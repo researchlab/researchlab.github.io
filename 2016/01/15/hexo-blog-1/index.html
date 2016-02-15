@@ -17,7 +17,7 @@
 <meta property="og:url" content="http://www.grdtechs.com/2016/01/15/hexo-blog-1/index.html">
 <meta property="og:site_name" content="朴实的一线码农">
 <meta property="og:description" content="前言Hexo是一个基于Node.js免费开源的静态博客框架，方便将生成的静态网页托管在github和Heroku上，可快速部署，并支持Markdown写作，这也是选择Hexo部署本站的理由。无特殊说明，本站所有操作均在Mac OS下完成。">
-<meta property="og:updated_time" content="2016-02-15T14:51:28.000Z">
+<meta property="og:updated_time" content="2016-02-15T15:28:26.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="用Hexo+github搭建本站">
 <meta name="twitter:description" content="前言Hexo是一个基于Node.js免费开源的静态博客框架，方便将生成的静态网页托管在github和Heroku上，可快速部署，并支持Markdown写作，这也是选择Hexo部署本站的理由。无特殊说明，本站所有操作均在Mac OS下完成。">
@@ -153,7 +153,7 @@ $ hexo deploy #部署到github上
 <li>开启RSS功能：编辑<code>$pwd/blog/_config.yml</code>，添加如下代码：<pre><code>plugins:
     - hexo-generator-feed
 </code></pre></li>
-<li>在<code>themes/jacman/_config.yml</code>中，编辑 <code>rss: /atom.xml</code></li>
+<li>在<code>themes/jacman/_config.yml</code>中，编辑 <code>rss: /atom.xml</code><br><strong> 注意 </strong> 如果发现没有生成<code>atom.xml</code>, 可接着执行<code>npm install hexo-generator-feed --save</code>即可。</li>
 </ol>
 </li>
 <li><p>添加sitemap<br>hexo也提供了sitemap到生成插件，与添加RSS插件类似。</p>
