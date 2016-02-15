@@ -17,7 +17,7 @@
 <meta property="og:url" content="http://www.grdtechs.com/2016/01/15/hexo-blog-1/index.html">
 <meta property="og:site_name" content="朴实的一线码农">
 <meta property="og:description" content="前言Hexo是一个基于Node.js免费开源的静态博客框架，方便将生成的静态网页托管在github和Heroku上，可快速部署，并支持Markdown写作，这也是选择Hexo部署本站的理由。无特殊说明，本站所有操作均在Mac OS下完成。">
-<meta property="og:updated_time" content="2016-02-15T14:28:57.000Z">
+<meta property="og:updated_time" content="2016-02-15T14:41:30.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="用Hexo+github搭建本站">
 <meta name="twitter:description" content="前言Hexo是一个基于Node.js免费开源的静态博客框架，方便将生成的静态网页托管在github和Heroku上，可快速部署，并支持Markdown写作，这也是选择Hexo部署本站的理由。无特殊说明，本站所有操作均在Mac OS下完成。">
@@ -138,43 +138,40 @@ $ hexo deploy #部署到github上
 </code></pre><p>打开新建的<code>source/_posts/the_first_post.md</code>, 如下：<br><figure class="highlight md"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="horizontal_rule">---</span></span><br><span class="line">title: the<span class="emphasis">_first_</span>post # 这个是文章的标题,可随意修改,如: 用Hexo+github搭建本站 </span><br><span class="line">date: 2016-01-15 12:10:10 #发表日期</span><br><span class="line">categories: Hexo #文章分类</span><br><span class="line">tags: [Hexo,Blog] #文章标签,多于一项时用这种格式</span><br><span class="line"><span class="header">description: </span><br><span class="line">---</span></span><br><span class="line"><span class="header"># 这里是正文</span></span><br><span class="line"><span class="xml"><span class="comment">&lt;!--more--&gt;</span></span> #这后面的正文在首页不予以显示</span><br></pre></td></tr></table></figure></p>
 <p>写好之后，执行<code>hexo g</code> 命令生成静态网页，执行<code>hexo s</code>启动本地服务器此时可通过localhost:4000在本地浏览器访问,执行<code>hexo d</code>部署到github上，则可通过公网访问了。</p>
 <h2 id="u4F18_u5316Hexo_u535A_u5BA2"><a href="#u4F18_u5316Hexo_u535A_u5BA2" class="headerlink" title="优化Hexo博客"></a>优化Hexo博客</h2><ul>
-<li>导航栏添加”关于”</li>
-</ul>
+<li><p>导航栏添加”关于”</p>
 <ol>
 <li><code>hexo new page &quot;about&quot;</code></li>
 <li>到<code>source/about/index.md</code>编辑内容</li>
-<li>在<code>themes/jacman/_config.yml</code>中,添加如下：<pre><code>menu:
-    关于: /about
+<li>在<code>themes/jacman/_config.yml</code>中,添加如下：<br> menu:<pre><code>关于: /about
 </code></pre></li>
 </ol>
-<ul>
-<li>添加RSS<br>hexo提供了RSS的生成插件，需要手动安装和设置。步骤如下：</li>
-</ul>
+</li>
+<li><p>添加RSS<br>hexo提供了RSS的生成插件，需要手动安装和设置。步骤如下：</p>
 <ol>
 <li>安装RSS插件到本地：<code>npm install hexo-generator-feed</code></li>
-<li>开启RSS功能：编辑<code>$pwd/blog/_config.yml</code>，添加如下代码：<pre><code>plugins:
-- hexo-generator-feed
-</code></pre></li>
+<li>开启RSS功能：编辑<code>$pwd/blog/_config.yml</code>，添加如下代码：<br> plugins:<ul>
+<li>hexo-generator-feed</li>
+</ul>
+</li>
 <li>在<code>themes/jacman/_config.yml</code>中，编辑 <code>rss: /atom.xml</code></li>
 </ol>
-<ul>
-<li>添加sitemap<br>hexo也提供了sitemap到生成插件，与添加RSS插件类似。</li>
-</ul>
+</li>
+<li><p>添加sitemap<br>hexo也提供了sitemap到生成插件，与添加RSS插件类似。</p>
 <ol>
 <li>安装sitemap插件到本地：<code>npm install hexo-generator-sitemap</code></li>
-<li>开启sitmap功能: 编辑<code>$pwd/blog/_config.yml</code>,添加如下代码：<pre><code>plugins:
-    - hexo-generator-feed
-    - hexo-generator-sitemap
+<li>开启sitmap功能: 编辑<code>$pwd/blog/_config.yml</code>,添加如下代码：<br> plugins:<pre><code>- hexo-generator-feed
+- hexo-generator-sitemap
 </code></pre></li>
 <li>访问researchlab.github.io/sitemap.xml即可看到站点地图。不过，sitemap的初衷是给搜索引擎看的，为了提高搜索引擎对自己站点的收录效果，我们最好手动到google和百度等搜索引擎提交sitemap.xml。</li>
 </ol>
-<ul>
-<li>文章中插入图片<br>使用markdown写文章，插入图片的格式为<code>![图片名称](链接地址)</code>，这里要说的是链接地址怎么写。对于hexo，有两种方式：</li>
-</ul>
+</li>
+<li><p>文章中插入图片<br>使用markdown写文章，插入图片的格式为<code>![图片名称](链接地址)</code>，这里要说的是链接地址怎么写。对于hexo，有两种方式：</p>
 <ol>
 <li>使用本地路径：在<code>$pwd/blog/source</code>目录下新建一个img文件夹，将图片放入该文件夹下，插入图片时链接即为<code>/img/图片名称</code>。</li>
-<li>使用微博图床，地址<a href="http://weibotuchuang.sinaapp.com/，将图片拖入区域中，会生成图片的URL，这就是链接地址。" target="_blank" rel="external">http://weibotuchuang.sinaapp.com/，将图片拖入区域中，会生成图片的URL，这就是链接地址。</a></li>
+<li>使用微博图床，地址:<a href="http://weibotuchuang.sinaapp.com/" target="_blank" rel="external">http://weibotuchuang.sinaapp.com/</a>，将图片拖入区域中，会生成图片的URL，这就是链接地址。</li>
 </ol>
+</li>
+</ul>
 <h2 id="u95EE_u9898_u89E3_u51B3_u65B9_u6848"><a href="#u95EE_u9898_u89E3_u51B3_u65B9_u6848" class="headerlink" title="问题解决方案"></a>问题解决方案</h2><ol>
 <li>执行<code>Hexo d</code> 出现<code>ERROR Deployer not found:git</code>,解决方案：<code>npm install hexo-deployer-git --save</code> 即可。</li>
 </ol>
