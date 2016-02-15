@@ -17,7 +17,7 @@
 <meta property="og:url" content="http://www.grdtechs.com/2016/01/15/hexo-blog-1/index.html">
 <meta property="og:site_name" content="朴实的一线码农">
 <meta property="og:description" content="前言Hexo是一个基于Node.js免费开源的静态博客框架，方便将生成的静态网页托管在github和Heroku上，可快速部署，并支持Markdown写作，这也是选择Hexo部署本站的理由。无特殊说明，本站所有操作均在Mac OS下完成。">
-<meta property="og:updated_time" content="2016-02-15T13:55:00.000Z">
+<meta property="og:updated_time" content="2016-02-15T14:28:57.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="用Hexo+github搭建本站">
 <meta name="twitter:description" content="前言Hexo是一个基于Node.js免费开源的静态博客框架，方便将生成的静态网页托管在github和Heroku上，可快速部署，并支持Markdown写作，这也是选择Hexo部署本站的理由。无特殊说明，本站所有操作均在Mac OS下完成。">
@@ -144,6 +144,34 @@ $ hexo deploy #部署到github上
 <li>在<code>themes/jacman/_config.yml</code>中,添加如下：<pre><code>menu:
     关于: /about
 </code></pre></li>
+</ol>
+<ul>
+<li>添加RSS<br>hexo提供了RSS的生成插件，需要手动安装和设置。步骤如下：</li>
+</ul>
+<ol>
+<li>安装RSS插件到本地：<code>npm install hexo-generator-feed</code></li>
+<li>开启RSS功能：编辑<code>$pwd/blog/_config.yml</code>，添加如下代码：<pre><code>plugins:
+- hexo-generator-feed
+</code></pre></li>
+<li>在<code>themes/jacman/_config.yml</code>中，编辑 <code>rss: /atom.xml</code></li>
+</ol>
+<ul>
+<li>添加sitemap<br>hexo也提供了sitemap到生成插件，与添加RSS插件类似。</li>
+</ul>
+<ol>
+<li>安装sitemap插件到本地：<code>npm install hexo-generator-sitemap</code></li>
+<li>开启sitmap功能: 编辑<code>$pwd/blog/_config.yml</code>,添加如下代码：<pre><code>plugins:
+    - hexo-generator-feed
+    - hexo-generator-sitemap
+</code></pre></li>
+<li>访问researchlab.github.io/sitemap.xml即可看到站点地图。不过，sitemap的初衷是给搜索引擎看的，为了提高搜索引擎对自己站点的收录效果，我们最好手动到google和百度等搜索引擎提交sitemap.xml。</li>
+</ol>
+<ul>
+<li>文章中插入图片<br>使用markdown写文章，插入图片的格式为<code>![图片名称](链接地址)</code>，这里要说的是链接地址怎么写。对于hexo，有两种方式：</li>
+</ul>
+<ol>
+<li>使用本地路径：在<code>$pwd/blog/source</code>目录下新建一个img文件夹，将图片放入该文件夹下，插入图片时链接即为<code>/img/图片名称</code>。</li>
+<li>使用微博图床，地址<a href="http://weibotuchuang.sinaapp.com/，将图片拖入区域中，会生成图片的URL，这就是链接地址。" target="_blank" rel="external">http://weibotuchuang.sinaapp.com/，将图片拖入区域中，会生成图片的URL，这就是链接地址。</a></li>
 </ol>
 <h2 id="u95EE_u9898_u89E3_u51B3_u65B9_u6848"><a href="#u95EE_u9898_u89E3_u51B3_u65B9_u6848" class="headerlink" title="问题解决方案"></a>问题解决方案</h2><ol>
 <li>执行<code>Hexo d</code> 出现<code>ERROR Deployer not found:git</code>,解决方案：<code>npm install hexo-deployer-git --save</code> 即可。</li>
