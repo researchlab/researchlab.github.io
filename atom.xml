@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://www.grdtechs.com/"/>
-  <updated>2016-02-15T15:28:26.000Z</updated>
+  <updated>2016-02-17T05:42:09.000Z</updated>
   <id>http://www.grdtechs.com/</id>
   
   <author>
@@ -14,6 +14,152 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>golang reflect使用总结</title>
+    <link href="http://www.grdtechs.com/2016/02/17/go-reflect-summarize/"/>
+    <id>http://www.grdtechs.com/2016/02/17/go-reflect-summarize/</id>
+    <published>2016-02-17T00:57:59.000Z</published>
+    <updated>2016-02-17T05:42:09.000Z</updated>
+    
+    <content type="html">&lt;h2 id=&quot;u524D_u8A00&quot;&gt;&lt;a href=&quot;#u524D_u8A00&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h2&gt;&lt;p&gt;反射是一种检查存储在接口变量中的&lt;code&gt;&amp;lt;值,类型&amp;gt;&lt;/code&gt;对的机制，通过go的reflect包提供的&lt;code&gt;reflect.TypeOf&lt;/code&gt;和&lt;code&gt;reflect.ValueOf&lt;/code&gt;可以方便的访问到一个接口值的&lt;code&gt;reflect.Type&lt;/code&gt;和&lt;code&gt;reflect.Value&lt;/code&gt;部分，从而可进一步得到这个接口的结构类型和对其进行值的修改操作。&lt;br&gt;&lt;a id=&quot;more&quot;&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;h2 id=&quot;u53CD_u5C04_u7684_u4F7F_u7528&quot;&gt;&lt;a href=&quot;#u53CD_u5C04_u7684_u4F7F_u7528&quot; class=&quot;headerlink&quot; title=&quot;反射的使用&quot;&gt;&lt;/a&gt;反射的使用&lt;/h2&gt;&lt;ol&gt;
+&lt;li&gt;&lt;p&gt;&lt;strong&gt;获取接口对象的字段,类型和方法信息&lt;/strong&gt;&lt;br&gt;先定义个通用的结构体&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;type User struct{
+    Id int
+    Name string
+    Age int
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;将接口对象类型信息映射为反射类型信息&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&quot;golang&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;func&lt;/span&gt; Info(o &lt;span class=&quot;keyword&quot;&gt;interface&lt;/span&gt;{}) {
+    t := reflect.TypeOf(o)         &lt;span class=&quot;comment&quot;&gt;//获取接口的类型&lt;/span&gt;
+    fmt.Println(&lt;span class=&quot;string&quot;&gt;&quot;Type:&quot;&lt;/span&gt;, t.Name()) &lt;span class=&quot;comment&quot;&gt;//t.Name() 获取接口的名称&lt;/span&gt;
+
+    &lt;span class=&quot;keyword&quot;&gt;if&lt;/span&gt; t.Kind() != refelct.Struct { &lt;span class=&quot;comment&quot;&gt;//通过Kind()来判断反射出的类型是否为需要的类型&lt;/span&gt;
+        fmt.Println(&lt;span class=&quot;string&quot;&gt;&quot;err: type invalid!&quot;&lt;/span&gt;)        
+        &lt;span class=&quot;keyword&quot;&gt;return&lt;/span&gt;
+    }        
+
+    v := reflect.ValueOf(o) &lt;span class=&quot;comment&quot;&gt;//获取接口的值类型&lt;/span&gt;
+    fmt.Println(&lt;span class=&quot;string&quot;&gt;&quot;Fields:&quot;&lt;/span&gt;)
+
+    &lt;span class=&quot;keyword&quot;&gt;for&lt;/span&gt; i := &lt;span class=&quot;number&quot;&gt;0&lt;/span&gt;; i &amp;lt; t.NumField(); i++ { &lt;span class=&quot;comment&quot;&gt;//NumField取出这个接口所有的字段数量&lt;/span&gt;
+    f := t.Field(i)                                   &lt;span class=&quot;comment&quot;&gt;//取得结构体的第i个字段&lt;/span&gt;
+    val := v.Field(i).Interface()                     &lt;span class=&quot;comment&quot;&gt;//取得字段的值&lt;/span&gt;
+    fmt.Printf(&lt;span class=&quot;string&quot;&gt;&quot;%6s: %v = %v\n&quot;&lt;/span&gt;, f.Name, f.Type, val) &lt;span class=&quot;comment&quot;&gt;//第i个字段的名称,类型,值&lt;/span&gt;
+    }
+
+    &lt;span class=&quot;keyword&quot;&gt;for&lt;/span&gt; i := &lt;span class=&quot;number&quot;&gt;0&lt;/span&gt;; i &amp;lt; t.NumMethod(); i++{
+        m := t.Method(i)
+        fmt.Printf(&lt;span class=&quot;string&quot;&gt;&quot;%6s: %v\n&quot;&lt;/span&gt;, m.Name,m.Type) &lt;span class=&quot;comment&quot;&gt;//获取方法的名称和类型       &lt;/span&gt;
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;获取接口对象的类型名称，通过&lt;code&gt;refelct.TypeOf()&lt;/code&gt;获取接口对象的类型,并通过&lt;code&gt;Name()&lt;/code&gt;方法获取接口的名称。&lt;br&gt;获取对象中所有字段的名称,类型和值,通过&lt;code&gt;reflect.ValueOf()&lt;/code&gt;获取接口对象的值类型取得字段的名称和类型,然后通过&lt;code&gt;v.Field(i).Interface()&lt;/code&gt;取得第i个字段的值。&lt;br&gt;还可以通过&lt;code&gt;NumMethod()&lt;/code&gt;循环获取接口对象所有方法的名称和类型。&lt;br&gt;&lt;a href=&quot;https://github.com/researchlab/go-learning/blob/master/reflect/01reflect.go&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;示例代码&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;&lt;strong&gt;反射接口对象中的匿名或嵌入字段信息&lt;/strong&gt;&lt;br&gt;先再添加一个Manager结构,User作为它的匿名字段&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;type Manager struct{
+    User
+    title string
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;初始化Manager的两种方法：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;m0 := Manager{User: User{1,&amp;quot;Mike&amp;quot;,11},title: &amp;quot;Man&amp;quot;}
+m1 := Manager{User{1,&amp;quot;Mike&amp;quot;,11},&amp;quot;Man&amp;quot;} //这种初始化,赋值顺序必须和结构体中的声明顺序相同! 
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;现在如何来取出Manager中的匿名字段User？&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;t := refelct.TypeOf(m)
+fmt.Printf(&amp;quot;%#v\n&amp;quot;, t.Field(0))
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;如上述代码，通过&lt;code&gt;t := refelct.TypeOf(m)&lt;/code&gt;将Manager的字段类型取出来,在反射中对象字段是通过索引取到的，所以可通过&lt;code&gt;t.Field(0)&lt;/code&gt;,&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;#reflect.StructField{Name:&amp;quot;User&amp;quot;, PkgPath:&amp;quot;&amp;quot;, Type:(*reflect.rtype)(0xedd20), Tag:&amp;quot;&amp;quot;, Offset:0x0, Index:[]int{0}, Anonymous:true}
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;还可以通过&lt;code&gt;FieldByIndex&lt;/code&gt;和&lt;code&gt;FieldByName&lt;/code&gt;两种方法取得匿名结构体中的字段属性&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;给&lt;code&gt;FieldByIndex()&lt;/code&gt;传入一个int型的slice索引,如&lt;code&gt;FieldByIndex([]int{0,0})&lt;/code&gt;即取得User结构体中的Id字段。&lt;/li&gt;
+&lt;li&gt;通过&lt;code&gt;FieldByName(&amp;quot;Id&amp;quot;)&lt;/code&gt;也可以取得User结构体中Id字段。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id=&quot;u901A_u8FC7_u53CD_u5C04_u4FEE_u6539_u5BF9_u8C61&quot;&gt;&lt;a href=&quot;#u901A_u8FC7_u53CD_u5C04_u4FEE_u6539_u5BF9_u8C61&quot; class=&quot;headerlink&quot; title=&quot;通过反射修改对象&quot;&gt;&lt;/a&gt;通过反射修改对象&lt;/h2&gt;&lt;p&gt;上面通过&lt;code&gt;reflect.TypeOf&lt;/code&gt;和&lt;code&gt;reflect.ValueOf&lt;/code&gt;已经可以得到接口对象的类型,字段和方法等属性了，怎么通过反射来修改对象的字段值？&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;x := 100
+v := refelct.ValueOf(&amp;amp;x) //传入地址
+v.Elem().SetInt(200) //成功修改x值为200
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;要修改变量x的值，首先就要通过&lt;code&gt;reflect.ValueOf&lt;/code&gt;来获取x的值类型,&lt;code&gt;refelct.ValueOf&lt;/code&gt;返回的值类型是变量x一份值拷贝,要修改变量x就要传递x的地址,从而返回x的地址对象,才可以进行对x变量值对修改操作。在得到x变量的地址值类型之后先调用&lt;code&gt;Elem()&lt;/code&gt;返回地址指针指向的值的Value封装。然后通过&lt;code&gt;Set&lt;/code&gt;方法进行修改赋值。&lt;br&gt;通过反射可以很容易的修改变量的值，怎么来修改结构体中的字段值？&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;func SetInfo(o interface{}) {
+        v := reflect.ValueOf(o)
+
+        if v.Kind() == reflect.Ptr &amp;amp;&amp;amp; !v.Elem().CanSet() { //判断是否为指针类型 元素是否可以修改
+            fmt.Println(&amp;quot;cannot set&amp;quot;)
+                return
+        } else {
+            v = v.Elem() //实际取得的对象
+        }
+
+        //判断字段是否存在
+        f := v.FieldByName(&amp;quot;Name&amp;quot;)
+        if !f.IsValid() {
+            fmt.Println(&amp;quot;wuxiao&amp;quot;)
+                return
+        }
+
+        //设置字段
+        if f := v.FieldByName(&amp;quot;Name&amp;quot;); f.Kind() == reflect.String {
+            f.SetString(&amp;quot;BY&amp;quot;)
+        }
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;要成功修改结构体中的某个字段,主要进行以下操作：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;首先要反射出这个字段的地址值类型;&lt;/li&gt;
+&lt;li&gt;判断反射返回类型是否为&lt;code&gt;reflect.Ptr&lt;/code&gt;指针类型（通过指针才能操作对象地址中的值)同时还要判断这个元素是否可以修改;&lt;/li&gt;
+&lt;li&gt;通过&lt;code&gt;FieldByName&lt;/code&gt;的返回值判断字段是否存在&lt;/li&gt;
+&lt;li&gt;通过&lt;code&gt;Kind()&lt;/code&gt;和&lt;code&gt;Set&lt;/code&gt;来修改字段的值&lt;br&gt;&lt;a href=&quot;https://github.com/researchlab/go-learning/blob/master/reflect/02reflect.go&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;示例代码&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id=&quot;u901A_u8FC7_u53CD_u5C04_u201C_u52A8_u6001_u201D_u8C03_u7528_u65B9_u6CD5&quot;&gt;&lt;a href=&quot;#u901A_u8FC7_u53CD_u5C04_u201C_u52A8_u6001_u201D_u8C03_u7528_u65B9_u6CD5&quot; class=&quot;headerlink&quot; title=&quot;通过反射“动态”调用方法&quot;&gt;&lt;/a&gt;通过反射“动态”调用方法&lt;/h2&gt;&lt;p&gt;现在已经可以通过反射获取并修改接口对象的字段，类型等信息了，那怎么通过反射“动态”调用接口对象等方法？&lt;br&gt;先为&lt;code&gt;User&lt;/code&gt;结构体引入一个&lt;code&gt;Hello&lt;/code&gt;方法：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;func (u User) Hello(m User) (int, string) {
+    fmt.Println(&amp;quot;Hello&amp;quot;, m.Name, &amp;quot;, I&amp;apos;m &amp;quot;, u.Name)
+    return m.Age + u.Age, u.Name
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;下面通过反射来调用&lt;code&gt;Hello&lt;/code&gt;这个方法：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;func GetInfo(u interface{}) {
+    m := User{2, &amp;quot;Json&amp;quot;, 12}
+
+    v := reflect.ValueOf(u)
+
+    if v.Kind() != reflect.Struct {
+        fmt.Println(&amp;quot;type invalid&amp;quot;)
+        return
+    }
+
+    mv := v.MethodByName(&amp;quot;Hello&amp;quot;) //获取对应的方法
+    if !mv.IsValid() {            //判断方法是否存在
+        fmt.Println(&amp;quot;Func Hello not exist&amp;quot;)
+        return
+    }
+
+    args := []reflect.Value{reflect.ValueOf(m)} //初始化传入等参数，传入等类型只能是[]reflect.Value类型
+    res := mv.Call(args)
+    fmt.Println(res[0], res[1])
+
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;通过&lt;code&gt;MethodByName&lt;/code&gt;先获取对象的&lt;code&gt;Hello&lt;/code&gt;方法,然后准备要传入的参数,这里传入的参数必须是&lt;code&gt;[]refelct.Value&lt;/code&gt;类型,传入的参数值必须强制转换为反射值类型&lt;code&gt;refelct.Value&lt;/code&gt;。&lt;br&gt;最后通过调用&lt;code&gt;Call&lt;/code&gt;方法就可以实现通过反射”动态”调用对象的方法。&lt;br&gt;&lt;a href=&quot;https://github.com/researchlab/go-learning/blob/master/reflect/03reflect.go&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;示例代码&lt;/a&gt;&lt;/p&gt;
+&lt;h2 id=&quot;u5C0F_u7ED3&quot;&gt;&lt;a href=&quot;#u5C0F_u7ED3&quot; class=&quot;headerlink&quot; title=&quot;小结&quot;&gt;&lt;/a&gt;小结&lt;/h2&gt;&lt;ul&gt;
+&lt;li&gt;通过反射包提供&lt;code&gt;refelct.TypeOf&lt;/code&gt;和&lt;code&gt;refelct.ValueOf&lt;/code&gt;方法获得接口对象的类型，值和方法等。&lt;/li&gt;
+&lt;li&gt;通过反射修改字段值等时候需要传入地址类型，并且需要检查反射返回值类型是否为&lt;code&gt;refelct.Ptr&lt;/code&gt;，检查字段是否&lt;code&gt;CanSet&lt;/code&gt;,检查字段是存在,然后通过&lt;code&gt;Kind()&lt;/code&gt;来帮助赋值相应对类型值。&lt;/li&gt;
+&lt;li&gt;最后总结了通过&lt;code&gt;MethodByName&lt;/code&gt;等方法如何“动态”调用对象的方法，示例代码也演示了如何传入和接收多个参数值。&lt;/li&gt;
+&lt;/ul&gt;
+</content>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;u524D_u8A00&quot;&gt;&lt;a href=&quot;#u524D_u8A00&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h2&gt;&lt;p&gt;反射是一种检查存储在接口变量中的&lt;code&gt;&amp;lt;值,类型&amp;gt;&lt;/code&gt;对的机制，通过go的reflect包提供的&lt;code&gt;reflect.TypeOf&lt;/code&gt;和&lt;code&gt;reflect.ValueOf&lt;/code&gt;可以方便的访问到一个接口值的&lt;code&gt;reflect.Type&lt;/code&gt;和&lt;code&gt;reflect.Value&lt;/code&gt;部分，从而可进一步得到这个接口的结构类型和对其进行值的修改操作。&lt;br&gt;
+    
+    </summary>
+    
+      <category term="golang" scheme="http://www.grdtechs.com/categories/golang/"/>
+    
+    
+      <category term="golang" scheme="http://www.grdtechs.com/tags/golang/"/>
+    
+      <category term="reflect" scheme="http://www.grdtechs.com/tags/reflect/"/>
+    
+  </entry>
   
   <entry>
     <title>用Hexo+github搭建本站</title>
