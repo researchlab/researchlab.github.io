@@ -11,16 +11,16 @@
     
 
     
-    <meta name="description" content="前言反射是一种检查存储在接口变量中的&amp;lt;值,类型&amp;gt;对的机制，通过go的reflect包提供的reflect.TypeOf和reflect.ValueOf可以方便的访问到一个接口值的reflect.Type和reflect.Value部分，从而可进一步得到这个接口的结构类型和对其进行值的修改操作。">
+    <meta name="description" content="前言反射是一种检查存储在接口变量中的&amp;lt;值,类型&amp;gt;对的机制，借助go反射包提供的reflect.TypeOf和reflect.ValueOf可以方便的访问到一个接口值的reflect.Type和reflect.Value部分，从而可进一步得到这个接口的结构类型和对其进行值的修改操作。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="golang reflect使用总结">
 <meta property="og:url" content="http://www.grdtechs.com/2016/02/17/go-reflect-summarize/index.html">
 <meta property="og:site_name" content="朴实的一线码农">
-<meta property="og:description" content="前言反射是一种检查存储在接口变量中的&amp;lt;值,类型&amp;gt;对的机制，通过go的reflect包提供的reflect.TypeOf和reflect.ValueOf可以方便的访问到一个接口值的reflect.Type和reflect.Value部分，从而可进一步得到这个接口的结构类型和对其进行值的修改操作。">
-<meta property="og:updated_time" content="2016-02-17T05:42:09.000Z">
+<meta property="og:description" content="前言反射是一种检查存储在接口变量中的&amp;lt;值,类型&amp;gt;对的机制，借助go反射包提供的reflect.TypeOf和reflect.ValueOf可以方便的访问到一个接口值的reflect.Type和reflect.Value部分，从而可进一步得到这个接口的结构类型和对其进行值的修改操作。">
+<meta property="og:updated_time" content="2016-02-17T05:44:22.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="golang reflect使用总结">
-<meta name="twitter:description" content="前言反射是一种检查存储在接口变量中的&amp;lt;值,类型&amp;gt;对的机制，通过go的reflect包提供的reflect.TypeOf和reflect.ValueOf可以方便的访问到一个接口值的reflect.Type和reflect.Value部分，从而可进一步得到这个接口的结构类型和对其进行值的修改操作。">
+<meta name="twitter:description" content="前言反射是一种检查存储在接口变量中的&amp;lt;值,类型&amp;gt;对的机制，借助go反射包提供的reflect.TypeOf和reflect.ValueOf可以方便的访问到一个接口值的reflect.Type和reflect.Value部分，从而可进一步得到这个接口的结构类型和对其进行值的修改操作。">
 
     
     <link rel="alternative" href="/atom.xml" title="朴实的一线码农" type="application/atom+xml">
@@ -93,7 +93,7 @@
 		
 		</div>
 		
-		<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>反射是一种检查存储在接口变量中的<code>&lt;值,类型&gt;</code>对的机制，通过go的reflect包提供的<code>reflect.TypeOf</code>和<code>reflect.ValueOf</code>可以方便的访问到一个接口值的<code>reflect.Type</code>和<code>reflect.Value</code>部分，从而可进一步得到这个接口的结构类型和对其进行值的修改操作。<br><a id="more"></a></p>
+		<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>反射是一种检查存储在接口变量中的<code>&lt;值,类型&gt;</code>对的机制，借助go反射包提供的<code>reflect.TypeOf</code>和<code>reflect.ValueOf</code>可以方便的访问到一个接口值的<code>reflect.Type</code>和<code>reflect.Value</code>部分，从而可进一步得到这个接口的结构类型和对其进行值的修改操作。<br><a id="more"></a></p>
 <h2 id="u53CD_u5C04_u7684_u4F7F_u7528"><a href="#u53CD_u5C04_u7684_u4F7F_u7528" class="headerlink" title="反射的使用"></a>反射的使用</h2><ol>
 <li><p><strong>获取接口对象的字段,类型和方法信息</strong><br>先定义个通用的结构体</p>
 <pre><code>type User struct{
@@ -273,6 +273,14 @@ v.Elem().SetInt(200) //成功修改x值为200
 	
 <nav class="article-nav clearfix">
  
+ <div class="prev" >
+ <a href="/2016/02/17/go-concurrency-summarize/" title="golang 并发concurrency 使用总结">
+  <strong>上一篇：</strong><br/>
+  <span>
+  golang 并发concurrency 使用总结</span>
+</a>
+</div>
+
 
 <div class="next">
 <a href="/2016/01/15/hexo-blog-1/"  title="用Hexo+github搭建本站">
@@ -334,7 +342,7 @@ v.Elem().SetInt(200) //成功修改x值为200
 		  
 		
 		  
-			<li><a href="/categories/golang/" title="golang">golang<sup>1</sup></a></li>
+			<li><a href="/categories/golang/" title="golang">golang<sup>2</sup></a></li>
 		  
 		
 		</ul>
@@ -348,6 +356,10 @@ v.Elem().SetInt(200) //成功修改x值为200
 		<ul class="clearfix">
 		
 			
+				<li><a href="/tags/golang/" title="golang">golang<sup>2</sup></a></li>
+			
+		
+			
 				<li><a href="/tags/Hexo/" title="Hexo">Hexo<sup>1</sup></a></li>
 			
 		
@@ -356,11 +368,11 @@ v.Elem().SetInt(200) //成功修改x值为200
 			
 		
 			
-				<li><a href="/tags/golang/" title="golang">golang<sup>1</sup></a></li>
+				<li><a href="/tags/reflect/" title="reflect">reflect<sup>1</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/reflect/" title="reflect">reflect<sup>1</sup></a></li>
+				<li><a href="/tags/concurrency/" title="concurrency">concurrency<sup>1</sup></a></li>
 			
 		
 		</ul>
