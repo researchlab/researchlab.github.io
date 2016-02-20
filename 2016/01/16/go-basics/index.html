@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   
-    <title>[译]GO BOOTCAMP 第二章：基础概念实践 | 朴实的一线码农</title>
+    <title>[译]GO BOOTCAMP 第二章：基本概念实战 | 朴实的一线码农</title>
     <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
     
     <meta name="author" content="Lee Hong">
@@ -13,13 +13,13 @@
     
     <meta name="description" content="前言如果已经有一定的编程基础，那你只需花几个小时就能学会Go编程，因此Go也常被认为是一门“简单易用”的编程语言。Go语言被设计得尽量简洁，它的整个语言规范也一样。在写第一个Go应用之前，我们先来学习Go的一些基础概念。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="[译]GO BOOTCAMP 第二章：基础概念实践">
+<meta property="og:title" content="[译]GO BOOTCAMP 第二章：基本概念实战">
 <meta property="og:url" content="http://www.grdtechs.com/2016/01/16/go-basics/index.html">
 <meta property="og:site_name" content="朴实的一线码农">
 <meta property="og:description" content="前言如果已经有一定的编程基础，那你只需花几个小时就能学会Go编程，因此Go也常被认为是一门“简单易用”的编程语言。Go语言被设计得尽量简洁，它的整个语言规范也一样。在写第一个Go应用之前，我们先来学习Go的一些基础概念。">
-<meta property="og:updated_time" content="2016-02-19T13:33:21.000Z">
+<meta property="og:updated_time" content="2016-02-20T08:56:47.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="[译]GO BOOTCAMP 第二章：基础概念实践">
+<meta name="twitter:title" content="[译]GO BOOTCAMP 第二章：基本概念实战">
 <meta name="twitter:description" content="前言如果已经有一定的编程基础，那你只需花几个小时就能学会Go编程，因此Go也常被认为是一门“简单易用”的编程语言。Go语言被设计得尽量简洁，它的整个语言规范也一样。在写第一个Go应用之前，我们先来学习Go的一些基础概念。">
 
     
@@ -73,7 +73,7 @@
 		<header class="article-info clearfix">
   <h1 itemprop="name">
     
-      <a href="/2016/01/16/go-basics/" title="[译]GO BOOTCAMP 第二章：基础概念实践" itemprop="url">[译]GO BOOTCAMP 第二章：基础概念实践</a>
+      <a href="/2016/01/16/go-basics/" title="[译]GO BOOTCAMP 第二章：基本概念实战" itemprop="url">[译]GO BOOTCAMP 第二章：基本概念实战</a>
   </h1>
   <p class="article-author">By
        
@@ -89,7 +89,7 @@
 		<div id="toc" class="toc-article">
 			<strong class="toc-title">文章目录</strong>
 		
-			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#u524D_u8A00"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u53D8_u91CF_u53CA_u7C7B_u578B_u63A8_u65AD"><span class="toc-number">2.</span> <span class="toc-text">变量及类型推断</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u5E38_u91CF"><span class="toc-number">3.</span> <span class="toc-text">常量</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u6253_u5370_u5E38_u91CF_u548C_u53D8_u91CF"><span class="toc-number">4.</span> <span class="toc-text">打印常量和变量</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u5305_u548C_u5F15_u5165"><span class="toc-number">5.</span> <span class="toc-text">包和引入</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u4EE3_u7801_u4F4D_u7F6E"><span class="toc-number">6.</span> <span class="toc-text">代码位置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u5BFC_u5165_u540D_u5B57"><span class="toc-number">7.</span> <span class="toc-text">导入名字</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u65B9_u6CD5_2C__u7B7E_u540D_2C_u8FD4_u56DE_u503C_uFF0C_u547D_u540D_u7ED3_u679C_u503C"><span class="toc-number">8.</span> <span class="toc-text">方法, 签名,返回值，命名结果值</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u6307_u9488"><span class="toc-number">9.</span> <span class="toc-text">指针</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u53EF_u53D8_u6027"><span class="toc-number">10.</span> <span class="toc-text">可变性</span></a></li></ol>
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#u524D_u8A00"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u53D8_u91CF_u53CA_u7C7B_u578B_u63A8_u65AD"><span class="toc-number">2.</span> <span class="toc-text">变量及类型推断</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u5E38_u91CF"><span class="toc-number">3.</span> <span class="toc-text">常量</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u6253_u5370_u5E38_u91CF_u548C_u53D8_u91CF"><span class="toc-number">4.</span> <span class="toc-text">打印常量和变量</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u5305_u548C_u5F15_u5165"><span class="toc-number">5.</span> <span class="toc-text">包和引入</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u4EE3_u7801_u4F4D_u7F6E"><span class="toc-number">6.</span> <span class="toc-text">代码位置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u5BFC_u5165_u540D_u5B57"><span class="toc-number">7.</span> <span class="toc-text">导入名字</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u51FD_u6570_u5F62_u53C2_u540D_2C_u8FD4_u56DE_u503C_uFF0C_u88AB_u547D_u540D_u7684_u8FD4_u56DE_u503C"><span class="toc-number">8.</span> <span class="toc-text">函数形参名,返回值，被命名的返回值</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u6307_u9488"><span class="toc-number">9.</span> <span class="toc-text">指针</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u53EF_u53D8_u6027"><span class="toc-number">10.</span> <span class="toc-text">可变性</span></a></li></ol>
 		
 		</div>
 		
@@ -119,7 +119,7 @@
 <h2 id="u5BFC_u5165_u540D_u5B57"><a href="#u5BFC_u5165_u540D_u5B57" class="headerlink" title="导入名字"></a>导入名字</h2><p>导入一个包后，就可以通过名字来引用导入包中的内容（即在包外可以访问到它到变量，方法及函数等）,在<code>Go</code>中，如果名字首字母大写则这个名字，则这个名字可导入的，可以被导入到其它包中使用，即公有的。如<code>Foo</code>和<code>FOO</code>都是可导入的,而<code>foo</code>则不是可导入的，来看两者的不同:<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">func</span> main() &#123;</span><br><span class="line">    fmt.Println(math.pi)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
 <p>和<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">func</span> main() &#123;</span><br><span class="line">	fmt.Println(math.Pi)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
 <p><code>Pi</code>是可以导入的，可以在包外被调用，是公有的，而<code>pi</code>则不可以，编译报错提示：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cannot refer to unexported name math.pi</span><br></pre></td></tr></table></figure></p>
-<h2 id="u65B9_u6CD5_2C__u7B7E_u540D_2C_u8FD4_u56DE_u503C_uFF0C_u547D_u540D_u7ED3_u679C_u503C"><a href="#u65B9_u6CD5_2C__u7B7E_u540D_2C_u8FD4_u56DE_u503C_uFF0C_u547D_u540D_u7ED3_u679C_u503C" class="headerlink" title="方法, 签名,返回值，命名结果值"></a>方法, 签名,返回值，命名结果值</h2><p>一个函数可以有零个或多个形参，也可以有多个返回值。在形参列表中类型放在形参变量的后面，如:<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> <span class="string">"fmt"</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> add(x <span class="typename">int</span>, y <span class="typename">int</span>) <span class="typename">int</span> &#123;</span><br><span class="line">	    <span class="keyword">return</span> x + y</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> main() &#123;</span><br><span class="line">	    fmt.Println(add(<span class="number">42</span>, <span class="number">13</span>))</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="u51FD_u6570_u5F62_u53C2_u540D_2C_u8FD4_u56DE_u503C_uFF0C_u88AB_u547D_u540D_u7684_u8FD4_u56DE_u503C"><a href="#u51FD_u6570_u5F62_u53C2_u540D_2C_u8FD4_u56DE_u503C_uFF0C_u88AB_u547D_u540D_u7684_u8FD4_u56DE_u503C" class="headerlink" title="函数形参名,返回值，被命名的返回值"></a>函数形参名,返回值，被命名的返回值</h2><p>一个函数可以有零个或多个形参，也可以有多个返回值。在形参列表中类型放在形参变量的后面，如:<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> <span class="string">"fmt"</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> add(x <span class="typename">int</span>, y <span class="typename">int</span>) <span class="typename">int</span> &#123;</span><br><span class="line">	    <span class="keyword">return</span> x + y</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> main() &#123;</span><br><span class="line">	    fmt.Println(add(<span class="number">42</span>, <span class="number">13</span>))</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
 <p>在下面的示例中，可以将多个类型相同的形参一起声明，如<code>x int, y int</code>可以写成<code>x, y int</code>，<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> <span class="string">"fmt"</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> add(x, y <span class="typename">int</span>) <span class="typename">int</span> &#123;</span><br><span class="line">	    <span class="keyword">return</span> x + y</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> main() &#123;</span><br><span class="line">	    fmt.Println(add(<span class="number">42</span>, <span class="number">13</span>))</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
 <p>下面示例中，<code>location</code>函数返回两个<code>string</code>类型值。<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">func</span> location(city <span class="typename">string</span>) (<span class="typename">string</span>, <span class="typename">string</span>) &#123;</span><br><span class="line">		<span class="keyword">var</span> region <span class="typename">string</span></span><br><span class="line">		<span class="keyword">var</span> continent <span class="typename">string</span></span><br><span class="line"></span><br><span class="line">		<span class="keyword">switch</span> city &#123;</span><br><span class="line">		<span class="keyword">case</span> <span class="string">"Los Angeles"</span>, <span class="string">"LA"</span>, <span class="string">"Santa Monica"</span>:</span><br><span class="line">			region, continent = <span class="string">"California"</span>, <span class="string">"North America"</span></span><br><span class="line">		<span class="keyword">case</span> <span class="string">"New York"</span>, <span class="string">"NYC"</span>:</span><br><span class="line">			region, continent = <span class="string">"New York"</span>, <span class="string">"North America"</span></span><br><span class="line">		<span class="keyword">default</span>:</span><br><span class="line">			region, continent = <span class="string">"Unknown"</span>, <span class="string">"Unknown"</span></span><br><span class="line">		&#125;</span><br><span class="line">			<span class="keyword">return</span> region, continent</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> main() &#123;</span><br><span class="line">		region, continent := location(<span class="string">"Santa Monica"</span>)</span><br><span class="line">		fmt.Printf(<span class="string">"Matt lives in %s, %s"</span>, region, continent)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
 <p>在<code>Go</code>语言中，函数可以返回多个值，如果返回参数被命名了，则返回语句可以不需要显示返回相应的返回参数，如：<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">func</span> location(name, city <span class="typename">string</span>) (name, continent <span class="typename">string</span>) &#123;</span><br><span class="line">	<span class="keyword">switch</span> city &#123;</span><br><span class="line">		<span class="keyword">case</span> <span class="string">"New York"</span>, <span class="string">"LA"</span>, <span class="string">"Chicago"</span>:</span><br><span class="line">			continent = <span class="string">"North America"</span></span><br><span class="line">		<span class="keyword">default</span>:</span><br><span class="line">			continent = <span class="string">"Unknown"</span></span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> main() &#123;</span><br><span class="line">		name, continent := location(<span class="string">"Matt"</span>, <span class="string">"LA"</span>)</span><br><span class="line">		fmt.Printf(<span class="string">"%s lives in %s"</span>, name, continent)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
@@ -129,7 +129,7 @@
 <p>results:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Matt released their <span class="number">43</span>th song</span><br><span class="line">Matt has a total of <span class="number">42</span> songs</span><br></pre></td></tr></table></figure></p>
 <p>上面的结果并没有真正修改<code>me</code>变量中的值，是因为上述形参是通过值传递，如果要达到成功修改，则需要借助指针对<code>me</code>变量进行引用传递，如：<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> <span class="string">"fmt"</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> Artist <span class="keyword">struct</span> &#123;</span><br><span class="line">		Name, Genre <span class="typename">string</span></span><br><span class="line">		Songs       <span class="typename">int</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> newRelease(a *Artist) <span class="typename">int</span> &#123;</span><br><span class="line">		a.Songs++</span><br><span class="line">		<span class="keyword">return</span> a.Songs</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> main() &#123;</span><br><span class="line">		me := &amp;Artist&#123;Name: <span class="string">"Matt"</span>, Genre: <span class="string">"Electro"</span>, Songs: <span class="number">42</span>&#125;</span><br><span class="line">		fmt.Printf(<span class="string">"%s released their %dth song\n"</span>, me.Name, newRelease(me))</span><br><span class="line">		fmt.Printf(<span class="string">"%s has a total of %d songs"</span>, me.Name, me.Songs)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
 <p>上面两个版本中唯一对不同是第一个版本是值传递，只修改了拷贝不影响变量原值，而第二个版本是引用传递，修改的是同一地址上的内容，所以修改成功。</p>
-<p><strong> 《GO BOOTCAMP》第二章翻译完成，原著第二章出处：<a href="http://www.golangbootcamp.com/book/basics" target="_blank" rel="external">Chapter 2 Intro</a> </strong></p>
+<p><strong> 《GO BOOTCAMP》第二章翻译完成，原著第二章出处：<a href="http://www.golangbootcamp.com/book/basics" target="_blank" rel="external">Chapter 2 The Basics</a> </strong></p>
   
 	</div>
 		<footer class="article-footer clearfix">
@@ -189,10 +189,10 @@
 <nav class="article-nav clearfix">
  
  <div class="prev" >
- <a href="/2016/02/17/go-reflect-summarize/" title="golang reflect使用总结">
+ <a href="/2016/01/17/go-types/" title="[译]GO BOOTCAMP 第三章：内置类型实战">
   <strong>上一篇：</strong><br/>
   <span>
-  golang reflect使用总结</span>
+  [译]GO BOOTCAMP 第三章：内置类型实战</span>
 </a>
 </div>
 
@@ -209,7 +209,7 @@
 
 	
 <section id="comments" class="comment">
-	<div class="ds-thread" data-thread-key="2016/01/16/go-basics/" data-title="[译]GO BOOTCAMP 第二章：基础概念实践" data-url="http://www.grdtechs.com/2016/01/16/go-basics/"></div>
+	<div class="ds-thread" data-thread-key="2016/01/16/go-basics/" data-title="[译]GO BOOTCAMP 第二章：基本概念实战" data-url="http://www.grdtechs.com/2016/01/16/go-basics/"></div>
 </section>
 
 
@@ -257,7 +257,7 @@
 		  
 		
 		  
-			<li><a href="/categories/go-bootcamp/" title="go-bootcamp">go-bootcamp<sup>1</sup></a></li>
+			<li><a href="/categories/go-bootcamp/" title="go-bootcamp">go-bootcamp<sup>2</sup></a></li>
 		  
 		
 		  
@@ -275,7 +275,7 @@
 		<ul class="clearfix">
 		
 			
-				<li><a href="/tags/golang/" title="golang">golang<sup>3</sup></a></li>
+				<li><a href="/tags/golang/" title="golang">golang<sup>4</sup></a></li>
 			
 		
 			
