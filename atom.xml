@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://www.grdtechs.com/"/>
-  <updated>2016-02-20T01:24:38.000Z</updated>
+  <updated>2016-02-18T03:28:08.000Z</updated>
   <id>http://www.grdtechs.com/</id>
   
   <author>
@@ -14,22 +14,6 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
-  
-  <entry>
-    <title>go-collection-types</title>
-    <link href="http://www.grdtechs.com/2016/02/20/go-collection-types/"/>
-    <id>http://www.grdtechs.com/2016/02/20/go-collection-types/</id>
-    <published>2016-02-20T01:24:38.000Z</published>
-    <updated>2016-02-20T01:24:38.000Z</updated>
-    
-    <content type="html"></content>
-    
-    <summary type="html">
-    
-    </summary>
-    
-    
-  </entry>
   
   <entry>
     <title>golang 并发concurrency 使用总结</title>
@@ -213,6 +197,56 @@ v.Elem().SetInt(200) //成功修改x值为200
       <category term="golang" scheme="http://www.grdtechs.com/tags/golang/"/>
     
       <category term="reflect" scheme="http://www.grdtechs.com/tags/reflect/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>golang xorm库使用总结</title>
+    <link href="http://www.grdtechs.com/2016/01/21/go-xorm-summarize/"/>
+    <id>http://www.grdtechs.com/2016/01/21/go-xorm-summarize/</id>
+    <published>2016-01-21T09:50:07.000Z</published>
+    <updated>2016-02-22T01:22:32.000Z</updated>
+    
+    <content type="html">&lt;h2 id=&quot;u524D_u8A00&quot;&gt;&lt;a href=&quot;#u524D_u8A00&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h2&gt;&lt;p&gt;&lt;a href=&quot;https://github.com/go-xorm/xorm&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;XORM&lt;/a&gt;是一个简单而强大的Go语言&lt;code&gt;ORM(Object Relational Mapping)&lt;/code&gt;库,通过调用&lt;code&gt;XORM&lt;/code&gt;提供简单丰富的API接口,可以简化便捷的完成对数据库的各类操作。&lt;code&gt;XORM&lt;/code&gt;目前已经支持所有主流关系型数据库,如Mysql,SQLite,Oracle,Postgres等。&lt;br&gt;&lt;a id=&quot;more&quot;&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;h2 id=&quot;u5B89_u88C5_u53CA_u7279_u6027&quot;&gt;&lt;a href=&quot;#u5B89_u88C5_u53CA_u7279_u6027&quot; class=&quot;headerlink&quot; title=&quot;安装及特性&quot;&gt;&lt;/a&gt;安装及特性&lt;/h2&gt;&lt;p&gt;&lt;code&gt;XORM&lt;/code&gt;的安装很简单， 具体可参看&lt;a href=&quot;http://xorm.io/&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;官网安装&lt;/a&gt;。&lt;br&gt;未完待续&lt;/p&gt;
+</content>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;u524D_u8A00&quot;&gt;&lt;a href=&quot;#u524D_u8A00&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h2&gt;&lt;p&gt;&lt;a href=&quot;https://github.com/go-xorm/xorm&quot;&gt;XORM&lt;/a&gt;是一个简单而强大的Go语言&lt;code&gt;ORM(Object Relational Mapping)&lt;/code&gt;库,通过调用&lt;code&gt;XORM&lt;/code&gt;提供简单丰富的API接口,可以简化便捷的完成对数据库的各类操作。&lt;code&gt;XORM&lt;/code&gt;目前已经支持所有主流关系型数据库,如Mysql,SQLite,Oracle,Postgres等。&lt;br&gt;
+    
+    </summary>
+    
+      <category term="golang" scheme="http://www.grdtechs.com/categories/golang/"/>
+    
+    
+      <category term="golang" scheme="http://www.grdtechs.com/tags/golang/"/>
+    
+      <category term="xorm" scheme="http://www.grdtechs.com/tags/xorm/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>[译]GO BOOTCAMP 第四章：集合类型</title>
+    <link href="http://www.grdtechs.com/2016/01/19/go-collection-types/"/>
+    <id>http://www.grdtechs.com/2016/01/19/go-collection-types/</id>
+    <published>2016-01-19T01:24:38.000Z</published>
+    <updated>2016-02-22T01:22:06.000Z</updated>
+    
+    <content type="html">&lt;h2 id=&quot;u524D_u8A00&quot;&gt;&lt;a href=&quot;#u524D_u8A00&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h2&gt;&lt;p&gt;&lt;code&gt;Go&lt;/code&gt;集合类型包含&lt;code&gt;Array&lt;/code&gt;,&lt;code&gt;Slice&lt;/code&gt;,&lt;code&gt;Range&lt;/code&gt;,&lt;code&gt;Map&lt;/code&gt;等议题的分析和讨论。&lt;br&gt;&lt;a id=&quot;more&quot;&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;h2 id=&quot;Array-_u6570_u7EC4&quot;&gt;&lt;a href=&quot;#Array-_u6570_u7EC4&quot; class=&quot;headerlink&quot; title=&quot;Array-数组&quot;&gt;&lt;/a&gt;Array-数组&lt;/h2&gt;&lt;p&gt;未完待续…&lt;/p&gt;
+</content>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;u524D_u8A00&quot;&gt;&lt;a href=&quot;#u524D_u8A00&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h2&gt;&lt;p&gt;&lt;code&gt;Go&lt;/code&gt;集合类型包含&lt;code&gt;Array&lt;/code&gt;,&lt;code&gt;Slice&lt;/code&gt;,&lt;code&gt;Range&lt;/code&gt;,&lt;code&gt;Map&lt;/code&gt;等议题的分析和讨论。&lt;br&gt;
+    
+    </summary>
+    
+      <category term="go-bootcamp" scheme="http://www.grdtechs.com/categories/go-bootcamp/"/>
+    
+    
+      <category term="golang" scheme="http://www.grdtechs.com/tags/golang/"/>
     
   </entry>
   
