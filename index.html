@@ -74,6 +74,70 @@
         <header class="article-info clearfix">
   <h1 itemprop="name">
     
+      <a href="/2016/02/24/go-concurrency-security/" title="golang 并发安全性案例分析" itemprop="url">golang 并发安全性案例分析</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
+		
+  <p class="article-time">
+    <time datetime="2016-02-24T13:47:55.000Z" itemprop="datePublished"> 发表于 2016-02-24</time>
+    
+  </p>
+</header>
+    <div class="article-content">
+        
+        <h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p><code>golang</code> 在1.5版本之前默认只使用一个核心来跑所有的<code>goroutines</code>,即<code>GOMAXPROCS</code>默认设置为1, ,即是串行执行<code>goroutines</code>,在1.5版本后，<code>GOMAXPROCS</code>默认设置为当前计算机真实的核心线程数，即是在并行执行<code>goroutines</code>。<br>
+        
+        
+        <p class="article-more-link">
+          
+            <a href="/2016/02/24/go-concurrency-security/#more">Read More</a>
+          
+       </p>
+    </div>
+    <footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/golang/">golang</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/concurrency/">concurrency</a><a href="/tags/golang/">golang</a>
+  </div>
+
+</div>
+
+
+
+
+<div class="comments-count">
+	
+	  	<span></span>
+		<a href="/2016/02/24/go-concurrency-security/#comments" class="ds-thread-count comments-count-link" data-thread-key="2016/02/24/go-concurrency-security/" data-count-type="comments">&nbsp;</a>
+	
+</div>
+
+</footer>
+
+
+    </article>
+
+
+
+
+
+
+   
+    
+    <article class="post-expand post" itemprop="articleBody"> 
+        <header class="article-info clearfix">
+  <h1 itemprop="name">
+    
       <a href="/2016/02/17/go-concurrency-summarize/" title="golang 并发concurrency 使用总结" itemprop="url">golang 并发concurrency 使用总结</a>
   </h1>
   <p class="article-author">By
@@ -324,70 +388,6 @@
 
 
 
-   
-    
-    <article class="post-expand post" itemprop="articleBody"> 
-        <header class="article-info clearfix">
-  <h1 itemprop="name">
-    
-      <a href="/2016/01/17/go-types/" title="[译]GO BOOTCAMP 第三章：内置类型实战" itemprop="url">[译]GO BOOTCAMP 第三章：内置类型实战</a>
-  </h1>
-  <p class="article-author">By
-       
-		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
-		
-  <p class="article-time">
-    <time datetime="2016-01-17T13:36:28.000Z" itemprop="datePublished"> 发表于 2016-01-17</time>
-    
-  </p>
-</header>
-    <div class="article-content">
-        
-        <h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p><code>Go</code>内置类型实战，包括类型转换，类型断言，结构类型，结构继承等内容。<br>
-        
-        
-        <p class="article-more-link">
-          
-            <a href="/2016/01/17/go-types/#more">Read More</a>
-          
-       </p>
-    </div>
-    <footer class="article-footer clearfix">
-<div class="article-catetags">
-
-<div class="article-categories">
-  <span></span>
-  <a class="article-category-link" href="/categories/go-bootcamp/">go-bootcamp</a>
-</div>
-
-
-  <div class="article-tags">
-  
-  <span></span> <a href="/tags/golang/">golang</a>
-  </div>
-
-</div>
-
-
-
-
-<div class="comments-count">
-	
-	  	<span></span>
-		<a href="/2016/01/17/go-types/#comments" class="ds-thread-count comments-count-link" data-thread-key="2016/01/17/go-types/" data-count-type="comments">&nbsp;</a>
-	
-</div>
-
-</footer>
-
-
-    </article>
-
-
-
-
-
-
 
   <nav id="page-nav" class="clearfix">
     <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/">Next<span></span></a>
@@ -441,7 +441,7 @@
 		  
 		
 		  
-			<li><a href="/categories/golang/" title="golang">golang<sup>3</sup></a></li>
+			<li><a href="/categories/golang/" title="golang">golang<sup>4</sup></a></li>
 		  
 		
 		</ul>
@@ -455,7 +455,11 @@
 		<ul class="clearfix">
 		
 			
-				<li><a href="/tags/golang/" title="golang">golang<sup>6</sup></a></li>
+				<li><a href="/tags/golang/" title="golang">golang<sup>7</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/concurrency/" title="concurrency">concurrency<sup>2</sup></a></li>
 			
 		
 			
@@ -472,10 +476,6 @@
 		
 			
 				<li><a href="/tags/reflect/" title="reflect">reflect<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/concurrency/" title="concurrency">concurrency<sup>1</sup></a></li>
 			
 		
 		</ul>
