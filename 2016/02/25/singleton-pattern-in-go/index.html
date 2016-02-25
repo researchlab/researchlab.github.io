@@ -4,22 +4,26 @@
 <head>
   <meta charset="UTF-8">
   
-    <title>朴实的一线码农</title>
+    <title>golang 设计模式之singleton使用总结 | 朴实的一线码农</title>
     <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
     
     <meta name="author" content="Lee Hong">
     
 
     
-    <meta name="description">
-<meta property="og:type" content="website">
-<meta property="og:title" content="朴实的一线码农">
-<meta property="og:url" content="http://www.grdtechs.com/index.html">
+    <meta name="description" content="前言golang 1.5版本之后默认设置GOMAXPROCS值为当前计算机真实核心数，使得goroutines从默认的单线程内并发执行变成了默认的（真实核心数支持的）的多线程内并行执行。多线程并行执行goroutines需要考虑并行执行过程中引入的线程安全问题。
+单线程singleton模型首先摘取一个在实际工作项目中碰到的singleton模型代码:12345678910111213packag">
+<meta property="og:type" content="article">
+<meta property="og:title" content="golang 设计模式之singleton使用总结">
+<meta property="og:url" content="http://www.grdtechs.com/2016/02/25/singleton-pattern-in-go/index.html">
 <meta property="og:site_name" content="朴实的一线码农">
-<meta property="og:description">
+<meta property="og:description" content="前言golang 1.5版本之后默认设置GOMAXPROCS值为当前计算机真实核心数，使得goroutines从默认的单线程内并发执行变成了默认的（真实核心数支持的）的多线程内并行执行。多线程并行执行goroutines需要考虑并行执行过程中引入的线程安全问题。
+单线程singleton模型首先摘取一个在实际工作项目中碰到的singleton模型代码:12345678910111213packag">
+<meta property="og:updated_time" content="2016-02-25T14:30:10.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="朴实的一线码农">
-<meta name="twitter:description">
+<meta name="twitter:title" content="golang 设计模式之singleton使用总结">
+<meta name="twitter:description" content="前言golang 1.5版本之后默认设置GOMAXPROCS值为当前计算机真实核心数，使得goroutines从默认的单线程内并发执行变成了默认的（真实核心数支持的）的多线程内并行执行。多线程并行执行goroutines需要考虑并行执行过程中引入的线程安全问题。
+单线程singleton模型首先摘取一个在实际工作项目中碰到的singleton模型代码:12345678910111213packag">
 
     
     <link rel="alternative" href="/atom.xml" title="朴实的一线码农" type="application/atom+xml">
@@ -66,12 +70,10 @@
 </div>
     </header>
     <div id="container">
-      <div id="main">
-
-   
-    
-    <article class="post-expand post" itemprop="articleBody"> 
-        <header class="article-info clearfix">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
   <h1 itemprop="name">
     
       <a href="/2016/02/25/singleton-pattern-in-go/" title="golang 设计模式之singleton使用总结" itemprop="url">golang 设计模式之singleton使用总结</a>
@@ -85,9 +87,16 @@
     
   </p>
 </header>
-    <div class="article-content">
-        
-        <h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p><code>golang</code> 1.5版本之后默认设置<code>GOMAXPROCS</code>值为当前计算机真实核心数，使得<code>goroutines</code>从默认的<code>单线程内并发执行</code>变成了默认的（真实核心数支持的）的<code>多线程内并行</code>执行。多线程并行执行<code>goroutines</code>需要考虑并行执行过程中引入的<code>线程安全问题</code>。</p>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#u524D_u8A00"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u5355_u7EBF_u7A0Bsingleton_u6A21_u578B"><span class="toc-number">2.</span> <span class="toc-text">单线程singleton模型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u91C7_u7528_u4E92_u65A5_u9501_u673A_u5236"><span class="toc-number">3.</span> <span class="toc-text">采用互斥锁机制</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u91C7_u7528_u53CC_u91CD_u68C0_u67E5_u9501_u673A_u5236"><span class="toc-number">4.</span> <span class="toc-text">采用双重检查锁机制</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u91C7_u7528atomic_u8FDB_u4E00_u6B65_u7B80_u5316"><span class="toc-number">5.</span> <span class="toc-text">采用atomic进一步简化</span></a></li></ol>
+		
+		</div>
+		
+		<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p><code>golang</code> 1.5版本之后默认设置<code>GOMAXPROCS</code>值为当前计算机真实核心数，使得<code>goroutines</code>从默认的<code>单线程内并发执行</code>变成了默认的（真实核心数支持的）的<code>多线程内并行</code>执行。多线程并行执行<code>goroutines</code>需要考虑并行执行过程中引入的<code>线程安全问题</code>。</p>
 <h2 id="u5355_u7EBF_u7A0Bsingleton_u6A21_u578B"><a href="#u5355_u7EBF_u7A0Bsingleton_u6A21_u578B" class="headerlink" title="单线程singleton模型"></a>单线程singleton模型</h2><p>首先摘取一个在实际工作项目中碰到的singleton模型代码:<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> singleton</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> singleton <span class="keyword">struct</span> &#123;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> instance *singleton</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> GetInstance() *singleton &#123;</span><br><span class="line">	<span class="keyword">if</span> instance == <span class="constant">nil</span> &#123;</span><br><span class="line">       instance = &amp;singleton&#123;&#125;   <span class="comment">// 没有考虑线程安全 </span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> instance</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
 <p>上面的<code>singleton</code>设计代码在见过的几个<code>golang</code>项目中都是这么写的，如果这段代码放在<code>golang</code>1.5版本之前默认的单线程场景下运行显然是没什么问题的。<code>golang</code>1.5版本之后默认是启动多核并行执行<code>goroutines</code>的，如果上述代码放在<code>golang</code>1.5版本之后，如果程序开启n个<code>goroutines</code>初始化一个<code>singleton</code>对象, 显然会初始化成功最少一个最多n个<code>singleton</code>对象，从而会存在潜在的多个单例实例对象了，也就不可能保证这个<code>singleton</code>对象全局唯一性了，那后继采用<code>singleton</code>对象进行全局唯一性操作时势必会造成数据不一致的问题。如果场景中但个<code>goroutines</code>执行时间短的话，会使得调试更难。</p>
 <h2 id="u91C7_u7528_u4E92_u65A5_u9501_u673A_u5236"><a href="#u91C7_u7528_u4E92_u65A5_u9501_u673A_u5236" class="headerlink" title="采用互斥锁机制"></a>采用互斥锁机制</h2><p>面对上述线程安全问题，一般会考虑到用锁机制(<code>Mutex</code>)来解决因线程安全引入的数据不一致问题，采用锁机制如：<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> mu Sync.Mutex</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> GetInstance() *singleton &#123;</span><br><span class="line">    mu.Lock()                    <span class="comment">// singleton实例对象操作之后，锁就是多余的了 </span></span><br><span class="line">    <span class="keyword">defer</span> mu.Unlock()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> instance == <span class="constant">nil</span> &#123;</span><br><span class="line">        instance = &amp;singleton&#123;&#125;</span><br><span class="line">    &#125;</span><br><span class="line">   <span class="keyword">return</span> instance</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
@@ -101,14 +110,9 @@
 <p>可以看到我们之前其实是借鉴了<code>golang</code>原生标准包<code>sync</code>中对<code>Once</code>实现对源码，那既然标准包中已经实现了这个<code>Check-Lock-Check</code>机制，那我们直接调用<code>sync</code>包提供<code>once.Do()</code>方法对某个方法只进行一次性调用：<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">once.Do(<span class="keyword">func</span>() &#123;</span><br><span class="line">		    <span class="comment">// perform safe initialization here</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
 <p>那么下面是根据<code>sync</code>包提供的<code>sync.Once</code>改进的获取<code>singleton</code>实例对象最终优化版本:<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> singleton</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	    <span class="string">"sync"</span></span><br><span class="line">	)</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> singleton <span class="keyword">struct</span> &#123;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> instance *singleton</span><br><span class="line"><span class="keyword">var</span> once sync.Once</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> GetInstance() *singleton &#123;</span><br><span class="line">    once.Do(<span class="keyword">func</span>() &#123;</span><br><span class="line">        instance = &amp;singleton&#123;&#125;</span><br><span class="line">    &#125;)</span><br><span class="line">    <span class="keyword">return</span> instance</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
 <p>因此使用<code>sync</code>包提供的<code>sync.Once</code>实现获取<code>singleton</code>实例对象可以说是最安全有效又简洁的方法。</p>
-
-        
-        
-        <p class="article-more-link">
-          
-       </p>
-    </div>
-    <footer class="article-footer clearfix">
+  
+	</div>
+		<footer class="article-footer clearfix">
 <div class="article-catetags">
 
 <div class="article-categories">
@@ -126,286 +130,62 @@
 
 
 
-
-<div class="comments-count">
+	<div class="article-share" id="share">
 	
-	  	<span></span>
-		<a href="/2016/02/25/singleton-pattern-in-go/#comments" class="ds-thread-count comments-count-link" data-thread-key="2016/02/25/singleton-pattern-in-go/" data-count-type="comments">&nbsp;</a>
-	
+	<div class="share-jiathis">
+	  
+<div class="jiathis_style_24x24">
+	<a class="jiathis_button_weixin"></a>
+	<a class="jiathis_button_tsina"></a>
+	<a class="jiathis_button_tqq"></a>
+	<a class="jiathis_button_qzone"></a>
+    <a class="jiathis_button_googleplus"></a>
+	<a class="jiathis_button_douban"></a>
+	<a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	<a class="jiathis_counter_style"></a>
 </div>
+<script type="text/javascript" >
+    var jiathis_config={
+    data_track_clickback:true,
+    sm:"copy,renren,cqq",
+    pic:"",
+    summary:"",
+    
+  </script> 
+<script type="text/javascript" src="//v3.jiathis.com/code/jia.js?uid=
+2084050" charset="utf-8"></script>      
+
+
+	 </div>
+	
+	</div>
+
 
 </footer>
 
-
-    </article>
-
-
-
-
-
-
-   
-    
-    <article class="post-expand post" itemprop="articleBody"> 
-        <header class="article-info clearfix">
-  <h1 itemprop="name">
-    
-      <a href="/2016/02/24/go-concurrency-security/" title="golang 并发安全性案例分析" itemprop="url">golang 并发安全性案例分析</a>
-  </h1>
-  <p class="article-author">By
-       
-		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
-		
-  <p class="article-time">
-    <time datetime="2016-02-24T13:47:55.000Z" itemprop="datePublished"> 发表于 2016-02-24</time>
-    
-  </p>
-</header>
-    <div class="article-content">
-        
-        <h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p><code>golang</code> 在1.5版本之前默认只使用一个核心来跑所有的<code>goroutines</code>,即<code>GOMAXPROCS</code>默认设置为1, ,即是串行执行<code>goroutines</code>,在1.5版本后，<code>GOMAXPROCS</code>默认设置为当前计算机真实的核心线程数，即是在并行执行<code>goroutines</code>。<br>
-        
-        
-        <p class="article-more-link">
-          
-            <a href="/2016/02/24/go-concurrency-security/#more">Read More</a>
-          
-       </p>
-    </div>
-    <footer class="article-footer clearfix">
-<div class="article-catetags">
-
-<div class="article-categories">
-  <span></span>
-  <a class="article-category-link" href="/categories/golang/">golang</a>
-</div>
-
-
-  <div class="article-tags">
-  
-  <span></span> <a href="/tags/concurrency/">concurrency</a><a href="/tags/golang/">golang</a>
-  </div>
-
-</div>
-
-
-
-
-<div class="comments-count">
+   	       
+	</article>
 	
-	  	<span></span>
-		<a href="/2016/02/24/go-concurrency-security/#comments" class="ds-thread-count comments-count-link" data-thread-key="2016/02/24/go-concurrency-security/" data-count-type="comments">&nbsp;</a>
+<nav class="article-nav clearfix">
+ 
+
+<div class="next">
+<a href="/2016/02/24/go-concurrency-security/"  title="golang 并发安全性案例分析">
+ <strong>下一篇：</strong><br/> 
+ <span>golang 并发安全性案例分析
+</span>
+</a>
+</div>
+
+</nav>
+
 	
-</div>
-
-</footer>
-
-
-    </article>
+<section id="comments" class="comment">
+	<div class="ds-thread" data-thread-key="2016/02/25/singleton-pattern-in-go/" data-title="golang 设计模式之singleton使用总结" data-url="http://www.grdtechs.com/2016/02/25/singleton-pattern-in-go/"></div>
+</section>
 
 
-
-
-
-
-   
-    
-    <article class="post-expand post" itemprop="articleBody"> 
-        <header class="article-info clearfix">
-  <h1 itemprop="name">
-    
-      <a href="/2016/02/17/go-concurrency-summarize/" title="golang 并发concurrency 使用总结" itemprop="url">golang 并发concurrency 使用总结</a>
-  </h1>
-  <p class="article-author">By
-       
-		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
-		
-  <p class="article-time">
-    <time datetime="2016-02-17T05:47:51.000Z" itemprop="datePublished"> 发表于 2016-02-17</time>
-    
-  </p>
-</header>
-    <div class="article-content">
-        
-        <h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>go能处理高并发的根本原因在于执行go协程只需极少的栈内存(大概4~5KB),并且能根据需要动态增长和缩减占用的资源。<br>
-        
-        
-        <p class="article-more-link">
-          
-            <a href="/2016/02/17/go-concurrency-summarize/#more">Read More</a>
-          
-       </p>
-    </div>
-    <footer class="article-footer clearfix">
-<div class="article-catetags">
-
-<div class="article-categories">
-  <span></span>
-  <a class="article-category-link" href="/categories/golang/">golang</a>
-</div>
-
-
-  <div class="article-tags">
-  
-  <span></span> <a href="/tags/concurrency/">concurrency</a><a href="/tags/golang/">golang</a>
-  </div>
-
-</div>
-
-
-
-
-<div class="comments-count">
-	
-	  	<span></span>
-		<a href="/2016/02/17/go-concurrency-summarize/#comments" class="ds-thread-count comments-count-link" data-thread-key="2016/02/17/go-concurrency-summarize/" data-count-type="comments">&nbsp;</a>
-	
-</div>
-
-</footer>
-
-
-    </article>
-
-
-
-
-
-
-   
-    
-    <article class="post-expand post" itemprop="articleBody"> 
-        <header class="article-info clearfix">
-  <h1 itemprop="name">
-    
-      <a href="/2016/02/17/go-reflect-summarize/" title="golang reflect使用总结" itemprop="url">golang reflect使用总结</a>
-  </h1>
-  <p class="article-author">By
-       
-		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
-		
-  <p class="article-time">
-    <time datetime="2016-02-17T00:57:59.000Z" itemprop="datePublished"> 发表于 2016-02-17</time>
-    
-  </p>
-</header>
-    <div class="article-content">
-        
-        <h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>反射是一种检查存储在接口变量中的<code>&lt;值,类型&gt;</code>对的机制，借助go反射包提供的<code>reflect.TypeOf</code>和<code>reflect.ValueOf</code>可以方便的访问到一个接口值的<code>reflect.Type</code>和<code>reflect.Value</code>部分，从而可进一步得到这个接口的结构类型和对其进行值的修改操作。<br>
-        
-        
-        <p class="article-more-link">
-          
-            <a href="/2016/02/17/go-reflect-summarize/#more">Read More</a>
-          
-       </p>
-    </div>
-    <footer class="article-footer clearfix">
-<div class="article-catetags">
-
-<div class="article-categories">
-  <span></span>
-  <a class="article-category-link" href="/categories/golang/">golang</a>
-</div>
-
-
-  <div class="article-tags">
-  
-  <span></span> <a href="/tags/golang/">golang</a><a href="/tags/reflect/">reflect</a>
-  </div>
-
-</div>
-
-
-
-
-<div class="comments-count">
-	
-	  	<span></span>
-		<a href="/2016/02/17/go-reflect-summarize/#comments" class="ds-thread-count comments-count-link" data-thread-key="2016/02/17/go-reflect-summarize/" data-count-type="comments">&nbsp;</a>
-	
-</div>
-
-</footer>
-
-
-    </article>
-
-
-
-
-
-
-   
-    
-    <article class="post-expand post" itemprop="articleBody"> 
-        <header class="article-info clearfix">
-  <h1 itemprop="name">
-    
-      <a href="/2016/01/21/go-xorm-summarize/" title="golang xorm库使用总结" itemprop="url">golang xorm库使用总结</a>
-  </h1>
-  <p class="article-author">By
-       
-		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
-		
-  <p class="article-time">
-    <time datetime="2016-01-21T09:50:07.000Z" itemprop="datePublished"> 发表于 2016-01-21</time>
-    
-  </p>
-</header>
-    <div class="article-content">
-        
-        <h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p><a href="https://github.com/go-xorm/xorm">XORM</a>是一个简单而强大的Go语言<code>ORM(Object Relational Mapping)</code>库,通过调用<code>XORM</code>提供简单丰富的API接口,可以简化便捷的完成对数据库的各类操作。<code>XORM</code>目前已经支持所有主流关系型数据库,如Mysql,SQLite,Oracle,Postgres等。<br>
-        
-        
-        <p class="article-more-link">
-          
-            <a href="/2016/01/21/go-xorm-summarize/#more">Read More</a>
-          
-       </p>
-    </div>
-    <footer class="article-footer clearfix">
-<div class="article-catetags">
-
-<div class="article-categories">
-  <span></span>
-  <a class="article-category-link" href="/categories/golang/">golang</a>
-</div>
-
-
-  <div class="article-tags">
-  
-  <span></span> <a href="/tags/golang/">golang</a><a href="/tags/xorm/">xorm</a>
-  </div>
-
-</div>
-
-
-
-
-<div class="comments-count">
-	
-	  	<span></span>
-		<a href="/2016/01/21/go-xorm-summarize/#comments" class="ds-thread-count comments-count-link" data-thread-key="2016/01/21/go-xorm-summarize/" data-count-type="comments">&nbsp;</a>
-	
-</div>
-
-</footer>
-
-
-    </article>
-
-
-
-
-
-
-
-  <nav id="page-nav" class="clearfix">
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/">Next<span></span></a>
-  </nav>
-
-</div>
+</div>  
       <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
 <div id="asidepart">
 
@@ -600,14 +380,54 @@ $(document).ready(function(){
       m.removeClass('moveMain');
       a.css('display', 'block').removeClass('fadeOut');
       o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
         
     }
   });
 });
 </script>
 
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
 
 
+
+
+<script type="text/javascript">
+  var duoshuoQuery = {short_name:"gamedp"};
+  (function() {
+    var ds = document.createElement('script');
+    ds.type = 'text/javascript';ds.async = true;
+    ds.src = '//static.duoshuo.com/embed.js';
+    ds.charset = 'UTF-8';
+    (document.getElementsByTagName('head')[0] 
+    || document.getElementsByTagName('body')[0]).appendChild(ds);
+  })();
+</script> 
 
 
 
@@ -676,4 +496,4 @@ var _hmt = _hmt || [];
 <!-- Tiny_search End -->
 
   </body>
- </html>
+</html>
