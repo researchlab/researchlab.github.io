@@ -10,4 +10,5 @@ protocol: `xml`,`json`,`protocol buffer`, `http`,`http proxy`
 others: `beego`,`rabbitmq`,`goconvey`,`jenkins`,`xorm`,`nginx`,`echarts`
 relations: `golang web`, `golang/c++ game`
 interesting:`web server/front-end`,`mobile app server`,`game server`
+focus on: `High-Performance, High-Concurrency in web dev`,`Continuous Integration,Automated Construction,Automated Testing`
 

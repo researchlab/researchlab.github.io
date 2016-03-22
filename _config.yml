@@ -65,7 +65,7 @@ pagination_dir: page
 plugins:
 - hexo-generator-feed
 ## Themes: https://hexo.io/themes/
-theme: jacman 
+theme: lightman 
 
 # Deployment
 ## Docs: https://hexo.io/docs/deployment.html
