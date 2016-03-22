@@ -1,0 +1,496 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>golang xorm库使用总结 | 朴实的一线码农</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="Lee Hong">
+    
+
+    
+    <meta name="description" content="前言XORM是一个简单而强大的Go语言ORM(Object Relational Mapping)库,通过调用XORM提供简单丰富的API接口,可以简化便捷的完成对数据库的各类操作。XORM目前已经支持所有主流关系型数据库,如Mysql,SQLite,Oracle,Postgres等。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="golang xorm库使用总结">
+<meta property="og:url" content="http://www.grdtechs.com/2016/01/21/go-xorm-summarize/index.html">
+<meta property="og:site_name" content="朴实的一线码农">
+<meta property="og:description" content="前言XORM是一个简单而强大的Go语言ORM(Object Relational Mapping)库,通过调用XORM提供简单丰富的API接口,可以简化便捷的完成对数据库的各类操作。XORM目前已经支持所有主流关系型数据库,如Mysql,SQLite,Oracle,Postgres等。">
+<meta property="og:updated_time" content="2016-03-21T16:45:45.571Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="golang xorm库使用总结">
+<meta name="twitter:description" content="前言XORM是一个简单而强大的Go语言ORM(Object Relational Mapping)库,通过调用XORM提供简单丰富的API接口,可以简化便捷的完成对数据库的各类操作。XORM目前已经支持所有主流关系型数据库,如Mysql,SQLite,Oracle,Postgres等。">
+
+    
+    <link rel="alternative" href="/atom.xml" title="朴实的一线码农" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="stylesheet" href="/css/style.css" type="text/css">
+</head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="朴实的一线码农">朴实的一线码农</a></h1>
+				<h2 class="blog-motto">十年磨一剑，一步一步脚踏实地的耕种</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">首页</a></li>
+					
+						<li><a href="/archives">归档</a></li>
+					
+						<li><a href="/about">关于</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:www.grdtechs.com">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2016/01/21/go-xorm-summarize/" title="golang xorm库使用总结" itemprop="url">golang xorm库使用总结</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
+		
+  <p class="article-time">
+    <time datetime="2016-01-21T22:50:07.000Z" itemprop="datePublished"> 发表于 2016-01-21</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#u524D_u8A00"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u5B89_u88C5_u53CA_u7279_u6027"><span class="toc-number">2.</span> <span class="toc-text">安装及特性</span></a></li></ol>
+		
+		</div>
+		
+		<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p><a href="https://github.com/go-xorm/xorm" target="_blank" rel="external">XORM</a>是一个简单而强大的Go语言<code>ORM(Object Relational Mapping)</code>库,通过调用<code>XORM</code>提供简单丰富的API接口,可以简化便捷的完成对数据库的各类操作。<code>XORM</code>目前已经支持所有主流关系型数据库,如Mysql,SQLite,Oracle,Postgres等。<br><a id="more"></a></p>
+<h2 id="u5B89_u88C5_u53CA_u7279_u6027"><a href="#u5B89_u88C5_u53CA_u7279_u6027" class="headerlink" title="安装及特性"></a>安装及特性</h2><p><code>XORM</code>的安装很简单， 具体可参看<a href="http://xorm.io/" target="_blank" rel="external">官网安装</a>。<br>未完待续</p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/golang/">golang</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/golang/">golang</a><a href="/tags/xorm/">xorm</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	<div class="share-jiathis">
+	  
+<div class="jiathis_style_24x24">
+	<a class="jiathis_button_weixin"></a>
+	<a class="jiathis_button_tsina"></a>
+	<a class="jiathis_button_tqq"></a>
+	<a class="jiathis_button_qzone"></a>
+    <a class="jiathis_button_googleplus"></a>
+	<a class="jiathis_button_douban"></a>
+	<a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+    var jiathis_config={
+    data_track_clickback:true,
+    sm:"copy,renren,cqq",
+    pic:"",
+    summary:"",
+    
+  </script> 
+<script type="text/javascript" src="//v3.jiathis.com/code/jia.js?uid=
+2084050" charset="utf-8"></script>      
+
+
+	 </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2016/02/17/go-reflect-summarize/" title="golang reflect使用总结">
+  <strong>上一篇：</strong><br/>
+  <span>
+  golang reflect使用总结</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2016/01/19/go-collection-types/"  title="[译]GO BOOTCAMP 第四章：集合类型">
+ <strong>下一篇：</strong><br/> 
+ <span>[译]GO BOOTCAMP 第四章：集合类型
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+<section id="comments" class="comment">
+	<div class="ds-thread" data-thread-key="2016/01/21/go-xorm-summarize/" data-title="golang xorm库使用总结" data-url="http://www.grdtechs.com/2016/01/21/go-xorm-summarize/"></div>
+</section>
+
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+<div id="asidepart">
+
+  <div class="widget tag">
+<p margin="0" style="text-align:center">
+<a class="ahref" href="http://researchlab.github.io/about/">
+<img id="aboutpic"  src="/img/weixin.jpg" alt="加我微信" height="200" width="200" >
+</a></p>
+<!--<hr noshade color="#ccc">-->
+<!-- <p style="text-align:center">Mike.Lee</p> -->
+<p style="text-align:center"><font size="2" color="grey">扫一扫上面的二维码 加我微信</font></p>
+<ul>
+<table border="0" font-size="1">
+<tr>
+<td align="right"><font size="2" >现状: </font></td>
+<td align="left"><font size="2" >软件开发攻城狮</font><td>
+</tr>
+<tr>
+<td align="right"><font size="2" >QQ号: </font></td>
+<td align="left"><font size="2" >975508300</font></td>
+</tr>
+<tr>
+<td align="right"><font color="red" size="2">Hexo交流群: </font></td>
+<td align="left"><font color="red" size="2">287306637</font></td>
+</tr>
+
+</table>
+</ul>
+
+</div>
+
+
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/Hexo/" title="Hexo">Hexo<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/go-bootcamp/" title="go-bootcamp">go-bootcamp<sup>3</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/go-pattern/" title="go-pattern">go-pattern<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/golang/" title="golang">golang<sup>4</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/golang/" title="golang">golang<sup>9</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/concurrency/" title="concurrency">concurrency<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/singleton/" title="singleton">singleton<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/observer/" title="observer">observer<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Hexo/" title="Hexo">Hexo<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Blog/" title="Blog">Blog<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/xorm/" title="xorm">xorm<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/reflect/" title="reflect">reflect<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="http://blog.csdn.net/xiaolongwang2010" target="_blank" title="小龙王2010csdn技术博客">Linux/c/c++</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  
+
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+  <iframe width="100%" height="550" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=550&fansRow=1&ptype=1&speed=0&skin=1&isTitle=1&noborder=1&isWeibo=1&isFans=1&uid=5141203275&verifier=a533edf5&dpc=1"></iframe>
+
+
+</aside>
+</div>
+
+    </div>
+    <footer><div id="footer" >
+	
+	
+	<div class="social-font" class="clearfix">
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2016 
+		
+		<a href="/about" target="_blank" title="Lee Hong">Lee Hong</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+
+
+<script type="text/javascript">
+  var duoshuoQuery = {short_name:"gamedp"};
+  (function() {
+    var ds = document.createElement('script');
+    ds.type = 'text/javascript';ds.async = true;
+    ds.src = '//static.duoshuo.com/embed.js';
+    ds.charset = 'UTF-8';
+    (document.getElementsByTagName('head')[0] 
+    || document.getElementsByTagName('body')[0]).appendChild(ds);
+  })();
+</script> 
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?e6d1f421bbc9962127a50488f9ed37d1";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>
