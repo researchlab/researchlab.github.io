@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://www.grdtechs.com/"/>
-  <updated>2016-03-24T07:42:43.792Z</updated>
+  <updated>2016-03-25T01:37:09.035Z</updated>
   <id>http://www.grdtechs.com/</id>
   
   <author>
@@ -16,11 +16,11 @@
   <generator uri="http://hexo.io/">Hexo</generator>
   
   <entry>
-    <title>golang-type-convert</title>
+    <title>golang类型转换(指定精度/四舍五入)</title>
     <link href="http://www.grdtechs.com/2016/03/24/go-type-convert/"/>
     <id>http://www.grdtechs.com/2016/03/24/go-type-convert/</id>
     <published>2016-03-24T06:06:54.000Z</published>
-    <updated>2016-03-24T07:42:43.792Z</updated>
+    <updated>2016-03-25T01:37:09.035Z</updated>
     
     <content type="html">&lt;h2 id=&quot;u524D_u8A00&quot;&gt;&lt;a href=&quot;#u524D_u8A00&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h2&gt;&lt;p&gt;&lt;code&gt;Go&lt;/code&gt;的数据类型很多都需要显示转换才能使用,比如&lt;code&gt;string&lt;/code&gt;转&lt;code&gt;float64&lt;/code&gt;指定精度等。转换中常用到的第三方包为&lt;code&gt;strconv&lt;/code&gt;和&lt;code&gt;math&lt;/code&gt;包。&lt;br&gt;&lt;a id=&quot;more&quot;&gt;&lt;/a&gt;&lt;/p&gt;
 &lt;h2 id=&quot;u6574_u578B_u8F6C_u5B57_u7B26_u4E32&quot;&gt;&lt;a href=&quot;#u6574_u578B_u8F6C_u5B57_u7B26_u4E32&quot; class=&quot;headerlink&quot; title=&quot;整型转字符串&quot;&gt;&lt;/a&gt;整型转字符串&lt;/h2&gt;&lt;figure class=&quot;highlight golang&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;strconv.Itoa(i) &lt;span class=&quot;comment&quot;&gt;//方法1&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;strconv.FormatInt(&lt;span class=&quot;typename&quot;&gt;int64&lt;/span&gt;(i),&lt;span class=&quot;number&quot;&gt;10&lt;/span&gt;) &lt;span class=&quot;comment&quot;&gt;//方法2&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
