@@ -1,5 +1,5 @@
 ---
-title: "golang-type-convert"
+title: "golang类型转换(指定精度/四舍五入)"
 date: 2016-03-24 02:06:54
 categories: golang
 tags: [golang]
