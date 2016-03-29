@@ -74,13 +74,13 @@ func Counter() gin.HandlerFunc {
 
 
 ## 总结
-服务器发送cookie给客户端
+**服务器发送cookie给客户端**
  从服务器端，发送cookie给客户端，是对应的Set-Cookie。包括了对应的cookie的名称，值，以及各个属性。
  例如：
 Set-Cookie: lu=Rg3vHJZnehYLjVg7qi3bZjzg; Expires=Tue, 15 Jan 2013 21:47:38 GMT; Path=/; Domain=.169it.com; HttpOnly
 Set-Cookie: made_write_conn=1295214458; Path=/; Domain=.169it.com
 Set-Cookie: reg_fb_gate=deleted; Expires=Thu, 01 Jan 1970 00:00:01 GMT; Path=/; Domain=.169it.com; HttpOnly
-从客户端把cookie发送到服务器
+**从客户端把cookie发送到服务器**
  从客户端发送cookie给服务器的时候，是不发送cookie的各个属性的，而只是发送对应的名称和值。
  例如：
 GET /spec.html HTTP/1.1  
