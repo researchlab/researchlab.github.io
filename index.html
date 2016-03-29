@@ -74,6 +74,70 @@
         <header class="article-info clearfix">
   <h1 itemprop="name">
     
+      <a href="/2016/03/29/gin-setcookie/" title="gin中使用设置cookie过期时间总结" itemprop="url">gin中使用设置cookie过期时间总结</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
+		
+  <p class="article-time">
+    <time datetime="2016-03-29T05:48:56.000Z" itemprop="datePublished"> 发表于 2016-03-29</time>
+    
+  </p>
+</header>
+    <div class="article-content">
+        
+        <h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>可以操作<code>Cookie</code>的<code>Http</code>头有两个:<code>Set-Cookie</code>和<code>Cookie</code>。<code>Set-Cookie</code>由服务器发送，它包含在响应请求的头部中。它用于在客户端创建一个<code>Cookie</code>。<code>Cookie</code>头由客户端发送，包含在<code>HTTP</code>请求的头部中。<font color=red><strong>注意：1.只有cookie的domain和path与请求的URL匹配才会发送这个cookie;2.客户端发送cookie信息给服务器只发送键-值对到服务器，cookie的属性是不会发送给服务器的。</strong></font><br>
+        
+        
+        <p class="article-more-link">
+          
+            <a href="/2016/03/29/gin-setcookie/#more">Read More</a>
+          
+       </p>
+    </div>
+    <footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/golang/">golang</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/gin/">gin</a><a href="/tags/golang/">golang</a><a href="/tags/setcookie/">setcookie</a>
+  </div>
+
+</div>
+
+
+
+
+<div class="comments-count">
+	
+	  	<span></span>
+		<a href="/2016/03/29/gin-setcookie/#comments" class="ds-thread-count comments-count-link" data-thread-key="2016/03/29/gin-setcookie/" data-count-type="comments">&nbsp;</a>
+	
+</div>
+
+</footer>
+
+
+    </article>
+
+
+
+
+
+
+   
+    
+    <article class="post-expand post" itemprop="articleBody"> 
+        <header class="article-info clearfix">
+  <h1 itemprop="name">
+    
       <a href="/2016/03/24/go-type-convert/" title="golang类型转换(指定精度/四舍五入)" itemprop="url">golang类型转换(指定精度/四舍五入)</a>
   </h1>
   <p class="article-author">By
@@ -324,70 +388,6 @@
 
 
 
-   
-    
-    <article class="post-expand post" itemprop="articleBody"> 
-        <header class="article-info clearfix">
-  <h1 itemprop="name">
-    
-      <a href="/2016/02/17/go-concurrency-summarize/" title="golang 并发concurrency 使用总结" itemprop="url">golang 并发concurrency 使用总结</a>
-  </h1>
-  <p class="article-author">By
-       
-		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
-		
-  <p class="article-time">
-    <time datetime="2016-02-17T18:47:51.000Z" itemprop="datePublished"> 发表于 2016-02-17</time>
-    
-  </p>
-</header>
-    <div class="article-content">
-        
-        <h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>go能处理高并发的根本原因在于执行go协程只需极少的栈内存(大概4~5KB),并且能根据需要动态增长和缩减占用的资源。<br>
-        
-        
-        <p class="article-more-link">
-          
-            <a href="/2016/02/17/go-concurrency-summarize/#more">Read More</a>
-          
-       </p>
-    </div>
-    <footer class="article-footer clearfix">
-<div class="article-catetags">
-
-<div class="article-categories">
-  <span></span>
-  <a class="article-category-link" href="/categories/golang/">golang</a>
-</div>
-
-
-  <div class="article-tags">
-  
-  <span></span> <a href="/tags/concurrency/">concurrency</a><a href="/tags/golang/">golang</a>
-  </div>
-
-</div>
-
-
-
-
-<div class="comments-count">
-	
-	  	<span></span>
-		<a href="/2016/02/17/go-concurrency-summarize/#comments" class="ds-thread-count comments-count-link" data-thread-key="2016/02/17/go-concurrency-summarize/" data-count-type="comments">&nbsp;</a>
-	
-</div>
-
-</footer>
-
-
-    </article>
-
-
-
-
-
-
 
   <nav id="page-nav" class="clearfix">
     <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><a class="extend next" rel="next" href="/page/2/">Next<span></span></a>
@@ -445,7 +445,7 @@
 		  
 		
 		  
-			<li><a href="/categories/golang/" title="golang">golang<sup>5</sup></a></li>
+			<li><a href="/categories/golang/" title="golang">golang<sup>6</sup></a></li>
 		  
 		
 		</ul>
@@ -459,7 +459,7 @@
 		<ul class="clearfix">
 		
 			
-				<li><a href="/tags/golang/" title="golang">golang<sup>10</sup></a></li>
+				<li><a href="/tags/golang/" title="golang">golang<sup>11</sup></a></li>
 			
 		
 			
@@ -488,6 +488,14 @@
 		
 			
 				<li><a href="/tags/reflect/" title="reflect">reflect<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/gin/" title="gin">gin<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/setcookie/" title="setcookie">setcookie<sup>1</sup></a></li>
 			
 		
 		</ul>
@@ -633,16 +641,6 @@ $(document).ready(function(){
 <!-- Analytics Begin -->
 
 
-
-<script>
-var _hmt = _hmt || [];
-(function() {
-  var hm = document.createElement("script");
-  hm.src = "//hm.baidu.com/hm.js?e6d1f421bbc9962127a50488f9ed37d1";
-  var s = document.getElementsByTagName("script")[0]; 
-  s.parentNode.insertBefore(hm, s);
-})();
-</script>
 
 
 
