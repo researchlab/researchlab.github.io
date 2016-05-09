@@ -1,6 +1,6 @@
 ## [www.grdtechs.com](http://www.grdtechs.com)
 
-[![Build Status](https://travis-ci.org/researchlab/researchlab.github.io.svg?branch=master)](https://travis-ci.org/researchlab/researchlab.github.io)
+[![Build Status](https://travis-ci.org/researchlab/researchlab.github.io.svg?branch=blog)](https://travis-ci.org/researchlab/researchlab.github.io)
 
 Technologies from my work and learning. And you can just take it as my HomePage.
 
