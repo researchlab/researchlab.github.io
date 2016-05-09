@@ -35,7 +35,7 @@ $ npm install
 
 到目前为止，Hexo安装完毕，如何配置及发布到`github`上托管，请参考[用Hexo+github搭建本站](./hexo-blog-1.md)。本文重点记录如何用`Travis CI` 自动构建`Hexo`博客。
 
-## Travis CI
+## 部署Travis CI
 目前，自动化构建、持续集成的理念在整个计算行业非常的流行，大家更愿意去使用自动化代替手动，从而提高效率。
 
 * 持续集成的概念
@@ -48,9 +48,9 @@ $ npm install
 
 Travis CI本身已经是很好的自动构建的工具，而这里使用的原因，本质上是因为Hexo本身并不能进行多人合作。Hexo的hexo generate和hexo deploy会自动渲染并提交到GitHub上，所以当你从别的电脑上clone的时候，clone下来的是渲染好的html的文章。就算我在两个电脑上同时搭建了环境，但是每次渲染的时候只会渲染本地的markdown文章，依然不能进行同步。有些人选择了使用百度云进行同步，每次写之前下载下来并覆盖，就能进行同步。不否认，这个方法对于一个人写博客，在工作和家的电脑还算是比较方便的，因为始终是一个人进行操作。而我们的博客是多人共同写的，所以说会存在各种冲突问题，于是想到了用Travis CI。
 
-<center>![travis-hexo-flowing](/img/travis-hexo-flowing.png)</center>
+<center>![travis-hexo-flowing](/imgs/travis-hexo-flowing.png)</center>
 
-分析下思路：
+从上述流程中分析下思路：
 前提：我们在之前博客搭建的repo下面，新建一个blog的分支，这个分支用来进行环境代码的备份，并且配置出`.travis.yml`进行自动化构建。
 
 ```bash
@@ -74,6 +74,12 @@ Dev repo - sync -> Travis CI
 这样会得到`id_rsa.pub`和`id_rsa`两个秘钥，我们将`id_rsa.pub`添加到了`github`，下面要加密`id_rsa`这个私钥并且上传到`Travis`。
 
 ** 注意：** <font color=red>这个SSH key不应该是你账号的全局SSH Key，这样Travis CI就获得了你所有代码库的提交权限。仅仅只需要把SSH Key添加到当前repo的setting中的key下面即可。</font>
+
+即将`id_rsa.pub`秘钥添加到当前项目`researchlab.github.io`下`Settings`下的`Deploy keys`中，如图:
+
+<center>![deploy_keys](/imgs/deploy_keys.png)</center>
+
+> 记得要将 `Allow write access` 的选项选上，这样 Travis CI 才能获得 push 代码的权限。 
 
 * Travis CI 环境
 ```bash
@@ -159,7 +165,7 @@ branches:
   only:
   - blog
 ```
-配置Hexo
+* 配置Hexo
 
 ```bash
 install:
@@ -203,3 +209,64 @@ script:
 - hexo d
 ```
 这个时候应该将其push到blog分支,然后就可以了。
+
+## 遇到Authentication failed
+提交之后，发现`Travis-ci` 每次到`hexo d` 这一步时就报错了：
+
+```bash
+remote: Invalid username or password.
+fatal: Authentication failed for 'https://github.com/researchlab/researchlab.github.io.git/'
+FATAL Something's wrong. Maybe you can find the solution here: http://hexo.io/docs/troubleshooting.html
+Error: remote: Invalid username or password.
+fatal: Authentication failed for 'https://github.com/researchlab/researchlab.github.io.git/'
+    at ChildProcess.<anonymous> (/home/travis/build/researchlab/researchlab.github.io/node_modules/hexo-deployer-git/node_modules/hexo-util/lib/spawn.js:37:17)
+    at ChildProcess.emit (events.js:110:17)
+    at maybeClose (child_process.js:1019:16)
+    at Process.ChildProcess._handle.onexit (child_process.js:1091:5)
+FATAL remote: Invalid username or password.
+fatal: Authentication failed for 'https://github.com/researchlab/researchlab.github.io.git/'
+Error: remote: Invalid username or password.
+fatal: Authentication failed for 'https://github.com/researchlab/researchlab.github.io.git/'
+    at ChildProcess.<anonymous> (/home/travis/build/researchlab/researchlab.github.io/node_modules/hexo-deployer-git/node_modules/hexo-util/lib/spawn.js:37:17)
+    at ChildProcess.emit (events.js:110:17)
+    at maybeClose (child_process.js:1019:16)
+    at Process.ChildProcess._handle.onexit (child_process.js:1091:5)
+The command "hexo d" exited with 2.
+cache.2
+store build cache
+0.00s
+2.99schanges detected, packing new archive
+FAILED: tar -Pzcf /home/travis/.casher/push.tgz 
+tar: Cowardly refusing to create an empty archive
+Try `tar --help' or `tar --usage' for more information.
+uploading archive
+failed to upload cache
+curl: Can't open '/home/travis/.casher/push.tgz'!
+curl: try 'curl --help' or 'curl --manual' for more information
+Done. Your build exited with 1.
+```
+
+这是因为hexo 根目录下的 `_config.yml`中配置问题导致的：
+把如下配置:
+
+```yml
+# Deployment
+## Docs: https://hexo.io/docs/deployment.html
+deploy:
+  type: git
+  repository: https://github.com/researchlab/researchlab.github.io.git
+  branch: master
+```
+
+修改为：
+
+```yml
+# Deployment
+## Docs: https://hexo.io/docs/deployment.html
+deploy:
+  type: git
+  repository: git@github.com:researchlab/researchlab.github.io.git
+  branch: master
+```
+
+问题即解决！
