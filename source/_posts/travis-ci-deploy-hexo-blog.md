@@ -175,8 +175,8 @@ install:
 
 script:
 - hexo clean
-- hexo d
-- hexo g
+- hexo g 
+- hexo d 
 ```
 
 这样就完成了`.travis.yml`的设置，这里是我的源文件`.travis.yml`。
