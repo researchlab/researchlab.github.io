@@ -105,7 +105,7 @@ Commit all changes to your .travis.yml.
 ```
 生成加密过得新秘钥`id_rsa.enc`, 并自动将branch blog中git的信息及解密秘钥的相关信息添加到`.travis.yml`中。** 然后手动删除私钥文件`id_rsa`， 以保证代码仓库的安全。**
 
-SSH的设置
+* SSH的设置
 在当前目录下新建文件ssh_config，内容为
 
 ```bash
@@ -117,20 +117,26 @@ Host github.com
 ```
 
 修改.travis.yml中的命令，指定openssl解密后的生成位置，xxxxxxxxxx部分就是你的解密参数，不要去改动它。
+即将
+```bash
+- openssl aes-256-cbc -K $encrypted_xxxxxxxxxx_key -iv $encrypted_xxxxxxxxxx_iv
+	-in id_rsa.enc -out id_rsa -d 
+```
+修改为：
 
 ```bash
 - openssl aes-256-cbc -K $encrypted_xxxxxxxxxx_key -iv $encrypted_xxxxxxxxxx_iv
-  -in travis.enc -out ~/.ssh/id_rsa -d
+  -in id_rsa.enc -out ~/.ssh/id_rsa -d
 ```
 
-修改目录权限
+* 修改目录权限
 紧接着在.travis.yml中修改目录权限
 
 ```bash
 - chmod 600 ~/.ssh/id_rsa
 ```
 
-将密钥加入系统
+* 将密钥加入系统
 紧接着在.travis.yml中将密钥加入系统
 
 ```bash
@@ -138,7 +144,7 @@ Host github.com
 - ssh-add ~/.ssh/id_rsa
 ```
 
-修改git信息
+* 修改git信息
 
 ```bash
 - cp ssh_config ~/.ssh/config
@@ -146,7 +152,7 @@ Host github.com
 - git config --global user.email username@example.com
 ```
 
-添加分支信息
+* 添加分支信息
 
 ```bash
 branches:
@@ -177,15 +183,15 @@ branches:
   only:
   - blog
 before_install:
-- openssl aes-256-cbc -K $encrypted_b83a281ef741_key -iv $encrypted_b83a281ef741_iv
+- openssl aes-256-cbc -K $encrypted_xxxxxxxxxx_key-iv $encrypted_xxxxxxxxxx_iv
   -in id_rsa.enc -out ~/.ssh/id_rsa -d
 - chmod 600 ~/.ssh/id_rsa
 - eval $(ssh-agent)
 - ssh-add ~/.ssh/id_rsa
 - cp ssh_config ~/.ssh/config
-- git config --global user.name "叶帆"
-- git config --global user.email yeziahehe@gmail.com
-- git clone -b master git@github.com:Coryphaei/coryphaei.github.io.git .deploy_git
+- git config --global user.name "researchlab"
+- git config --global user.email leehongitrd@163.com 
+- git clone -b master git@github.com:researchlab/researchlab.github.io.git deploy_git
 install:
 - npm install hexo-cli -g
 - npm install
@@ -194,7 +200,6 @@ install:
 script:
 - hexo clean
 - hexo g
-- hexo g
 - hexo d
 ```
-这个时候应该将其push到blog分支。
+这个时候应该将其push到blog分支,然后就可以了。
