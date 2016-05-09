@@ -12,7 +12,7 @@ before_install:
 - ssh-add ~/.ssh/id_rsa
 - cp ssh_config ~/.ssh/config
 - git config --global user.name "researchlab"
-- git config --global user.email leehongitrd@163.com
+- git config --global user.email inforoom@126.com 
 - git clone -b master git@github.com:researchlab/researchlab.github.io.git .deploy_git
 install:
 - npm install hexo-cli -g
