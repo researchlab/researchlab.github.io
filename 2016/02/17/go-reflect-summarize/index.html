@@ -17,7 +17,7 @@
 <meta property="og:url" content="http://www.grdtechs.com/2016/02/17/go-reflect-summarize/index.html">
 <meta property="og:site_name" content="朴实的一线码农">
 <meta property="og:description" content="前言反射是一种检查存储在接口变量中的&amp;lt;值,类型&amp;gt;对的机制，借助go反射包提供的reflect.TypeOf和reflect.ValueOf可以方便的访问到一个接口值的reflect.Type和reflect.Value部分，从而可进一步得到这个接口的结构类型和对其进行值的修改操作。">
-<meta property="og:updated_time" content="2016-05-09T08:14:39.197Z">
+<meta property="og:updated_time" content="2016-05-09T08:36:24.534Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="golang reflect使用总结">
 <meta name="twitter:description" content="前言反射是一种检查存储在接口变量中的&amp;lt;值,类型&amp;gt;对的机制，借助go反射包提供的reflect.TypeOf和reflect.ValueOf可以方便的访问到一个接口值的reflect.Type和reflect.Value部分，从而可进一步得到这个接口的结构类型和对其进行值的修改操作。">
@@ -126,7 +126,7 @@
     }
 }
 </code></pre>
-<p>获取接口对象的类型名称，通过<code>refelct.TypeOf()</code>获取接口对象的类型,并通过<code>Name()</code>方法获取接口的名称。<br>获取对象中所有字段的名称,类型和值,通过<code>reflect.ValueOf()</code>获取接口对象的值类型取得字段的名称和类型,然后通过<code>v.Field(i).Interface()</code>取得第i个字段的值。<br>还可以通过<code>NumMethod()</code>循环获取接口对象所有方法的名称和类型。<br><a href="https://github.com/researchlab/go-learning/blob/master/reflect/01reflect.go" target="_blank" rel="external">示例代码</a></p>
+<p>获取接口对象的类型名称，通过<code>refelct.TypeOf()</code>获取接口对象的类型,并通过<code>Name()</code>方法获取接口的名称。<br>获取对象中所有字段的名称,类型和值,通过<code>reflect.ValueOf()</code>获取接口对象的值类型取得字段的名称和类型,然后通过<code>v.Field(i).Interface()</code>取得第i个字段的值。<br>还可以通过<code>NumMethod()</code>循环获取接口对象所有方法的名称和类型。<br><a href="https://github.com/researchlab/golearning/blob/master/reflect/01reflect.go" target="_blank" rel="external">示例代码</a></p>
 </li>
 <li><p><strong>反射接口对象中的匿名或嵌入字段信息</strong><br>先再添加一个Manager结构,User作为它的匿名字段</p>
 <pre><code>type Manager struct{
@@ -180,7 +180,7 @@ v.Elem().SetInt(200) //成功修改x值为200
 <li>首先要反射出这个字段的地址值类型;</li>
 <li>判断反射返回类型是否为<code>reflect.Ptr</code>指针类型（通过指针才能操作对象地址中的值)同时还要判断这个元素是否可以修改;</li>
 <li>通过<code>FieldByName</code>的返回值判断字段是否存在</li>
-<li>通过<code>Kind()</code>和<code>Set</code>来修改字段的值<br><a href="https://github.com/researchlab/go-learning/blob/master/reflect/02reflect.go" target="_blank" rel="external">示例代码</a></li>
+<li>通过<code>Kind()</code>和<code>Set</code>来修改字段的值<br><a href="https://github.com/researchlab/golearning/blob/master/reflect/02reflect.go" target="_blank" rel="external">示例代码</a></li>
 </ol>
 <h2 id="u901A_u8FC7_u53CD_u5C04_u201C_u52A8_u6001_u201D_u8C03_u7528_u65B9_u6CD5"><a href="#u901A_u8FC7_u53CD_u5C04_u201C_u52A8_u6001_u201D_u8C03_u7528_u65B9_u6CD5" class="headerlink" title="通过反射“动态”调用方法"></a>通过反射“动态”调用方法</h2><p>现在已经可以通过反射获取并修改接口对象的字段，类型等信息了，那怎么通过反射“动态”调用接口对象等方法？<br>先为<code>User</code>结构体引入一个<code>Hello</code>方法：</p>
 <pre><code>func (u User) Hello(m User) (int, string) {
@@ -209,7 +209,7 @@ v.Elem().SetInt(200) //成功修改x值为200
     fmt.Println(res[0], res[1])
 
 }
-</code></pre><p>通过<code>MethodByName</code>先获取对象的<code>Hello</code>方法,然后准备要传入的参数,这里传入的参数必须是<code>[]refelct.Value</code>类型,传入的参数值必须强制转换为反射值类型<code>refelct.Value</code>。<br>最后通过调用<code>Call</code>方法就可以实现通过反射”动态”调用对象的方法。<br><a href="https://github.com/researchlab/go-learning/blob/master/reflect/03reflect.go" target="_blank" rel="external">示例代码</a></p>
+</code></pre><p>通过<code>MethodByName</code>先获取对象的<code>Hello</code>方法,然后准备要传入的参数,这里传入的参数必须是<code>[]refelct.Value</code>类型,传入的参数值必须强制转换为反射值类型<code>refelct.Value</code>。<br>最后通过调用<code>Call</code>方法就可以实现通过反射”动态”调用对象的方法。<br><a href="https://github.com/researchlab/golearning/blob/master/reflect/03reflect.go" target="_blank" rel="external">示例代码</a></p>
 <h2 id="u5C0F_u7ED3"><a href="#u5C0F_u7ED3" class="headerlink" title="小结"></a>小结</h2><ul>
 <li>通过反射包提供<code>refelct.TypeOf</code>和<code>refelct.ValueOf</code>方法获得接口对象的类型，值和方法等。</li>
 <li>通过反射修改字段值等时候需要传入地址类型，并且需要检查反射返回值类型是否为<code>refelct.Ptr</code>，检查字段是否<code>CanSet</code>,检查字段是存在,然后通过<code>Kind()</code>来帮助赋值相应对类型值。</li>
