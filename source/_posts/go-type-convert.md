@@ -76,4 +76,4 @@ func Precision(f float64, prec int, round bool) float64 {
 	return math.Trunc((f)*pow10_n) / pow10_n
 }
 ```
-具体请参考[[示例代码](https://github.com/researchlab/go-learning/blob/master/base/convert.go)]
+具体请参考[[示例代码](https://github.com/researchlab/golearning/blob/master/base/convert.go)]

@@ -46,7 +46,7 @@ description:
 获取接口对象的类型名称，通过`refelct.TypeOf()`获取接口对象的类型,并通过`Name()`方法获取接口的名称。
 获取对象中所有字段的名称,类型和值,通过`reflect.ValueOf()`获取接口对象的值类型取得字段的名称和类型,然后通过`v.Field(i).Interface()`取得第i个字段的值。
 还可以通过`NumMethod()`循环获取接口对象所有方法的名称和类型。
-[示例代码](https://github.com/researchlab/go-learning/blob/master/reflect/01reflect.go)
+[示例代码](https://github.com/researchlab/golearning/blob/master/reflect/01reflect.go)
 
 2. **反射接口对象中的匿名或嵌入字段信息**
 先再添加一个Manager结构,User作为它的匿名字段
@@ -103,7 +103,7 @@ description:
 2. 判断反射返回类型是否为`reflect.Ptr`指针类型（通过指针才能操作对象地址中的值)同时还要判断这个元素是否可以修改;
 3. 通过`FieldByName`的返回值判断字段是否存在
 4. 通过`Kind()`和`Set`来修改字段的值
-[示例代码](https://github.com/researchlab/go-learning/blob/master/reflect/02reflect.go)
+[示例代码](https://github.com/researchlab/golearning/blob/master/reflect/02reflect.go)
 
 ## 通过反射“动态”调用方法
 现在已经可以通过反射获取并修改接口对象的字段，类型等信息了，那怎么通过反射“动态”调用接口对象等方法？
@@ -139,7 +139,7 @@ description:
 		}
 通过`MethodByName`先获取对象的`Hello`方法,然后准备要传入的参数,这里传入的参数必须是`[]refelct.Value`类型,传入的参数值必须强制转换为反射值类型`refelct.Value`。
 最后通过调用`Call`方法就可以实现通过反射"动态"调用对象的方法。
-[示例代码](https://github.com/researchlab/go-learning/blob/master/reflect/03reflect.go)
+[示例代码](https://github.com/researchlab/golearning/blob/master/reflect/03reflect.go)
 
 ## 小结
 - 通过反射包提供`refelct.TypeOf`和`refelct.ValueOf`方法获得接口对象的类型，值和方法等。

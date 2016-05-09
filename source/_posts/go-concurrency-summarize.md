@@ -78,7 +78,7 @@ func sell_tickets(wg *sync.WaitGroup, i int) {
 }
 ```
 上面是一个多`goroutine`并发买票的问题，比如当开启5个`goroutine`来卖100张票，如果不加锁，则有可能会出行多出一些不存在的票的问题。所以当并发访问公有资源时要注意加锁保护公有资源属性修改的唯一性和访问时数据同步问题。
-[示例代码](https://github.com/researchlab/go-learning/blob/master/concurrency/concurrency_sync_mutex.go)
+[示例代码](https://github.com/researchlab/golearning/blob/master/concurrency/concurrency_sync_mutex.go)
 
 ## 批量处理多个Channel操作
 go通过`Select`可以同时处理多个`Channel`,`Select`默认是阻塞的，只有当监听的`Channel`中有发送或接收可以进行时才会运行,当同时有多个可用的`Channel`,`Select`按随机顺序进行处理,`Select`可以方便处理多`Channel`同时响应，在goroutine阻塞的情况也可以方便借助`Select`超时机制来解除阻塞僵局，下面来看一个示例:
@@ -110,4 +110,4 @@ func getHttpRes(url string) (string, error) {
 }
 ```
 发起http请求之后通常会有三种状况:1.访问成功，返回内容值;2.访问失败，返回错误信息;3.访问超时，返回超时。上面的代码中利用`Select`很方便的处理了go并发执行中多可用`Channel`的处理问题，通过设置超时，帮助程序跳出超时等待的僵局。
-[示例代码](https://github.com/researchlab/go-learning/blob/master/concurrency/select_timeout.go)
+[示例代码](https://github.com/researchlab/golearning/blob/master/concurrency/select_timeout.go)
