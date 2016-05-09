@@ -1,0 +1,506 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>golang 设计模式之singleton使用总结 | 朴实的一线码农</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="Lee Hong">
+    
+
+    
+    <meta name="description" content="前言golang 1.5版本之后默认设置GOMAXPROCS值为当前计算机真实核心数，使得goroutines从默认的单线程内并发执行变成了默认的（真实核心数支持的）的多线程内并行执行。多线程并行执行goroutines需要考虑并行执行过程中引入的线程安全问题。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="golang 设计模式之singleton使用总结">
+<meta property="og:url" content="http://www.grdtechs.com/2016/02/25/singleton-pattern-in-go/index.html">
+<meta property="og:site_name" content="朴实的一线码农">
+<meta property="og:description" content="前言golang 1.5版本之后默认设置GOMAXPROCS值为当前计算机真实核心数，使得goroutines从默认的单线程内并发执行变成了默认的（真实核心数支持的）的多线程内并行执行。多线程并行执行goroutines需要考虑并行执行过程中引入的线程安全问题。">
+<meta property="og:updated_time" content="2016-05-09T08:14:39.197Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="golang 设计模式之singleton使用总结">
+<meta name="twitter:description" content="前言golang 1.5版本之后默认设置GOMAXPROCS值为当前计算机真实核心数，使得goroutines从默认的单线程内并发执行变成了默认的（真实核心数支持的）的多线程内并行执行。多线程并行执行goroutines需要考虑并行执行过程中引入的线程安全问题。">
+
+    
+    <link rel="alternative" href="/atom.xml" title="朴实的一线码农" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="stylesheet" href="/css/style.css" type="text/css">
+</head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="朴实的一线码农">朴实的一线码农</a></h1>
+				<h2 class="blog-motto">十年磨一剑，一步一步脚踏实地的耕种</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">首页</a></li>
+					
+						<li><a href="/archives">归档</a></li>
+					
+						<li><a href="/about">关于</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:www.grdtechs.com">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2016/02/25/singleton-pattern-in-go/" title="golang 设计模式之singleton使用总结" itemprop="url">golang 设计模式之singleton使用总结</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
+		
+  <p class="article-time">
+    <time datetime="2016-02-25T17:01:43.000Z" itemprop="datePublished"> 发表于 2016-02-25</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#u524D_u8A00"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u5355_u7EBF_u7A0Bsingleton_u6A21_u578B"><span class="toc-number">2.</span> <span class="toc-text">单线程singleton模型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u91C7_u7528_u4E92_u65A5_u9501_u673A_u5236"><span class="toc-number">3.</span> <span class="toc-text">采用互斥锁机制</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u91C7_u7528_u53CC_u91CD_u68C0_u67E5_u9501_u673A_u5236"><span class="toc-number">4.</span> <span class="toc-text">采用双重检查锁机制</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u91C7_u7528atomic_u8FDB_u4E00_u6B65_u7B80_u5316"><span class="toc-number">5.</span> <span class="toc-text">采用atomic进一步简化</span></a></li></ol>
+		
+		</div>
+		
+		<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p><code>golang</code> 1.5版本之后默认设置<code>GOMAXPROCS</code>值为当前计算机真实核心数，使得<code>goroutines</code>从默认的<code>单线程内并发执行</code>变成了默认的（真实核心数支持的）的<code>多线程内并行</code>执行。多线程并行执行<code>goroutines</code>需要考虑并行执行过程中引入的<code>线程安全问题</code>。<br><a id="more"></a></p>
+<h2 id="u5355_u7EBF_u7A0Bsingleton_u6A21_u578B"><a href="#u5355_u7EBF_u7A0Bsingleton_u6A21_u578B" class="headerlink" title="单线程singleton模型"></a>单线程singleton模型</h2><p>单例模式定义：保证一个类仅有一个实例，并提供一个访问它的全局访问点。先摘取一个在实际工作项目中碰到的singleton模型代码:<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> singleton</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> singleton <span class="keyword">struct</span> &#123;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> instance *singleton</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> GetInstance() *singleton &#123;</span><br><span class="line">	<span class="keyword">if</span> instance == <span class="constant">nil</span> &#123;</span><br><span class="line">       instance = &amp;singleton&#123;&#125;   <span class="comment">// 没有考虑线程安全 </span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> instance</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>上面的<code>singleton</code>设计代码在见过的几个<code>golang</code>项目中都是这么写的，如果这段代码放在<code>golang</code>1.5版本之前默认的单线程场景下运行显然是没什么问题的。<code>golang</code>1.5版本之后默认是启动多核并行执行<code>goroutines</code>的，如果上述代码放在<code>golang</code>1.5版本之后，如果程序开启n个<code>goroutines</code>初始化一个<code>singleton</code>对象, 显然会初始化成功最少一个最多n个<code>singleton</code>对象，从而会存在潜在的多个单例实例对象了，也就不可能保证这个<code>singleton</code>对象全局唯一性了，那后继采用<code>singleton</code>对象进行全局唯一性操作时势必会造成数据不一致的问题。如果场景中但个<code>goroutines</code>执行时间短的话，会使得调试更难。</p>
+<h2 id="u91C7_u7528_u4E92_u65A5_u9501_u673A_u5236"><a href="#u91C7_u7528_u4E92_u65A5_u9501_u673A_u5236" class="headerlink" title="采用互斥锁机制"></a>采用互斥锁机制</h2><p>面对上述线程安全问题，一般会考虑到用锁机制(<code>Mutex</code>)来解决因线程安全引入的数据不一致问题，采用锁机制如：<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> mu Sync.Mutex</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> GetInstance() *singleton &#123;</span><br><span class="line">    mu.Lock()                    <span class="comment">// singleton实例对象操作之后，锁就是多余的了 </span></span><br><span class="line">    <span class="keyword">defer</span> mu.Unlock()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> instance == <span class="constant">nil</span> &#123;</span><br><span class="line">        instance = &amp;singleton&#123;&#125;</span><br><span class="line">    &#125;</span><br><span class="line">   <span class="keyword">return</span> instance</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>上述代码可以看到，引入锁机制<code>Sync.Mutex</code>后，能够保证多线程并行执行<code>goroutines</code>创建的<code>singleton</code>实例对象是唯一的，但是当这个<code>singleton</code>实例对象被初始化创建之后，再次并行来创建<code>singleton</code>实例对象时，其实已经不再需要锁了，因为已经存在了一个创建好的<code>singleton</code>实例对象，所以直接返回即可;但是因为锁机制的存在，使得再次创建<code>singleton</code>实例对象时，还是需要先获取锁，然后在判断处理，多线程执行中这种锁竞争使得多线程的并行执行变成了多线程的串行执行，这显然会使程序丧失并行执行带来的性能提升。在一个高度并行的程序中，这样显示会是抑制程序性能提升的一个瓶颈。</p>
+<h2 id="u91C7_u7528_u53CC_u91CD_u68C0_u67E5_u9501_u673A_u5236"><a href="#u91C7_u7528_u53CC_u91CD_u68C0_u67E5_u9501_u673A_u5236" class="headerlink" title="采用双重检查锁机制"></a>采用双重检查锁机制</h2><p>在<code>C++</code>等编程语言中，为了同时保证最小锁和线程安全通常采用的方法是<code>双重检查锁(Check-Lock-Check)</code>机制，也表述为<code>DCL(Double Check Lock)</code>。<code>双重检查锁</code>机制的伪代码一般是下面的这种形式:<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> check() &#123;</span><br><span class="line">    lock() &#123;</span><br><span class="line">       <span class="keyword">if</span> check() &#123;</span><br><span class="line">           <span class="comment">// 锁安全代码 </span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>其实对这个<code>singleton</code>实例对象来说，只有在第一次创建实例的时候才需要同步，所以为了减少同步，先check一下，判断<code>singleton</code>实例对象是否为空，如果为空，表示是第一使用这个<code>singleton</code>实例对象，那就锁住它，new一个<code>singleton</code>实例，下次另一个线程来<code>GetInstance</code>的时候，看到这个<code>singleton</code>实例对象不为空，就表示已经创建过一个实例了，那就可以直接得到这个实例，避免再次锁。这是第一个 check的作用。 </p>
+<p>第二个check是解决锁竞争情况下的问题，假设现在两个线程来请求<code>GetInstance</code>，A、B线程同时发现<code>singleton</code>实例对象为空，因为我们在第一次check方法上没有加锁，然后A线程率先获得锁，进入同步代码块，new了一个<code>singleton</code>实例对象，之后释放锁，接着B线程获得了这个锁，发现<code>singleton</code>实例对象已经被创建了，就直接释放锁，退出同步代码块。所以这就是<code>Check-Lock-Check</code>; 将上面的<code>singleton</code>实例用<code>Check-Lock-Check</code>机制实现如：<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">func</span> GetInstance() *singleton &#123;</span><br><span class="line">    <span class="keyword">if</span> instance == <span class="constant">nil</span> &#123; </span><br><span class="line">        mu.Lock()</span><br><span class="line">        <span class="keyword">defer</span> mu.Unlock()</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> instance == <span class="constant">nil</span> &#123;</span><br><span class="line">	            instance = &amp;singleton&#123;&#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> instance</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>通过上面的<code>Check-Lock-Check</code>机制,的确可以解决锁竟争的问题，但是这种方法不管是否<code>singleton</code>实例对象是否已创建，每次都要执行两次check才是一个完整的判断，那有没有方法使得只要一次check就可以完成对<code>singleton</code>实例对象是否存在的检查呢？ 有！通过<code>golang</code>的<code>sync/atomic</code>包提供的原子性操作可以更高效的完成这个检查，改进代码如：<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> <span class="string">"sync"</span></span><br><span class="line"><span class="keyword">import</span> <span class="string">"sync/atomic"</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> initialized <span class="typename">uint32</span></span><br><span class="line">...</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> GetInstance() *singleton &#123;</span><br><span class="line"></span><br><span class="line">   <span class="keyword">if</span> atomic.LoadUInt32(&amp;initialized) == <span class="number">1</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> instance</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">    mu.Lock()</span><br><span class="line">    <span class="keyword">defer</span> mu.Unlock()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> initialized == <span class="number">0</span> &#123;</span><br><span class="line">         instance = &amp;singleton&#123;&#125;</span><br><span class="line">         atomic.StoreUint32(&amp;initialized, <span class="number">1</span>)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> instance</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>改进之后的代码通过设置一个标志操作，使得<code>singleton</code>实例对象创建之后，直接通过原子操作读取标志字段的值判断返回已经存在的实例，连锁操作及其后面的代码都略过了。</p>
+<h2 id="u91C7_u7528atomic_u8FDB_u4E00_u6B65_u7B80_u5316"><a href="#u91C7_u7528atomic_u8FDB_u4E00_u6B65_u7B80_u5316" class="headerlink" title="采用atomic进一步简化"></a>采用atomic进一步简化</h2><p>上面通过<code>Check-Lock-Check</code>机制改进之后似乎没有什么可做的了，先不急，来看看<code>golang</code>原生标准包<code>sync</code>包中对<code>Once</code>实现的源码：<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Once is an object that will perform exactly one action.</span></span><br><span class="line"><span class="keyword">type</span> Once <span class="keyword">struct</span> &#123;</span><br><span class="line">	m    Mutex</span><br><span class="line">	done <span class="typename">uint32</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Do calls the function f if and only if Do is being called for the</span></span><br><span class="line"><span class="comment">// first time for this instance of Once. In other words, given</span></span><br><span class="line"><span class="comment">//	var once Once</span></span><br><span class="line"><span class="comment">// if once.Do(f) is called multiple times, only the first call will invoke f,</span></span><br><span class="line"><span class="comment">// even if f has a different value in each invocation.  A new instance of</span></span><br><span class="line"><span class="comment">// Once is required for each function to execute.</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">// Do is intended for initialization that must be run exactly once.  Since f</span></span><br><span class="line"><span class="comment">// is niladic, it may be necessary to use a function literal to capture the</span></span><br><span class="line"><span class="comment">// arguments to a function to be invoked by Do:</span></span><br><span class="line"><span class="comment">//	config.once.Do(func() &#123; config.init(filename) &#125;)</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">// Because no call to Do returns until the one call to f returns, if f causes</span></span><br><span class="line"><span class="comment">// Do to be called, it will deadlock.</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">// If f panics, Do considers it to have returned; future calls of Do return</span></span><br><span class="line"><span class="comment">// without calling f.</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="keyword">func</span> (o *Once) Do(f <span class="keyword">func</span>()) &#123;</span><br><span class="line">	<span class="keyword">if</span> atomic.LoadUint32(&amp;o.done) == <span class="number">1</span> &#123; <span class="comment">// &lt;-- Check</span></span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// Slow-path.</span></span><br><span class="line">	o.m.Lock()                           <span class="comment">// &lt;-- Lock</span></span><br><span class="line">	<span class="keyword">defer</span> o.m.Unlock()</span><br><span class="line">	<span class="keyword">if</span> o.done == <span class="number">0</span> &#123;                     <span class="comment">// &lt;-- Check</span></span><br><span class="line">		<span class="keyword">defer</span> atomic.StoreUint32(&amp;o.done, <span class="number">1</span>)</span><br><span class="line">		f()</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>可以看到我们之前其实是借鉴了<code>golang</code>原生标准包<code>sync</code>中对<code>Once</code>实现对源码，那既然标准包中已经实现了这个<code>Check-Lock-Check</code>机制，那我们直接调用<code>sync</code>包提供<code>once.Do()</code>方法对某个方法只进行一次性调用：<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">once.Do(<span class="keyword">func</span>() &#123;</span><br><span class="line">	 <span class="comment">// perform safe initialization here</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>那么下面是根据<code>sync</code>包提供的<code>sync.Once</code>改进的获取<code>singleton</code>实例对象最终优化版本:<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> singleton</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">    <span class="string">"sync"</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> singleton <span class="keyword">struct</span> &#123;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> instance *singleton</span><br><span class="line"><span class="keyword">var</span> once sync.Once</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> GetInstance() *singleton &#123;</span><br><span class="line">    once.Do(<span class="keyword">func</span>() &#123;</span><br><span class="line">        instance = &amp;singleton&#123;&#125;</span><br><span class="line">    &#125;)</span><br><span class="line">    <span class="keyword">return</span> instance</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>因此使用<code>sync</code>包提供的<code>sync.Once</code>实现获取<code>singleton</code>实例对象可以说是最安全有效又简洁的方法。</p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/go-pattern/">go-pattern</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/golang/">golang</a><a href="/tags/singleton/">singleton</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	<div class="share-jiathis">
+	  
+<div class="jiathis_style_24x24">
+	<a class="jiathis_button_weixin"></a>
+	<a class="jiathis_button_tsina"></a>
+	<a class="jiathis_button_tqq"></a>
+	<a class="jiathis_button_qzone"></a>
+    <a class="jiathis_button_googleplus"></a>
+	<a class="jiathis_button_douban"></a>
+	<a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+    var jiathis_config={
+    data_track_clickback:true,
+    sm:"copy,renren,cqq",
+    pic:"",
+    summary:"",
+    
+  </script> 
+<script type="text/javascript" src="//v3.jiathis.com/code/jia.js?uid=
+2084050" charset="utf-8"></script>      
+
+
+	 </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2016/02/26/observer-pattern-in-go-md/" title="golang 设计模式之observer使用总结">
+  <strong>上一篇：</strong><br/>
+  <span>
+  golang 设计模式之observer使用总结</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2016/02/24/go-concurrency-security/"  title="golang 并发安全性案例分析">
+ <strong>下一篇：</strong><br/> 
+ <span>golang 并发安全性案例分析
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+<section id="comments" class="comment">
+	<div class="ds-thread" data-thread-key="2016/02/25/singleton-pattern-in-go/" data-title="golang 设计模式之singleton使用总结" data-url="http://www.grdtechs.com/2016/02/25/singleton-pattern-in-go/"></div>
+</section>
+
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+<div id="asidepart">
+
+  <div class="widget tag">
+<p margin="0" style="text-align:center">
+<a class="ahref" href="http://researchlab.github.io/about/">
+<img id="aboutpic"  src="/img/weixin.jpg" alt="加我微信" height="200" width="200" >
+</a></p>
+<!--<hr noshade color="#ccc">-->
+<!-- <p style="text-align:center">Mike.Lee</p> -->
+<p style="text-align:center"><font size="2" color="grey">扫一扫上面的二维码 加我微信</font></p>
+<ul>
+<table border="0" font-size="1">
+<tr>
+<td align="right"><font size="2" >现状: </font></td>
+<td align="left"><font size="2" >软件开发攻城狮</font><td>
+</tr>
+<tr>
+<td align="right"><font size="2" >QQ号: </font></td>
+<td align="left"><font size="2" >975508300</font></td>
+</tr>
+<tr>
+<td align="right"><font color="red" size="2">Hexo交流群: </font></td>
+<td align="left"><font color="red" size="2">287306637</font></td>
+</tr>
+
+</table>
+</ul>
+
+</div>
+
+
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/Hexo/" title="Hexo">Hexo<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/go-bootcamp/" title="go-bootcamp">go-bootcamp<sup>3</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/go-pattern/" title="go-pattern">go-pattern<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/golang/" title="golang">golang<sup>6</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/golang/" title="golang">golang<sup>11</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Hexo/" title="Hexo">Hexo<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Blog/" title="Blog">Blog<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/concurrency/" title="concurrency">concurrency<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/singleton/" title="singleton">singleton<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/observer/" title="observer">observer<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/xorm/" title="xorm">xorm<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/reflect/" title="reflect">reflect<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/gin/" title="gin">gin<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/setcookie/" title="setcookie">setcookie<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="http://blog.csdn.net/xiaolongwang2010" target="_blank" title="小龙王2010csdn技术博客">Linux/c/c++</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  
+
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+  <iframe width="100%" height="550" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=550&fansRow=1&ptype=1&speed=0&skin=1&isTitle=1&noborder=1&isWeibo=1&isFans=1&uid=5141203275&verifier=a533edf5&dpc=1"></iframe>
+
+
+</aside>
+</div>
+
+    </div>
+    <footer><div id="footer" >
+	
+	
+	<div class="social-font" class="clearfix">
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2016 
+		
+		<a href="/about" target="_blank" title="Lee Hong">Lee Hong</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+
+
+<script type="text/javascript">
+  var duoshuoQuery = {short_name:"gamedp"};
+  (function() {
+    var ds = document.createElement('script');
+    ds.type = 'text/javascript';ds.async = true;
+    ds.src = '//static.duoshuo.com/embed.js';
+    ds.charset = 'UTF-8';
+    (document.getElementsByTagName('head')[0] 
+    || document.getElementsByTagName('body')[0]).appendChild(ds);
+  })();
+</script> 
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>
