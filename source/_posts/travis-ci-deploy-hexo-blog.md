@@ -81,10 +81,29 @@ $ sudo cp ~/.ssh/id_rsa / #将上一步得到的`id_rsa`复制到当前blog根�
 $ vim .travis.yml #创建.travis.yml
 $ gem install travis #安装Travis CI
 $ travis login --auto #登录Travis CI，需要输入GitHub的账号密码
-$ travis encrypt-file ssh_key --add #加密私钥并上传至Travis
+$ travis encrypt-file ssh_key --add #加密私钥并上传至Travis 注意这里的 ssh_key 要换成上面私钥的名称，即: travis encrypt-file id_rsa
+```
+**注意**:
+gem 的官方源经常被qiang, 所以要注意更换gem sources,
+```bash
+gem sources #查看原有的官方源
+gem source -r https://rubygems.org/ # 删除 rubygems 官方源
+gem source -a http://mirrors.aliyun.com/rubygems/   # 添加aliyun 源
+gem install travis --no-rdoc --no-ri --verbose  # 安装Travis 
 ```
 
-生成加密过得新秘钥`id_rsa.enc`, 并自动将branch blog中git的信息及解密秘钥的相关信息添加到`.travis.yml`中。然后手动删除私钥文件`id_rsa`， 以保证代码仓库的安全。
+**生成提示**
+
+```bash
+encrypting id_rsa for researchlab/researchlab.github.io
+storing result as id_rsa.enc
+storing secure env variables for decryption
+
+Make sure to add id_rsa.enc to the git repository.
+Make sure not to add id_rsa to the git repository.
+Commit all changes to your .travis.yml.
+```
+生成加密过得新秘钥`id_rsa.enc`, 并自动将branch blog中git的信息及解密秘钥的相关信息添加到`.travis.yml`中。** 然后手动删除私钥文件`id_rsa`， 以保证代码仓库的安全。**
 
 SSH的设置
 在当前目录下新建文件ssh_config，内容为
