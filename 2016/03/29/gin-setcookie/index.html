@@ -17,7 +17,7 @@
 <meta property="og:url" content="http://www.grdtechs.com/2016/03/29/gin-setcookie/index.html">
 <meta property="og:site_name" content="朴实的一线码农">
 <meta property="og:description" content="前言可以操作Cookie的Http头有两个:Set-Cookie和Cookie。Set-Cookie由服务器发送，它包含在响应请求的头部中。它用于在客户端创建一个Cookie。Cookie头由客户端发送，包含在HTTP请求的头部中。注意：1.只有cookie的domain和path与请求的URL匹配才会发送这个cookie;2.客户端发送cookie信息给服务器只发送键-值对到服务器，cookie">
-<meta property="og:updated_time" content="2016-05-26T03:37:47.970Z">
+<meta property="og:updated_time" content="2016-06-07T03:09:43.684Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="gin中使用设置cookie过期时间总结">
 <meta name="twitter:description" content="前言可以操作Cookie的Http头有两个:Set-Cookie和Cookie。Set-Cookie由服务器发送，它包含在响应请求的头部中。它用于在客户端创建一个Cookie。Cookie头由客户端发送，包含在HTTP请求的头部中。注意：1.只有cookie的domain和path与请求的URL匹配才会发送这个cookie;2.客户端发送cookie信息给服务器只发送键-值对到服务器，cookie">
@@ -103,6 +103,21 @@
 <font color="red">除了name=value对以外，我们还可以设置Cookie其他属性以支持更丰富的Cookie需求，<strong>这些属性通常是浏览器用来判断如何对待cookie，何时删除、屏蔽或者如何发送name-value对给Server。也就是说无论我们设置了某个cookie的多少属性，这些Cookie属性是不会被浏览器发送回给Server的。包括设置的过期时间也不会发送到服务器端</strong></font>
   
 	</div>
+		<div style="padding: 10px 44px 30px 44px;" >
+<div style="border: 1px dashed #e0e0e0; padding: 10px 10px 10px 10px; background-color: #fffeee; background-repeat: no-repeat; background-attachment: scroll; background-position: 1% 50%; -moz-background-size: auto auto; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">
+<div style="float:left;margin-top:0px;">
+<img src="/img/weixin.jpg" width="125px" height="125px" style="border:1px solid #ccc; margin: 6px 5px 0px 0px"/>
+</div>
+<div>
+ <p style="margin-top:0px;">作者署名：<b><a target="_blank" href="http://www.grdtechs.com/">朴实的一线攻城狮</a></b>
+<br />本文标题：<b><a href="/2016/03/29/gin-setcookie/" target="_blank" title="gin中使用设置cookie过期时间总结">gin中使用设置cookie过期时间总结</a></b> 
+<br />本文出处：<b><a href="/2016/03/29/gin-setcookie/" target="_blank" title="gin中使用设置cookie过期时间总结">http://www.grdtechs.com/2016/03/29/gin-setcookie/</a></b>
+<br />版权声明：本文由<b><a href="/about" target="_blank" title="Lee Hong">Lee Hong</a></b>创作和发表,采用<b>署名(BY)</b>-<b>非商业性使用(NC)</b>-<b>相同方式共享(SA)</b>国际许可协议进行许可,转载请注明作者及出处, 否则保留追究法律责任的权利。 </p>
+</div>
+</div>
+</div>
+
+   	       
 		<footer class="article-footer clearfix">
 <div class="article-catetags">
 
@@ -185,6 +200,7 @@
 
 
 </div>  
+
       <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
 <div id="asidepart">
 
