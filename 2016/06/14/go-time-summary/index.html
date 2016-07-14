@@ -4,23 +4,23 @@
 <head>
   <meta charset="UTF-8">
   
-    <title>golang xorm库使用总结 | 朴实的一线攻城狮</title>
+    <title>golang 格式化时间总结 | 朴实的一线攻城狮</title>
     <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
     
     <meta name="author" content="Lee Hong">
     
 
     
-    <meta name="description" content="前言XORM是一个简单而强大的Go语言ORM(Object Relational Mapping)库,通过调用XORM提供简单丰富的API接口,可以简化便捷的完成对数据库的各类操作。XORM目前已经支持所有主流关系型数据库,如Mysql,SQLite,Oracle,Postgres等。">
+    <meta name="description" content="前言golang 中经常需要格式化时间和日期来满足不同的业务需求,下面总结格式化时间日期中遇到的问题。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="golang xorm库使用总结">
-<meta property="og:url" content="http://www.grdtechs.com/2016/01/21/go-xorm-summarize/index.html">
+<meta property="og:title" content="golang 格式化时间总结">
+<meta property="og:url" content="http://www.grdtechs.com/2016/06/14/go-time-summary/index.html">
 <meta property="og:site_name" content="朴实的一线攻城狮">
-<meta property="og:description" content="前言XORM是一个简单而强大的Go语言ORM(Object Relational Mapping)库,通过调用XORM提供简单丰富的API接口,可以简化便捷的完成对数据库的各类操作。XORM目前已经支持所有主流关系型数据库,如Mysql,SQLite,Oracle,Postgres等。">
-<meta property="og:updated_time" content="2016-07-14T07:26:17.571Z">
+<meta property="og:description" content="前言golang 中经常需要格式化时间和日期来满足不同的业务需求,下面总结格式化时间日期中遇到的问题。">
+<meta property="og:updated_time" content="2016-07-14T07:26:17.567Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="golang xorm库使用总结">
-<meta name="twitter:description" content="前言XORM是一个简单而强大的Go语言ORM(Object Relational Mapping)库,通过调用XORM提供简单丰富的API接口,可以简化便捷的完成对数据库的各类操作。XORM目前已经支持所有主流关系型数据库,如Mysql,SQLite,Oracle,Postgres等。">
+<meta name="twitter:title" content="golang 格式化时间总结">
+<meta name="twitter:description" content="前言golang 中经常需要格式化时间和日期来满足不同的业务需求,下面总结格式化时间日期中遇到的问题。">
 
     
     <link rel="alternative" href="/atom.xml" title="朴实的一线攻城狮" type="application/atom+xml">
@@ -73,14 +73,14 @@
 		<header class="article-info clearfix">
   <h1 itemprop="name">
     
-      <a href="/2016/01/21/go-xorm-summarize/" title="golang xorm库使用总结" itemprop="url">golang xorm库使用总结</a>
+      <a href="/2016/06/14/go-time-summary/" title="golang 格式化时间总结" itemprop="url">golang 格式化时间总结</a>
   </h1>
   <p class="article-author">By
        
 		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
 		
   <p class="article-time">
-    <time datetime="2016-01-21T17:50:07.000Z" itemprop="datePublished"> 发表于 2016-01-21</time>
+    <time datetime="2016-06-14T14:05:28.000Z" itemprop="datePublished"> 发表于 2016-06-14</time>
     
   </p>
 </header>
@@ -89,12 +89,66 @@
 		<div id="toc" class="toc-article">
 			<strong class="toc-title">文章目录</strong>
 		
-			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#u524D_u8A00"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u5B89_u88C5_u53CA_u7279_u6027"><span class="toc-number">2.</span> <span class="toc-text">安装及特性</span></a></li></ol>
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#u524D_u8A00"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#golang_time_u5305__u65F6_u95F4_u65E5_u671F_u683C_u5F0F_u5316_u5B9A_u4E49"><span class="toc-number">2.</span> <span class="toc-text">golang time包 时间日期格式化定义</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u65F6_u95F4_u65E5_u671F_u683C_u5F0F_u5316"><span class="toc-number">3.</span> <span class="toc-text">时间日期格式化</span></a></li></ol>
 		
 		</div>
 		
-		<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p><a href="https://github.com/go-xorm/xorm" target="_blank" rel="external">XORM</a>是一个简单而强大的Go语言<code>ORM(Object Relational Mapping)</code>库,通过调用<code>XORM</code>提供简单丰富的API接口,可以简化便捷的完成对数据库的各类操作。<code>XORM</code>目前已经支持所有主流关系型数据库,如Mysql,SQLite,Oracle,Postgres等。<br><a id="more"></a></p>
-<h2 id="u5B89_u88C5_u53CA_u7279_u6027"><a href="#u5B89_u88C5_u53CA_u7279_u6027" class="headerlink" title="安装及特性"></a>安装及特性</h2><p><code>XORM</code>的安装很简单， 具体可参看<a href="http://xorm.io/" target="_blank" rel="external">官网安装</a>。<br>未完待续</p>
+		<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p><code>golang</code> 中经常需要格式化时间和日期来满足不同的业务需求,下面总结格式化时间日期中遇到的问题。<br><a id="more"></a></p>
+<h2 id="golang_time_u5305__u65F6_u95F4_u65E5_u671F_u683C_u5F0F_u5316_u5B9A_u4E49"><a href="#golang_time_u5305__u65F6_u95F4_u65E5_u671F_u683C_u5F0F_u5316_u5B9A_u4E49" class="headerlink" title="golang time包 时间日期格式化定义"></a>golang time包 时间日期格式化定义</h2><p>go 的time package 提供了time.Format函数，用来对时间进行格式化输出;类似的还有time.Parse用来解析字符串类型的时间到time.Time。这是两个互逆的函数。</p>
+<p><strong> 下面看<code>golang</code>中<code>time</code>包对于时间的详细定义 </strong></p>
+<ul>
+<li>月份 1,01,Jan,January</li>
+<li>日　 2,02,_2</li>
+<li>时　 3,03,15,PM,pm,AM,am</li>
+<li>分　 4,04</li>
+<li>秒　 5,05</li>
+<li>年　 06,2006</li>
+<li>时区 -07,-0700,Z0700,Z07:00,-07:00,MST</li>
+<li>周几 Mon,Monday</li>
+</ul>
+<p><strong> 比如小时的表示(原定义是下午3时，也就是15时) </strong></p>
+<ul>
+<li>3 用12小时制表示，去掉前导0</li>
+<li>03 用12小时制表示，保留前导0</li>
+<li>15 用24小时制表示，保留前导0</li>
+<li>03pm 用24小时制am/pm表示上下午表示，保留前导0</li>
+<li>3pm 用24小时制am/pm表示上下午表示，去掉前导0</li>
+</ul>
+<p><strong> 又比如月份 </strong></p>
+<ul>
+<li>1 数字表示月份，去掉前导0</li>
+<li>01 数字表示月份，保留前导0</li>
+<li>Jan 缩写单词表示月份</li>
+<li>January 全单词表示月份</li>
+</ul>
+<h2 id="u65F6_u95F4_u65E5_u671F_u683C_u5F0F_u5316"><a href="#u65F6_u95F4_u65E5_u671F_u683C_u5F0F_u5316" class="headerlink" title="时间日期格式化"></a>时间日期格式化</h2><ul>
+<li>本地当期时间</li>
+</ul>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">fmt.Println(time.Now()) <span class="comment">//2016-07-14 14:27:28.214512532 +0800 CST</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>时间格式化</li>
+</ul>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">fmt.Println(time.Now().Format(<span class="string">"3:04:05.000 PM Mon Jan"</span>))            <span class="comment">// 2:27:05.702 PM Thu Jul</span></span><br><span class="line">fmt.Println(time.Now().Format(<span class="string">"2006-01-_2 3:04:05.000 PM Mon Jan"</span>)) <span class="comment">// 2016-07-14 2:54:11.442 PM Thu Jul</span></span><br><span class="line">fmt.Println(time.Now().Format(<span class="string">"2006-01-02 15:04:05"</span>))  <span class="comment">// 2016-07-14 14:54:11.442239513 +0800 CST</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>本地当前时间戳(10位)</li>
+</ul>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">fmt.Println(time.Now().Unix()) <span class="comment">//1468479251</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>本地当前时间戳(19位)</li>
+</ul>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">fmt.Println(time.Now().UnixNano()) <span class="comment">//1468480006774460462</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>时间戳转时间 </li>
+</ul>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">fmt.Println(time.Unix(<span class="number">1389058332</span>, <span class="number">0</span>).Format(<span class="string">"2006-01-02 15:04:05"</span>)) <span class="comment">//2014-01-07 09:32:12</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>时间转时间戳</li>
+</ul>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">fmt.Println(time.Date(<span class="number">2014</span>, <span class="number">1</span>, <span class="number">7</span>, <span class="number">5</span>, <span class="number">50</span>, <span class="number">4</span>, <span class="number">0</span>, time.Local).Unix())</span><br></pre></td></tr></table></figure>
+<ul>
+<li>时间转换为UTC时间和本地时间( UTC:零时区 +0000， China: 东八区 +0800)</li>
+</ul>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">dateStr := <span class="string">"2016-07-14 14:24:51"</span> </span><br><span class="line">timestamp1, _ := time.Parse(<span class="string">"2006-01-02 15:04:05"</span>, dateStr)</span><br><span class="line">timestamp2, _ := time.ParseInLocation(<span class="string">"2006-01-02 15:04:05"</span>, dateStr, time.Local)</span><br><span class="line">fmt.Println(timestamp1, timestamp2)               <span class="comment">//2016-07-14 14:24:51 +0000 UTC 2016-07-14 14:24:51 +0800 CST </span></span><br><span class="line">fmt.Println(timestamp1.Unix(), timestamp2.Unix()) <span class="comment">//1468506291 1468477491 </span></span><br><span class="line"></span><br><span class="line">now := time.Now()                </span><br><span class="line">year, mon, day := now.UTC().Date()</span><br><span class="line">hour, min, sec := now.UTC().Clock()</span><br><span class="line">zone, _ := now.UTC().Zone()     </span><br><span class="line">fmt.Printf(<span class="string">"UTC 时间是 %d-%d-%d %02d:%02d:%02d %s\n"</span>,         </span><br><span class="line">    year, mon, day, hour, min, sec, zone) <span class="comment">// UTC 时间是 2016-7-14 07:06:46 UTC</span></span><br><span class="line">                                                           </span><br><span class="line">year, mon, day = now.Date()</span><br><span class="line">hour, min, sec = now.Clock()</span><br><span class="line">zone, _ = now.Zone()</span><br><span class="line">fmt.Printf(<span class="string">"本地时间是 %d-%d-%d %02d:%02d:%02d %s\n"</span>,</span><br><span class="line">    year, mon, day, hour, min, sec, zone) <span class="comment">// 本地时间是 2016-7-14 15:06:46 CST</span></span><br></pre></td></tr></table></figure>
   
 	</div>
 		<div style="padding: 10px 44px 30px 44px;" >
@@ -104,8 +158,8 @@
 </div>
 <div>
  <p style="margin-top:0px;">作者署名：<b><a target="_blank" href="http://www.grdtechs.com/">朴实的一线攻城狮</a></b>
-<br />本文标题：<b><a href="/2016/01/21/go-xorm-summarize/" target="_blank" title="golang xorm库使用总结">golang xorm库使用总结</a></b> 
-<br />本文出处：<b><a href="/2016/01/21/go-xorm-summarize/" target="_blank" title="golang xorm库使用总结">http://www.grdtechs.com/2016/01/21/go-xorm-summarize/</a></b>
+<br />本文标题：<b><a href="/2016/06/14/go-time-summary/" target="_blank" title="golang 格式化时间总结">golang 格式化时间总结</a></b> 
+<br />本文出处：<b><a href="/2016/06/14/go-time-summary/" target="_blank" title="golang 格式化时间总结">http://www.grdtechs.com/2016/06/14/go-time-summary/</a></b>
 <br />版权声明：本文由<b><a href="/about" target="_blank" title="Lee Hong">Lee Hong</a></b>创作和发表,采用<b>署名(BY)</b>-<b>非商业性使用(NC)</b>-<b>相同方式共享(SA)</b>国际许可协议进行许可,转载请注明作者及出处, 否则保留追究法律责任的权利。 </p>
 </div>
 </div>
@@ -123,7 +177,7 @@
 
   <div class="article-tags">
   
-  <span></span> <a href="/tags/golang/">golang</a><a href="/tags/xorm/">xorm</a>
+  <span></span> <a href="/tags/golang/">golang</a><a href="/tags/time/">time</a>
   </div>
 
 </div>
@@ -168,19 +222,11 @@
 	
 <nav class="article-nav clearfix">
  
- <div class="prev" >
- <a href="/2016/02/17/go-reflect-summarize/" title="golang reflect使用总结">
-  <strong>上一篇：</strong><br/>
-  <span>
-  golang reflect使用总结</span>
-</a>
-</div>
-
 
 <div class="next">
-<a href="/2016/01/19/go-collection-types/"  title="[译]GO BOOTCAMP 第四章：集合类型">
+<a href="/2016/05/24/comparison-of-Go-Vendoring-Tools/"  title="Go Vendoring Tools 使用总结">
  <strong>下一篇：</strong><br/> 
- <span>[译]GO BOOTCAMP 第四章：集合类型
+ <span>Go Vendoring Tools 使用总结
 </span>
 </a>
 </div>
@@ -189,7 +235,7 @@
 
 	
 <section id="comments" class="comment">
-	<div class="ds-thread" data-thread-key="2016/01/21/go-xorm-summarize/" data-title="golang xorm库使用总结" data-url="http://www.grdtechs.com/2016/01/21/go-xorm-summarize/"></div>
+	<div class="ds-thread" data-thread-key="2016/06/14/go-time-summary/" data-title="golang 格式化时间总结" data-url="http://www.grdtechs.com/2016/06/14/go-time-summary/"></div>
 </section>
 
 
