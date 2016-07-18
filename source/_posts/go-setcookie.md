@@ -7,7 +7,7 @@ description:
 ---
 
 ## 前言
-
+`Go`web开发中，经常需要设置获取cookies, 不管是从client端设置获取还是server设置获取，其实都差不多，下面就总结一下常用的方法。
 <!--more-->
 
 ## golang中cookie 详细定义
