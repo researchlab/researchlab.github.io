@@ -7,8 +7,11 @@ description:
 ---
 
 ## 前言
-可以操作`Cookie`的`Http`头有两个:`Set-Cookie`和`Cookie`。`Set-Cookie`由服务器发送，它包含在响应请求的头部中。它用于在客户端创建一个`Cookie`。`Cookie`头由客户端发送，包含在`HTTP`请求的头部中。<font color=red>**注意：1.只有cookie的domain和path与请求的URL匹配才会发送这个cookie;2.客户端发送cookie信息给服务器只发送键-值对到服务器，cookie的属性是不会发送给服务器的。**</font>
+可以操作`Cookie`的`Http`头有两个:`Set-Cookie`和`Cookie`。`Set-Cookie`由服务器发送，它包含在响应请求的头部中。它用于在客户端创建一个`Cookie`。`Cookie`头由客户端发送，包含在`HTTP`请求的头部中。
 <!--more-->
+<font color=red>**注意：
+1.只有cookie的domain和path与请求的URL匹配才会发送这个cookie;
+2.客户端发送cookie信息给服务器只发送键-值对到服务器，cookie的属性是不会发送给服务器的。**</font>
 
 ## 试验需求
 1.服务器给客户端设置cookie，并设置过期时间，客户端每次请求服务器时如果cookie没有过期，则服务器将cookie相应的value 加1并重设cookie, 如果cookie 过期，则重新设置cookie让value 从0开始计数。
