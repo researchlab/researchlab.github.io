@@ -33,7 +33,7 @@ $ npm install
 
 启动本地的服务器看下是否安装成功`hexo s`，浏览器打开http://localhost:4000。
 
-到目前为止，Hexo安装完毕，如何配置及发布到`github`上托管，请参考[用Hexo+github搭建本站](./hexo-blog-1.md)。本文重点记录如何用`Travis CI` 自动构建`Hexo`博客。
+到目前为止，Hexo安装完毕，如何配置及发布到`github`上托管，请参考[用Hexo+github搭建本站](http://www.grdtechs.com/2016/01/15/hexo-blog-1/)。本文重点记录如何用`Travis CI` 自动构建`Hexo`博客。
 
 ## 部署Travis CI
 目前，自动化构建、持续集成的理念在整个计算行业非常的流行，大家更愿意去使用自动化代替手动，从而提高效率。
