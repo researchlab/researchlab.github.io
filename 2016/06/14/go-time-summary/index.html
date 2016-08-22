@@ -1,0 +1,600 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>golang 格式化时间总结 | 朴实的一线攻城狮</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="Lee Hong">
+    
+
+    
+    <meta name="description" content="前言golang 中经常需要格式化时间和日期来满足不同的业务需求,下面总结格式化时间日期中遇到的问题。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="golang 格式化时间总结">
+<meta property="og:url" content="http://www.grdtechs.com/2016/06/14/go-time-summary/index.html">
+<meta property="og:site_name" content="朴实的一线攻城狮">
+<meta property="og:description" content="前言golang 中经常需要格式化时间和日期来满足不同的业务需求,下面总结格式化时间日期中遇到的问题。">
+<meta property="og:updated_time" content="2016-08-20T02:46:33.733Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="golang 格式化时间总结">
+<meta name="twitter:description" content="前言golang 中经常需要格式化时间和日期来满足不同的业务需求,下面总结格式化时间日期中遇到的问题。">
+
+    
+    <link rel="alternative" href="/atom.xml" title="朴实的一线攻城狮" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="stylesheet" href="/css/style.css" type="text/css">
+</head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="朴实的一线攻城狮">朴实的一线攻城狮</a></h1>
+				<h2 class="blog-motto">十年磨一剑，一步一步脚踏实地的耕种</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">首页</a></li>
+					
+						<li><a href="/archives">归档</a></li>
+					
+						<li><a href="/about">关于</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:www.grdtechs.com">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2016/06/14/go-time-summary/" title="golang 格式化时间总结" itemprop="url">golang 格式化时间总结</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
+		
+  <p class="article-time">
+    <time datetime="2016-06-14T14:05:28.000Z" itemprop="datePublished"> 发表于 2016-06-14</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#u524D_u8A00"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#golang_time_u5305__u65F6_u95F4_u65E5_u671F_u683C_u5F0F_u5316_u5B9A_u4E49"><span class="toc-number">2.</span> <span class="toc-text">golang time包 时间日期格式化定义</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u65F6_u95F4_u65E5_u671F_u683C_u5F0F_u5316"><span class="toc-number">3.</span> <span class="toc-text">时间日期格式化</span></a></li></ol>
+		
+		</div>
+		
+		<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p><code>golang</code> 中经常需要格式化时间和日期来满足不同的业务需求,下面总结格式化时间日期中遇到的问题。<br><a id="more"></a></p>
+<h2 id="golang_time_u5305__u65F6_u95F4_u65E5_u671F_u683C_u5F0F_u5316_u5B9A_u4E49"><a href="#golang_time_u5305__u65F6_u95F4_u65E5_u671F_u683C_u5F0F_u5316_u5B9A_u4E49" class="headerlink" title="golang time包 时间日期格式化定义"></a>golang time包 时间日期格式化定义</h2><p>go 的time package 提供了time.Format函数，用来对时间进行格式化输出;类似的还有time.Parse用来解析字符串类型的时间到time.Time。这是两个互逆的函数。</p>
+<p><strong> 下面看<code>golang</code>中<code>time</code>包对于时间的详细定义 </strong></p>
+<ul>
+<li>月份 1,01,Jan,January</li>
+<li>日　 2,02,_2</li>
+<li>时　 3,03,15,PM,pm,AM,am</li>
+<li>分　 4,04</li>
+<li>秒　 5,05</li>
+<li>年　 06,2006</li>
+<li>时区 -07,-0700,Z0700,Z07:00,-07:00,MST</li>
+<li>周几 Mon,Monday</li>
+</ul>
+<p><strong> 比如小时的表示(原定义是下午3时，也就是15时) </strong></p>
+<ul>
+<li>3 用12小时制表示，去掉前导0</li>
+<li>03 用12小时制表示，保留前导0</li>
+<li>15 用24小时制表示，保留前导0</li>
+<li>03pm 用24小时制am/pm表示上下午表示，保留前导0</li>
+<li>3pm 用24小时制am/pm表示上下午表示，去掉前导0</li>
+</ul>
+<p><strong> 又比如月份 </strong></p>
+<ul>
+<li>1 数字表示月份，去掉前导0</li>
+<li>01 数字表示月份，保留前导0</li>
+<li>Jan 缩写单词表示月份</li>
+<li>January 全单词表示月份</li>
+</ul>
+<h2 id="u65F6_u95F4_u65E5_u671F_u683C_u5F0F_u5316"><a href="#u65F6_u95F4_u65E5_u671F_u683C_u5F0F_u5316" class="headerlink" title="时间日期格式化"></a>时间日期格式化</h2><ul>
+<li>本地当期时间</li>
+</ul>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">fmt.Println(time.Now()) <span class="comment">//2016-07-14 14:27:28.214512532 +0800 CST</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>时间格式化</li>
+</ul>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">fmt.Println(time.Now().Format(<span class="string">"3:04:05.000 PM Mon Jan"</span>))            <span class="comment">// 2:27:05.702 PM Thu Jul</span></span><br><span class="line">fmt.Println(time.Now().Format(<span class="string">"2006-01-_2 3:04:05.000 PM Mon Jan"</span>)) <span class="comment">// 2016-07-14 2:54:11.442 PM Thu Jul</span></span><br><span class="line">fmt.Println(time.Now().Format(<span class="string">"2006-01-02 15:04:05"</span>))  <span class="comment">// 2016-07-14 14:54:11.442239513 +0800 CST</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>本地当前时间戳(10位)</li>
+</ul>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">fmt.Println(time.Now().Unix()) <span class="comment">//1468479251</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>本地当前时间戳(19位)</li>
+</ul>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">fmt.Println(time.Now().UnixNano()) <span class="comment">//1468480006774460462</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>时间戳转时间 </li>
+</ul>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">fmt.Println(time.Unix(<span class="number">1389058332</span>, <span class="number">0</span>).Format(<span class="string">"2006-01-02 15:04:05"</span>)) <span class="comment">//2014-01-07 09:32:12</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>时间转时间戳</li>
+</ul>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">fmt.Println(time.Date(<span class="number">2014</span>, <span class="number">1</span>, <span class="number">7</span>, <span class="number">5</span>, <span class="number">50</span>, <span class="number">4</span>, <span class="number">0</span>, time.Local).Unix())</span><br></pre></td></tr></table></figure>
+<ul>
+<li>时间转换为UTC时间和本地时间( UTC:零时区 +0000， China: 东八区 +0800)</li>
+</ul>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">dateStr := <span class="string">"2016-07-14 14:24:51"</span> </span><br><span class="line">timestamp1, _ := time.Parse(<span class="string">"2006-01-02 15:04:05"</span>, dateStr)</span><br><span class="line">timestamp2, _ := time.ParseInLocation(<span class="string">"2006-01-02 15:04:05"</span>, dateStr, time.Local)</span><br><span class="line">fmt.Println(timestamp1, timestamp2)               <span class="comment">//2016-07-14 14:24:51 +0000 UTC 2016-07-14 14:24:51 +0800 CST </span></span><br><span class="line">fmt.Println(timestamp1.Unix(), timestamp2.Unix()) <span class="comment">//1468506291 1468477491 </span></span><br><span class="line"></span><br><span class="line">now := time.Now()                </span><br><span class="line">year, mon, day := now.UTC().Date()</span><br><span class="line">hour, min, sec := now.UTC().Clock()</span><br><span class="line">zone, _ := now.UTC().Zone()     </span><br><span class="line">fmt.Printf(<span class="string">"UTC 时间是 %d-%d-%d %02d:%02d:%02d %s\n"</span>,         </span><br><span class="line">    year, mon, day, hour, min, sec, zone) <span class="comment">// UTC 时间是 2016-7-14 07:06:46 UTC</span></span><br><span class="line">                                                           </span><br><span class="line">year, mon, day = now.Date()</span><br><span class="line">hour, min, sec = now.Clock()</span><br><span class="line">zone, _ = now.Zone()</span><br><span class="line">fmt.Printf(<span class="string">"本地时间是 %d-%d-%d %02d:%02d:%02d %s\n"</span>,</span><br><span class="line">    year, mon, day, hour, min, sec, zone) <span class="comment">// 本地时间是 2016-7-14 15:06:46 CST</span></span><br></pre></td></tr></table></figure>
+  
+	</div>
+		<div style="padding: 10px 44px 30px 44px;" >
+<div style="border: 1px dashed #e0e0e0; padding: 10px 10px 10px 10px; background-color: #fffeee; background-repeat: no-repeat; background-attachment: scroll; background-position: 1% 50%; -moz-background-size: auto auto; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">
+<div style="float:left;margin-top:0px;">
+<img src="/img/weixin.jpg" width="125px" height="125px" style="border:1px solid #ccc; margin: 6px 5px 0px 0px"/>
+</div>
+<div>
+ <p style="margin-top:0px;">作者署名：<b><a target="_blank" href="http://www.grdtechs.com/">朴实的一线攻城狮</a></b>
+<br />本文标题：<b><a href="/2016/06/14/go-time-summary/" target="_blank" title="golang 格式化时间总结">golang 格式化时间总结</a></b> 
+<br />本文出处：<b><a href="/2016/06/14/go-time-summary/" target="_blank" title="golang 格式化时间总结">http://www.grdtechs.com/2016/06/14/go-time-summary/</a></b>
+<br />版权声明：本文由<b><a href="/about" target="_blank" title="Lee Hong">Lee Hong</a></b>创作和发表,采用<b>署名(BY)</b>-<b>非商业性使用(NC)</b>-<b>相同方式共享(SA)</b>国际许可协议进行许可,转载请注明作者及出处, 否则保留追究法律责任的权利。 </p>
+</div>
+</div>
+</div>
+
+   	       
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/golang/">golang</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/golang/">golang</a><a href="/tags/time/">time</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	<div class="share-jiathis">
+	  
+<div class="jiathis_style_24x24">
+	<a class="jiathis_button_weixin"></a>
+	<a class="jiathis_button_tsina"></a>
+	<a class="jiathis_button_tqq"></a>
+	<a class="jiathis_button_qzone"></a>
+    <a class="jiathis_button_googleplus"></a>
+	<a class="jiathis_button_douban"></a>
+	<a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+    var jiathis_config={
+    data_track_clickback:true,
+    sm:"copy,renren,cqq",
+    pic:"",
+    summary:"",
+    
+  </script> 
+<script type="text/javascript" src="//v3.jiathis.com/code/jia.js?uid=
+2084050" charset="utf-8"></script>      
+
+
+	 </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2016/06/17/jsonfmt/" title="html 美化输出 json 字符串">
+  <strong>上一篇：</strong><br/>
+  <span>
+  html 美化输出 json 字符串</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2016/05/24/comparison-of-Go-Vendoring-Tools/"  title="Go Vendoring Tools 使用总结">
+ <strong>下一篇：</strong><br/> 
+ <span>Go Vendoring Tools 使用总结
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+<section id="comments" class="comment">
+	<div class="ds-thread" data-thread-key="2016/06/14/go-time-summary/" data-title="golang 格式化时间总结" data-url="http://www.grdtechs.com/2016/06/14/go-time-summary/"></div>
+</section>
+
+
+</div>  
+
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+<div id="asidepart">
+
+  <div class="widget tag">
+<p margin="0" style="text-align:center">
+<a class="ahref" href="http://researchlab.github.io/about/">
+<img id="aboutpic"  src="/img/weixin.jpg" alt="加我微信" height="200" width="200" style="box-shadow: 0px 0px 2px 2px #9edeff;border-radius: 8px;" >
+</a></p>
+<!--<hr noshade color="#ccc">-->
+<!-- <p style="text-align:center">Mike.Lee</p> -->
+<p style="text-align:center"><font size="2" color="grey">扫一扫上面的二维码 加我微信</font></p>
+<ul>
+<table border="0" font-size="1">
+<tr>
+<td align="right"><font size="2" >现状: </font></td>
+<td align="left"><font size="2" >软件开发攻城狮</font><td>
+</tr>
+<tr>
+<td align="right"><font size="2" >QQ号: </font></td>
+<td align="left"><font size="2" >975508300</font></td>
+</tr>
+<tr>
+<td align="right"><font color="red" size="2">Hexo交流群: </font></td>
+<td align="left"><font color="red" size="2">287306637</font></td>
+</tr>
+
+</table>
+</ul>
+
+</div>
+
+
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/Hexo/" title="Hexo">Hexo<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/go-bootcamp/" title="go-bootcamp">go-bootcamp<sup>6</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/go-pattern/" title="go-pattern">go-pattern<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/golang/" title="golang">golang<sup>9</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/javascript/" title="javascript">javascript<sup>1</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/golang/" title="golang">golang<sup>16</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/setcookie/" title="setcookie">setcookie<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Hexo/" title="Hexo">Hexo<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/concurrency/" title="concurrency">concurrency<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Blog/" title="Blog">Blog<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/reflect/" title="reflect">reflect<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/json/" title="json">json<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/xorm/" title="xorm">xorm<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/time/" title="time">time<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/observer/" title="observer">observer<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/net-http/" title="net/http">net/http<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/html/" title="html">html<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/singleton/" title="singleton">singleton<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/gin/" title="gin">gin<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/vendoring/" title="vendoring">vendoring<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/godep/" title="godep">godep<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/govendor/" title="govendor">govendor<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/glide/" title="glide">glide<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="http://blog.csdn.net/xiaolongwang2010" target="_blank" title="小龙王2010csdn技术博客">Linux/c/c++</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  
+
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+  <iframe width="100%" height="550" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=550&fansRow=1&ptype=1&speed=0&skin=1&isTitle=1&noborder=1&isWeibo=1&isFans=1&uid=5141203275&verifier=a533edf5&dpc=1"></iframe>
+
+
+</aside>
+</div>
+
+    </div>
+    <footer><div id="footer" >
+	
+	
+	<div class="social-font" class="clearfix">
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2016 
+		
+		<a href="/about" target="_blank" title="Lee Hong">Lee Hong</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+
+
+<script type="text/javascript">
+  var duoshuoQuery = {short_name:"gamedp"};
+  (function() {
+    var ds = document.createElement('script');
+    ds.type = 'text/javascript';ds.async = true;
+    ds.src = '//static.duoshuo.com/embed.js';
+    ds.charset = 'UTF-8';
+    (document.getElementsByTagName('head')[0] 
+    || document.getElementsByTagName('body')[0]).appendChild(ds);
+  })();
+</script> 
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

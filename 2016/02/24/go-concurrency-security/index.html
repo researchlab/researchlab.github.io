@@ -1,0 +1,553 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>golang 并发安全性案例分析 | 朴实的一线攻城狮</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="Lee Hong">
+    
+
+    
+    <meta name="description" content="前言golang 在1.5版本之前默认只使用一个核心来跑所有的goroutines,即GOMAXPROCS默认设置为1, ,即是串行执行goroutines,在1.5版本后，GOMAXPROCS默认设置为当前计算机真实的核心线程数，即是在并行执行goroutines。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="golang 并发安全性案例分析">
+<meta property="og:url" content="http://www.grdtechs.com/2016/02/24/go-concurrency-security/index.html">
+<meta property="og:site_name" content="朴实的一线攻城狮">
+<meta property="og:description" content="前言golang 在1.5版本之前默认只使用一个核心来跑所有的goroutines,即GOMAXPROCS默认设置为1, ,即是串行执行goroutines,在1.5版本后，GOMAXPROCS默认设置为当前计算机真实的核心线程数，即是在并行执行goroutines。">
+<meta property="og:updated_time" content="2016-08-20T02:46:33.733Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="golang 并发安全性案例分析">
+<meta name="twitter:description" content="前言golang 在1.5版本之前默认只使用一个核心来跑所有的goroutines,即GOMAXPROCS默认设置为1, ,即是串行执行goroutines,在1.5版本后，GOMAXPROCS默认设置为当前计算机真实的核心线程数，即是在并行执行goroutines。">
+
+    
+    <link rel="alternative" href="/atom.xml" title="朴实的一线攻城狮" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="stylesheet" href="/css/style.css" type="text/css">
+</head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="朴实的一线攻城狮">朴实的一线攻城狮</a></h1>
+				<h2 class="blog-motto">十年磨一剑，一步一步脚踏实地的耕种</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">首页</a></li>
+					
+						<li><a href="/archives">归档</a></li>
+					
+						<li><a href="/about">关于</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:www.grdtechs.com">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2016/02/24/go-concurrency-security/" title="golang 并发安全性案例分析" itemprop="url">golang 并发安全性案例分析</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
+		
+  <p class="article-time">
+    <time datetime="2016-02-24T21:47:55.000Z" itemprop="datePublished"> 发表于 2016-02-24</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#u524D_u8A00"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u5E76_u884C_u6267_u884C_u5B89_u5168_u6027_u6848_u4F8B_u5206_u6790"><span class="toc-number">2.</span> <span class="toc-text">并行执行安全性案例分析</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u7528_u9501_u89E3_u51B3_u7ADF_u6001_u6570_u636E_u5B89_u5168_u95EE_u9898"><span class="toc-number">3.</span> <span class="toc-text">用锁解决竟态数据安全问题</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u5229_u7528Channel_2C_u66F4_u597D_u7684_u5B9E_u73B0_u5E76_u53D1"><span class="toc-number">4.</span> <span class="toc-text">利用Channel,更好的实现并发</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u796D_u51FAselect__u8FDB_u4E00_u6B65_u63D0_u5347_u6027_u80FD"><span class="toc-number">5.</span> <span class="toc-text">祭出select 进一步提升性能</span></a></li></ol>
+		
+		</div>
+		
+		<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p><code>golang</code> 在1.5版本之前默认只使用一个核心来跑所有的<code>goroutines</code>,即<code>GOMAXPROCS</code>默认设置为1, ,即是串行执行<code>goroutines</code>,在1.5版本后，<code>GOMAXPROCS</code>默认设置为当前计算机真实的核心线程数，即是在并行执行<code>goroutines</code>。<br><a id="more"></a></p>
+<h2 id="u5E76_u884C_u6267_u884C_u5B89_u5168_u6027_u6848_u4F8B_u5206_u6790"><a href="#u5E76_u884C_u6267_u884C_u5B89_u5168_u6027_u6848_u4F8B_u5206_u6790" class="headerlink" title="并行执行安全性案例分析"></a>并行执行安全性案例分析</h2><p>利用计算机多核处理的特性，并行执行能成倍的提高程序的性能,但同时也带入了数据安全性问题，下面看一个在线银行转账的案例:<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> User <span class="keyword">struct</span> &#123;</span><br><span class="line">		Cash <span class="typename">int</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> (u *User) sendCash(to *User, amount <span class="typename">int</span>) <span class="typename">bool</span> &#123;</span><br><span class="line">	<span class="keyword">if</span> u.Cash &lt; amount &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="constant">false</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">/* 设置延迟Sleep，当多个goroutines并行执行时,便于进行数据安全分析 */</span></span><br><span class="line">	time.Sleep(<span class="number">500</span> * time.Millisecond)</span><br><span class="line">	u.Cash = u.Cash - amount</span><br><span class="line">	to.Cash = to.Cash + amount</span><br><span class="line">	<span class="keyword">return</span> <span class="constant">true</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> main() &#123;</span><br><span class="line">	me := User&#123;Cash: <span class="number">500</span>&#125;</span><br><span class="line">	you := User&#123;Cash: <span class="number">500</span>&#125;</span><br><span class="line">	http.HandleFunc(<span class="string">"/"</span>, <span class="keyword">func</span>(w http.ResponseWriter, r *http.Request) &#123;</span><br><span class="line">		me.sendCash(&amp;you, <span class="number">50</span>) <span class="comment">//转账</span></span><br><span class="line">		fmt.Fprintf(w, <span class="string">"I have $%d\n"</span>, me.Cash)</span><br><span class="line">		fmt.Fprintf(w, <span class="string">"You have $%d\n"</span>, you.Cash)</span><br><span class="line">		fmt.Fprintf(w, <span class="string">"Total transferred: $%d\n"</span>, (you.Cash - <span class="number">500</span>))</span><br><span class="line">	&#125;)</span><br><span class="line">	http.ListenAndServe(<span class="string">":8080"</span>, <span class="constant">nil</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>这是一个通用的Go Web应用，定义User数据结构，sendCash是在两个User之间转账的服务，这里使用的是net/http 包，我们创建了一个简单的Http服务器，然后将请求路由到转账50元的sendCash方法，在正常操作下，代码会如我们预料一样运行，每次转移50美金，一旦一个用户的账户余额达到0美金，就不能再进行转出钞票了，因为没有钱了，但是，如果我们很快地发送很多请求，这个程序会继续转出很多钱，导致账户余额为负数。</p>
+<p>这是课本上经常谈到的竞争情况race condition，在这个代码中，账户余额的检查是与从账户中取钱操作分离的，我们假想一下，如果一个请求刚刚完成账户余额检查，但是还没有取钱，也就是没有减少账户余额数值；而另外一个请求线程同时也检查账户余额，发现账户余额还没有剩为零（结果两个请求都一起取钱，导致账户余额为负数），这是典型的”check-then-act”竞争情况。这是很普遍存在的 并发 bug。</p>
+<h2 id="u7528_u9501_u89E3_u51B3_u7ADF_u6001_u6570_u636E_u5B89_u5168_u95EE_u9898"><a href="#u7528_u9501_u89E3_u51B3_u7ADF_u6001_u6570_u636E_u5B89_u5168_u95EE_u9898" class="headerlink" title="用锁解决竟态数据安全问题"></a>用锁解决竟态数据安全问题</h2><p>那么我们如何解决呢？我们肯定不能移除检查操作，而是确保检查和取钱两个动作之间没有任何其他操作发生，其他语言是使用锁，当账户进行更新时，锁住禁止同时有其他线程操作，确保一次只有一个进程操作，也就是排斥锁Mutex。,下面用<code>golang</code>自带的<code>sync</code>包实现对转账判断及数据操作过程的加锁：<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> User <span class="keyword">struct</span> &#123;</span><br><span class="line">		Cash <span class="typename">int</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> transferLock *sync.Mutex</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> (u *User) sendCash(to *User, amount <span class="typename">int</span>) <span class="typename">bool</span> &#123;</span><br><span class="line"></span><br><span class="line">	transferLock.Lock() <span class="comment">//对转账操作进行加锁</span></span><br><span class="line">	<span class="keyword">defer</span> transferLock.Unlock() <span class="comment">//转账结束后解锁释放资源</span></span><br><span class="line">	<span class="keyword">if</span> u.Cash &lt; amount &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="constant">false</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">/* 设置延迟Sleep，当多个goroutines并行执行时,便于进行数据安全分析 */</span></span><br><span class="line">	time.Sleep(<span class="number">500</span> * time.Millisecond)</span><br><span class="line">	u.Cash = u.Cash - amount</span><br><span class="line">	to.Cash = to.Cash + amount</span><br><span class="line">	<span class="keyword">return</span> <span class="constant">true</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">func</span> main() &#123;</span><br><span class="line">	me := User&#123;Cash: <span class="number">500</span>&#125;</span><br><span class="line">	you := User&#123;Cash: <span class="number">500</span>&#125;</span><br><span class="line">	http.HandleFunc(<span class="string">"/"</span>, <span class="keyword">func</span>(w http.ResponseWriter, r *http.Request) &#123;</span><br><span class="line">		me.sendCash(&amp;you, <span class="number">50</span>) <span class="comment">//转账</span></span><br><span class="line">		fmt.Fprintf(w, <span class="string">"I have $%d\n"</span>, me.Cash)</span><br><span class="line">		fmt.Fprintf(w, <span class="string">"You have $%d\n"</span>, you.Cash)</span><br><span class="line">		fmt.Fprintf(w, <span class="string">"Total transferred: $%d\n"</span>, (you.Cash - <span class="number">500</span>))</span><br><span class="line">	&#125;)</span><br><span class="line">	http.ListenAndServe(<span class="string">":8080"</span>, <span class="constant">nil</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="u5229_u7528Channel_2C_u66F4_u597D_u7684_u5B9E_u73B0_u5E76_u53D1"><a href="#u5229_u7528Channel_2C_u66F4_u597D_u7684_u5B9E_u73B0_u5E76_u53D1" class="headerlink" title="利用Channel,更好的实现并发"></a>利用Channel,更好的实现并发</h2><p>但是锁的问题很显然降低了<code>程序并发的性能</code>，锁是并发设计的最大敌人，在Go中推荐使用通道<code>Channel</code>，能够使用事件循环event loop机制更灵活地实现并发;通过委托一个后台协程监听通道，当通道中有数据时，立即进行转账操作，因为协程是顺序地读取通道中的数据，也就是巧妙地回避了竞争情况，没有必要使用任何状态变量防止<code>并发</code>竞争了。 具体示例:<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> User <span class="keyword">struct</span> &#123;</span><br><span class="line">	Cash <span class="typename">int</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">type</span> Transfer <span class="keyword">struct</span> &#123;</span><br><span class="line">	Sender    *User</span><br><span class="line">	Recipient *User</span><br><span class="line">	Amount    <span class="typename">int</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> sendCashHandler(transferchan <span class="keyword">chan</span> Transfer) &#123;</span><br><span class="line">	<span class="keyword">var</span> val Transfer</span><br><span class="line">	<span class="keyword">for</span> &#123;</span><br><span class="line">		val = &lt;-transferchan</span><br><span class="line">		val.Sender.sendCash(val.Recipient, val.Amount)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> (u *User) sendCash(to *User, amount <span class="typename">int</span>) <span class="typename">bool</span> &#123;</span><br><span class="line">	<span class="keyword">if</span> u.Cash &lt; amount &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="constant">false</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">/* 设置延迟Sleep，当多个goroutines并行执行时,便于进行数据安全分析 */</span></span><br><span class="line">	time.Sleep(<span class="number">500</span> * time.Millisecond)</span><br><span class="line">	u.Cash = u.Cash - amount</span><br><span class="line">	to.Cash = to.Cash + amount</span><br><span class="line">	<span class="keyword">return</span> <span class="constant">true</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> main() &#123;</span><br><span class="line">	me := User&#123;Cash: <span class="number">500</span>&#125;</span><br><span class="line">	you := User&#123;Cash: <span class="number">500</span>&#125;</span><br><span class="line">	transferchan := <span class="built_in">make</span>(<span class="keyword">chan</span> Transfer)</span><br><span class="line">	<span class="keyword">go</span> sendCashHandler(transferchan)</span><br><span class="line">	http.HandleFunc(<span class="string">"/"</span>, <span class="keyword">func</span>(w http.ResponseWriter, r *http.Request) &#123;</span><br><span class="line">		transfer := Transfer&#123;Sender: &amp;me, Recipient: &amp;you, Amount: <span class="number">50</span>&#125;</span><br><span class="line">		transferchan &lt;- transfer</span><br><span class="line">		fmt.Fprintf(w, <span class="string">"I have $%d\n"</span>, me.Cash)</span><br><span class="line">		fmt.Fprintf(w, <span class="string">"You have $%d\n"</span>, you.Cash)</span><br><span class="line">		fmt.Fprintf(w, <span class="string">"Total transferred: $%d\n"</span>, (you.Cash - <span class="number">500</span>))</span><br><span class="line">	&#125;)</span><br><span class="line">	http.ListenAndServe(<span class="string">":8080"</span>, <span class="constant">nil</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>上面这段代码创建了比较可靠的系统从而避免了<code>并发</code>竞争，但是我们会带来另外一个安全问题：<code>DoS(Denial of Service服务拒绝)</code>，如果我们的转账操作慢下来，那么不断进来的请求需要等待进行转账操作的那个协程从通道中读取新数据，但是这个线程忙于照顾转账操作，没有闲功夫读取通道中新数据，这个情况会导致系统容易遭受<code>DoS攻击</code>，外界只要发送大量请求就能让系统停止响应。</p>
+<h2 id="u796D_u51FAselect__u8FDB_u4E00_u6B65_u63D0_u5347_u6027_u80FD"><a href="#u796D_u51FAselect__u8FDB_u4E00_u6B65_u63D0_u5347_u6027_u80FD" class="headerlink" title="祭出select 进一步提升性能"></a>祭出select 进一步提升性能</h2><p>一些基础机制比如buffered channel可以处理这种情况，但是buffered channel是有内存上限的，不足够保存所有请求数据，优化解决方案是使用Go杰出的<code>select</code>语句：<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">http.HandleFunc(<span class="string">"/"</span>, <span class="keyword">func</span>(w http.ResponseWriter, r *http.Request) &#123;</span><br><span class="line">	 transfer := Transfer&#123;Sender: &amp;me, Recipient: &amp;you, Amount: <span class="number">50</span>&#125;</span><br><span class="line">	 <span class="comment">/*转账*/</span></span><br><span class="line">	 result := <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="typename">int</span>)</span><br><span class="line">	 <span class="keyword">go</span> <span class="keyword">func</span>(transferchan <span class="keyword">chan</span>&lt;- Transfer, transfer Transfer, result <span class="keyword">chan</span>&lt;- <span class="typename">int</span>) &#123;</span><br><span class="line">	      transferchan &lt;- transfer</span><br><span class="line">	      result &lt;- <span class="number">1</span></span><br><span class="line">	 &#125;(transferchan, transfer, result)</span><br><span class="line"></span><br><span class="line">	<span class="comment">/*用select来处理超时机制*/</span>	 </span><br><span class="line">	 <span class="keyword">select</span> &#123;</span><br><span class="line">	   <span class="keyword">case</span> &lt;-result:</span><br><span class="line">	    fmt.Fprintf(w, <span class="string">"I have $%d\n"</span>, me.Cash)</span><br><span class="line">	    fmt.Fprintf(w, <span class="string">"You have $%d\n"</span>, you.Cash)</span><br><span class="line">	    fmt.Fprintf(w, <span class="string">"Total transferred: $%d\n"</span>, (you.Cash - <span class="number">500</span>))</span><br><span class="line">	  <span class="keyword">case</span> &lt;-time.After(time.Second * <span class="number">10</span>): <span class="comment">//超时处理</span></span><br><span class="line">	    fmt.Fprintf(w, <span class="string">"Your request has been received, but is processing slowly"</span>)</span><br><span class="line">	 &#125;</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure></p>
+<p>这里提升了事件循环，等待不能超过10秒，等待超过timeout时间，会返回一个消息给User告诉它们请求已经接受，可能会花点时间处理，请耐心等候即可，使用这种方法我们降低了<code>DoS攻击</code>可能，一个真正健壮的能够<code>并发</code>处理转账且没有使用任何锁的系统诞生了。</p>
+  
+	</div>
+		<div style="padding: 10px 44px 30px 44px;" >
+<div style="border: 1px dashed #e0e0e0; padding: 10px 10px 10px 10px; background-color: #fffeee; background-repeat: no-repeat; background-attachment: scroll; background-position: 1% 50%; -moz-background-size: auto auto; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">
+<div style="float:left;margin-top:0px;">
+<img src="/img/weixin.jpg" width="125px" height="125px" style="border:1px solid #ccc; margin: 6px 5px 0px 0px"/>
+</div>
+<div>
+ <p style="margin-top:0px;">作者署名：<b><a target="_blank" href="http://www.grdtechs.com/">朴实的一线攻城狮</a></b>
+<br />本文标题：<b><a href="/2016/02/24/go-concurrency-security/" target="_blank" title="golang 并发安全性案例分析">golang 并发安全性案例分析</a></b> 
+<br />本文出处：<b><a href="/2016/02/24/go-concurrency-security/" target="_blank" title="golang 并发安全性案例分析">http://www.grdtechs.com/2016/02/24/go-concurrency-security/</a></b>
+<br />版权声明：本文由<b><a href="/about" target="_blank" title="Lee Hong">Lee Hong</a></b>创作和发表,采用<b>署名(BY)</b>-<b>非商业性使用(NC)</b>-<b>相同方式共享(SA)</b>国际许可协议进行许可,转载请注明作者及出处, 否则保留追究法律责任的权利。 </p>
+</div>
+</div>
+</div>
+
+   	       
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/golang/">golang</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/concurrency/">concurrency</a><a href="/tags/golang/">golang</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	<div class="share-jiathis">
+	  
+<div class="jiathis_style_24x24">
+	<a class="jiathis_button_weixin"></a>
+	<a class="jiathis_button_tsina"></a>
+	<a class="jiathis_button_tqq"></a>
+	<a class="jiathis_button_qzone"></a>
+    <a class="jiathis_button_googleplus"></a>
+	<a class="jiathis_button_douban"></a>
+	<a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+    var jiathis_config={
+    data_track_clickback:true,
+    sm:"copy,renren,cqq",
+    pic:"",
+    summary:"",
+    
+  </script> 
+<script type="text/javascript" src="//v3.jiathis.com/code/jia.js?uid=
+2084050" charset="utf-8"></script>      
+
+
+	 </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2016/02/25/singleton-pattern-in-go/" title="golang 设计模式之singleton使用总结">
+  <strong>上一篇：</strong><br/>
+  <span>
+  golang 设计模式之singleton使用总结</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2016/02/17/go-concurrency-summarize/"  title="golang 并发concurrency 使用总结">
+ <strong>下一篇：</strong><br/> 
+ <span>golang 并发concurrency 使用总结
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+<section id="comments" class="comment">
+	<div class="ds-thread" data-thread-key="2016/02/24/go-concurrency-security/" data-title="golang 并发安全性案例分析" data-url="http://www.grdtechs.com/2016/02/24/go-concurrency-security/"></div>
+</section>
+
+
+</div>  
+
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+<div id="asidepart">
+
+  <div class="widget tag">
+<p margin="0" style="text-align:center">
+<a class="ahref" href="http://researchlab.github.io/about/">
+<img id="aboutpic"  src="/img/weixin.jpg" alt="加我微信" height="200" width="200" style="box-shadow: 0px 0px 2px 2px #9edeff;border-radius: 8px;" >
+</a></p>
+<!--<hr noshade color="#ccc">-->
+<!-- <p style="text-align:center">Mike.Lee</p> -->
+<p style="text-align:center"><font size="2" color="grey">扫一扫上面的二维码 加我微信</font></p>
+<ul>
+<table border="0" font-size="1">
+<tr>
+<td align="right"><font size="2" >现状: </font></td>
+<td align="left"><font size="2" >软件开发攻城狮</font><td>
+</tr>
+<tr>
+<td align="right"><font size="2" >QQ号: </font></td>
+<td align="left"><font size="2" >975508300</font></td>
+</tr>
+<tr>
+<td align="right"><font color="red" size="2">Hexo交流群: </font></td>
+<td align="left"><font color="red" size="2">287306637</font></td>
+</tr>
+
+</table>
+</ul>
+
+</div>
+
+
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/Hexo/" title="Hexo">Hexo<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/go-bootcamp/" title="go-bootcamp">go-bootcamp<sup>6</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/go-pattern/" title="go-pattern">go-pattern<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/golang/" title="golang">golang<sup>9</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/javascript/" title="javascript">javascript<sup>1</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/golang/" title="golang">golang<sup>16</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/setcookie/" title="setcookie">setcookie<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Hexo/" title="Hexo">Hexo<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/concurrency/" title="concurrency">concurrency<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Blog/" title="Blog">Blog<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/reflect/" title="reflect">reflect<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/json/" title="json">json<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/xorm/" title="xorm">xorm<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/time/" title="time">time<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/observer/" title="observer">observer<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/net-http/" title="net/http">net/http<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/html/" title="html">html<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/singleton/" title="singleton">singleton<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/gin/" title="gin">gin<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/vendoring/" title="vendoring">vendoring<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/godep/" title="godep">godep<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/govendor/" title="govendor">govendor<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/glide/" title="glide">glide<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="http://blog.csdn.net/xiaolongwang2010" target="_blank" title="小龙王2010csdn技术博客">Linux/c/c++</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  
+
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+  <iframe width="100%" height="550" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=550&fansRow=1&ptype=1&speed=0&skin=1&isTitle=1&noborder=1&isWeibo=1&isFans=1&uid=5141203275&verifier=a533edf5&dpc=1"></iframe>
+
+
+</aside>
+</div>
+
+    </div>
+    <footer><div id="footer" >
+	
+	
+	<div class="social-font" class="clearfix">
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2016 
+		
+		<a href="/about" target="_blank" title="Lee Hong">Lee Hong</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+
+
+<script type="text/javascript">
+  var duoshuoQuery = {short_name:"gamedp"};
+  (function() {
+    var ds = document.createElement('script');
+    ds.type = 'text/javascript';ds.async = true;
+    ds.src = '//static.duoshuo.com/embed.js';
+    ds.charset = 'UTF-8';
+    (document.getElementsByTagName('head')[0] 
+    || document.getElementsByTagName('body')[0]).appendChild(ds);
+  })();
+</script> 
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>
