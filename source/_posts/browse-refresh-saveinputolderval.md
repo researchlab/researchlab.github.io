@@ -1,6 +1,6 @@
 ---
 title: "浏览器刷新后input输入框依旧保留原值不被清空"
-date: 2016-08-19 18:22:43
+date: 2016-07-10 18:22:43
 categories: javascript
 tags: [setcookie, getcookie]
 description:
