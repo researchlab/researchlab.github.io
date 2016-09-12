@@ -55,3 +55,4 @@ if r.Method == "POST" {
 	)
 ```
 
+[github示例代码](https://github.com/researchlab/golearning/tree/master/postform)
