@@ -4,24 +4,23 @@
 <head>
   <meta charset="UTF-8">
   
-    <title>golang 设计模式之observer使用总结 | 朴实的一线攻城狮</title>
+    <title>Golang发送post表单请求 | 朴实的一线攻城狮</title>
     <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
     
     <meta name="author" content="Lee Hong">
     
 
     
-    <meta name="description" content="前言观察者(Observer)设计模式定义了对象间的一种一对多的依赖关系，以便一个对象的状态发生变化时，所有依赖于它的对象都得到通知并自动刷新。观察者模式将观察者和被观察的对象分离开,体现了面向对象设计中一个对象只做一件事情的原则，提高了应用程序的可维护性和重用性。">
+    <meta name="description" content="前言golang这边将map结构序列化通常采用json.Marshal和json.Unmarshal来做，但是在php server端还需要做json反序列化解析才能用， 用golang模拟表单提交, php server端则非常方便提取相应的数据字段.">
 <meta property="og:type" content="article">
-<meta property="og:title" content="golang 设计模式之observer使用总结">
-<meta property="og:url" content="http://www.grdtechs.com/2016/02/26/observer-pattern-in-go-md/index.html">
+<meta property="og:title" content="Golang发送post表单请求">
+<meta property="og:url" content="http://www.grdtechs.com/2016/09/07/go-postform/index.html">
 <meta property="og:site_name" content="朴实的一线攻城狮">
-<meta property="og:description" content="前言观察者(Observer)设计模式定义了对象间的一种一对多的依赖关系，以便一个对象的状态发生变化时，所有依赖于它的对象都得到通知并自动刷新。观察者模式将观察者和被观察的对象分离开,体现了面向对象设计中一个对象只做一件事情的原则，提高了应用程序的可维护性和重用性。">
-<meta property="og:image" content="http://www.grdtechs.com/imgs/observer_pattern.jpg">
-<meta property="og:updated_time" content="2016-09-12T03:26:55.295Z">
+<meta property="og:description" content="前言golang这边将map结构序列化通常采用json.Marshal和json.Unmarshal来做，但是在php server端还需要做json反序列化解析才能用， 用golang模拟表单提交, php server端则非常方便提取相应的数据字段.">
+<meta property="og:updated_time" content="2016-09-12T03:26:55.291Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="golang 设计模式之observer使用总结">
-<meta name="twitter:description" content="前言观察者(Observer)设计模式定义了对象间的一种一对多的依赖关系，以便一个对象的状态发生变化时，所有依赖于它的对象都得到通知并自动刷新。观察者模式将观察者和被观察的对象分离开,体现了面向对象设计中一个对象只做一件事情的原则，提高了应用程序的可维护性和重用性。">
+<meta name="twitter:title" content="Golang发送post表单请求">
+<meta name="twitter:description" content="前言golang这边将map结构序列化通常采用json.Marshal和json.Unmarshal来做，但是在php server端还需要做json反序列化解析才能用， 用golang模拟表单提交, php server端则非常方便提取相应的数据字段.">
 
     
     <link rel="alternative" href="/atom.xml" title="朴实的一线攻城狮" type="application/atom+xml">
@@ -74,14 +73,14 @@
 		<header class="article-info clearfix">
   <h1 itemprop="name">
     
-      <a href="/2016/02/26/observer-pattern-in-go-md/" title="golang 设计模式之observer使用总结" itemprop="url">golang 设计模式之observer使用总结</a>
+      <a href="/2016/09/07/go-postform/" title="Golang发送post表单请求" itemprop="url">Golang发送post表单请求</a>
   </h1>
   <p class="article-author">By
        
 		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
 		
   <p class="article-time">
-    <time datetime="2016-02-26T00:40:11.000Z" itemprop="datePublished"> 发表于 2016-02-26</time>
+    <time datetime="2016-09-07T16:00:32.000Z" itemprop="datePublished"> 发表于 2016-09-07</time>
     
   </p>
 </header>
@@ -90,24 +89,17 @@
 		<div id="toc" class="toc-article">
 			<strong class="toc-title">文章目录</strong>
 		
-			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#u524D_u8A00"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u5B9E_u73B0_u89C2_u5BDF_u8005_u6A21_u5F0F"><span class="toc-number">2.</span> <span class="toc-text">实现观察者模式</span></a></li></ol>
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#u524D_u8A00"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u65B9_u6CD5"><span class="toc-number">2.</span> <span class="toc-text">方法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#http-Client_7B_7D-PostForm"><span class="toc-number">3.</span> <span class="toc-text">http.Client{}.PostForm</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#http-PostForm"><span class="toc-number">4.</span> <span class="toc-text">http.PostForm</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u5BF9_u8868_u5355_u6570_u636E_u7684_u63D0_u53D6"><span class="toc-number">5.</span> <span class="toc-text">对表单数据的提取</span></a></li></ol>
 		
 		</div>
 		
-		<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>观察者(<code>Observer</code>)设计模式定义了对象间的一种一对多的依赖关系，以便一个对象的状态发生变化时，所有依赖于它的对象都得到通知并自动刷新。观察者模式将观察者和被观察的对象分离开,体现了面向对象设计中一个对象只做一件事情的原则，提高了应用程序的可维护性和重用性。<br><a id="more"></a></p>
-<h2 id="u5B9E_u73B0_u89C2_u5BDF_u8005_u6A21_u5F0F"><a href="#u5B9E_u73B0_u89C2_u5BDF_u8005_u6A21_u5F0F" class="headerlink" title="实现观察者模式"></a>实现观察者模式</h2><p>观察者模式有很多实现方式，从根本上说，该模式必须包含两个角色：观察者(Observer)和被观察对象(Subject)。</p>
-<p><center><img src="/imgs/observer_pattern.jpg" alt="observer_pattern"></center></p>
-<ul>
-<li><p>观察者<br>观察者（<code>Observer</code>）将自己注册到被观察对象（<code>Subject</code>）中，被观察对象将观察者存放在一个容器（<code>Container</code>）里。</p>
-</li>
-<li><p>被观察<br>被观察对象(<code>Subject</code>)发生了某种变化，从容器中得到所有注册过的观察者，将变化通知观察者(<code>notifyObservers</code>)。</p>
-</li>
-<li><p>撤销观察<br>观察者告诉被观察者要撤销观察，被观察者从容器中将观察者去除。<br><strong>观察者将自己注册到被观察者的容器中时，被观察者不应该过问观察者的具体类型，而是应该使用观察者的接口。</strong>这样的优点是：假定程序中还有别的观察者，那么只要这个观察者也是相同的接口实现即可。一个被观察者可以对应多个观察者，当被观察者发生变化的时候，它可以将消息一一通知给所有的观察者。基于接口，而不是具体的实现——这一点为程序提供了更大的灵活性。<br>下面通过构建一个股民(<code>Observer</code>)和他们关注的某支具体股票(<code>Subject</code>)案例分析,<br>首先观察者(<code>Observer</code>)要能注册/注销到某个被观察者(<code>Subject</code>)中，同时被观察者(<code>Subject</code>)发送变化时要能够通知到依赖它的观察者(<code>Observer</code>),由此我们需要声明一个被观察者(<code>Subject</code>)的接口：</p>
-<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// subject被观察者接口</span></span><br><span class="line"><span class="keyword">type</span> Subject <span class="keyword">interface</span> &#123;</span><br><span class="line">	Attach(Observer)</span><br><span class="line">	Detach(Observer)</span><br><span class="line">	Notify()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-</li>
-</ul>
-<p>遵循被观察者不应该过问观察者的具体类型，而是应该使用观察者的接口的原则，当被观察者(<code>Subject</code>)因自身改变通知观察者(<code>Observer</code>)改变时，应提供一个观察者(<code>Observer</code>)接口供被观察者(<code>Subject</code>)调用:<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// observer观察者</span></span><br><span class="line"><span class="keyword">type</span> Observer <span class="keyword">interface</span> &#123;</span><br><span class="line">	Update(Subject, <span class="keyword">interface</span>&#123;&#125;) <span class="comment">//更新</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>接口设计好之后，就需要通过具体的对象来实现这些接口，在这个案例中假定股民关注的是中国石油这只股票，那么股票就是观察者(<code>Observer</code>),而中国石油股票则是被观察者(<code>Subject</code>),具体结构如下：<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 具体observer观察者</span></span><br><span class="line"><span class="keyword">type</span> Investors <span class="keyword">struct</span> &#123;</span><br><span class="line">	<span class="comment">/*投资人*/</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 具体subject被观察者</span></span><br><span class="line"><span class="keyword">type</span> ChinaPetroleum <span class="keyword">struct</span> &#123;</span><br><span class="line">	oblist []Observer <span class="comment">//注册者链表</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+		<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>golang这边将<code>map</code>结构序列化通常采用<code>json.Marshal</code>和<code>json.Unmarshal</code>来做，但是在php server端还需要做<code>json</code>反序列化解析才能用， 用golang模拟表单提交, php server端则非常方便提取相应的数据字段.<br><a id="more"></a></p>
+<h2 id="u65B9_u6CD5"><a href="#u65B9_u6CD5" class="headerlink" title="方法"></a>方法</h2><p>方法是利用golang<code>net/http</code>包提供的<code>PostForm</code>提交post表单提交。<code>ParseForm</code>解析<code>URL</code>中的查询字符串，并将解析结果更新到<code>r.Form</code>字段。对于<code>POST</code>或<code>PUT</code>请求，<code>ParseForm</code>还会将<code>body</code>当作表单解析，并将结果既更新到<code>r.PostForm</code>也更新到<code>r.Form</code>。解析结果中，<code>POST</code>或<code>PUT</code>请求主体要优先于<code>URL</code>查询字符串（同名变量，主体的值在查询字符串的值前面）。如果请求的主体的大小没有被<code>MaxBytesReader</code>函数设定限制，其大小默认限制为开头10MB。</p>
+<h2 id="http-Client_7B_7D-PostForm"><a href="#http-Client_7B_7D-PostForm" class="headerlink" title="http.Client{}.PostForm"></a>http.Client{}.PostForm</h2><p>利用<code>http.Client{}.PostForm</code>提交post表单。</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> <span class="string">"net/http"</span></span><br><span class="line">client := &amp;http.Client&#123;&#125;</span><br><span class="line">res, err := client.PostForm(<span class="string">"http://127.0.0.1:8091/postpage"</span>, url.Values&#123;</span><br><span class="line">	<span class="string">"key"</span>:   &#123;<span class="string">"this is client key"</span>&#125;,</span><br><span class="line">	<span class="string">"value"</span>: &#123;<span class="string">"this is client value"</span>&#125;,</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+<h2 id="http-PostForm"><a href="#http-PostForm" class="headerlink" title="http.PostForm"></a>http.PostForm</h2><p>直接用<code>http.PostForm</code>提交post表单。</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> <span class="string">"net/http"</span></span><br><span class="line"><span class="comment">//data := make(url.Values)</span></span><br><span class="line"><span class="comment">//data["key"] = []string&#123;"this is key"&#125;</span></span><br><span class="line"><span class="comment">//data["value"] = []string&#123;"this is value"&#125;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//把post表单发送给目标服务器</span></span><br><span class="line">res, err := http.PostForm(<span class="string">"http://127.0.0.1:8091/postpage"</span>, url.Values&#123;</span><br><span class="line">	<span class="string">"key"</span>:   &#123;<span class="string">"this is url key"</span>&#125;,</span><br><span class="line">	<span class="string">"value"</span>: &#123;<span class="string">"this is url value"</span>&#125;,</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+<h2 id="u5BF9_u8868_u5355_u6570_u636E_u7684_u63D0_u53D6"><a href="#u5BF9_u8868_u5355_u6570_u636E_u7684_u63D0_u53D6" class="headerlink" title="对表单数据的提取"></a>对表单数据的提取</h2><p>server端对表单数据的提取<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//接受post请求， 然后打印表单中key和value字段的值</span></span><br><span class="line"><span class="keyword">if</span> r.Method == <span class="string">"POST"</span> &#123;</span><br><span class="line">	<span class="keyword">var</span> (</span><br><span class="line">		key   <span class="typename">string</span> = r.PostFormValue(<span class="string">"key"</span>)</span><br><span class="line">		value <span class="typename">string</span> = r.PostFormValue(<span class="string">"value"</span>)</span><br><span class="line">	)</span><br></pre></td></tr></table></figure></p>
   
 	</div>
 		<div style="padding: 10px 44px 30px 44px;" >
@@ -117,8 +109,8 @@
 </div>
 <div>
  <p style="margin-top:0px;">作者署名：<b><a target="_blank" href="http://www.grdtechs.com/">朴实的一线攻城狮</a></b>
-<br />本文标题：<b><a href="/2016/02/26/observer-pattern-in-go-md/" target="_blank" title="golang 设计模式之observer使用总结">golang 设计模式之observer使用总结</a></b> 
-<br />本文出处：<b><a href="/2016/02/26/observer-pattern-in-go-md/" target="_blank" title="golang 设计模式之observer使用总结">http://www.grdtechs.com/2016/02/26/observer-pattern-in-go-md/</a></b>
+<br />本文标题：<b><a href="/2016/09/07/go-postform/" target="_blank" title="Golang发送post表单请求">Golang发送post表单请求</a></b> 
+<br />本文出处：<b><a href="/2016/09/07/go-postform/" target="_blank" title="Golang发送post表单请求">http://www.grdtechs.com/2016/09/07/go-postform/</a></b>
 <br />版权声明：本文由<b><a href="/about" target="_blank" title="Lee Hong">Lee Hong</a></b>创作和发表,采用<b>署名(BY)</b>-<b>非商业性使用(NC)</b>-<b>相同方式共享(SA)</b>国际许可协议进行许可,转载请注明作者及出处, 否则保留追究法律责任的权利。 </p>
 </div>
 </div>
@@ -130,13 +122,13 @@
 
 <div class="article-categories">
   <span></span>
-  <a class="article-category-link" href="/categories/go-pattern/">go-pattern</a>
+  <a class="article-category-link" href="/categories/golang/">golang</a>
 </div>
 
 
   <div class="article-tags">
   
-  <span></span> <a href="/tags/golang/">golang</a><a href="/tags/observer/">observer</a>
+  <span></span> <a href="/tags/form/">form</a><a href="/tags/post/">post</a>
   </div>
 
 </div>
@@ -181,19 +173,11 @@
 	
 <nav class="article-nav clearfix">
  
- <div class="prev" >
- <a href="/2016/03/24/go-type-convert/" title="golang类型转换(指定精度/四舍五入)">
-  <strong>上一篇：</strong><br/>
-  <span>
-  golang类型转换(指定精度/四舍五入)</span>
-</a>
-</div>
-
 
 <div class="next">
-<a href="/2016/02/25/singleton-pattern-in-go/"  title="golang 设计模式之singleton使用总结">
+<a href="/2016/08/02/php7-redis-install/"  title="php7 安装redis扩展">
  <strong>下一篇：</strong><br/> 
- <span>golang 设计模式之singleton使用总结
+ <span>php7 安装redis扩展
 </span>
 </a>
 </div>
@@ -202,7 +186,7 @@
 
 	
 <section id="comments" class="comment">
-	<div class="ds-thread" data-thread-key="2016/02/26/observer-pattern-in-go-md/" data-title="golang 设计模式之observer使用总结" data-url="http://www.grdtechs.com/2016/02/26/observer-pattern-in-go-md/"></div>
+	<div class="ds-thread" data-thread-key="2016/09/07/go-postform/" data-title="Golang发送post表单请求" data-url="http://www.grdtechs.com/2016/09/07/go-postform/"></div>
 </section>
 
 
