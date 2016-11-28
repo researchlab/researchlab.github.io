@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://www.grdtechs.com/"/>
-  <updated>2016-11-28T04:02:01.191Z</updated>
+  <updated>2016-11-28T08:30:35.464Z</updated>
   <id>http://www.grdtechs.com/</id>
   
   <author>
@@ -20,7 +20,7 @@
     <link href="http://www.grdtechs.com/2016/11/23/go-dealwith-database-nullvalue/"/>
     <id>http://www.grdtechs.com/2016/11/23/go-dealwith-database-nullvalue/</id>
     <published>2016-11-23T11:40:54.000Z</published>
-    <updated>2016-11-28T04:02:01.191Z</updated>
+    <updated>2016-11-28T08:30:35.464Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>golang是强类型语言，在赋值和解析过程中需要先定义好数据类型，否在会报类型错误，下面总结在处理数据库表时遇到字段为空或零值的情况<br><a id="more"></a></p>
 <h2 id="u573A_u666F"><a href="#u573A_u666F" class="headerlink" title="场景"></a>场景</h2><p>假如存在如下没有指定<code>not null</code>的场合<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="operator"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> <span class="string">"users"</span> (</span><br><span class="line">    <span class="string">"id"</span> <span class="built_in">serial</span> <span class="keyword">not</span> <span class="literal">null</span> primary <span class="keyword">key</span>,</span><br><span class="line">    <span class="string">"name"</span> <span class="built_in">text</span>,</span><br><span class="line">    <span class="string">"age"</span> <span class="built_in">integer</span></span><br><span class="line">)</span></span><br></pre></td></tr></table></figure></p>
@@ -45,11 +45,96 @@
   </entry>
   
   <entry>
+    <title>golang操作mysql使用总结</title>
+    <link href="http://www.grdtechs.com/2016/11/11/go-use-mysql/"/>
+    <id>http://www.grdtechs.com/2016/11/11/go-use-mysql/</id>
+    <published>2016-11-11T13:21:16.000Z</published>
+    <updated>2016-11-28T08:30:35.468Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>Golang 提供了<code>database/sql</code>包用于对<code>SQL数据库</code>的访问, 作为操作数据库的入口对象<code>sql.DB</code>, 主要为我们提供了两个重要的功能:<br><a id="more"></a></p>
+<ul>
+<li>sql.DB 通过数据库驱动为我们提供管理底层数据库连接的打开和关闭操作.</li>
+<li>sql.DB 为我们管理数据库连接池</li>
+</ul>
+<p>需要注意的是，sql.DB表示操作数据库的抽象访问接口,而非一个数据库连接对象;正因为 sql.DB 是以连接池的方式管理数据库连接, 每次进行数据库操作时, 都需要从连接池中取出一个连接, 当操作任务完成时就需要将此连接返回到连接池中, 如果没有正确地将连接返回给连接池, 那么会造成<code>db.SQL</code>打开过多的数据库连接, 使数据库连接资源耗尽.</p>
+<h2 id="u64CD_u4F5Cmysql"><a href="#u64CD_u4F5Cmysql" class="headerlink" title="操作mysql"></a>操作mysql</h2><p><strong>1.导入mysql数据库驱动</strong><br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> (</span><br><span class="line">   <span class="string">"database/sql"</span></span><br><span class="line">   _ <span class="string">"github.com/go-sql-driver/mysql"</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>通常来说, 不应该直接使用驱动所提供的方法, 而是应该使用 sql.DB, 因此在导入 mysql 驱动时, 这里使用了匿名导入的方式(在包路径前添加 _), 当导入了一个数据库驱动后, 此驱动会自行初始化并注册自己到Golang的database/sql上下文中, 因此我们就可以通过 database/sql 包提供的方法访问数据库了.</p>
+</blockquote>
+<p><strong>2.连接数据库</strong><br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">type</span> DbWorker <span class="keyword">struct</span> &#123;</span><br><span class="line">    <span class="comment">//mysql data source name</span></span><br><span class="line">    Dsn <span class="typename">string</span> </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> main() &#123;</span><br><span class="line">    dbw := DbWorker&#123;</span><br><span class="line">        Dsn: <span class="string">"user:password@tcp(127.0.0.1:3306)/test"</span>,</span><br><span class="line">    &#125;	</span><br><span class="line">    db, err := sql.Open(<span class="string">"mysql"</span>,</span><br><span class="line">        dbw.Dsn)</span><br><span class="line">    <span class="keyword">if</span> err != <span class="constant">nil</span> &#123;</span><br><span class="line">        <span class="built_in">panic</span>(err)</span><br><span class="line">        <span class="keyword">return</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">defer</span> db.Close()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>通过sql.Open函数创建一个数据库抽象操作接口, 创建成功则返回一个<code>sql.DB指针</code>; sql.Open函数原型如下:<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">func</span> Open(driverName, dataSourceName <span class="typename">string</span>) (*DB, error)</span><br></pre></td></tr></table></figure></p>
+<ul>
+<li><code>driverName</code>: 使用的驱动名. 这个名字其实就是数据库驱动注册到 database/sql 时所使用的名字.</li>
+<li><code>dataSourceName</code>:  数据库连接信息，这个连接包含了数据库的用户名, 密码, 数据库主机以及需要连接的数据库名等信息.</li>
+</ul>
+<blockquote>
+<ol>
+<li>sql.Open并不会立即建立一个数据库的网络连接, 也不会对数据库链接参数的合法性做检验, 它仅仅是初始化一个sql.DB对象. 当真正进行第一次数据库查询操作时, 此时才会真正建立网络连接; </li>
+<li>如果想立即检查数据库连接是否可用, 那么可以利用sql.DB的Ping方法; </li>
+<li>sql.Open返回的sql.DB对象是协程并发安全的.</li>
+</ol>
+</blockquote>
+<p><strong>3.数据库查询</strong></p>
+<p>数据库查询的一般步骤如下:</p>
+<ol>
+<li>调用 db.Query 执行 SQL 语句, 此方法会返回一个 Rows 作为查询的结果</li>
+<li>通过 rows.Next() 迭代查询数据.</li>
+<li>通过 rows.Scan() 读取每一行的值</li>
+<li>调用 db.Close() 关闭查询</li>
+</ol>
+<p>现有<code>user</code>数据库表如下:<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="operator"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> <span class="string">`user`</span> (</span><br><span class="line">  <span class="string">`id`</span> <span class="built_in">bigint</span>(<span class="number">20</span>) <span class="keyword">NOT</span> <span class="literal">NULL</span> AUTO_INCREMENT,</span><br><span class="line">  <span class="string">`name`</span> <span class="built_in">varchar</span>(<span class="number">20</span>) <span class="keyword">DEFAULT</span> <span class="string">''</span>,</span><br><span class="line">  <span class="string">`age`</span> <span class="built_in">int</span>(<span class="number">11</span>) <span class="keyword">DEFAULT</span> <span class="string">'0'</span>,</span><br><span class="line">  PRIMARY <span class="keyword">KEY</span> (<span class="string">`id`</span>)</span><br><span class="line">) <span class="keyword">ENGINE</span>=<span class="keyword">InnoDB</span> AUTO_INCREMENT=<span class="number">3</span> <span class="keyword">DEFAULT</span> <span class="keyword">CHARSET</span>=utf8mb4</span></span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<blockquote>
+<font color="red">MySQL 5.5 之前， UTF8 编码只支持1-3个字节,从MYSQL5.5开始，可支持4个字节UTF编码utf8mb4，一个字符最多能有4字节，utf8mb4兼容utf8，所以能支持更多的字符集;关于emoji表情的话mysql的utf8是不支持，需要修改设置为utf8mb4，才能支持。</font>
+
+</blockquote>
+</blockquote>
+<p>插入数据<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">func</span> (dbw *DbWorker) insertData() &#123;</span><br><span class="line">	ret, err := dbw.Db.Exec(<span class="string">`INSERT INTO user (name, age) VALUES ("xys", 23)`</span>)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="constant">nil</span> &#123;</span><br><span class="line">		fmt.Printf(<span class="string">"insert data error: %v\n"</span>, err)</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> LastInsertId, err := ret.LastInsertId(); <span class="constant">nil</span> == err &#123;</span><br><span class="line">		fmt.Println(<span class="string">"LastInsertId:"</span>, LastInsertId)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> RowsAffected, err := ret.RowsAffected(); <span class="constant">nil</span> == err &#123;</span><br><span class="line">		fmt.Println(<span class="string">"RowsAffected:"</span>, RowsAffected)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>通过<code>db.Exec()</code>插入数据，通过返回的<code>err</code>可知插入失败的原因，通过返回的<code>ret</code>可以进一步查询本次插入数据影响的行数<code>RowsAffected</code>和最后插入的Id(如果数据库支持查询最后插入Id).</p>
+<p>读取数据<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">func</span> (dbw *DbWorker) QueryData() &#123;</span><br><span class="line">	dbw.QueryDataPre()</span><br><span class="line">	rows, err := dbw.Db.Query(<span class="string">`SELECT * From user where age &gt;= 20 AND age &lt; 30`</span>)</span><br><span class="line">	<span class="keyword">defer</span> rows.Close()</span><br><span class="line">	<span class="keyword">if</span> err != <span class="constant">nil</span> &#123;</span><br><span class="line">		fmt.Printf(<span class="string">"insert data error: %v\n"</span>, err)</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">for</span> rows.Next() &#123;</span><br><span class="line">		rows.Scan(&amp;dbw.UserInfo.Id, &amp;dbw.UserInfo.Name, &amp;dbw.UserInfo.Age)</span><br><span class="line">		<span class="keyword">if</span> err != <span class="constant">nil</span> &#123;</span><br><span class="line">			fmt.Printf(err.Error())</span><br><span class="line">			<span class="keyword">continue</span></span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">if</span> !dbw.UserInfo.Name.Valid &#123;</span><br><span class="line">			dbw.UserInfo.Name.String = <span class="string">""</span></span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">if</span> !dbw.UserInfo.Age.Valid &#123;</span><br><span class="line">			dbw.UserInfo.Age.Int64 = <span class="number">0</span></span><br><span class="line">		&#125;</span><br><span class="line">		fmt.Println(<span class="string">"get data, id: "</span>, dbw.UserInfo.Id, <span class="string">" name: "</span>, dbw.UserInfo.Name.String, <span class="string">" age: "</span>, <span class="typename">int</span>(dbw.UserInfo.Age.Int64))</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	err = rows.Err()</span><br><span class="line">	<span class="keyword">if</span> err != <span class="constant">nil</span> &#123;</span><br><span class="line">		fmt.Printf(err.Error())</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<ol>
+<li>rows.Scan 参数的顺序很重要, 需要和查询的结果的column对应. 例如 “SELECT * From user where age &gt;=20 AND age &lt; 30” 查询的行的 column 顺序是 “id, name, age” 和插入操作顺序相同, 因此 rows.Scan 也需要按照此顺序 rows.Scan(&amp;id, &amp;name, &amp;age), 不然会造成数据读取的错位.</li>
+<li>因为golang是强类型语言，所以查询数据时先定义数据类型，但是查询数据库中的数据存在三种可能:存在值，存在零值，未赋值NULL 三种状态, 因为可以将待查询的数据类型定义为sql.Nullxxx类型，可以通过判断Valid值来判断查询到的值是否为赋值状态还是未赋值NULL状态.</li>
+<li>每次db.Query操作后, 都建议调用rows.Close(). 因为 db.Query() 会从数据库连接池中获取一个连接, 如果我们没有调用 rows.Close(), 则此连接会一直被占用. 因此通常我们使用 defer rows.Close() 来确保数据库连接可以正确放回到连接池中; 不过阅读源码发现当rows.Next()没有数据返回时会自动调用Close()方法关闭rows, 不过rows.Close()操作是幂等操作，即一个幂等操作的特点是其任意多次执行所产生的影响均与一次执行的影响相同.</li>
+</ol>
+</blockquote>
+<p><a href="https://github.com/researchlab/golearning/blob/master/sql/sql.go" target="_blank" rel="external">github完整代码示例</a></p>
+<p><strong>4.预编译语句(Prepared Statement)</strong><br>预编译语句(PreparedStatement)提供了诸多好处, 因此我们在开发中尽量使用它. 下面列出了使用预编译语句所提供的功能:</p>
+<ul>
+<li>PreparedStatement 可以实现自定义参数的查询</li>
+<li>PreparedStatement 通常来说, 比手动拼接字符串 SQL 语句高效.</li>
+<li>PreparedStatement 可以防止SQL注入攻击</li>
+</ul>
+<p>下面是将上述案例用Prepared Statement 修改之后的完整代码<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">"database/sql"</span></span><br><span class="line">	<span class="string">"fmt"</span></span><br><span class="line">	_ <span class="string">"github.com/go-sql-driver/mysql"</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> DbWorker <span class="keyword">struct</span> &#123;</span><br><span class="line">	Dsn      <span class="typename">string</span></span><br><span class="line">	Db       *sql.DB</span><br><span class="line">	UserInfo userTB</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">type</span> userTB <span class="keyword">struct</span> &#123;</span><br><span class="line">	Id   <span class="typename">int</span></span><br><span class="line">	Name sql.NullString</span><br><span class="line">	Age  sql.NullInt64</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> main() &#123;</span><br><span class="line">	<span class="keyword">var</span> err error</span><br><span class="line">	dbw := DbWorker&#123;</span><br><span class="line">		Dsn: <span class="string">"root:123456@tcp(localhost:3306)/sqlx_db?charset=utf8mb4"</span>,</span><br><span class="line">	&#125;</span><br><span class="line">	dbw.Db, err = sql.Open(<span class="string">"mysql"</span>, dbw.Dsn)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="constant">nil</span> &#123;</span><br><span class="line">		<span class="built_in">panic</span>(err)</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">defer</span> dbw.Db.Close()</span><br><span class="line"></span><br><span class="line">	dbw.insertData()</span><br><span class="line">	dbw.queryData()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> (dbw *DbWorker) insertData() &#123;</span><br><span class="line">	stmt, _ := dbw.Db.Prepare(<span class="string">`INSERT INTO user (name, age) VALUES (?, ?)`</span>)</span><br><span class="line">	<span class="keyword">defer</span> stmt.Close()</span><br><span class="line"></span><br><span class="line">	ret, err := stmt.Exec(<span class="string">"xys"</span>, <span class="number">23</span>)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="constant">nil</span> &#123;</span><br><span class="line">		fmt.Printf(<span class="string">"insert data error: %v\n"</span>, err)</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> LastInsertId, err := ret.LastInsertId(); <span class="constant">nil</span> == err &#123;</span><br><span class="line">		fmt.Println(<span class="string">"LastInsertId:"</span>, LastInsertId)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> RowsAffected, err := ret.RowsAffected(); <span class="constant">nil</span> == err &#123;</span><br><span class="line">		fmt.Println(<span class="string">"RowsAffected:"</span>, RowsAffected)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> (dbw *DbWorker) QueryDataPre() &#123;</span><br><span class="line">	dbw.UserInfo = userTB&#123;&#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">func</span> (dbw *DbWorker) queryData() &#123;</span><br><span class="line">	stmt, _ := dbw.Db.Prepare(<span class="string">`SELECT * From user where age &gt;= ? AND age &lt; ?`</span>)</span><br><span class="line">	<span class="keyword">defer</span> stmt.Close()</span><br><span class="line"></span><br><span class="line">	dbw.QueryDataPre()</span><br><span class="line"></span><br><span class="line">	rows, err := stmt.Query(<span class="number">20</span>, <span class="number">30</span>)</span><br><span class="line">	<span class="keyword">defer</span> rows.Close()</span><br><span class="line">	<span class="keyword">if</span> err != <span class="constant">nil</span> &#123;</span><br><span class="line">		fmt.Printf(<span class="string">"insert data error: %v\n"</span>, err)</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">for</span> rows.Next() &#123;</span><br><span class="line">		rows.Scan(&amp;dbw.UserInfo.Id, &amp;dbw.UserInfo.Name, &amp;dbw.UserInfo.Age)</span><br><span class="line">		<span class="keyword">if</span> err != <span class="constant">nil</span> &#123;</span><br><span class="line">			fmt.Printf(err.Error())</span><br><span class="line">			<span class="keyword">continue</span></span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">if</span> !dbw.UserInfo.Name.Valid &#123;</span><br><span class="line">			dbw.UserInfo.Name.String = <span class="string">""</span></span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">if</span> !dbw.UserInfo.Age.Valid &#123;</span><br><span class="line">			dbw.UserInfo.Age.Int64 = <span class="number">0</span></span><br><span class="line">		&#125;</span><br><span class="line">		fmt.Println(<span class="string">"get data, id: "</span>, dbw.UserInfo.Id, <span class="string">" name: "</span>, dbw.UserInfo.Name.String, <span class="string">" age: "</span>, <span class="typename">int</span>(dbw.UserInfo.Age.Int64))</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	err = rows.Err()</span><br><span class="line">	<span class="keyword">if</span> err != <span class="constant">nil</span> &#123;</span><br><span class="line">		fmt.Printf(err.Error())</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<blockquote>
+<font color="red">db.Prepare()返回的statement使用完之后需要手动关闭，即defer stmt.Close()</font>
+</blockquote>
+</blockquote>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;u524D_u8A00&quot;&gt;&lt;a href=&quot;#u524D_u8A00&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h2&gt;&lt;p&gt;Golang 提供了&lt;code&gt;database/sql&lt;/code&gt;包用于对&lt;code&gt;SQL数据库&lt;/code&gt;的访问, 作为操作数据库的入口对象&lt;code&gt;sql.DB&lt;/code&gt;, 主要为我们提供了两个重要的功能:&lt;br&gt;
+    
+    </summary>
+    
+      <category term="golang" scheme="http://www.grdtechs.com/categories/golang/"/>
+    
+    
+      <category term="golang" scheme="http://www.grdtechs.com/tags/golang/"/>
+    
+      <category term="mysql" scheme="http://www.grdtechs.com/tags/mysql/"/>
+    
+  </entry>
+  
+  <entry>
     <title>go编译生成更小的执行程序</title>
     <link href="http://www.grdtechs.com/2016/10/23/go-build-small-exec/"/>
     <id>http://www.grdtechs.com/2016/10/23/go-build-small-exec/</id>
     <published>2016-10-23T14:00:32.000Z</published>
-    <updated>2016-11-28T04:02:01.191Z</updated>
+    <updated>2016-11-28T08:30:35.464Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>尽管go1.7.3编译生成的可执行程序已经很小了,但是通过编译参数控制还能编译出更小的可执行文件，总结如下,<br><a id="more"></a></p>
 <h2 id="u52A0-ldflags_u53C2_u6570"><a href="#u52A0-ldflags_u53C2_u6570" class="headerlink" title="加-ldflags参数"></a>加-ldflags参数</h2><p>在程序编译的时候可以加上<code>-ldflags &quot;-s -w&quot;</code> 参数来优化编译程序, 其实通过去除部分连接和调试等信息来使得编译之后的执行程序更小,具体参数如下:</p>
@@ -87,7 +172,7 @@
     <link href="http://www.grdtechs.com/2016/10/16/mac-update-vim8-0/"/>
     <id>http://www.grdtechs.com/2016/10/16/mac-update-vim8-0/</id>
     <published>2016-10-16T23:08:56.000Z</published>
-    <updated>2016-11-28T04:02:01.191Z</updated>
+    <updated>2016-11-28T08:30:35.468Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>将mac自带的vim7.3 升级到vim8.0<br><a id="more"></a></p>
 <h2 id="u5347_u7EA7vim8-0"><a href="#u5347_u7EA7vim8-0" class="headerlink" title="升级vim8.0"></a>升级vim8.0</h2><ul>
@@ -145,7 +230,7 @@
     <link href="http://www.grdtechs.com/2016/10/16/close-ticker-correctly/"/>
     <id>http://www.grdtechs.com/2016/10/16/close-ticker-correctly/</id>
     <published>2016-10-16T14:27:39.000Z</published>
-    <updated>2016-11-28T04:02:01.191Z</updated>
+    <updated>2016-11-28T08:30:35.464Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>在<code>ticker</code>和<code>goroutine</code>组合使用中当调用<code>ticker.Stop()</code>关闭<code>ticker</code>之后，相应的<code>goroutine</code>中的<code>ticker.C</code>并没有停掉，下面总结一种优雅的方式关闭<code>ticker</code>.<br><a id="more"></a></p>
 <h2 id="u4F18_u96C5_u7684_u5173_u95EDticker"><a href="#u4F18_u96C5_u7684_u5173_u95EDticker" class="headerlink" title="优雅的关闭ticker"></a>优雅的关闭<code>ticker</code></h2><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">"fmt"</span></span><br><span class="line">	<span class="string">"time"</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> main() &#123;</span><br><span class="line">	Demo()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> Demo() &#123;</span><br><span class="line">	done := startTicker(PrintInfo)</span><br><span class="line">	time.Sleep(time.Duration(<span class="number">12</span>) * time.Second)</span><br><span class="line">	<span class="built_in">close</span>(done)</span><br><span class="line">	time.Sleep(time.Duration(<span class="number">1</span>) * time.Minute)</span><br><span class="line">	fmt.Println(<span class="string">"main finished"</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> startTicker(f <span class="keyword">func</span>()) <span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125; &#123;</span><br><span class="line">	done := <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;, <span class="number">1</span>)</span><br><span class="line">	<span class="keyword">go</span> <span class="keyword">func</span>() &#123;</span><br><span class="line">		ticker := time.NewTicker(<span class="number">5</span> * time.Second)</span><br><span class="line">		<span class="comment">//	ticker := time.NewTicker(5 * time.Minute)</span></span><br><span class="line">		<span class="keyword">defer</span> ticker.Stop()</span><br><span class="line"></span><br><span class="line">		<span class="keyword">for</span> &#123;</span><br><span class="line">			<span class="keyword">select</span> &#123;</span><br><span class="line">			<span class="keyword">case</span> &lt;-ticker.C:</span><br><span class="line">				f()</span><br><span class="line">			<span class="keyword">case</span> &lt;-done:</span><br><span class="line">				<span class="keyword">return</span></span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;()</span><br><span class="line">	<span class="keyword">return</span> done</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> PrintInfo() &#123;</span><br><span class="line">	fmt.Println(<span class="string">"hello"</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -170,7 +255,7 @@
     <link href="http://www.grdtechs.com/2016/09/07/go-postform/"/>
     <id>http://www.grdtechs.com/2016/09/07/go-postform/</id>
     <published>2016-09-07T16:00:32.000Z</published>
-    <updated>2016-11-28T04:02:01.191Z</updated>
+    <updated>2016-11-28T08:30:35.464Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>golang这边将<code>map</code>结构序列化通常采用<code>json.Marshal</code>和<code>json.Unmarshal</code>来做，但是在php server端还需要做<code>json</code>反序列化解析才能用， 用golang模拟表单提交, php server端则非常方便提取相应的数据字段.<br><a id="more"></a></p>
 <h2 id="u65B9_u6CD5"><a href="#u65B9_u6CD5" class="headerlink" title="方法"></a>方法</h2><p>方法是利用golang<code>net/http</code>包提供的<code>PostForm</code>提交post表单提交。<code>ParseForm</code>解析<code>URL</code>中的查询字符串，并将解析结果更新到<code>r.Form</code>字段。对于<code>POST</code>或<code>PUT</code>请求，<code>ParseForm</code>还会将<code>body</code>当作表单解析，并将结果既更新到<code>r.PostForm</code>也更新到<code>r.Form</code>。解析结果中，<code>POST</code>或<code>PUT</code>请求主体要优先于<code>URL</code>查询字符串（同名变量，主体的值在查询字符串的值前面）。如果请求的主体的大小没有被<code>MaxBytesReader</code>函数设定限制，其大小默认限制为开头10MB。</p>
@@ -202,7 +287,7 @@
     <link href="http://www.grdtechs.com/2016/08/02/php7-redis-install/"/>
     <id>http://www.grdtechs.com/2016/08/02/php7-redis-install/</id>
     <published>2016-08-02T18:56:05.000Z</published>
-    <updated>2016-11-28T04:02:01.191Z</updated>
+    <updated>2016-11-28T08:30:35.468Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>在<code>Ubuntu16.04</code>上， 安装<code>php7</code>的<code>redis</code>扩展, 记录安装过程。<br><a id="more"></a></p>
 <h3 id="u5B89_u88C5phpredis"><a href="#u5B89_u88C5phpredis" class="headerlink" title="安装phpredis"></a>安装phpredis</h3><p><code>Redis</code>已经有了<code>PHP7</code>版本，可以从<code>github</code> 上获取项目克隆，然后手动切换到 <code>php7</code> 分支即可安装</p>
@@ -232,7 +317,7 @@
     <link href="http://www.grdtechs.com/2016/07/30/php-mvc-1/"/>
     <id>http://www.grdtechs.com/2016/07/30/php-mvc-1/</id>
     <published>2016-07-30T16:34:45.000Z</published>
-    <updated>2016-11-28T04:02:01.191Z</updated>
+    <updated>2016-11-28T08:30:35.468Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>尽管MVC(model view controller pattern)模式在<code>PHP</code>web开发中很受欢迎，但是网上很难找到一套代码简单又能清楚阐述<code>PHP MVC</code>模式的案例，本文希望通过理论和代码实践简单阐述<code>PHP MVC</code>模式。</p>
 <a id="more"></a>
@@ -297,7 +382,7 @@
     <link href="http://www.grdtechs.com/2016/07/10/browse-refresh-saveinputolderval/"/>
     <id>http://www.grdtechs.com/2016/07/10/browse-refresh-saveinputolderval/</id>
     <published>2016-07-10T18:22:43.000Z</published>
-    <updated>2016-11-28T04:02:01.191Z</updated>
+    <updated>2016-11-28T08:30:35.464Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>html页面中的input框如果在浏览器刷新前有值，怎么在刷新后依然保留这个值不被清空呢？下面用<code>setCookie</code>的方案来解决这个问题.<br><a id="more"></a><br>首选判断input框中有值时,<code>setcookie</code>, 每次刷新浏览器时，读取<code>Cookie</code>值,如果存在<code>Cookie</code>值，则用此值初始化input值。</p>
 <h2 id="u7EAFjs_u5B9E_u73B0"><a href="#u7EAFjs_u5B9E_u73B0" class="headerlink" title="纯js实现"></a>纯js实现</h2><h3 id="u8BBE_u7F6ECookie"><a href="#u8BBE_u7F6ECookie" class="headerlink" title="设置Cookie"></a>设置Cookie</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span><br><span class="line">* @cname  cookie name </span><br><span class="line">* @cvalue cookie value </span><br><span class="line">* @ exdays cookie expires(天)</span><br><span class="line">*/</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">setCookie</span>(<span class="params">cname,cvalue,exdays</span>)</span><br><span class="line"></span>&#123;</span><br><span class="line">	<span class="keyword">if</span>(!(<span class="built_in">document</span>.cookie || navigator.cookieEnabled))</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="built_in">console</span>.log(<span class="string">'浏览器 cookie 未打开!'</span>);</span><br><span class="line">	&#125; </span><br><span class="line"></span><br><span class="line">	<span class="keyword">var</span> d = <span class="keyword">new</span> <span class="built_in">Date</span>();</span><br><span class="line">	d.setTime(d.getTime()+(exdays*<span class="number">24</span>*<span class="number">60</span>*<span class="number">60</span>*<span class="number">1000</span>));</span><br><span class="line">	<span class="keyword">var</span> expires = <span class="string">"expires="</span>+d.toGMTString();</span><br><span class="line">	<span class="built_in">document</span>.cookie = cname+<span class="string">"="</span>+cvalue+<span class="string">"; "</span>+expires;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -347,7 +432,7 @@
     <link href="http://www.grdtechs.com/2016/07/10/go-setcookie/"/>
     <id>http://www.grdtechs.com/2016/07/10/go-setcookie/</id>
     <published>2016-07-10T16:51:56.000Z</published>
-    <updated>2016-11-28T04:02:01.191Z</updated>
+    <updated>2016-11-28T08:30:35.468Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p><code>Go</code>web开发中，经常需要设置获取cookies, 不管是从client端设置获取还是server设置获取，其实都差不多，下面就总结一下常用的方法。<br><a id="more"></a></p>
 <h2 id="golang_u4E2Dcookie__u8BE6_u7EC6_u5B9A_u4E49"><a href="#golang_u4E2Dcookie__u8BE6_u7EC6_u5B9A_u4E49" class="headerlink" title="golang中cookie 详细定义"></a>golang中cookie 详细定义</h2><p>golang 官方文档中对<code>Cookie</code>结构的定义<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> Cookie <span class="keyword">struct</span> &#123;</span><br><span class="line">    Name       <span class="typename">string</span></span><br><span class="line">    Value      <span class="typename">string</span></span><br><span class="line">    Path       <span class="typename">string</span></span><br><span class="line">    Domain     <span class="typename">string</span></span><br><span class="line">    Expires    time.Time</span><br><span class="line">    RawExpires <span class="typename">string</span></span><br><span class="line">    <span class="comment">// MaxAge=0表示未设置Max-Age属性</span></span><br><span class="line">    <span class="comment">// MaxAge&lt;0表示立刻删除该cookie，等价于"Max-Age: 0"</span></span><br><span class="line">    <span class="comment">// MaxAge&gt;0表示存在Max-Age属性，单位是秒</span></span><br><span class="line">    MaxAge   <span class="typename">int</span></span><br><span class="line">    Secure   <span class="typename">bool</span></span><br><span class="line">    HttpOnly <span class="typename">bool</span></span><br><span class="line">    Raw      <span class="typename">string</span></span><br><span class="line">    Unparsed []<span class="typename">string</span> <span class="comment">// 未解析的“属性-值”对的原始文本</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
@@ -402,7 +487,7 @@
     <link href="http://www.grdtechs.com/2016/06/17/jsonfmt/"/>
     <id>http://www.grdtechs.com/2016/06/17/jsonfmt/</id>
     <published>2016-06-17T10:55:21.000Z</published>
-    <updated>2016-11-28T04:02:01.191Z</updated>
+    <updated>2016-11-28T08:30:35.468Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p><code>json</code>字符串在html用js美化输出使用总结。<br><a id="more"></a></p>
 <h2 id="JSON-stringify_28_29_u51FD_u6570_u539F_u578B"><a href="#JSON-stringify_28_29_u51FD_u6570_u539F_u578B" class="headerlink" title="JSON.stringify()函数原型"></a>JSON.stringify()函数原型</h2><p><strong>语法：</strong><br>　　<code>JSON.stringify(value [, replacer] [, space])</code></p>
@@ -436,7 +521,7 @@
     <link href="http://www.grdtechs.com/2016/06/14/go-time-summary/"/>
     <id>http://www.grdtechs.com/2016/06/14/go-time-summary/</id>
     <published>2016-06-14T14:05:28.000Z</published>
-    <updated>2016-11-28T04:02:01.191Z</updated>
+    <updated>2016-11-28T08:30:35.468Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p><code>golang</code> 中经常需要格式化时间和日期来满足不同的业务需求,下面总结格式化时间日期中遇到的问题。<br><a id="more"></a></p>
 <h2 id="golang_time_u5305__u65F6_u95F4_u65E5_u671F_u683C_u5F0F_u5316_u5B9A_u4E49"><a href="#golang_time_u5305__u65F6_u95F4_u65E5_u671F_u683C_u5F0F_u5316_u5B9A_u4E49" class="headerlink" title="golang time包 时间日期格式化定义"></a>golang time包 时间日期格式化定义</h2><p>go 的time package 提供了time.Format函数，用来对时间进行格式化输出;类似的还有time.Parse用来解析字符串类型的时间到time.Time。这是两个互逆的函数。</p>
@@ -516,7 +601,7 @@
     <link href="http://www.grdtechs.com/2016/05/24/comparison-of-Go-Vendoring-Tools/"/>
     <id>http://www.grdtechs.com/2016/05/24/comparison-of-Go-Vendoring-Tools/</id>
     <published>2016-05-24T14:03:36.000Z</published>
-    <updated>2016-11-28T04:02:01.191Z</updated>
+    <updated>2016-11-28T08:30:35.464Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>golang1.5版本开始支持第三方包到依赖管理,当多个项目在同一个<code>GOPATH</code>下，每个项目包含到第三方包通过<code>go get</code>命令都会<code>get</code>到<code>GOPATH</code>下到<code>src</code>目录中，而不是各个项目的文件夹中，这就导致第三方包的不同版本不能同时被<code>GOPATH</code>下到多个项目使用，从<code>golang</code>需要设置<code>GOPATH</code>来看,<code>golang</code>其实把每个项目当作一个个独立的第三包来看待。<br><a id="more"></a><br>关于<code>golang</code>包管理工具的topic, 在<code>golang</code>的官方wiki要有一篇总结对比的文章:<a href="https://github.com/golang/go/wiki/PackageManagementTools" target="_blank" rel="external">PackageManagementTools</a>。下面主要就项目中用过的<code>godep</code>,<code>govendor</code>,<code>glide</code>做一个简要的对比分析。</p>
 <h2 id="godep"><a href="#godep" class="headerlink" title="godep"></a>godep</h2><p><a href="https://github.com/tools/godep" target="_blank" rel="external">godep</a> helps build packages reproducibly by fixing their dependencies.</p>
@@ -594,7 +679,7 @@
     <link href="http://www.grdtechs.com/2016/05/08/travis-ci-deploy-hexo-blog/"/>
     <id>http://www.grdtechs.com/2016/05/08/travis-ci-deploy-hexo-blog/</id>
     <published>2016-05-08T21:48:40.000Z</published>
-    <updated>2016-11-28T04:02:01.195Z</updated>
+    <updated>2016-11-28T08:30:35.468Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>目前，自动化构建、持续集成的理念在整个计算行业非常的流行，大家更愿意去使用自动化代替手动，从而提高效率。<code>Travis CI</code>就是一个在线的、分布式的持续集成服务，用来构建及测试在GitHub托管的代码。利用Travis CI 会在每一次push后生成一个虚拟机来执行事先安排好的自动构建任务，从来进行发布。本文就要用<code>Travis CI</code>来自动构建<code>Hexo</code>博客。<br><a id="more"></a></p>
 <h2 id="u5B89_u88C5Hexo"><a href="#u5B89_u88C5Hexo" class="headerlink" title="安装Hexo"></a>安装Hexo</h2><ul>
@@ -708,7 +793,7 @@
     <link href="http://www.grdtechs.com/2016/03/29/gin-setcookie/"/>
     <id>http://www.grdtechs.com/2016/03/29/gin-setcookie/</id>
     <published>2016-03-29T01:48:56.000Z</published>
-    <updated>2016-11-28T04:02:01.191Z</updated>
+    <updated>2016-11-28T08:30:35.464Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>可以操作<code>Cookie</code>的<code>Http</code>头有两个:<code>Set-Cookie</code>和<code>Cookie</code>。<code>Set-Cookie</code>由服务器发送，它包含在响应请求的头部中。它用于在客户端创建一个<code>Cookie</code>。<code>Cookie</code>头由客户端发送，包含在<code>HTTP</code>请求的头部中。<br><a id="more"></a></p>
 <font color="red"><strong>注意：<br>1.只有cookie的domain和path与请求的URL匹配才会发送这个cookie;<br>2.客户端发送cookie信息给服务器只发送键-值对到服务器，cookie的属性是不会发送给服务器的。</strong></font>
@@ -744,7 +829,7 @@
     <link href="http://www.grdtechs.com/2016/03/24/go-type-convert/"/>
     <id>http://www.grdtechs.com/2016/03/24/go-type-convert/</id>
     <published>2016-03-24T02:06:54.000Z</published>
-    <updated>2016-11-28T04:02:01.191Z</updated>
+    <updated>2016-11-28T08:30:35.468Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p><code>Go</code>的数据类型很多都需要显示转换才能使用,比如<code>string</code>转<code>float64</code>指定精度等。转换中常用到的第三方包为<code>strconv</code>和<code>math</code>包。<br><a id="more"></a></p>
 <h2 id="u6574_u578B_u8F6C_u5B57_u7B26_u4E32"><a href="#u6574_u578B_u8F6C_u5B57_u7B26_u4E32" class="headerlink" title="整型转字符串"></a>整型转字符串</h2><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">strconv.Itoa(i) <span class="comment">//方法1</span></span><br><span class="line">strconv.FormatInt(<span class="typename">int64</span>(i),<span class="number">10</span>) <span class="comment">//方法2</span></span><br></pre></td></tr></table></figure>
@@ -776,7 +861,7 @@
     <link href="http://www.grdtechs.com/2016/02/26/observer-pattern-in-go-md/"/>
     <id>http://www.grdtechs.com/2016/02/26/observer-pattern-in-go-md/</id>
     <published>2016-02-26T00:40:11.000Z</published>
-    <updated>2016-11-28T04:02:01.191Z</updated>
+    <updated>2016-11-28T08:30:35.468Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>观察者(<code>Observer</code>)设计模式定义了对象间的一种一对多的依赖关系，以便一个对象的状态发生变化时，所有依赖于它的对象都得到通知并自动刷新。观察者模式将观察者和被观察的对象分离开,体现了面向对象设计中一个对象只做一件事情的原则，提高了应用程序的可维护性和重用性。<br><a id="more"></a></p>
 <h2 id="u5B9E_u73B0_u89C2_u5BDF_u8005_u6A21_u5F0F"><a href="#u5B9E_u73B0_u89C2_u5BDF_u8005_u6A21_u5F0F" class="headerlink" title="实现观察者模式"></a>实现观察者模式</h2><p>观察者模式有很多实现方式，从根本上说，该模式必须包含两个角色：观察者(Observer)和被观察对象(Subject)。</p>
@@ -814,7 +899,7 @@
     <link href="http://www.grdtechs.com/2016/02/25/singleton-pattern-in-go/"/>
     <id>http://www.grdtechs.com/2016/02/25/singleton-pattern-in-go/</id>
     <published>2016-02-25T17:01:43.000Z</published>
-    <updated>2016-11-28T04:02:01.195Z</updated>
+    <updated>2016-11-28T08:30:35.468Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p><code>golang</code> 1.5版本之后默认设置<code>GOMAXPROCS</code>值为当前计算机真实核心数，使得<code>goroutines</code>从默认的<code>单线程内并发执行</code>变成了默认的（真实核心数支持的）的<code>多线程内并行</code>执行。多线程并行执行<code>goroutines</code>需要考虑并行执行过程中引入的<code>线程安全问题</code>。<br><a id="more"></a></p>
 <h2 id="u5355_u7EBF_u7A0Bsingleton_u6A21_u578B"><a href="#u5355_u7EBF_u7A0Bsingleton_u6A21_u578B" class="headerlink" title="单线程singleton模型"></a>单线程singleton模型</h2><p>单例模式定义：保证一个类仅有一个实例，并提供一个访问它的全局访问点。先摘取一个在实际工作项目中碰到的singleton模型代码:<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> singleton</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> singleton <span class="keyword">struct</span> &#123;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> instance *singleton</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> GetInstance() *singleton &#123;</span><br><span class="line">	<span class="keyword">if</span> instance == <span class="constant">nil</span> &#123;</span><br><span class="line">       instance = &amp;singleton&#123;&#125;   <span class="comment">// 没有考虑线程安全 </span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> instance</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
@@ -852,7 +937,7 @@
     <link href="http://www.grdtechs.com/2016/02/24/go-concurrency-security/"/>
     <id>http://www.grdtechs.com/2016/02/24/go-concurrency-security/</id>
     <published>2016-02-24T21:47:55.000Z</published>
-    <updated>2016-11-28T04:02:01.191Z</updated>
+    <updated>2016-11-28T08:30:35.464Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p><code>golang</code> 在1.5版本之前默认只使用一个核心来跑所有的<code>goroutines</code>,即<code>GOMAXPROCS</code>默认设置为1, ,即是串行执行<code>goroutines</code>,在1.5版本后，<code>GOMAXPROCS</code>默认设置为当前计算机真实的核心线程数，即是在并行执行<code>goroutines</code>。<br><a id="more"></a></p>
 <h2 id="u5E76_u884C_u6267_u884C_u5B89_u5168_u6027_u6848_u4F8B_u5206_u6790"><a href="#u5E76_u884C_u6267_u884C_u5B89_u5168_u6027_u6848_u4F8B_u5206_u6790" class="headerlink" title="并行执行安全性案例分析"></a>并行执行安全性案例分析</h2><p>利用计算机多核处理的特性，并行执行能成倍的提高程序的性能,但同时也带入了数据安全性问题，下面看一个在线银行转账的案例:<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> User <span class="keyword">struct</span> &#123;</span><br><span class="line">		Cash <span class="typename">int</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> (u *User) sendCash(to *User, amount <span class="typename">int</span>) <span class="typename">bool</span> &#123;</span><br><span class="line">	<span class="keyword">if</span> u.Cash &lt; amount &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="constant">false</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">/* 设置延迟Sleep，当多个goroutines并行执行时,便于进行数据安全分析 */</span></span><br><span class="line">	time.Sleep(<span class="number">500</span> * time.Millisecond)</span><br><span class="line">	u.Cash = u.Cash - amount</span><br><span class="line">	to.Cash = to.Cash + amount</span><br><span class="line">	<span class="keyword">return</span> <span class="constant">true</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> main() &#123;</span><br><span class="line">	me := User&#123;Cash: <span class="number">500</span>&#125;</span><br><span class="line">	you := User&#123;Cash: <span class="number">500</span>&#125;</span><br><span class="line">	http.HandleFunc(<span class="string">"/"</span>, <span class="keyword">func</span>(w http.ResponseWriter, r *http.Request) &#123;</span><br><span class="line">		me.sendCash(&amp;you, <span class="number">50</span>) <span class="comment">//转账</span></span><br><span class="line">		fmt.Fprintf(w, <span class="string">"I have $%d\n"</span>, me.Cash)</span><br><span class="line">		fmt.Fprintf(w, <span class="string">"You have $%d\n"</span>, you.Cash)</span><br><span class="line">		fmt.Fprintf(w, <span class="string">"Total transferred: $%d\n"</span>, (you.Cash - <span class="number">500</span>))</span><br><span class="line">	&#125;)</span><br><span class="line">	http.ListenAndServe(<span class="string">":8080"</span>, <span class="constant">nil</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
@@ -885,7 +970,7 @@
     <link href="http://www.grdtechs.com/2016/02/17/go-concurrency-summarize/"/>
     <id>http://www.grdtechs.com/2016/02/17/go-concurrency-summarize/</id>
     <published>2016-02-17T13:47:51.000Z</published>
-    <updated>2016-11-28T04:02:01.191Z</updated>
+    <updated>2016-11-28T08:30:35.464Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>go能处理高并发的根本原因在于执行go协程只需极少的栈内存(大概4~5KB),并且能根据需要动态增长和缩减占用的资源。<br><a id="more"></a></p>
 <h2 id="u9AD8_u5E76_u53D1_u7684_u672C_u8D28goroutine"><a href="#u9AD8_u5E76_u53D1_u7684_u672C_u8D28goroutine" class="headerlink" title="高并发的本质goroutine"></a>高并发的本质goroutine</h2><p>简单而言,<code>goroutine</code>就是一段代码，一个函数入口，以及在堆上为其分配的一个堆栈。所以它非常廉价，我们可以很轻松的创建上万个<code>goroutine</code>，但它们并不是被操作系统所调度执行,而是通过系统的线程来多路派遣这些函数的执行，使得每个用go关键字执行的函数可以运行成为一个单位协程。当一个协程阻塞的时候，调度器就会自动把其他协程安排到另外的线程中去执行，从而实现了程序无等待并行化运行。而且调度的开销非常小，一颗CPU调度的规模不下于每秒百万次，这使得在程序中能够创建大量的<code>goroutine</code>，实现高并发的同时，依旧能保持高性能。<br><code>goroutine</code>是通过通信来共享内存,go中是通过<code>Channel</code>来实现通信的，<code>Channel</code>本身就像一根管道，go就通过这根管道进行数据的传递,实现消息通信。先来看一个简单的示例：<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">c := <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="typename">bool</span>)</span><br><span class="line"><span class="keyword">go</span> <span class="keyword">func</span>() &#123;</span><br><span class="line">	fmt.Println(<span class="string">"Go concurrency"</span>)</span><br><span class="line">	c &lt;- <span class="constant">true</span></span><br><span class="line">	<span class="built_in">close</span>(c)</span><br><span class="line">&#125;()</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span>  v := <span class="keyword">range</span> c &#123;</span><br><span class="line">	fmt.Println(v)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
@@ -916,152 +1001,6 @@
       <category term="concurrency" scheme="http://www.grdtechs.com/tags/concurrency/"/>
     
       <category term="golang" scheme="http://www.grdtechs.com/tags/golang/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>golang reflect使用总结</title>
-    <link href="http://www.grdtechs.com/2016/02/17/go-reflect-summarize/"/>
-    <id>http://www.grdtechs.com/2016/02/17/go-reflect-summarize/</id>
-    <published>2016-02-17T08:57:59.000Z</published>
-    <updated>2016-11-28T04:02:01.191Z</updated>
-    
-    <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>反射是一种检查存储在接口变量中的<code>&lt;值,类型&gt;</code>对的机制，借助go反射包提供的<code>reflect.TypeOf</code>和<code>reflect.ValueOf</code>可以方便的访问到一个接口值的<code>reflect.Type</code>和<code>reflect.Value</code>部分，从而可进一步得到这个接口的结构类型和对其进行值的修改操作。<br><a id="more"></a></p>
-<h2 id="u53CD_u5C04_u7684_u4F7F_u7528"><a href="#u53CD_u5C04_u7684_u4F7F_u7528" class="headerlink" title="反射的使用"></a>反射的使用</h2><ol>
-<li><p><strong>获取接口对象的字段,类型和方法信息</strong><br>先定义个通用的结构体</p>
-<pre><code>type User struct{
-    Id int
-    Name string
-    Age int
-}
-</code></pre><p>将接口对象类型信息映射为反射类型信息</p>
-<pre><code class="golang"><span class="keyword">func</span> Info(o <span class="keyword">interface</span>{}) {
-    t := reflect.TypeOf(o)         <span class="comment">//获取接口的类型</span>
-    fmt.Println(<span class="string">"Type:"</span>, t.Name()) <span class="comment">//t.Name() 获取接口的名称</span>
-
-    <span class="keyword">if</span> t.Kind() != refelct.Struct { <span class="comment">//通过Kind()来判断反射出的类型是否为需要的类型</span>
-        fmt.Println(<span class="string">"err: type invalid!"</span>)        
-        <span class="keyword">return</span>
-    }        
-
-    v := reflect.ValueOf(o) <span class="comment">//获取接口的值类型</span>
-    fmt.Println(<span class="string">"Fields:"</span>)
-
-    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; t.NumField(); i++ { <span class="comment">//NumField取出这个接口所有的字段数量</span>
-    f := t.Field(i)                                   <span class="comment">//取得结构体的第i个字段</span>
-    val := v.Field(i).Interface()                     <span class="comment">//取得字段的值</span>
-    fmt.Printf(<span class="string">"%6s: %v = %v\n"</span>, f.Name, f.Type, val) <span class="comment">//第i个字段的名称,类型,值</span>
-    }
-
-    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; t.NumMethod(); i++{
-        m := t.Method(i)
-        fmt.Printf(<span class="string">"%6s: %v\n"</span>, m.Name,m.Type) <span class="comment">//获取方法的名称和类型       </span>
-    }
-}
-</code></pre>
-<p>获取接口对象的类型名称，通过<code>refelct.TypeOf()</code>获取接口对象的类型,并通过<code>Name()</code>方法获取接口的名称。<br>获取对象中所有字段的名称,类型和值,通过<code>reflect.ValueOf()</code>获取接口对象的值类型取得字段的名称和类型,然后通过<code>v.Field(i).Interface()</code>取得第i个字段的值。<br>还可以通过<code>NumMethod()</code>循环获取接口对象所有方法的名称和类型。<br><a href="https://github.com/researchlab/golearning/blob/master/reflect/01reflect.go" target="_blank" rel="external">示例代码</a></p>
-</li>
-<li><p><strong>反射接口对象中的匿名或嵌入字段信息</strong><br>先再添加一个Manager结构,User作为它的匿名字段</p>
-<pre><code>type Manager struct{
-    User
-    title string
-}
-</code></pre><p>初始化Manager的两种方法：</p>
-<pre><code>m0 := Manager{User: User{1,&quot;Mike&quot;,11},title: &quot;Man&quot;}
-m1 := Manager{User{1,&quot;Mike&quot;,11},&quot;Man&quot;} //这种初始化,赋值顺序必须和结构体中的声明顺序相同! 
-</code></pre><p>现在如何来取出Manager中的匿名字段User？</p>
-<pre><code>t := refelct.TypeOf(m)
-fmt.Printf(&quot;%#v\n&quot;, t.Field(0))
-</code></pre><p>如上述代码，通过<code>t := refelct.TypeOf(m)</code>将Manager的字段类型取出来,在反射中对象字段是通过索引取到的，所以可通过<code>t.Field(0)</code>,</p>
-<pre><code>#reflect.StructField{Name:&quot;User&quot;, PkgPath:&quot;&quot;, Type:(*reflect.rtype)(0xedd20), Tag:&quot;&quot;, Offset:0x0, Index:[]int{0}, Anonymous:true}
-</code></pre><p>还可以通过<code>FieldByIndex</code>和<code>FieldByName</code>两种方法取得匿名结构体中的字段属性</p>
-<ol>
-<li>给<code>FieldByIndex()</code>传入一个int型的slice索引,如<code>FieldByIndex([]int{0,0})</code>即取得User结构体中的Id字段。</li>
-<li>通过<code>FieldByName(&quot;Id&quot;)</code>也可以取得User结构体中Id字段。</li>
-</ol>
-</li>
-</ol>
-<h2 id="u901A_u8FC7_u53CD_u5C04_u4FEE_u6539_u5BF9_u8C61"><a href="#u901A_u8FC7_u53CD_u5C04_u4FEE_u6539_u5BF9_u8C61" class="headerlink" title="通过反射修改对象"></a>通过反射修改对象</h2><p>上面通过<code>reflect.TypeOf</code>和<code>reflect.ValueOf</code>已经可以得到接口对象的类型,字段和方法等属性了，怎么通过反射来修改对象的字段值？</p>
-<pre><code>x := 100
-v := refelct.ValueOf(&amp;x) //传入地址
-v.Elem().SetInt(200) //成功修改x值为200
-</code></pre><p>要修改变量x的值，首先就要通过<code>reflect.ValueOf</code>来获取x的值类型,<code>refelct.ValueOf</code>返回的值类型是变量x一份值拷贝,要修改变量x就要传递x的地址,从而返回x的地址对象,才可以进行对x变量值对修改操作。在得到x变量的地址值类型之后先调用<code>Elem()</code>返回地址指针指向的值的Value封装。然后通过<code>Set</code>方法进行修改赋值。<br>通过反射可以很容易的修改变量的值，怎么来修改结构体中的字段值？</p>
-<pre><code>func SetInfo(o interface{}) {
-        v := reflect.ValueOf(o)
-
-        if v.Kind() == reflect.Ptr &amp;&amp; !v.Elem().CanSet() { //判断是否为指针类型 元素是否可以修改
-            fmt.Println(&quot;cannot set&quot;)
-                return
-        } else {
-            v = v.Elem() //实际取得的对象
-        }
-
-        //判断字段是否存在
-        f := v.FieldByName(&quot;Name&quot;)
-        if !f.IsValid() {
-            fmt.Println(&quot;wuxiao&quot;)
-                return
-        }
-
-        //设置字段
-        if f := v.FieldByName(&quot;Name&quot;); f.Kind() == reflect.String {
-            f.SetString(&quot;BY&quot;)
-        }
-}
-</code></pre><p>要成功修改结构体中的某个字段,主要进行以下操作：</p>
-<ol>
-<li>首先要反射出这个字段的地址值类型;</li>
-<li>判断反射返回类型是否为<code>reflect.Ptr</code>指针类型（通过指针才能操作对象地址中的值)同时还要判断这个元素是否可以修改;</li>
-<li>通过<code>FieldByName</code>的返回值判断字段是否存在</li>
-<li>通过<code>Kind()</code>和<code>Set</code>来修改字段的值<br><a href="https://github.com/researchlab/golearning/blob/master/reflect/02reflect.go" target="_blank" rel="external">示例代码</a></li>
-</ol>
-<h2 id="u901A_u8FC7_u53CD_u5C04_u201C_u52A8_u6001_u201D_u8C03_u7528_u65B9_u6CD5"><a href="#u901A_u8FC7_u53CD_u5C04_u201C_u52A8_u6001_u201D_u8C03_u7528_u65B9_u6CD5" class="headerlink" title="通过反射“动态”调用方法"></a>通过反射“动态”调用方法</h2><p>现在已经可以通过反射获取并修改接口对象的字段，类型等信息了，那怎么通过反射“动态”调用接口对象等方法？<br>先为<code>User</code>结构体引入一个<code>Hello</code>方法：</p>
-<pre><code>func (u User) Hello(m User) (int, string) {
-    fmt.Println(&quot;Hello&quot;, m.Name, &quot;, I&apos;m &quot;, u.Name)
-    return m.Age + u.Age, u.Name
-}
-</code></pre><p>下面通过反射来调用<code>Hello</code>这个方法：</p>
-<pre><code>func GetInfo(u interface{}) {
-    m := User{2, &quot;Json&quot;, 12}
-
-    v := reflect.ValueOf(u)
-
-    if v.Kind() != reflect.Struct {
-        fmt.Println(&quot;type invalid&quot;)
-        return
-    }
-
-    mv := v.MethodByName(&quot;Hello&quot;) //获取对应的方法
-    if !mv.IsValid() {            //判断方法是否存在
-        fmt.Println(&quot;Func Hello not exist&quot;)
-        return
-    }
-
-    args := []reflect.Value{reflect.ValueOf(m)} //初始化传入等参数，传入等类型只能是[]reflect.Value类型
-    res := mv.Call(args)
-    fmt.Println(res[0], res[1])
-
-}
-</code></pre><p>通过<code>MethodByName</code>先获取对象的<code>Hello</code>方法,然后准备要传入的参数,这里传入的参数必须是<code>[]refelct.Value</code>类型,传入的参数值必须强制转换为反射值类型<code>refelct.Value</code>。<br>最后通过调用<code>Call</code>方法就可以实现通过反射”动态”调用对象的方法。<br><a href="https://github.com/researchlab/golearning/blob/master/reflect/03reflect.go" target="_blank" rel="external">示例代码</a></p>
-<h2 id="u5C0F_u7ED3"><a href="#u5C0F_u7ED3" class="headerlink" title="小结"></a>小结</h2><ul>
-<li>通过反射包提供<code>refelct.TypeOf</code>和<code>refelct.ValueOf</code>方法获得接口对象的类型，值和方法等。</li>
-<li>通过反射修改字段值等时候需要传入地址类型，并且需要检查反射返回值类型是否为<code>refelct.Ptr</code>，检查字段是否<code>CanSet</code>,检查字段是存在,然后通过<code>Kind()</code>来帮助赋值相应对类型值。</li>
-<li>最后总结了通过<code>MethodByName</code>等方法如何“动态”调用对象的方法，示例代码也演示了如何传入和接收多个参数值。</li>
-</ul>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;h2 id=&quot;u524D_u8A00&quot;&gt;&lt;a href=&quot;#u524D_u8A00&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h2&gt;&lt;p&gt;反射是一种检查存储在接口变量中的&lt;code&gt;&amp;lt;值,类型&amp;gt;&lt;/code&gt;对的机制，借助go反射包提供的&lt;code&gt;reflect.TypeOf&lt;/code&gt;和&lt;code&gt;reflect.ValueOf&lt;/code&gt;可以方便的访问到一个接口值的&lt;code&gt;reflect.Type&lt;/code&gt;和&lt;code&gt;reflect.Value&lt;/code&gt;部分，从而可进一步得到这个接口的结构类型和对其进行值的修改操作。&lt;br&gt;
-    
-    </summary>
-    
-      <category term="golang" scheme="http://www.grdtechs.com/categories/golang/"/>
-    
-    
-      <category term="golang" scheme="http://www.grdtechs.com/tags/golang/"/>
-    
-      <category term="reflect" scheme="http://www.grdtechs.com/tags/reflect/"/>
     
   </entry>
   
