@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://www.grdtechs.com/"/>
-  <updated>2016-11-28T08:30:35.464Z</updated>
+  <updated>2016-12-13T09:13:26.481Z</updated>
   <id>http://www.grdtechs.com/</id>
   
   <author>
@@ -16,11 +16,142 @@
   <generator uri="http://hexo.io/">Hexo</generator>
   
   <entry>
+    <title>UML类图中符号定义,作用及区别总结</title>
+    <link href="http://www.grdtechs.com/2016/11/23/uml-symbol-desc/"/>
+    <id>http://www.grdtechs.com/2016/11/23/uml-symbol-desc/</id>
+    <published>2016-11-23T11:47:43.000Z</published>
+    <updated>2016-12-13T09:13:26.481Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>在UML的定义中，描述类和对象之间的关系，包括以下几种方式：依赖（<code>Dependency</code>）、关联（<code>Association</code>）、聚合（<code>Aggregation</code>）、组合（<code>Composition</code>）、泛化（<code>Generalization</code>）和实现（<code>Realization</code>）。现分别说明如下：<br><a id="more"></a></p>
+<h2 id="u5B9A_u4E49"><a href="#u5B9A_u4E49" class="headerlink" title="定义"></a>定义</h2><p>类图基本符号可拆分为四类:<code>线</code>(<code>虚线</code>和<code>实线</code>)，<code>箭头</code>，<code>三角</code>(<code>空心右三角</code>和<code>实心右三角</code>)，<code>菱形</code>(<code>空心菱形</code>和<code>实心菱形</code>); 由这些基本的图形进行组合构成了类图的基本符号。这里要注意这几个符号的顺序，代表了类与类之间关系的耦合程度, 越向右耦合度越高。</p>
+<p>由上述四类图形（<code>线</code>，<code>箭头</code>,<code>三角</code>,<code>菱形</code>)可构成以下类图中六类常用关系,</p>
+<ol>
+<li><code>虚线+箭头</code>是表示即<code>依赖</code>的关系;</li>
+<li><code>实线+箭头</code>表示<code>关联</code>的关系;</li>
+<li><code>虚线+空心右三角</code>表示<code>实现</code>接口;</li>
+<li><code>实线+空心右三角</code>表示的是<code>泛化</code>，即<code>类的继承关系</code>;</li>
+<li><code>实线+空心菱形</code>表示的是<code>聚合</code>的关系;</li>
+<li><code>实线+实心菱形</code>则表示<code>组合</code>的关系。</li>
+</ol>
+<p>看类图的时候要注意, 类图的思想其实也还没有脱离面向对象的思想，以某个类为中心，有些线是射入的而有些线是射出的。射入的线表示的是这个类被哪些类所调用而射出的线则表示该类调用了哪些类，包括泛化，关联，依赖，聚合和组合四种关系。这类似于离散数学中有关图部分的描述。</p>
+<ul>
+<li>类(Class):使用三层矩形框表示<ol>
+<li>第一层显示类的名称，如果是抽象类，则就用斜体显示;</li>
+<li>第二层是字段和属性;</li>
+<li>第三层是类的方法。 </li>
+</ol>
+</li>
+</ul>
+<blockquote>
+<p>注意前面的符号，<code>+</code>表示public，<code>-</code>表示private，<code>#</code>表示protected, <code>~</code>表示package</p>
+</blockquote>
+<ul>
+<li><p>接口:使用两层矩形框表示，与类图的区别主要是顶端有<code>&lt;&lt;interface&gt;&gt;</code>显示 </p>
+<ol>
+<li>第一行是接口名称; </li>
+<li>第二行是接口方法。 </li>
+</ol>
+</li>
+<li><p>继承类(extends):用空心三角形+实线来表示 </p>
+</li>
+<li><p>实现接口(implements):用空心三角形+虚线来表示 </p>
+</li>
+<li><p>关联(Association):用实线箭头来表示，例如:燕子与气候 </p>
+</li>
+<li><p>聚合(Aggregation):用空心的菱形+实线箭头来表示 </p>
+<ol>
+<li>聚合:表示一种弱的<code>拥有</code>关系，体现的是A对象可以包含B对象，但B对象不是A对象的一部分，例如:公司和员工</li>
+</ol>
+</li>
+<li><p>组合(Composition):用实心的菱形+实线箭头来表示 </p>
+<ol>
+<li>组合:部分和整体的关系，并且生命周期是相同的。例如:人与手 </li>
+</ol>
+</li>
+<li><p>依赖(Dependency):用虚线箭头来表示，例如:动物与氧气 </p>
+</li>
+<li><p>基数:连线两端的数字表明这一端的类可以有几个实例，比如:一个鸟应该有两只翅膀。如果一个类可能有无数个实例，则就用<code>n</code>来表示。关联、聚合、组合是有基数的</p>
+</li>
+</ul>
+<p>下面详细阐述类图中六类常用关系,</p>
+<h2 id="u4F9D_u8D56_uFF08Dependency_uFF09"><a href="#u4F9D_u8D56_uFF08Dependency_uFF09" class="headerlink" title="依赖（Dependency）"></a>依赖（<code>Dependency</code>）</h2><p>在uml中，<code>依赖</code>表示为<code>带箭头的虚线</code>，<code>箭头指向被依赖的元素</code>。是类与类之间的连接，表示为一个类依赖于另一个类的定义，其中一个类的变化将影响另一个类。依赖总是单向的，不应该存在双向依赖，这一点要特别注意。更具体的说，依赖可以理解为：<code>一个类（A）对不在其实例作用域内的另一个类或对象（B）的任何类型的引用</code>。大致包含以下几种情况：<br>（1）局部变量；<br>（2）方法的参数；<br>（3）静态方法的调用；</p>
+<p>下面是依赖关系的uml示意图：<br><img src="/imgs/uml_dependency.png" alt="uml-dependency"></p>
+<blockquote>
+<p>1.综合上图，Class-A类的实现依赖Class-B类，即Class-A类可能要用到Class-B类的一些方法，即，要完成Class-A里的所有功能，一定要有Class-B类的某些方法协助才行.</p>
+</blockquote>
+<h2 id="u5173_u8054_uFF08Association_uFF09"><a href="#u5173_u8054_uFF08Association_uFF09" class="headerlink" title="关联（Association）"></a>关联（<code>Association</code>）</h2><p>在uml中，<code>关联</code>表示为<code>带箭头的实线</code>。关联可以是单向的，也可以是双向的, 还有自身关联是指拥有一个自身的引用。如果是双向关联，则可以表示为双向箭头，或者没有箭头,双向关联是指双方都拥有对方的引用, 都可以调用对方的公共属性和方法。一般来说，系统设计应表现为单向关联，这样利于维护。一个关联可以附加<code>多重性</code>的修饰符，表示两个类之间的数量关系。关联可以理解为：<code>一个类（A）持有另一个类或对象（B）</code>。具体表现为：</p>
+<p>下面是关联关系的uml示例图：<br><img src="/imgs/uml_association.png" alt="uml-association"></p>
+<blockquote>
+<p>1.上面的关联表示，一个Employee持有(has)0个或多个TimeCard，从而可以调用其中的属性或方法，但Employee与TimeCard之间没有生命期的依赖。</p>
+</blockquote>
+<h2 id="u805A_u5408_uFF08Aggregation_uFF09"><a href="#u805A_u5408_uFF08Aggregation_uFF09" class="headerlink" title="聚合（Aggregation）"></a>聚合（<code>Aggregation</code>）</h2><p>在uml中，<code>聚合</code>表示为<code>空心的菱形箭头线</code>。<code>聚合关系</code>是关联关系的一种，表示一种<code>强</code>关联关系。对比<code>关联关系</code>，两个类是处于同一个层次的。而聚合关系，两个类处于不同的层次，强调了一个整体/局部的关系。例如一辆汽车有一个引擎，4个轮胎。在聚合关系中，体现了一种<code>弱拥有</code>的概念。也就是说，对象A拥有对象B，但B并不是A的组成部分。更具体的表现为，如果A由B聚合而成，则A包含B的全局对象，但B对象可以不在A对象创建时创建。回到前面的例子，汽车对象由轮胎对象聚合而成，但是轮胎对象的生命期并不受汽车对象的左右。当汽车对象销毁时，轮胎对象也可以单独存在！</p>
+<p>下面是聚合关系的uml示意图：</p>
+<p><img src="/imgs/uml_aggregation.png" alt="uml-aggregation"></p>
+<blockquote>
+<p>从代码上看，聚合和关联没有任何区别。这里仅仅体现一种概念上的含义。在创建ClassA的时候，不一定需要同时创建ClassB的实例。 表示ClassA由ClassB聚合而成，但ClassB可以独立存在。</p>
+</blockquote>
+<h2 id="u7EC4_u5408_uFF08Composition_uFF09"><a href="#u7EC4_u5408_uFF08Composition_uFF09" class="headerlink" title="组合（Composition）"></a>组合（<code>Composition</code>）</h2><p>在uml中，<code>组合</code>表示为<code>实心菱形箭头线</code>。组合也叫合成。合成关系强调了比聚合关系更加强的整体/部分的关联，例如人和四肢。和聚合关系所不同的是，在组合关系中，虽然局部不一定随着整体的销毁而销毁，但整体要么负责保持局部的存活状态，要么负责将其销毁。也就是说，组合关系中，局部的存活期一定是小于，最多是等于整体的存活期的。</p>
+<p>下面是组合关系的uml示例图：</p>
+<p><img src="/imgs/uml_composition.png" alt="uml-composition"> </p>
+<h2 id="u6CDB_u5316_uFF08Generalization_uFF09"><a href="#u6CDB_u5316_uFF08Generalization_uFF09" class="headerlink" title="泛化（Generalization）"></a>泛化（<code>Generalization</code>）</h2><p><code>泛化也就是通常所谓的继承关系</code>，在uml中表示为一个<code>带空心三角的实线</code>。表示为is-a的关系，是对象间耦合度最大的一种关系，子类继承父类的所有细节，并可以在此基础上添加自己的特性。</p>
+<p>下面是泛化关系的uml图：</p>
+<p><img src="/imgs/uml_generalization.png" alt="uml-generalization"></p>
+<h2 id="u5B9E_u73B0_uFF08Realization_uFF09"><a href="#u5B9E_u73B0_uFF08Realization_uFF09" class="headerlink" title="实现（Realization）"></a>实现（<code>Realization</code>）</h2><p>所谓<code>实现</code>就是<code>类对接口的定义实现</code>，表示类是接口所有特征和行为的实现。表现为<code>带箭头的虚线</code>。</p>
+<p>下面的实现的uml图：</p>
+<p><img src="/imgs/uml_realization.png" alt="uml-realization"></p>
+<p>下面通过一副类图包含上述六类常用关系,</p>
+<p><img src="/imgs/uml_all_class.png" alt="uml-all-class"></p>
+<blockquote>
+<ol>
+<li>依赖: 动物依赖氧气，水.</li>
+<li>关联: 当一个类知道另一个类时，可以用关联关系。现在企鹅需要知道气候的变化，了解气候的变化规律. </li>
+<li>聚合: 雅群由单只大雅聚合而成，但是单只大雁可独立存在. </li>
+<li>组合: 一只鸟包含两支翅膀,但是翅膀无法单独存活,即生命期在鸟的生命期内.</li>
+<li>泛化: 泛化即继承,子类继承父类属性及方法,如大雁从鸟类继承而来.</li>
+<li>实现: 类对接口的实现，如大雁类实现了飞翔接口的所有方法(飞),所以大雁类实现了飞翔这个接口.</li>
+</ol>
+<p>说明: 关联又可以分为聚合，组合，他们的主要区别体现在类和类之间关联的强度,聚合是一种较弱拥有的关联关系, 如雁群由单只大雁聚合而成，但不能强制要求单只大雁飞离雁群; 而组合是一种强拥有的聚合关系，如鸟有两支翅膀，但是单独把翅膀从鸟身上砍下来，它本身无法存活无法飞.</p>
+</blockquote>
+<h2 id="u5173_u8054_u53CA_u533A_u522B"><a href="#u5173_u8054_u53CA_u533A_u522B" class="headerlink" title="关联及区别"></a>关联及区别</h2><p>面向对象建模依赖、关联、聚合以及组合关系区别,</p>
+<ol>
+<li>语义<ul>
+<li>依赖表达 <code>use a</code></li>
+<li>关联表达 <code>has a</code></li>
+<li>聚合表达 <code>owns a</code></li>
+<li>组合表达 <code>is a part of</code></li>
+</ul>
+</li>
+<li>四种联系是递进的，表示对象之间的联系越来越紧密</li>
+<li>代码实现形式<ul>
+<li><code>依赖</code>：一般对应局部变量，方法形参，静态方法调用表达</li>
+<li><code>关联</code>：一般对应成员变量，有时也用方法形参的形式</li>
+<li><code>聚合</code>：一般对应成员变量，聚合关系一般使用setter方法给成员变量赋值</li>
+<li><code>组合</code>：一般来说，为了表示组合关系，常常会使用构造方法来达到初始化的目的</li>
+</ul>
+</li>
+</ol>
+<p>另一篇值得参考的文章:  <a href="http://www.jasongj.com/uml/class_diagram/" target="_blank" rel="external">UML(一) 类图详解</a></p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;u524D_u8A00&quot;&gt;&lt;a href=&quot;#u524D_u8A00&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h2&gt;&lt;p&gt;在UML的定义中，描述类和对象之间的关系，包括以下几种方式：依赖（&lt;code&gt;Dependency&lt;/code&gt;）、关联（&lt;code&gt;Association&lt;/code&gt;）、聚合（&lt;code&gt;Aggregation&lt;/code&gt;）、组合（&lt;code&gt;Composition&lt;/code&gt;）、泛化（&lt;code&gt;Generalization&lt;/code&gt;）和实现（&lt;code&gt;Realization&lt;/code&gt;）。现分别说明如下：&lt;br&gt;
+    
+    </summary>
+    
+      <category term="go-pattern" scheme="http://www.grdtechs.com/categories/go-pattern/"/>
+    
+    
+      <category term="uml" scheme="http://www.grdtechs.com/tags/uml/"/>
+    
+  </entry>
+  
+  <entry>
     <title>golang处理数据表中字段为空或NULL的情况</title>
     <link href="http://www.grdtechs.com/2016/11/23/go-dealwith-database-nullvalue/"/>
     <id>http://www.grdtechs.com/2016/11/23/go-dealwith-database-nullvalue/</id>
     <published>2016-11-23T11:40:54.000Z</published>
-    <updated>2016-11-28T08:30:35.464Z</updated>
+    <updated>2016-12-13T09:13:26.477Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>golang是强类型语言，在赋值和解析过程中需要先定义好数据类型，否在会报类型错误，下面总结在处理数据库表时遇到字段为空或零值的情况<br><a id="more"></a></p>
 <h2 id="u573A_u666F"><a href="#u573A_u666F" class="headerlink" title="场景"></a>场景</h2><p>假如存在如下没有指定<code>not null</code>的场合<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="operator"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> <span class="string">"users"</span> (</span><br><span class="line">    <span class="string">"id"</span> <span class="built_in">serial</span> <span class="keyword">not</span> <span class="literal">null</span> primary <span class="keyword">key</span>,</span><br><span class="line">    <span class="string">"name"</span> <span class="built_in">text</span>,</span><br><span class="line">    <span class="string">"age"</span> <span class="built_in">integer</span></span><br><span class="line">)</span></span><br></pre></td></tr></table></figure></p>
@@ -49,7 +180,7 @@
     <link href="http://www.grdtechs.com/2016/11/11/go-use-mysql/"/>
     <id>http://www.grdtechs.com/2016/11/11/go-use-mysql/</id>
     <published>2016-11-11T13:21:16.000Z</published>
-    <updated>2016-11-28T08:30:35.468Z</updated>
+    <updated>2016-12-13T09:13:26.477Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>Golang 提供了<code>database/sql</code>包用于对<code>SQL数据库</code>的访问, 作为操作数据库的入口对象<code>sql.DB</code>, 主要为我们提供了两个重要的功能:<br><a id="more"></a></p>
 <ul>
@@ -134,7 +265,7 @@
     <link href="http://www.grdtechs.com/2016/10/23/go-build-small-exec/"/>
     <id>http://www.grdtechs.com/2016/10/23/go-build-small-exec/</id>
     <published>2016-10-23T14:00:32.000Z</published>
-    <updated>2016-11-28T08:30:35.464Z</updated>
+    <updated>2016-12-13T09:13:26.477Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>尽管go1.7.3编译生成的可执行程序已经很小了,但是通过编译参数控制还能编译出更小的可执行文件，总结如下,<br><a id="more"></a></p>
 <h2 id="u52A0-ldflags_u53C2_u6570"><a href="#u52A0-ldflags_u53C2_u6570" class="headerlink" title="加-ldflags参数"></a>加-ldflags参数</h2><p>在程序编译的时候可以加上<code>-ldflags &quot;-s -w&quot;</code> 参数来优化编译程序, 其实通过去除部分连接和调试等信息来使得编译之后的执行程序更小,具体参数如下:</p>
@@ -172,7 +303,7 @@
     <link href="http://www.grdtechs.com/2016/10/16/mac-update-vim8-0/"/>
     <id>http://www.grdtechs.com/2016/10/16/mac-update-vim8-0/</id>
     <published>2016-10-16T23:08:56.000Z</published>
-    <updated>2016-11-28T08:30:35.468Z</updated>
+    <updated>2016-12-13T09:13:26.477Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>将mac自带的vim7.3 升级到vim8.0<br><a id="more"></a></p>
 <h2 id="u5347_u7EA7vim8-0"><a href="#u5347_u7EA7vim8-0" class="headerlink" title="升级vim8.0"></a>升级vim8.0</h2><ul>
@@ -230,7 +361,7 @@
     <link href="http://www.grdtechs.com/2016/10/16/close-ticker-correctly/"/>
     <id>http://www.grdtechs.com/2016/10/16/close-ticker-correctly/</id>
     <published>2016-10-16T14:27:39.000Z</published>
-    <updated>2016-11-28T08:30:35.464Z</updated>
+    <updated>2016-12-13T09:13:26.477Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>在<code>ticker</code>和<code>goroutine</code>组合使用中当调用<code>ticker.Stop()</code>关闭<code>ticker</code>之后，相应的<code>goroutine</code>中的<code>ticker.C</code>并没有停掉，下面总结一种优雅的方式关闭<code>ticker</code>.<br><a id="more"></a></p>
 <h2 id="u4F18_u96C5_u7684_u5173_u95EDticker"><a href="#u4F18_u96C5_u7684_u5173_u95EDticker" class="headerlink" title="优雅的关闭ticker"></a>优雅的关闭<code>ticker</code></h2><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">"fmt"</span></span><br><span class="line">	<span class="string">"time"</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> main() &#123;</span><br><span class="line">	Demo()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> Demo() &#123;</span><br><span class="line">	done := startTicker(PrintInfo)</span><br><span class="line">	time.Sleep(time.Duration(<span class="number">12</span>) * time.Second)</span><br><span class="line">	<span class="built_in">close</span>(done)</span><br><span class="line">	time.Sleep(time.Duration(<span class="number">1</span>) * time.Minute)</span><br><span class="line">	fmt.Println(<span class="string">"main finished"</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> startTicker(f <span class="keyword">func</span>()) <span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125; &#123;</span><br><span class="line">	done := <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;, <span class="number">1</span>)</span><br><span class="line">	<span class="keyword">go</span> <span class="keyword">func</span>() &#123;</span><br><span class="line">		ticker := time.NewTicker(<span class="number">5</span> * time.Second)</span><br><span class="line">		<span class="comment">//	ticker := time.NewTicker(5 * time.Minute)</span></span><br><span class="line">		<span class="keyword">defer</span> ticker.Stop()</span><br><span class="line"></span><br><span class="line">		<span class="keyword">for</span> &#123;</span><br><span class="line">			<span class="keyword">select</span> &#123;</span><br><span class="line">			<span class="keyword">case</span> &lt;-ticker.C:</span><br><span class="line">				f()</span><br><span class="line">			<span class="keyword">case</span> &lt;-done:</span><br><span class="line">				<span class="keyword">return</span></span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;()</span><br><span class="line">	<span class="keyword">return</span> done</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> PrintInfo() &#123;</span><br><span class="line">	fmt.Println(<span class="string">"hello"</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -255,7 +386,7 @@
     <link href="http://www.grdtechs.com/2016/09/07/go-postform/"/>
     <id>http://www.grdtechs.com/2016/09/07/go-postform/</id>
     <published>2016-09-07T16:00:32.000Z</published>
-    <updated>2016-11-28T08:30:35.464Z</updated>
+    <updated>2016-12-13T09:13:26.477Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>golang这边将<code>map</code>结构序列化通常采用<code>json.Marshal</code>和<code>json.Unmarshal</code>来做，但是在php server端还需要做<code>json</code>反序列化解析才能用， 用golang模拟表单提交, php server端则非常方便提取相应的数据字段.<br><a id="more"></a></p>
 <h2 id="u65B9_u6CD5"><a href="#u65B9_u6CD5" class="headerlink" title="方法"></a>方法</h2><p>方法是利用golang<code>net/http</code>包提供的<code>PostForm</code>提交post表单提交。<code>ParseForm</code>解析<code>URL</code>中的查询字符串，并将解析结果更新到<code>r.Form</code>字段。对于<code>POST</code>或<code>PUT</code>请求，<code>ParseForm</code>还会将<code>body</code>当作表单解析，并将结果既更新到<code>r.PostForm</code>也更新到<code>r.Form</code>。解析结果中，<code>POST</code>或<code>PUT</code>请求主体要优先于<code>URL</code>查询字符串（同名变量，主体的值在查询字符串的值前面）。如果请求的主体的大小没有被<code>MaxBytesReader</code>函数设定限制，其大小默认限制为开头10MB。</p>
@@ -287,7 +418,7 @@
     <link href="http://www.grdtechs.com/2016/08/02/php7-redis-install/"/>
     <id>http://www.grdtechs.com/2016/08/02/php7-redis-install/</id>
     <published>2016-08-02T18:56:05.000Z</published>
-    <updated>2016-11-28T08:30:35.468Z</updated>
+    <updated>2016-12-13T09:13:26.481Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>在<code>Ubuntu16.04</code>上， 安装<code>php7</code>的<code>redis</code>扩展, 记录安装过程。<br><a id="more"></a></p>
 <h3 id="u5B89_u88C5phpredis"><a href="#u5B89_u88C5phpredis" class="headerlink" title="安装phpredis"></a>安装phpredis</h3><p><code>Redis</code>已经有了<code>PHP7</code>版本，可以从<code>github</code> 上获取项目克隆，然后手动切换到 <code>php7</code> 分支即可安装</p>
@@ -317,7 +448,7 @@
     <link href="http://www.grdtechs.com/2016/07/30/php-mvc-1/"/>
     <id>http://www.grdtechs.com/2016/07/30/php-mvc-1/</id>
     <published>2016-07-30T16:34:45.000Z</published>
-    <updated>2016-11-28T08:30:35.468Z</updated>
+    <updated>2016-12-13T09:13:26.481Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>尽管MVC(model view controller pattern)模式在<code>PHP</code>web开发中很受欢迎，但是网上很难找到一套代码简单又能清楚阐述<code>PHP MVC</code>模式的案例，本文希望通过理论和代码实践简单阐述<code>PHP MVC</code>模式。</p>
 <a id="more"></a>
@@ -382,7 +513,7 @@
     <link href="http://www.grdtechs.com/2016/07/10/browse-refresh-saveinputolderval/"/>
     <id>http://www.grdtechs.com/2016/07/10/browse-refresh-saveinputolderval/</id>
     <published>2016-07-10T18:22:43.000Z</published>
-    <updated>2016-11-28T08:30:35.464Z</updated>
+    <updated>2016-12-13T09:13:26.477Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>html页面中的input框如果在浏览器刷新前有值，怎么在刷新后依然保留这个值不被清空呢？下面用<code>setCookie</code>的方案来解决这个问题.<br><a id="more"></a><br>首选判断input框中有值时,<code>setcookie</code>, 每次刷新浏览器时，读取<code>Cookie</code>值,如果存在<code>Cookie</code>值，则用此值初始化input值。</p>
 <h2 id="u7EAFjs_u5B9E_u73B0"><a href="#u7EAFjs_u5B9E_u73B0" class="headerlink" title="纯js实现"></a>纯js实现</h2><h3 id="u8BBE_u7F6ECookie"><a href="#u8BBE_u7F6ECookie" class="headerlink" title="设置Cookie"></a>设置Cookie</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span><br><span class="line">* @cname  cookie name </span><br><span class="line">* @cvalue cookie value </span><br><span class="line">* @ exdays cookie expires(天)</span><br><span class="line">*/</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">setCookie</span>(<span class="params">cname,cvalue,exdays</span>)</span><br><span class="line"></span>&#123;</span><br><span class="line">	<span class="keyword">if</span>(!(<span class="built_in">document</span>.cookie || navigator.cookieEnabled))</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="built_in">console</span>.log(<span class="string">'浏览器 cookie 未打开!'</span>);</span><br><span class="line">	&#125; </span><br><span class="line"></span><br><span class="line">	<span class="keyword">var</span> d = <span class="keyword">new</span> <span class="built_in">Date</span>();</span><br><span class="line">	d.setTime(d.getTime()+(exdays*<span class="number">24</span>*<span class="number">60</span>*<span class="number">60</span>*<span class="number">1000</span>));</span><br><span class="line">	<span class="keyword">var</span> expires = <span class="string">"expires="</span>+d.toGMTString();</span><br><span class="line">	<span class="built_in">document</span>.cookie = cname+<span class="string">"="</span>+cvalue+<span class="string">"; "</span>+expires;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -432,7 +563,7 @@
     <link href="http://www.grdtechs.com/2016/07/10/go-setcookie/"/>
     <id>http://www.grdtechs.com/2016/07/10/go-setcookie/</id>
     <published>2016-07-10T16:51:56.000Z</published>
-    <updated>2016-11-28T08:30:35.468Z</updated>
+    <updated>2016-12-13T09:13:26.477Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p><code>Go</code>web开发中，经常需要设置获取cookies, 不管是从client端设置获取还是server设置获取，其实都差不多，下面就总结一下常用的方法。<br><a id="more"></a></p>
 <h2 id="golang_u4E2Dcookie__u8BE6_u7EC6_u5B9A_u4E49"><a href="#golang_u4E2Dcookie__u8BE6_u7EC6_u5B9A_u4E49" class="headerlink" title="golang中cookie 详细定义"></a>golang中cookie 详细定义</h2><p>golang 官方文档中对<code>Cookie</code>结构的定义<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> Cookie <span class="keyword">struct</span> &#123;</span><br><span class="line">    Name       <span class="typename">string</span></span><br><span class="line">    Value      <span class="typename">string</span></span><br><span class="line">    Path       <span class="typename">string</span></span><br><span class="line">    Domain     <span class="typename">string</span></span><br><span class="line">    Expires    time.Time</span><br><span class="line">    RawExpires <span class="typename">string</span></span><br><span class="line">    <span class="comment">// MaxAge=0表示未设置Max-Age属性</span></span><br><span class="line">    <span class="comment">// MaxAge&lt;0表示立刻删除该cookie，等价于"Max-Age: 0"</span></span><br><span class="line">    <span class="comment">// MaxAge&gt;0表示存在Max-Age属性，单位是秒</span></span><br><span class="line">    MaxAge   <span class="typename">int</span></span><br><span class="line">    Secure   <span class="typename">bool</span></span><br><span class="line">    HttpOnly <span class="typename">bool</span></span><br><span class="line">    Raw      <span class="typename">string</span></span><br><span class="line">    Unparsed []<span class="typename">string</span> <span class="comment">// 未解析的“属性-值”对的原始文本</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
@@ -487,7 +618,7 @@
     <link href="http://www.grdtechs.com/2016/06/17/jsonfmt/"/>
     <id>http://www.grdtechs.com/2016/06/17/jsonfmt/</id>
     <published>2016-06-17T10:55:21.000Z</published>
-    <updated>2016-11-28T08:30:35.468Z</updated>
+    <updated>2016-12-13T09:13:26.477Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p><code>json</code>字符串在html用js美化输出使用总结。<br><a id="more"></a></p>
 <h2 id="JSON-stringify_28_29_u51FD_u6570_u539F_u578B"><a href="#JSON-stringify_28_29_u51FD_u6570_u539F_u578B" class="headerlink" title="JSON.stringify()函数原型"></a>JSON.stringify()函数原型</h2><p><strong>语法：</strong><br>　　<code>JSON.stringify(value [, replacer] [, space])</code></p>
@@ -521,7 +652,7 @@
     <link href="http://www.grdtechs.com/2016/06/14/go-time-summary/"/>
     <id>http://www.grdtechs.com/2016/06/14/go-time-summary/</id>
     <published>2016-06-14T14:05:28.000Z</published>
-    <updated>2016-11-28T08:30:35.468Z</updated>
+    <updated>2016-12-13T09:13:26.477Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p><code>golang</code> 中经常需要格式化时间和日期来满足不同的业务需求,下面总结格式化时间日期中遇到的问题。<br><a id="more"></a></p>
 <h2 id="golang_time_u5305__u65F6_u95F4_u65E5_u671F_u683C_u5F0F_u5316_u5B9A_u4E49"><a href="#golang_time_u5305__u65F6_u95F4_u65E5_u671F_u683C_u5F0F_u5316_u5B9A_u4E49" class="headerlink" title="golang time包 时间日期格式化定义"></a>golang time包 时间日期格式化定义</h2><p>go 的time package 提供了time.Format函数，用来对时间进行格式化输出;类似的还有time.Parse用来解析字符串类型的时间到time.Time。这是两个互逆的函数。</p>
@@ -601,7 +732,7 @@
     <link href="http://www.grdtechs.com/2016/05/24/comparison-of-Go-Vendoring-Tools/"/>
     <id>http://www.grdtechs.com/2016/05/24/comparison-of-Go-Vendoring-Tools/</id>
     <published>2016-05-24T14:03:36.000Z</published>
-    <updated>2016-11-28T08:30:35.464Z</updated>
+    <updated>2016-12-13T09:13:26.477Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>golang1.5版本开始支持第三方包到依赖管理,当多个项目在同一个<code>GOPATH</code>下，每个项目包含到第三方包通过<code>go get</code>命令都会<code>get</code>到<code>GOPATH</code>下到<code>src</code>目录中，而不是各个项目的文件夹中，这就导致第三方包的不同版本不能同时被<code>GOPATH</code>下到多个项目使用，从<code>golang</code>需要设置<code>GOPATH</code>来看,<code>golang</code>其实把每个项目当作一个个独立的第三包来看待。<br><a id="more"></a><br>关于<code>golang</code>包管理工具的topic, 在<code>golang</code>的官方wiki要有一篇总结对比的文章:<a href="https://github.com/golang/go/wiki/PackageManagementTools" target="_blank" rel="external">PackageManagementTools</a>。下面主要就项目中用过的<code>godep</code>,<code>govendor</code>,<code>glide</code>做一个简要的对比分析。</p>
 <h2 id="godep"><a href="#godep" class="headerlink" title="godep"></a>godep</h2><p><a href="https://github.com/tools/godep" target="_blank" rel="external">godep</a> helps build packages reproducibly by fixing their dependencies.</p>
@@ -679,7 +810,7 @@
     <link href="http://www.grdtechs.com/2016/05/08/travis-ci-deploy-hexo-blog/"/>
     <id>http://www.grdtechs.com/2016/05/08/travis-ci-deploy-hexo-blog/</id>
     <published>2016-05-08T21:48:40.000Z</published>
-    <updated>2016-11-28T08:30:35.468Z</updated>
+    <updated>2016-12-13T09:13:26.481Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>目前，自动化构建、持续集成的理念在整个计算行业非常的流行，大家更愿意去使用自动化代替手动，从而提高效率。<code>Travis CI</code>就是一个在线的、分布式的持续集成服务，用来构建及测试在GitHub托管的代码。利用Travis CI 会在每一次push后生成一个虚拟机来执行事先安排好的自动构建任务，从来进行发布。本文就要用<code>Travis CI</code>来自动构建<code>Hexo</code>博客。<br><a id="more"></a></p>
 <h2 id="u5B89_u88C5Hexo"><a href="#u5B89_u88C5Hexo" class="headerlink" title="安装Hexo"></a>安装Hexo</h2><ul>
@@ -793,7 +924,7 @@
     <link href="http://www.grdtechs.com/2016/03/29/gin-setcookie/"/>
     <id>http://www.grdtechs.com/2016/03/29/gin-setcookie/</id>
     <published>2016-03-29T01:48:56.000Z</published>
-    <updated>2016-11-28T08:30:35.464Z</updated>
+    <updated>2016-12-13T09:13:26.477Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>可以操作<code>Cookie</code>的<code>Http</code>头有两个:<code>Set-Cookie</code>和<code>Cookie</code>。<code>Set-Cookie</code>由服务器发送，它包含在响应请求的头部中。它用于在客户端创建一个<code>Cookie</code>。<code>Cookie</code>头由客户端发送，包含在<code>HTTP</code>请求的头部中。<br><a id="more"></a></p>
 <font color="red"><strong>注意：<br>1.只有cookie的domain和path与请求的URL匹配才会发送这个cookie;<br>2.客户端发送cookie信息给服务器只发送键-值对到服务器，cookie的属性是不会发送给服务器的。</strong></font>
@@ -829,7 +960,7 @@
     <link href="http://www.grdtechs.com/2016/03/24/go-type-convert/"/>
     <id>http://www.grdtechs.com/2016/03/24/go-type-convert/</id>
     <published>2016-03-24T02:06:54.000Z</published>
-    <updated>2016-11-28T08:30:35.468Z</updated>
+    <updated>2016-12-13T09:13:26.477Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p><code>Go</code>的数据类型很多都需要显示转换才能使用,比如<code>string</code>转<code>float64</code>指定精度等。转换中常用到的第三方包为<code>strconv</code>和<code>math</code>包。<br><a id="more"></a></p>
 <h2 id="u6574_u578B_u8F6C_u5B57_u7B26_u4E32"><a href="#u6574_u578B_u8F6C_u5B57_u7B26_u4E32" class="headerlink" title="整型转字符串"></a>整型转字符串</h2><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">strconv.Itoa(i) <span class="comment">//方法1</span></span><br><span class="line">strconv.FormatInt(<span class="typename">int64</span>(i),<span class="number">10</span>) <span class="comment">//方法2</span></span><br></pre></td></tr></table></figure>
@@ -861,7 +992,7 @@
     <link href="http://www.grdtechs.com/2016/02/26/observer-pattern-in-go-md/"/>
     <id>http://www.grdtechs.com/2016/02/26/observer-pattern-in-go-md/</id>
     <published>2016-02-26T00:40:11.000Z</published>
-    <updated>2016-11-28T08:30:35.468Z</updated>
+    <updated>2016-12-13T09:13:26.481Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>观察者(<code>Observer</code>)设计模式定义了对象间的一种一对多的依赖关系，以便一个对象的状态发生变化时，所有依赖于它的对象都得到通知并自动刷新。观察者模式将观察者和被观察的对象分离开,体现了面向对象设计中一个对象只做一件事情的原则，提高了应用程序的可维护性和重用性。<br><a id="more"></a></p>
 <h2 id="u5B9E_u73B0_u89C2_u5BDF_u8005_u6A21_u5F0F"><a href="#u5B9E_u73B0_u89C2_u5BDF_u8005_u6A21_u5F0F" class="headerlink" title="实现观察者模式"></a>实现观察者模式</h2><p>观察者模式有很多实现方式，从根本上说，该模式必须包含两个角色：观察者(Observer)和被观察对象(Subject)。</p>
@@ -899,7 +1030,7 @@
     <link href="http://www.grdtechs.com/2016/02/25/singleton-pattern-in-go/"/>
     <id>http://www.grdtechs.com/2016/02/25/singleton-pattern-in-go/</id>
     <published>2016-02-25T17:01:43.000Z</published>
-    <updated>2016-11-28T08:30:35.468Z</updated>
+    <updated>2016-12-13T09:13:26.481Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p><code>golang</code> 1.5版本之后默认设置<code>GOMAXPROCS</code>值为当前计算机真实核心数，使得<code>goroutines</code>从默认的<code>单线程内并发执行</code>变成了默认的（真实核心数支持的）的<code>多线程内并行</code>执行。多线程并行执行<code>goroutines</code>需要考虑并行执行过程中引入的<code>线程安全问题</code>。<br><a id="more"></a></p>
 <h2 id="u5355_u7EBF_u7A0Bsingleton_u6A21_u578B"><a href="#u5355_u7EBF_u7A0Bsingleton_u6A21_u578B" class="headerlink" title="单线程singleton模型"></a>单线程singleton模型</h2><p>单例模式定义：保证一个类仅有一个实例，并提供一个访问它的全局访问点。先摘取一个在实际工作项目中碰到的singleton模型代码:<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> singleton</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> singleton <span class="keyword">struct</span> &#123;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> instance *singleton</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> GetInstance() *singleton &#123;</span><br><span class="line">	<span class="keyword">if</span> instance == <span class="constant">nil</span> &#123;</span><br><span class="line">       instance = &amp;singleton&#123;&#125;   <span class="comment">// 没有考虑线程安全 </span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> instance</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
@@ -937,7 +1068,7 @@
     <link href="http://www.grdtechs.com/2016/02/24/go-concurrency-security/"/>
     <id>http://www.grdtechs.com/2016/02/24/go-concurrency-security/</id>
     <published>2016-02-24T21:47:55.000Z</published>
-    <updated>2016-11-28T08:30:35.464Z</updated>
+    <updated>2016-12-13T09:13:26.477Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p><code>golang</code> 在1.5版本之前默认只使用一个核心来跑所有的<code>goroutines</code>,即<code>GOMAXPROCS</code>默认设置为1, ,即是串行执行<code>goroutines</code>,在1.5版本后，<code>GOMAXPROCS</code>默认设置为当前计算机真实的核心线程数，即是在并行执行<code>goroutines</code>。<br><a id="more"></a></p>
 <h2 id="u5E76_u884C_u6267_u884C_u5B89_u5168_u6027_u6848_u4F8B_u5206_u6790"><a href="#u5E76_u884C_u6267_u884C_u5B89_u5168_u6027_u6848_u4F8B_u5206_u6790" class="headerlink" title="并行执行安全性案例分析"></a>并行执行安全性案例分析</h2><p>利用计算机多核处理的特性，并行执行能成倍的提高程序的性能,但同时也带入了数据安全性问题，下面看一个在线银行转账的案例:<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> User <span class="keyword">struct</span> &#123;</span><br><span class="line">		Cash <span class="typename">int</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> (u *User) sendCash(to *User, amount <span class="typename">int</span>) <span class="typename">bool</span> &#123;</span><br><span class="line">	<span class="keyword">if</span> u.Cash &lt; amount &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="constant">false</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">/* 设置延迟Sleep，当多个goroutines并行执行时,便于进行数据安全分析 */</span></span><br><span class="line">	time.Sleep(<span class="number">500</span> * time.Millisecond)</span><br><span class="line">	u.Cash = u.Cash - amount</span><br><span class="line">	to.Cash = to.Cash + amount</span><br><span class="line">	<span class="keyword">return</span> <span class="constant">true</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> main() &#123;</span><br><span class="line">	me := User&#123;Cash: <span class="number">500</span>&#125;</span><br><span class="line">	you := User&#123;Cash: <span class="number">500</span>&#125;</span><br><span class="line">	http.HandleFunc(<span class="string">"/"</span>, <span class="keyword">func</span>(w http.ResponseWriter, r *http.Request) &#123;</span><br><span class="line">		me.sendCash(&amp;you, <span class="number">50</span>) <span class="comment">//转账</span></span><br><span class="line">		fmt.Fprintf(w, <span class="string">"I have $%d\n"</span>, me.Cash)</span><br><span class="line">		fmt.Fprintf(w, <span class="string">"You have $%d\n"</span>, you.Cash)</span><br><span class="line">		fmt.Fprintf(w, <span class="string">"Total transferred: $%d\n"</span>, (you.Cash - <span class="number">500</span>))</span><br><span class="line">	&#125;)</span><br><span class="line">	http.ListenAndServe(<span class="string">":8080"</span>, <span class="constant">nil</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
@@ -953,45 +1084,6 @@
     <summary type="html">
     
       &lt;h2 id=&quot;u524D_u8A00&quot;&gt;&lt;a href=&quot;#u524D_u8A00&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h2&gt;&lt;p&gt;&lt;code&gt;golang&lt;/code&gt; 在1.5版本之前默认只使用一个核心来跑所有的&lt;code&gt;goroutines&lt;/code&gt;,即&lt;code&gt;GOMAXPROCS&lt;/code&gt;默认设置为1, ,即是串行执行&lt;code&gt;goroutines&lt;/code&gt;,在1.5版本后，&lt;code&gt;GOMAXPROCS&lt;/code&gt;默认设置为当前计算机真实的核心线程数，即是在并行执行&lt;code&gt;goroutines&lt;/code&gt;。&lt;br&gt;
-    
-    </summary>
-    
-      <category term="golang" scheme="http://www.grdtechs.com/categories/golang/"/>
-    
-    
-      <category term="concurrency" scheme="http://www.grdtechs.com/tags/concurrency/"/>
-    
-      <category term="golang" scheme="http://www.grdtechs.com/tags/golang/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>golang 并发concurrency 使用总结</title>
-    <link href="http://www.grdtechs.com/2016/02/17/go-concurrency-summarize/"/>
-    <id>http://www.grdtechs.com/2016/02/17/go-concurrency-summarize/</id>
-    <published>2016-02-17T13:47:51.000Z</published>
-    <updated>2016-11-28T08:30:35.464Z</updated>
-    
-    <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>go能处理高并发的根本原因在于执行go协程只需极少的栈内存(大概4~5KB),并且能根据需要动态增长和缩减占用的资源。<br><a id="more"></a></p>
-<h2 id="u9AD8_u5E76_u53D1_u7684_u672C_u8D28goroutine"><a href="#u9AD8_u5E76_u53D1_u7684_u672C_u8D28goroutine" class="headerlink" title="高并发的本质goroutine"></a>高并发的本质goroutine</h2><p>简单而言,<code>goroutine</code>就是一段代码，一个函数入口，以及在堆上为其分配的一个堆栈。所以它非常廉价，我们可以很轻松的创建上万个<code>goroutine</code>，但它们并不是被操作系统所调度执行,而是通过系统的线程来多路派遣这些函数的执行，使得每个用go关键字执行的函数可以运行成为一个单位协程。当一个协程阻塞的时候，调度器就会自动把其他协程安排到另外的线程中去执行，从而实现了程序无等待并行化运行。而且调度的开销非常小，一颗CPU调度的规模不下于每秒百万次，这使得在程序中能够创建大量的<code>goroutine</code>，实现高并发的同时，依旧能保持高性能。<br><code>goroutine</code>是通过通信来共享内存,go中是通过<code>Channel</code>来实现通信的，<code>Channel</code>本身就像一根管道，go就通过这根管道进行数据的传递,实现消息通信。先来看一个简单的示例：<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">c := <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="typename">bool</span>)</span><br><span class="line"><span class="keyword">go</span> <span class="keyword">func</span>() &#123;</span><br><span class="line">	fmt.Println(<span class="string">"Go concurrency"</span>)</span><br><span class="line">	c &lt;- <span class="constant">true</span></span><br><span class="line">	<span class="built_in">close</span>(c)</span><br><span class="line">&#125;()</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span>  v := <span class="keyword">range</span> c &#123;</span><br><span class="line">	fmt.Println(v)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<ul>
-<li>上面的代码首先创建一个<code>bool</code>的<code>Channel</code>对象<code>c</code>,然后通过<code>go</code>关键字执行一个<code>goroutine</code>,紧接着执行一个<code>for</code>循环;<code>for</code>会循环去读取<code>c</code>中的值，如果读取到值，则执行<code>for</code>循环体（打印v的值），没读取到则<code>for</code>被阻塞等待,直到读取到<code>c</code>中的值再去执行<code>for</code>循环体然后继续循环读取<code>c</code>，如果执行了<code>close(c)</code>把<code>Channel</code>对象<code>c</code>关闭了，那<code>for</code>循环就退出不执行了。 这就是通过<code>Channel</code>通信执行<code>goroutine</code>的一个简单示例。</li>
-<li><p>上面通过make这样初始化的<code>Channel</code>对象<code>c</code>是既可以写又可以被读取的双向通道, 有时候为了避免被误读误写操作，可以初始化一个单向的<code>Channel</code>对象。通过设置<code>Channel</code>的长度可以分为有缓冲和无缓冲两种<code>Channel</code>,无缓冲区的<code>Channel</code>,在等待读或等待写的过程中都会引起<code>同步阻塞</code>，而有缓冲区的<code>Channel</code>,可以看作<code>异步执行</code>,也可以认为控制为<code>同步执行</code>，只有当缓冲区被占用完了之后才会引起<code>阻塞</code>。</p>
-<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">c := <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="typename">int</span>, <span class="number">3</span>)  <span class="comment">//初始化缓冲区长度为3的Channel</span></span><br><span class="line"><span class="keyword">var</span> send <span class="keyword">chan</span>&lt;- <span class="typename">int</span> = c <span class="comment">//只写入的Channel</span></span><br><span class="line"><span class="keyword">var</span> recv &lt;-<span class="keyword">chan</span> <span class="typename">int</span> = c <span class="comment">//只读取的Channel</span></span><br></pre></td></tr></table></figure>
-<p>  <strong> 注意: </strong>  只读或只写的单向<code>Channel</code> 都需要借助其它<code>Channel</code>才有实际意义，定义一个只写入但是读取不出来的<code>Channel</code>没有任何用处。单向<code>Channel</code>用作函数形参用于防止参数在函数内部被误读误写是非常有帮助的。</p>
-</li>
-</ul>
-<h2 id="u5F00_u542F_u591A_u6838_u5E76_u884C_u5E76_u53D1_u6267_u884C"><a href="#u5F00_u542F_u591A_u6838_u5E76_u884C_u5E76_u53D1_u6267_u884C" class="headerlink" title="开启多核并行并发执行"></a>开启多核并行并发执行</h2><p>默认情况下，go所有的<code>goroutines</code>是在一个线程中执行的，而不是同时利用多核进行并行执行，或者通过切换时间片让出CPU进行并发执行。下面看一段示例：<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">func</span> main() &#123;</span><br><span class="line">	runtime.GOMAXPROCS(runtime.NumCPU())</span><br><span class="line">	wg := sync.WaitGroup&#123;&#125;</span><br><span class="line">	wg.Add(<span class="number">3</span>)</span><br><span class="line">	<span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">3</span>; i++ &#123;</span><br><span class="line">		<span class="keyword">go</span> GoPrint(&amp;wg)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	wg.Wait()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> GoPrint(wg *sync.WaitGroup) &#123;</span><br><span class="line">	<span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">3</span>; i++ &#123;</span><br><span class="line">		time.Sleep(time.Second)</span><br><span class="line">		fmt.Printf(<span class="string">"%d "</span>, i)</span><br><span class="line"></span><br><span class="line">	&#125;</span><br><span class="line">	wg.Done()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>目前只有显示设置了<code>runtime.GOMAXPROCS</code>,go才会开启多核并行执行<code>goroutines</code>, 如果在<code>GoPrint</code>方法中不加入<code>time.Sleep</code>，输出的结果将会是<code>0 1 2 0 1 2 0 1 2</code>，如果当前<code>goroutine</code>不发生阻塞，它是不会让出CPU给其他<code>goroutine</code>的, 所以在<code>GoPrint</code>中不加<code>time.Sleep</code>,输出会是一个一个<code>goroutine</code>进行的，而sleep函数则阻塞掉了 当前<code>goroutine</code>, 当前<code>goroutine</code>主动让其他<code>goroutine</code>执行, 所以形成了逻辑上的并行, 也就是并发。</p>
-<h2 id="go_u5E76_u53D1_u6267_u884C_u5B89_u5168_u95EE_u9898"><a href="#go_u5E76_u53D1_u6267_u884C_u5B89_u5168_u95EE_u9898" class="headerlink" title="go并发执行安全问题"></a>go并发执行安全问题</h2><p>go并发执行当多个<code>goroutine</code>同时访问一个共有的资源时，在不加锁的情况很容易出行数据不同步的问题，看一示例:<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">func</span> sell_tickets(wg *sync.WaitGroup, i <span class="typename">int</span>) &#123;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">for</span> total_tickets &gt; <span class="number">0</span> &#123;</span><br><span class="line"></span><br><span class="line">		mutex.Lock()</span><br><span class="line">		<span class="comment">// 如果有票就卖</span></span><br><span class="line">		<span class="keyword">if</span> total_tickets &gt; <span class="number">0</span> &#123;</span><br><span class="line">			time.Sleep(time.Duration(rand.Intn(<span class="number">5</span>)) * time.Millisecond)</span><br><span class="line">			<span class="comment">// 卖一张票</span></span><br><span class="line">			total_tickets--</span><br><span class="line">			fmt.Println(<span class="string">"id:"</span>, i, <span class="string">" ticket:"</span>, total_tickets)</span><br><span class="line">		&#125;</span><br><span class="line">		mutex.Unlock()</span><br><span class="line">	&#125;</span><br><span class="line">	wg.Done()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>上面是一个多<code>goroutine</code>并发买票的问题，比如当开启5个<code>goroutine</code>来卖100张票，如果不加锁，则有可能会出行多出一些不存在的票的问题。所以当并发访问公有资源时要注意加锁保护公有资源属性修改的唯一性和访问时数据同步问题。<br><a href="https://github.com/researchlab/golearning/blob/master/concurrency/concurrency_sync_mutex.go" target="_blank" rel="external">示例代码</a></p>
-<h2 id="u6279_u91CF_u5904_u7406_u591A_u4E2AChannel_u64CD_u4F5C"><a href="#u6279_u91CF_u5904_u7406_u591A_u4E2AChannel_u64CD_u4F5C" class="headerlink" title="批量处理多个Channel操作"></a>批量处理多个Channel操作</h2><p>go通过<code>Select</code>可以同时处理多个<code>Channel</code>,<code>Select</code>默认是阻塞的，只有当监听的<code>Channel</code>中有发送或接收可以进行时才会运行,当同时有多个可用的<code>Channel</code>,<code>Select</code>按随机顺序进行处理,<code>Select</code>可以方便处理多<code>Channel</code>同时响应，在goroutine阻塞的情况也可以方便借助<code>Select</code>超时机制来解除阻塞僵局，下面来看一个示例:<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">func</span> getHttpRes(url <span class="typename">string</span>) (<span class="typename">string</span>, error) &#123;</span><br><span class="line">	res := <span class="built_in">make</span>(<span class="keyword">chan</span> *http.Response, <span class="number">1</span>)</span><br><span class="line">	httpError := <span class="built_in">make</span>(<span class="keyword">chan</span> *error)</span><br><span class="line">	<span class="keyword">go</span> <span class="keyword">func</span>() &#123;</span><br><span class="line">		resp, err := http.Get(url)</span><br><span class="line">		<span class="keyword">if</span> err != <span class="constant">nil</span> &#123;</span><br><span class="line">			httpError &lt;- &amp;err</span><br><span class="line">		&#125;</span><br><span class="line">		res &lt;- resp</span><br><span class="line">	&#125;()</span><br><span class="line"></span><br><span class="line">	<span class="keyword">for</span> &#123;</span><br><span class="line">		<span class="keyword">select</span> &#123;</span><br><span class="line">		<span class="keyword">case</span> r := &lt;-res:</span><br><span class="line">			result, err := ioutil.ReadAll(r.Body)</span><br><span class="line">			<span class="keyword">defer</span> r.Body.Close()</span><br><span class="line">			<span class="keyword">return</span> <span class="typename">string</span>(result), err</span><br><span class="line">		<span class="keyword">case</span> err := &lt;-httpError:</span><br><span class="line">			<span class="keyword">return</span> <span class="string">"err"</span>, *err</span><br><span class="line">		<span class="keyword">case</span> &lt;-time.After(<span class="number">2000</span> * time.Millisecond):</span><br><span class="line">			<span class="keyword">return</span> <span class="string">"Timed out"</span>, errors.New(<span class="string">"Timed out"</span>)</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>发起http请求之后通常会有三种状况:1.访问成功，返回内容值;2.访问失败，返回错误信息;3.访问超时，返回超时。上面的代码中利用<code>Select</code>很方便的处理了go并发执行中多可用<code>Channel</code>的处理问题，通过设置超时，帮助程序跳出超时等待的僵局。<br><a href="https://github.com/researchlab/golearning/blob/master/concurrency/select_timeout.go" target="_blank" rel="external">示例代码</a></p>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;h2 id=&quot;u524D_u8A00&quot;&gt;&lt;a href=&quot;#u524D_u8A00&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h2&gt;&lt;p&gt;go能处理高并发的根本原因在于执行go协程只需极少的栈内存(大概4~5KB),并且能根据需要动态增长和缩减占用的资源。&lt;br&gt;
     
     </summary>
     
