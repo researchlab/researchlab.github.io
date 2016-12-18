@@ -4,23 +4,23 @@
 <head>
   <meta charset="UTF-8">
   
-    <title>golang xorm库使用总结 | 朴实的一线攻城狮</title>
+    <title>安装golang工具包软件 | 朴实的一线攻城狮</title>
     <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
     
     <meta name="author" content="Lee Hong">
     
 
     
-    <meta name="description" content="前言XORM是一个简单而强大的Go语言ORM(Object Relational Mapping)库,通过调用XORM提供简单丰富的API接口,可以简化便捷的完成对数据库的各类操作。XORM目前已经支持所有主流关系型数据库,如Mysql,SQLite,Oracle,Postgres等。">
+    <meta name="description" content="前言golang tool chains 提供了很多好用的工具， 但是如果直接安装的话，大多数需要翻墙才能安装， 而且比较麻烦； 本文记录一种不需要翻墙就能顺利安装相应的工具">
 <meta property="og:type" content="article">
-<meta property="og:title" content="golang xorm库使用总结">
-<meta property="og:url" content="http://www.grdtechs.com/2016/01/21/go-xorm-summarize/index.html">
+<meta property="og:title" content="安装golang工具包软件">
+<meta property="og:url" content="http://www.grdtechs.com/2016/12/19/go-install-binaries/index.html">
 <meta property="og:site_name" content="朴实的一线攻城狮">
-<meta property="og:description" content="前言XORM是一个简单而强大的Go语言ORM(Object Relational Mapping)库,通过调用XORM提供简单丰富的API接口,可以简化便捷的完成对数据库的各类操作。XORM目前已经支持所有主流关系型数据库,如Mysql,SQLite,Oracle,Postgres等。">
+<meta property="og:description" content="前言golang tool chains 提供了很多好用的工具， 但是如果直接安装的话，大多数需要翻墙才能安装， 而且比较麻烦； 本文记录一种不需要翻墙就能顺利安装相应的工具">
 <meta property="og:updated_time" content="2016-12-18T16:34:26.458Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="golang xorm库使用总结">
-<meta name="twitter:description" content="前言XORM是一个简单而强大的Go语言ORM(Object Relational Mapping)库,通过调用XORM提供简单丰富的API接口,可以简化便捷的完成对数据库的各类操作。XORM目前已经支持所有主流关系型数据库,如Mysql,SQLite,Oracle,Postgres等。">
+<meta name="twitter:title" content="安装golang工具包软件">
+<meta name="twitter:description" content="前言golang tool chains 提供了很多好用的工具， 但是如果直接安装的话，大多数需要翻墙才能安装， 而且比较麻烦； 本文记录一种不需要翻墙就能顺利安装相应的工具">
 
     
     <link rel="alternative" href="/atom.xml" title="朴实的一线攻城狮" type="application/atom+xml">
@@ -73,14 +73,14 @@
 		<header class="article-info clearfix">
   <h1 itemprop="name">
     
-      <a href="/2016/01/21/go-xorm-summarize/" title="golang xorm库使用总结" itemprop="url">golang xorm库使用总结</a>
+      <a href="/2016/12/19/go-install-binaries/" title="安装golang工具包软件" itemprop="url">安装golang工具包软件</a>
   </h1>
   <p class="article-author">By
        
 		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
 		
   <p class="article-time">
-    <time datetime="2016-01-21T17:50:07.000Z" itemprop="datePublished"> 发表于 2016-01-21</time>
+    <time datetime="2016-12-19T00:18:37.000Z" itemprop="datePublished"> 发表于 2016-12-19</time>
     
   </p>
 </header>
@@ -89,12 +89,22 @@
 		<div id="toc" class="toc-article">
 			<strong class="toc-title">文章目录</strong>
 		
-			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#u524D_u8A00"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u5B89_u88C5_u53CA_u7279_u6027"><span class="toc-number">2.</span> <span class="toc-text">安装及特性</span></a></li></ol>
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#u524D_u8A00"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u5B89_u88C5"><span class="toc-number">2.</span> <span class="toc-text">安装</span></a></li></ol>
 		
 		</div>
 		
-		<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p><a href="https://github.com/go-xorm/xorm" target="_blank" rel="external">XORM</a>是一个简单而强大的Go语言<code>ORM(Object Relational Mapping)</code>库,通过调用<code>XORM</code>提供简单丰富的API接口,可以简化便捷的完成对数据库的各类操作。<code>XORM</code>目前已经支持所有主流关系型数据库,如Mysql,SQLite,Oracle,Postgres等。<br><a id="more"></a></p>
-<h2 id="u5B89_u88C5_u53CA_u7279_u6027"><a href="#u5B89_u88C5_u53CA_u7279_u6027" class="headerlink" title="安装及特性"></a>安装及特性</h2><p><code>XORM</code>的安装很简单， 具体可参看<a href="http://xorm.io/" target="_blank" rel="external">官网安装</a>。<br>未完待续</p>
+		<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>golang tool chains 提供了很多好用的工具， 但是如果直接安装的话，大多数需要翻墙才能安装， 而且比较麻烦； 本文记录一种不需要翻墙就能顺利安装相应的工具</p>
+<a id="more"></a>
+<h2 id="u5B89_u88C5"><a href="#u5B89_u88C5" class="headerlink" title="安装"></a>安装</h2><p>不需要翻墙安装相应的golang tool chains，具体步骤如下:</p>
+<ol>
+<li><p>假设<code>GOPATH=/path/to/proj_go/</code>,在<code>/path/to/proj_go/src/</code>目录下新建<code>golang.org/x/</code>目录，进入<code>/path/to/proj_go/src/golang.org/x/</code>目录下载<code>tools</code>目录，下载命令如下:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$git</span> <span class="built_in">clone</span> https://github.com/golang/tools.git</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>通过<code>go install</code>命令直接安装相应的tools, 比如安装<code>guru</code>工具，<br>$cd <code>/path/to/proj_go/bin</code>目录， 然后安装<code>go install ../src/golang.org/x/tools/cmd/guru</code> 直接安装即可， </p>
+</li>
+<li><p>同样的方法也可以安装<code>tools</code>下得任何工具.</p>
+</li>
+</ol>
   
 	</div>
 		<div style="padding: 10px 44px 30px 44px;" >
@@ -104,8 +114,8 @@
 </div>
 <div>
  <p style="margin-top:0px;">作者署名：<b><a target="_blank" href="http://www.grdtechs.com/">朴实的一线攻城狮</a></b>
-<br />本文标题：<b><a href="/2016/01/21/go-xorm-summarize/" target="_blank" title="golang xorm库使用总结">golang xorm库使用总结</a></b> 
-<br />本文出处：<b><a href="/2016/01/21/go-xorm-summarize/" target="_blank" title="golang xorm库使用总结">http://www.grdtechs.com/2016/01/21/go-xorm-summarize/</a></b>
+<br />本文标题：<b><a href="/2016/12/19/go-install-binaries/" target="_blank" title="安装golang工具包软件">安装golang工具包软件</a></b> 
+<br />本文出处：<b><a href="/2016/12/19/go-install-binaries/" target="_blank" title="安装golang工具包软件">http://www.grdtechs.com/2016/12/19/go-install-binaries/</a></b>
 <br />版权声明：本文由<b><a href="/about" target="_blank" title="Lee Hong">Lee Hong</a></b>创作和发表,采用<b>署名(BY)</b>-<b>非商业性使用(NC)</b>-<b>相同方式共享(SA)</b>国际许可协议进行许可,转载请注明作者及出处, 否则保留追究法律责任的权利。 </p>
 </div>
 </div>
@@ -123,7 +133,7 @@
 
   <div class="article-tags">
   
-  <span></span> <a href="/tags/golang/">golang</a><a href="/tags/xorm/">xorm</a>
+  <span></span> <a href="/tags/golang/">golang</a>
   </div>
 
 </div>
@@ -168,19 +178,11 @@
 	
 <nav class="article-nav clearfix">
  
- <div class="prev" >
- <a href="/2016/01/23/go-methods/" title="[译]GO BOOTCAMP 第六章：方法">
-  <strong>上一篇：</strong><br/>
-  <span>
-  [译]GO BOOTCAMP 第六章：方法</span>
-</a>
-</div>
-
 
 <div class="next">
-<a href="/2016/01/21/go-control/"  title="[译]GO BOOTCAMP 第五章：控制流程">
+<a href="/2016/12/17/go-cache-component/"  title="go实现缓存组件">
  <strong>下一篇：</strong><br/> 
- <span>[译]GO BOOTCAMP 第五章：控制流程
+ <span>go实现缓存组件
 </span>
 </a>
 </div>
@@ -189,7 +191,7 @@
 
 	
 <section id="comments" class="comment">
-	<div class="ds-thread" data-thread-key="2016/01/21/go-xorm-summarize/" data-title="golang xorm库使用总结" data-url="http://www.grdtechs.com/2016/01/21/go-xorm-summarize/"></div>
+	<div class="ds-thread" data-thread-key="2016/12/19/go-install-binaries/" data-title="安装golang工具包软件" data-url="http://www.grdtechs.com/2016/12/19/go-install-binaries/"></div>
 </section>
 
 
