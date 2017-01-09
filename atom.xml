@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://www.grdtechs.com/"/>
-  <updated>2016-12-18T16:38:50.571Z</updated>
+  <updated>2017-01-09T02:26:12.834Z</updated>
   <id>http://www.grdtechs.com/</id>
   
   <author>
@@ -16,11 +16,33 @@
   <generator uri="http://hexo.io/">Hexo</generator>
   
   <entry>
+    <title>总结printf 格式化标识</title>
+    <link href="http://www.grdtechs.com/2017/01/06/go-printf-format/"/>
+    <id>http://www.grdtechs.com/2017/01/06/go-printf-format/</id>
+    <published>2017-01-06T15:49:13.000Z</published>
+    <updated>2017-01-09T02:26:12.834Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>项目中总是时不时的要使用<code>fmt.Printf</code>或<code>fmt.Sprintf</code>来处理某些数据类型,总结一下常用的标识符用途及场景.</p>
+<h2 id="u6807_u8BC6_u7B26_u7528_u9014_u53CA_u573A_u666F"><a href="#u6807_u8BC6_u7B26_u7528_u9014_u53CA_u573A_u666F" class="headerlink" title="标识符用途及场景"></a>标识符用途及场景</h2><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"><span class="keyword">import</span> <span class="string">"fmt"</span></span><br><span class="line"><span class="keyword">import</span> <span class="string">"os"</span></span><br><span class="line"><span class="keyword">type</span> point <span class="keyword">struct</span> &#123;</span><br><span class="line">    x, y <span class="typename">int</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">func</span> main() &#123;</span><br><span class="line"><span class="comment">//Go 为常规 Go 值的格式化设计提供了多种打印方式。例如，这里打印了 point 结构体的一个实例。</span></span><br><span class="line">    p := point&#123;<span class="number">1</span>, <span class="number">2</span>&#125;</span><br><span class="line">    fmt.Printf(<span class="string">"%v\n"</span>, p) <span class="comment">// &#123;1 2&#125;</span></span><br><span class="line"><span class="comment">//如果值是一个结构体，%+v 的格式化输出内容将包括结构体的字段名。</span></span><br><span class="line">    fmt.Printf(<span class="string">"%+v\n"</span>, p) <span class="comment">// &#123;x:1 y:2&#125;</span></span><br><span class="line"><span class="comment">//%#v 形式则输出这个值的 Go 语法表示。例如，值的运行源代码片段。</span></span><br><span class="line">    fmt.Printf(<span class="string">"%#v\n"</span>, p) <span class="comment">// main.point&#123;x:1, y:2&#125;</span></span><br><span class="line"><span class="comment">//需要打印值的类型，使用 %T。</span></span><br><span class="line">    fmt.Printf(<span class="string">"%T\n"</span>, p) <span class="comment">// main.point</span></span><br><span class="line"><span class="comment">//格式化布尔值是简单的。</span></span><br><span class="line">    fmt.Printf(<span class="string">"%t\n"</span>, <span class="constant">true</span>)</span><br><span class="line"><span class="comment">//格式化整形数有多种方式，使用 %d进行标准的十进制格式化。</span></span><br><span class="line">    fmt.Printf(<span class="string">"%d\n"</span>, <span class="number">123</span>)</span><br><span class="line"><span class="comment">//这个输出二进制表示形式。</span></span><br><span class="line">    fmt.Printf(<span class="string">"%b\n"</span>, <span class="number">14</span>)</span><br><span class="line">这个输出给定整数的对应字符。</span><br><span class="line">    fmt.Printf(<span class="string">"%c\n"</span>, <span class="number">33</span>)</span><br><span class="line">%x 提供十六进制编码。</span><br><span class="line">    fmt.Printf(<span class="string">"%x\n"</span>, <span class="number">456</span>)</span><br><span class="line"><span class="comment">//对于浮点型同样有很多的格式化选项。使用 %f 进行最基本的十进制格式化。</span></span><br><span class="line">    fmt.Printf(<span class="string">"%f\n"</span>, <span class="number">78.9</span>)</span><br><span class="line"><span class="comment">//%e 和 %E 将浮点型格式化为（稍微有一点不同的）科学技科学记数法表示形式。</span></span><br><span class="line">    fmt.Printf(<span class="string">"%e\n"</span>, <span class="number">123400000.0</span>)</span><br><span class="line">    fmt.Printf(<span class="string">"%E\n"</span>, <span class="number">123400000.0</span>)</span><br><span class="line"><span class="comment">//使用 %s 进行基本的字符串输出。</span></span><br><span class="line">    fmt.Printf(<span class="string">"%s\n"</span>, <span class="string">"\"string\""</span>)</span><br><span class="line"><span class="comment">//像 Go 源代码中那样带有双引号的输出，使用 %q。</span></span><br><span class="line">    fmt.Printf(<span class="string">"%q\n"</span>, <span class="string">"\"string\""</span>)</span><br><span class="line"><span class="comment">//和上面的整形数一样，%x 输出使用 base-16 编码的字符串，每个字节使用 2 个字符表示。</span></span><br><span class="line">    fmt.Printf(<span class="string">"%x\n"</span>, <span class="string">"hex this"</span>)</span><br><span class="line"><span class="comment">//要输出一个指针的值，使用 %p。</span></span><br><span class="line">    fmt.Printf(<span class="string">"%p\n"</span>, &amp;p)</span><br><span class="line"><span class="comment">//当输出数字的时候，你将经常想要控制输出结果的宽度和精度，可以使用在 % 后面使用数字来控制输出宽度。默认结果使用右对齐并且通过空格来填充空白部分。</span></span><br><span class="line">    fmt.Printf(<span class="string">"|%6d|%6d|\n"</span>, <span class="number">12</span>, <span class="number">345</span>)</span><br><span class="line"><span class="comment">//你也可以指定浮点型的输出宽度，同时也可以通过 宽度.精度 的语法来指定输出的精度。</span></span><br><span class="line">    fmt.Printf(<span class="string">"|%6.2f|%6.2f|\n"</span>, <span class="number">1.2</span>, <span class="number">3.45</span>)</span><br><span class="line"><span class="comment">//要最对齐，使用 - 标志。</span></span><br><span class="line">    fmt.Printf(<span class="string">"|%-6.2f|%-6.2f|\n"</span>, <span class="number">1.2</span>, <span class="number">3.45</span>)</span><br><span class="line"><span class="comment">//你也许也想控制字符串输出时的宽度，特别是要确保他们在类表格输出时的对齐。这是基本的右对齐宽度表示。</span></span><br><span class="line">    fmt.Printf(<span class="string">"|%6s|%6s|\n"</span>, <span class="string">"foo"</span>, <span class="string">"b"</span>)</span><br><span class="line"><span class="comment">//要左对齐，和数字一样，使用 - 标志。</span></span><br><span class="line">    fmt.Printf(<span class="string">"|%-6s|%-6s|\n"</span>, <span class="string">"foo"</span>, <span class="string">"b"</span>)</span><br><span class="line"><span class="comment">//到目前为止，我们已经看过 Printf了，它通过 os.Stdout输出格式化的字符串。Sprintf 则格式化并返回一个字符串而不带任何输出。</span></span><br><span class="line">    s := fmt.Sprintf(<span class="string">"a %s"</span>, <span class="string">"string"</span>)</span><br><span class="line">    fmt.Println(s)</span><br><span class="line"><span class="comment">//你可以使用 Fprintf 来格式化并输出到 io.Writers而不是 os.Stdout。</span></span><br><span class="line">    fmt.Fprintf(os.Stderr, <span class="string">"an %s\n"</span>, <span class="string">"error"</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;u524D_u8A00&quot;&gt;&lt;a href=&quot;#u524D_u8A00&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h2&gt;&lt;p&gt;项目中总是时不时的要使用&lt;code&gt;fmt.Printf&lt;/code&gt;或&lt;code&gt;fmt.Sprint
+    
+    </summary>
+    
+      <category term="golang" scheme="http://www.grdtechs.com/categories/golang/"/>
+    
+    
+  </entry>
+  
+  <entry>
     <title>go实现缓存组件</title>
     <link href="http://www.grdtechs.com/2016/12/17/go-cache-component/"/>
     <id>http://www.grdtechs.com/2016/12/17/go-cache-component/</id>
     <published>2016-12-17T11:32:51.000Z</published>
-    <updated>2016-12-18T16:38:50.571Z</updated>
+    <updated>2017-01-09T02:26:12.834Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>总结用golang从分析，设计到实现一个可用的缓存组件。<br><a id="more"></a></p>
 <h2 id="u7F13_u5B58"><a href="#u7F13_u5B58" class="headerlink" title="缓存"></a>缓存</h2><ul>
@@ -116,7 +138,7 @@
     <link href="http://www.grdtechs.com/2016/11/23/uml-symbol-desc/"/>
     <id>http://www.grdtechs.com/2016/11/23/uml-symbol-desc/</id>
     <published>2016-11-23T11:47:43.000Z</published>
-    <updated>2016-12-18T16:38:50.571Z</updated>
+    <updated>2017-01-09T02:26:12.838Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>在UML的定义中，描述类和对象之间的关系，包括以下几种方式：依赖（<code>Dependency</code>）、关联（<code>Association</code>）、聚合（<code>Aggregation</code>）、组合（<code>Composition</code>）、泛化（<code>Generalization</code>）和实现（<code>Realization</code>）。现分别说明如下：<br><a id="more"></a></p>
 <h2 id="u5B9A_u4E49"><a href="#u5B9A_u4E49" class="headerlink" title="定义"></a>定义</h2><p>类图基本符号可拆分为四类:<code>线</code>(<code>虚线</code>和<code>实线</code>)，<code>箭头</code>，<code>三角</code>(<code>空心右三角</code>和<code>实心右三角</code>)，<code>菱形</code>(<code>空心菱形</code>和<code>实心菱形</code>); 由这些基本的图形进行组合构成了类图的基本符号。这里要注意这几个符号的顺序，代表了类与类之间关系的耦合程度, 越向右耦合度越高。</p>
@@ -247,7 +269,7 @@
     <link href="http://www.grdtechs.com/2016/11/23/go-dealwith-database-nullvalue/"/>
     <id>http://www.grdtechs.com/2016/11/23/go-dealwith-database-nullvalue/</id>
     <published>2016-11-23T11:40:54.000Z</published>
-    <updated>2016-12-18T16:38:50.571Z</updated>
+    <updated>2017-01-09T02:26:12.834Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>golang是强类型语言，在赋值和解析过程中需要先定义好数据类型，否在会报类型错误，下面总结在处理数据库表时遇到字段为空或零值的情况<br><a id="more"></a></p>
 <h2 id="u573A_u666F"><a href="#u573A_u666F" class="headerlink" title="场景"></a>场景</h2><p>假如存在如下没有指定<code>not null</code>的场合<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="operator"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> <span class="string">"users"</span> (</span><br><span class="line">    <span class="string">"id"</span> <span class="built_in">serial</span> <span class="keyword">not</span> <span class="literal">null</span> primary <span class="keyword">key</span>,</span><br><span class="line">    <span class="string">"name"</span> <span class="built_in">text</span>,</span><br><span class="line">    <span class="string">"age"</span> <span class="built_in">integer</span></span><br><span class="line">)</span></span><br></pre></td></tr></table></figure></p>
@@ -276,7 +298,7 @@
     <link href="http://www.grdtechs.com/2016/11/19/go-install-binaries/"/>
     <id>http://www.grdtechs.com/2016/11/19/go-install-binaries/</id>
     <published>2016-11-19T00:18:37.000Z</published>
-    <updated>2016-12-18T16:38:50.571Z</updated>
+    <updated>2017-01-09T02:26:12.834Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>golang tool chains 提供了很多好用的工具， 但是如果直接安装的话，大多数需要翻墙才能安装， 而且比较麻烦； 本文记录一种不需要翻墙就能顺利安装相应的工具的方法.</p>
 <a id="more"></a>
@@ -310,7 +332,7 @@
     <link href="http://www.grdtechs.com/2016/11/11/go-use-mysql/"/>
     <id>http://www.grdtechs.com/2016/11/11/go-use-mysql/</id>
     <published>2016-11-11T13:21:16.000Z</published>
-    <updated>2016-12-18T16:38:50.571Z</updated>
+    <updated>2017-01-09T02:26:12.834Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>Golang 提供了<code>database/sql</code>包用于对<code>SQL数据库</code>的访问, 作为操作数据库的入口对象<code>sql.DB</code>, 主要为我们提供了两个重要的功能:<br><a id="more"></a></p>
 <ul>
@@ -395,7 +417,7 @@
     <link href="http://www.grdtechs.com/2016/10/23/go-build-small-exec/"/>
     <id>http://www.grdtechs.com/2016/10/23/go-build-small-exec/</id>
     <published>2016-10-23T14:00:32.000Z</published>
-    <updated>2016-12-18T16:38:50.571Z</updated>
+    <updated>2017-01-09T02:26:12.834Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>尽管go1.7.3编译生成的可执行程序已经很小了,但是通过编译参数控制还能编译出更小的可执行文件，总结如下,<br><a id="more"></a></p>
 <h2 id="u52A0-ldflags_u53C2_u6570"><a href="#u52A0-ldflags_u53C2_u6570" class="headerlink" title="加-ldflags参数"></a>加-ldflags参数</h2><p>在程序编译的时候可以加上<code>-ldflags &quot;-s -w&quot;</code> 参数来优化编译程序, 其实通过去除部分连接和调试等信息来使得编译之后的执行程序更小,具体参数如下:</p>
@@ -433,7 +455,7 @@
     <link href="http://www.grdtechs.com/2016/10/16/mac-update-vim8-0/"/>
     <id>http://www.grdtechs.com/2016/10/16/mac-update-vim8-0/</id>
     <published>2016-10-16T23:08:56.000Z</published>
-    <updated>2016-12-18T16:38:50.571Z</updated>
+    <updated>2017-01-09T02:26:12.834Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>将mac自带的vim7.3 升级到vim8.0<br><a id="more"></a></p>
 <h2 id="u5347_u7EA7vim8-0"><a href="#u5347_u7EA7vim8-0" class="headerlink" title="升级vim8.0"></a>升级vim8.0</h2><ul>
@@ -491,7 +513,7 @@
     <link href="http://www.grdtechs.com/2016/10/16/close-ticker-correctly/"/>
     <id>http://www.grdtechs.com/2016/10/16/close-ticker-correctly/</id>
     <published>2016-10-16T14:27:39.000Z</published>
-    <updated>2016-12-18T16:38:50.571Z</updated>
+    <updated>2017-01-09T02:26:12.834Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>在<code>ticker</code>和<code>goroutine</code>组合使用中当调用<code>ticker.Stop()</code>关闭<code>ticker</code>之后，相应的<code>goroutine</code>中的<code>ticker.C</code>并没有停掉，下面总结一种优雅的方式关闭<code>ticker</code>.<br><a id="more"></a></p>
 <h2 id="u4F18_u96C5_u7684_u5173_u95EDticker"><a href="#u4F18_u96C5_u7684_u5173_u95EDticker" class="headerlink" title="优雅的关闭ticker"></a>优雅的关闭<code>ticker</code></h2><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">"fmt"</span></span><br><span class="line">	<span class="string">"time"</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> main() &#123;</span><br><span class="line">	Demo()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> Demo() &#123;</span><br><span class="line">	done := startTicker(PrintInfo)</span><br><span class="line">	time.Sleep(time.Duration(<span class="number">12</span>) * time.Second)</span><br><span class="line">	<span class="built_in">close</span>(done)</span><br><span class="line">	time.Sleep(time.Duration(<span class="number">1</span>) * time.Minute)</span><br><span class="line">	fmt.Println(<span class="string">"main finished"</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> startTicker(f <span class="keyword">func</span>()) <span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125; &#123;</span><br><span class="line">	done := <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;, <span class="number">1</span>)</span><br><span class="line">	<span class="keyword">go</span> <span class="keyword">func</span>() &#123;</span><br><span class="line">		ticker := time.NewTicker(<span class="number">5</span> * time.Second)</span><br><span class="line">		<span class="comment">//	ticker := time.NewTicker(5 * time.Minute)</span></span><br><span class="line">		<span class="keyword">defer</span> ticker.Stop()</span><br><span class="line"></span><br><span class="line">		<span class="keyword">for</span> &#123;</span><br><span class="line">			<span class="keyword">select</span> &#123;</span><br><span class="line">			<span class="keyword">case</span> &lt;-ticker.C:</span><br><span class="line">				f()</span><br><span class="line">			<span class="keyword">case</span> &lt;-done:</span><br><span class="line">				<span class="keyword">return</span></span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;()</span><br><span class="line">	<span class="keyword">return</span> done</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> PrintInfo() &#123;</span><br><span class="line">	fmt.Println(<span class="string">"hello"</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -516,7 +538,7 @@
     <link href="http://www.grdtechs.com/2016/09/07/go-postform/"/>
     <id>http://www.grdtechs.com/2016/09/07/go-postform/</id>
     <published>2016-09-07T16:00:32.000Z</published>
-    <updated>2016-12-18T16:38:50.571Z</updated>
+    <updated>2017-01-09T02:26:12.834Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>golang这边将<code>map</code>结构序列化通常采用<code>json.Marshal</code>和<code>json.Unmarshal</code>来做，但是在php server端还需要做<code>json</code>反序列化解析才能用， 用golang模拟表单提交, php server端则非常方便提取相应的数据字段.<br><a id="more"></a></p>
 <h2 id="u65B9_u6CD5"><a href="#u65B9_u6CD5" class="headerlink" title="方法"></a>方法</h2><p>方法是利用golang<code>net/http</code>包提供的<code>PostForm</code>提交post表单提交。<code>ParseForm</code>解析<code>URL</code>中的查询字符串，并将解析结果更新到<code>r.Form</code>字段。对于<code>POST</code>或<code>PUT</code>请求，<code>ParseForm</code>还会将<code>body</code>当作表单解析，并将结果既更新到<code>r.PostForm</code>也更新到<code>r.Form</code>。解析结果中，<code>POST</code>或<code>PUT</code>请求主体要优先于<code>URL</code>查询字符串（同名变量，主体的值在查询字符串的值前面）。如果请求的主体的大小没有被<code>MaxBytesReader</code>函数设定限制，其大小默认限制为开头10MB。</p>
@@ -548,7 +570,7 @@
     <link href="http://www.grdtechs.com/2016/08/02/php7-redis-install/"/>
     <id>http://www.grdtechs.com/2016/08/02/php7-redis-install/</id>
     <published>2016-08-02T18:56:05.000Z</published>
-    <updated>2016-12-18T16:38:50.571Z</updated>
+    <updated>2017-01-09T02:26:12.834Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>在<code>Ubuntu16.04</code>上， 安装<code>php7</code>的<code>redis</code>扩展, 记录安装过程。<br><a id="more"></a></p>
 <h3 id="u5B89_u88C5phpredis"><a href="#u5B89_u88C5phpredis" class="headerlink" title="安装phpredis"></a>安装phpredis</h3><p><code>Redis</code>已经有了<code>PHP7</code>版本，可以从<code>github</code> 上获取项目克隆，然后手动切换到 <code>php7</code> 分支即可安装</p>
@@ -578,7 +600,7 @@
     <link href="http://www.grdtechs.com/2016/07/30/php-mvc-1/"/>
     <id>http://www.grdtechs.com/2016/07/30/php-mvc-1/</id>
     <published>2016-07-30T16:34:45.000Z</published>
-    <updated>2016-12-18T16:38:50.571Z</updated>
+    <updated>2017-01-09T02:26:12.834Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>尽管MVC(model view controller pattern)模式在<code>PHP</code>web开发中很受欢迎，但是网上很难找到一套代码简单又能清楚阐述<code>PHP MVC</code>模式的案例，本文希望通过理论和代码实践简单阐述<code>PHP MVC</code>模式。</p>
 <a id="more"></a>
@@ -643,7 +665,7 @@
     <link href="http://www.grdtechs.com/2016/07/10/browse-refresh-saveinputolderval/"/>
     <id>http://www.grdtechs.com/2016/07/10/browse-refresh-saveinputolderval/</id>
     <published>2016-07-10T18:22:43.000Z</published>
-    <updated>2016-12-18T16:38:50.571Z</updated>
+    <updated>2017-01-09T02:26:12.834Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>html页面中的input框如果在浏览器刷新前有值，怎么在刷新后依然保留这个值不被清空呢？下面用<code>setCookie</code>的方案来解决这个问题.<br><a id="more"></a><br>首选判断input框中有值时,<code>setcookie</code>, 每次刷新浏览器时，读取<code>Cookie</code>值,如果存在<code>Cookie</code>值，则用此值初始化input值。</p>
 <h2 id="u7EAFjs_u5B9E_u73B0"><a href="#u7EAFjs_u5B9E_u73B0" class="headerlink" title="纯js实现"></a>纯js实现</h2><h3 id="u8BBE_u7F6ECookie"><a href="#u8BBE_u7F6ECookie" class="headerlink" title="设置Cookie"></a>设置Cookie</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span><br><span class="line">* @cname  cookie name </span><br><span class="line">* @cvalue cookie value </span><br><span class="line">* @ exdays cookie expires(天)</span><br><span class="line">*/</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">setCookie</span>(<span class="params">cname,cvalue,exdays</span>)</span><br><span class="line"></span>&#123;</span><br><span class="line">	<span class="keyword">if</span>(!(<span class="built_in">document</span>.cookie || navigator.cookieEnabled))</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="built_in">console</span>.log(<span class="string">'浏览器 cookie 未打开!'</span>);</span><br><span class="line">	&#125; </span><br><span class="line"></span><br><span class="line">	<span class="keyword">var</span> d = <span class="keyword">new</span> <span class="built_in">Date</span>();</span><br><span class="line">	d.setTime(d.getTime()+(exdays*<span class="number">24</span>*<span class="number">60</span>*<span class="number">60</span>*<span class="number">1000</span>));</span><br><span class="line">	<span class="keyword">var</span> expires = <span class="string">"expires="</span>+d.toGMTString();</span><br><span class="line">	<span class="built_in">document</span>.cookie = cname+<span class="string">"="</span>+cvalue+<span class="string">"; "</span>+expires;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -693,7 +715,7 @@
     <link href="http://www.grdtechs.com/2016/07/10/go-setcookie/"/>
     <id>http://www.grdtechs.com/2016/07/10/go-setcookie/</id>
     <published>2016-07-10T16:51:56.000Z</published>
-    <updated>2016-12-18T16:38:50.571Z</updated>
+    <updated>2017-01-09T02:26:12.834Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p><code>Go</code>web开发中，经常需要设置获取cookies, 不管是从client端设置获取还是server设置获取，其实都差不多，下面就总结一下常用的方法。<br><a id="more"></a></p>
 <h2 id="golang_u4E2Dcookie__u8BE6_u7EC6_u5B9A_u4E49"><a href="#golang_u4E2Dcookie__u8BE6_u7EC6_u5B9A_u4E49" class="headerlink" title="golang中cookie 详细定义"></a>golang中cookie 详细定义</h2><p>golang 官方文档中对<code>Cookie</code>结构的定义<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> Cookie <span class="keyword">struct</span> &#123;</span><br><span class="line">    Name       <span class="typename">string</span></span><br><span class="line">    Value      <span class="typename">string</span></span><br><span class="line">    Path       <span class="typename">string</span></span><br><span class="line">    Domain     <span class="typename">string</span></span><br><span class="line">    Expires    time.Time</span><br><span class="line">    RawExpires <span class="typename">string</span></span><br><span class="line">    <span class="comment">// MaxAge=0表示未设置Max-Age属性</span></span><br><span class="line">    <span class="comment">// MaxAge&lt;0表示立刻删除该cookie，等价于"Max-Age: 0"</span></span><br><span class="line">    <span class="comment">// MaxAge&gt;0表示存在Max-Age属性，单位是秒</span></span><br><span class="line">    MaxAge   <span class="typename">int</span></span><br><span class="line">    Secure   <span class="typename">bool</span></span><br><span class="line">    HttpOnly <span class="typename">bool</span></span><br><span class="line">    Raw      <span class="typename">string</span></span><br><span class="line">    Unparsed []<span class="typename">string</span> <span class="comment">// 未解析的“属性-值”对的原始文本</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
@@ -748,7 +770,7 @@
     <link href="http://www.grdtechs.com/2016/06/17/jsonfmt/"/>
     <id>http://www.grdtechs.com/2016/06/17/jsonfmt/</id>
     <published>2016-06-17T10:55:21.000Z</published>
-    <updated>2016-12-18T16:38:50.571Z</updated>
+    <updated>2017-01-09T02:26:12.834Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p><code>json</code>字符串在html用js美化输出使用总结。<br><a id="more"></a></p>
 <h2 id="JSON-stringify_28_29_u51FD_u6570_u539F_u578B"><a href="#JSON-stringify_28_29_u51FD_u6570_u539F_u578B" class="headerlink" title="JSON.stringify()函数原型"></a>JSON.stringify()函数原型</h2><p><strong>语法：</strong><br>　　<code>JSON.stringify(value [, replacer] [, space])</code></p>
@@ -782,7 +804,7 @@
     <link href="http://www.grdtechs.com/2016/06/14/go-time-summary/"/>
     <id>http://www.grdtechs.com/2016/06/14/go-time-summary/</id>
     <published>2016-06-14T14:05:28.000Z</published>
-    <updated>2016-12-18T16:38:50.571Z</updated>
+    <updated>2017-01-09T02:26:12.834Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p><code>golang</code> 中经常需要格式化时间和日期来满足不同的业务需求,下面总结格式化时间日期中遇到的问题。<br><a id="more"></a></p>
 <h2 id="golang_time_u5305__u65F6_u95F4_u65E5_u671F_u683C_u5F0F_u5316_u5B9A_u4E49"><a href="#golang_time_u5305__u65F6_u95F4_u65E5_u671F_u683C_u5F0F_u5316_u5B9A_u4E49" class="headerlink" title="golang time包 时间日期格式化定义"></a>golang time包 时间日期格式化定义</h2><p>go 的time package 提供了time.Format函数，用来对时间进行格式化输出;类似的还有time.Parse用来解析字符串类型的时间到time.Time。这是两个互逆的函数。</p>
@@ -862,7 +884,7 @@
     <link href="http://www.grdtechs.com/2016/05/24/comparison-of-Go-Vendoring-Tools/"/>
     <id>http://www.grdtechs.com/2016/05/24/comparison-of-Go-Vendoring-Tools/</id>
     <published>2016-05-24T14:03:36.000Z</published>
-    <updated>2016-12-18T16:38:50.571Z</updated>
+    <updated>2017-01-09T02:26:12.834Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>golang1.5版本开始支持第三方包到依赖管理,当多个项目在同一个<code>GOPATH</code>下，每个项目包含到第三方包通过<code>go get</code>命令都会<code>get</code>到<code>GOPATH</code>下到<code>src</code>目录中，而不是各个项目的文件夹中，这就导致第三方包的不同版本不能同时被<code>GOPATH</code>下到多个项目使用，从<code>golang</code>需要设置<code>GOPATH</code>来看,<code>golang</code>其实把每个项目当作一个个独立的第三包来看待。<br><a id="more"></a><br>关于<code>golang</code>包管理工具的topic, 在<code>golang</code>的官方wiki要有一篇总结对比的文章:<a href="https://github.com/golang/go/wiki/PackageManagementTools" target="_blank" rel="external">PackageManagementTools</a>。下面主要就项目中用过的<code>godep</code>,<code>govendor</code>,<code>glide</code>做一个简要的对比分析。</p>
 <h2 id="godep"><a href="#godep" class="headerlink" title="godep"></a>godep</h2><p><a href="https://github.com/tools/godep" target="_blank" rel="external">godep</a> helps build packages reproducibly by fixing their dependencies.</p>
@@ -940,7 +962,7 @@
     <link href="http://www.grdtechs.com/2016/05/08/travis-ci-deploy-hexo-blog/"/>
     <id>http://www.grdtechs.com/2016/05/08/travis-ci-deploy-hexo-blog/</id>
     <published>2016-05-08T21:48:40.000Z</published>
-    <updated>2016-12-18T16:38:50.571Z</updated>
+    <updated>2017-01-09T02:26:12.838Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>目前，自动化构建、持续集成的理念在整个计算行业非常的流行，大家更愿意去使用自动化代替手动，从而提高效率。<code>Travis CI</code>就是一个在线的、分布式的持续集成服务，用来构建及测试在GitHub托管的代码。利用Travis CI 会在每一次push后生成一个虚拟机来执行事先安排好的自动构建任务，从来进行发布。本文就要用<code>Travis CI</code>来自动构建<code>Hexo</code>博客。<br><a id="more"></a></p>
 <h2 id="u5B89_u88C5Hexo"><a href="#u5B89_u88C5Hexo" class="headerlink" title="安装Hexo"></a>安装Hexo</h2><ul>
@@ -1054,7 +1076,7 @@
     <link href="http://www.grdtechs.com/2016/03/29/gin-setcookie/"/>
     <id>http://www.grdtechs.com/2016/03/29/gin-setcookie/</id>
     <published>2016-03-29T01:48:56.000Z</published>
-    <updated>2016-12-18T16:38:50.571Z</updated>
+    <updated>2017-01-09T02:26:12.834Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>可以操作<code>Cookie</code>的<code>Http</code>头有两个:<code>Set-Cookie</code>和<code>Cookie</code>。<code>Set-Cookie</code>由服务器发送，它包含在响应请求的头部中。它用于在客户端创建一个<code>Cookie</code>。<code>Cookie</code>头由客户端发送，包含在<code>HTTP</code>请求的头部中。<br><a id="more"></a></p>
 <font color="red"><strong>注意：<br>1.只有cookie的domain和path与请求的URL匹配才会发送这个cookie;<br>2.客户端发送cookie信息给服务器只发送键-值对到服务器，cookie的属性是不会发送给服务器的。</strong></font>
@@ -1090,7 +1112,7 @@
     <link href="http://www.grdtechs.com/2016/03/24/go-type-convert/"/>
     <id>http://www.grdtechs.com/2016/03/24/go-type-convert/</id>
     <published>2016-03-24T02:06:54.000Z</published>
-    <updated>2016-12-18T16:38:50.571Z</updated>
+    <updated>2017-01-09T02:26:12.834Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p><code>Go</code>的数据类型很多都需要显示转换才能使用,比如<code>string</code>转<code>float64</code>指定精度等。转换中常用到的第三方包为<code>strconv</code>和<code>math</code>包。<br><a id="more"></a></p>
 <h2 id="u6574_u578B_u8F6C_u5B57_u7B26_u4E32"><a href="#u6574_u578B_u8F6C_u5B57_u7B26_u4E32" class="headerlink" title="整型转字符串"></a>整型转字符串</h2><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">strconv.Itoa(i) <span class="comment">//方法1</span></span><br><span class="line">strconv.FormatInt(<span class="typename">int64</span>(i),<span class="number">10</span>) <span class="comment">//方法2</span></span><br></pre></td></tr></table></figure>
@@ -1114,44 +1136,6 @@
     
     
       <category term="golang" scheme="http://www.grdtechs.com/tags/golang/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>golang 设计模式之observer使用总结</title>
-    <link href="http://www.grdtechs.com/2016/02/26/observer-pattern-in-go-md/"/>
-    <id>http://www.grdtechs.com/2016/02/26/observer-pattern-in-go-md/</id>
-    <published>2016-02-26T00:40:11.000Z</published>
-    <updated>2016-12-18T16:38:50.571Z</updated>
-    
-    <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>观察者(<code>Observer</code>)设计模式定义了对象间的一种一对多的依赖关系，以便一个对象的状态发生变化时，所有依赖于它的对象都得到通知并自动刷新。观察者模式将观察者和被观察的对象分离开,体现了面向对象设计中一个对象只做一件事情的原则，提高了应用程序的可维护性和重用性。<br><a id="more"></a></p>
-<h2 id="u5B9E_u73B0_u89C2_u5BDF_u8005_u6A21_u5F0F"><a href="#u5B9E_u73B0_u89C2_u5BDF_u8005_u6A21_u5F0F" class="headerlink" title="实现观察者模式"></a>实现观察者模式</h2><p>观察者模式有很多实现方式，从根本上说，该模式必须包含两个角色：观察者(Observer)和被观察对象(Subject)。</p>
-<p><center><img src="/imgs/observer_pattern.jpg" alt="observer_pattern"></center></p>
-<ul>
-<li><p>观察者<br>观察者（<code>Observer</code>）将自己注册到被观察对象（<code>Subject</code>）中，被观察对象将观察者存放在一个容器（<code>Container</code>）里。</p>
-</li>
-<li><p>被观察<br>被观察对象(<code>Subject</code>)发生了某种变化，从容器中得到所有注册过的观察者，将变化通知观察者(<code>notifyObservers</code>)。</p>
-</li>
-<li><p>撤销观察<br>观察者告诉被观察者要撤销观察，被观察者从容器中将观察者去除。<br><strong>观察者将自己注册到被观察者的容器中时，被观察者不应该过问观察者的具体类型，而是应该使用观察者的接口。</strong>这样的优点是：假定程序中还有别的观察者，那么只要这个观察者也是相同的接口实现即可。一个被观察者可以对应多个观察者，当被观察者发生变化的时候，它可以将消息一一通知给所有的观察者。基于接口，而不是具体的实现——这一点为程序提供了更大的灵活性。<br>下面通过构建一个股民(<code>Observer</code>)和他们关注的某支具体股票(<code>Subject</code>)案例分析,<br>首先观察者(<code>Observer</code>)要能注册/注销到某个被观察者(<code>Subject</code>)中，同时被观察者(<code>Subject</code>)发送变化时要能够通知到依赖它的观察者(<code>Observer</code>),由此我们需要声明一个被观察者(<code>Subject</code>)的接口：</p>
-<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// subject被观察者接口</span></span><br><span class="line"><span class="keyword">type</span> Subject <span class="keyword">interface</span> &#123;</span><br><span class="line">	Attach(Observer)</span><br><span class="line">	Detach(Observer)</span><br><span class="line">	Notify()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-</li>
-</ul>
-<p>遵循被观察者不应该过问观察者的具体类型，而是应该使用观察者的接口的原则，当被观察者(<code>Subject</code>)因自身改变通知观察者(<code>Observer</code>)改变时，应提供一个观察者(<code>Observer</code>)接口供被观察者(<code>Subject</code>)调用:<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// observer观察者</span></span><br><span class="line"><span class="keyword">type</span> Observer <span class="keyword">interface</span> &#123;</span><br><span class="line">	Update(Subject, <span class="keyword">interface</span>&#123;&#125;) <span class="comment">//更新</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>接口设计好之后，就需要通过具体的对象来实现这些接口，在这个案例中假定股民关注的是中国石油这只股票，那么股票就是观察者(<code>Observer</code>),而中国石油股票则是被观察者(<code>Subject</code>),具体结构如下：<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 具体observer观察者</span></span><br><span class="line"><span class="keyword">type</span> Investors <span class="keyword">struct</span> &#123;</span><br><span class="line">	<span class="comment">/*投资人*/</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 具体subject被观察者</span></span><br><span class="line"><span class="keyword">type</span> ChinaPetroleum <span class="keyword">struct</span> &#123;</span><br><span class="line">	oblist []Observer <span class="comment">//注册者链表</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;h2 id=&quot;u524D_u8A00&quot;&gt;&lt;a href=&quot;#u524D_u8A00&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h2&gt;&lt;p&gt;观察者(&lt;code&gt;Observer&lt;/code&gt;)设计模式定义了对象间的一种一对多的依赖关系，以便一个对象的状态发生变化时，所有依赖于它的对象都得到通知并自动刷新。观察者模式将观察者和被观察的对象分离开,体现了面向对象设计中一个对象只做一件事情的原则，提高了应用程序的可维护性和重用性。&lt;br&gt;
-    
-    </summary>
-    
-      <category term="go-pattern" scheme="http://www.grdtechs.com/categories/go-pattern/"/>
-    
-    
-      <category term="golang" scheme="http://www.grdtechs.com/tags/golang/"/>
-    
-      <category term="observer" scheme="http://www.grdtechs.com/tags/observer/"/>
     
   </entry>
   
