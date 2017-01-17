@@ -9,6 +9,8 @@ description:
 ## 前言
 项目中总是时不时的要使用`fmt.Printf`或`fmt.Sprintf`来处理某些数据类型,总结一下常用的标识符用途及场景.
 
+<!--more-->
+
 ## 标识符用途及场景
 ```golang
 package main
