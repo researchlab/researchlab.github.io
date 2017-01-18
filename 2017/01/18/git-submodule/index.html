@@ -4,23 +4,23 @@
 <head>
   <meta charset="UTF-8">
   
-    <title>优雅的关闭ticker | 朴实的一线攻城狮</title>
+    <title>git submodule使用总结 | 朴实的一线攻城狮</title>
     <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
     
     <meta name="author" content="Lee Hong">
     
 
     
-    <meta name="description" content="前言在ticker和goroutine组合使用中当调用ticker.Stop()关闭ticker之后，相应的goroutine中的ticker.C并没有停掉，下面总结一种优雅的方式关闭ticker.">
+    <meta name="description" content="前言现在golang已经可以通过vendor来管理第三方依赖包了，但是之前的一个老项目用的是git submodule来管理的，但是.gitsubmodule文件中只记录管理了项目的部分依赖包， 需要把还没有被管理的第三包也加上，下面总结使用git submodule的过程。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="优雅的关闭ticker">
-<meta property="og:url" content="http://www.grdtechs.com/2016/10/16/close-ticker-correctly/index.html">
+<meta property="og:title" content="git submodule使用总结">
+<meta property="og:url" content="http://www.grdtechs.com/2017/01/18/git-submodule/index.html">
 <meta property="og:site_name" content="朴实的一线攻城狮">
-<meta property="og:description" content="前言在ticker和goroutine组合使用中当调用ticker.Stop()关闭ticker之后，相应的goroutine中的ticker.C并没有停掉，下面总结一种优雅的方式关闭ticker.">
+<meta property="og:description" content="前言现在golang已经可以通过vendor来管理第三方依赖包了，但是之前的一个老项目用的是git submodule来管理的，但是.gitsubmodule文件中只记录管理了项目的部分依赖包， 需要把还没有被管理的第三包也加上，下面总结使用git submodule的过程。">
 <meta property="og:updated_time" content="2017-01-18T10:00:48.484Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="优雅的关闭ticker">
-<meta name="twitter:description" content="前言在ticker和goroutine组合使用中当调用ticker.Stop()关闭ticker之后，相应的goroutine中的ticker.C并没有停掉，下面总结一种优雅的方式关闭ticker.">
+<meta name="twitter:title" content="git submodule使用总结">
+<meta name="twitter:description" content="前言现在golang已经可以通过vendor来管理第三方依赖包了，但是之前的一个老项目用的是git submodule来管理的，但是.gitsubmodule文件中只记录管理了项目的部分依赖包， 需要把还没有被管理的第三包也加上，下面总结使用git submodule的过程。">
 
     
     <link rel="alternative" href="/atom.xml" title="朴实的一线攻城狮" type="application/atom+xml">
@@ -73,14 +73,14 @@
 		<header class="article-info clearfix">
   <h1 itemprop="name">
     
-      <a href="/2016/10/16/close-ticker-correctly/" title="优雅的关闭ticker" itemprop="url">优雅的关闭ticker</a>
+      <a href="/2017/01/18/git-submodule/" title="git submodule使用总结" itemprop="url">git submodule使用总结</a>
   </h1>
   <p class="article-author">By
        
 		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
 		
   <p class="article-time">
-    <time datetime="2016-10-16T14:27:39.000Z" itemprop="datePublished"> 发表于 2016-10-16</time>
+    <time datetime="2017-01-18T17:11:52.000Z" itemprop="datePublished"> 发表于 2017-01-18</time>
     
   </p>
 </header>
@@ -89,13 +89,28 @@
 		<div id="toc" class="toc-article">
 			<strong class="toc-title">文章目录</strong>
 		
-			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#u524D_u8A00"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u4F18_u96C5_u7684_u5173_u95EDticker"><span class="toc-number">2.</span> <span class="toc-text">优雅的关闭ticker</span></a></li></ol>
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#u524D_u8A00"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u6DFB_u52A0_u7B2C_u4E09_u65B9_u5305"><span class="toc-number">2.</span> <span class="toc-text">添加第三方包</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u5220_u9664_u7B2C_u4E09_u65B9_u5305"><span class="toc-number">3.</span> <span class="toc-text">删除第三方包</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u4E0B_u8F7D_u7684_u5DE5_u7A0B_u5E26_u6709submodule"><span class="toc-number">4.</span> <span class="toc-text">下载的工程带有submodule</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u95EE_u9898"><span class="toc-number">5.</span> <span class="toc-text">问题</span></a></li></ol>
 		
 		</div>
 		
-		<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>在<code>ticker</code>和<code>goroutine</code>组合使用中当调用<code>ticker.Stop()</code>关闭<code>ticker</code>之后，相应的<code>goroutine</code>中的<code>ticker.C</code>并没有停掉，下面总结一种优雅的方式关闭<code>ticker</code>.<br><a id="more"></a></p>
-<h2 id="u4F18_u96C5_u7684_u5173_u95EDticker"><a href="#u4F18_u96C5_u7684_u5173_u95EDticker" class="headerlink" title="优雅的关闭ticker"></a>优雅的关闭<code>ticker</code></h2><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">"fmt"</span></span><br><span class="line">	<span class="string">"time"</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> main() &#123;</span><br><span class="line">	Demo()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> Demo() &#123;</span><br><span class="line">	done := startTicker(PrintInfo)</span><br><span class="line">	time.Sleep(time.Duration(<span class="number">12</span>) * time.Second)</span><br><span class="line">	<span class="built_in">close</span>(done)</span><br><span class="line">	time.Sleep(time.Duration(<span class="number">1</span>) * time.Minute)</span><br><span class="line">	fmt.Println(<span class="string">"main finished"</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> startTicker(f <span class="keyword">func</span>()) <span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125; &#123;</span><br><span class="line">	done := <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;, <span class="number">1</span>)</span><br><span class="line">	<span class="keyword">go</span> <span class="keyword">func</span>() &#123;</span><br><span class="line">		ticker := time.NewTicker(<span class="number">5</span> * time.Second)</span><br><span class="line">		<span class="comment">//	ticker := time.NewTicker(5 * time.Minute)</span></span><br><span class="line">		<span class="keyword">defer</span> ticker.Stop()</span><br><span class="line"></span><br><span class="line">		<span class="keyword">for</span> &#123;</span><br><span class="line">			<span class="keyword">select</span> &#123;</span><br><span class="line">			<span class="keyword">case</span> &lt;-ticker.C:</span><br><span class="line">				f()</span><br><span class="line">			<span class="keyword">case</span> &lt;-done:</span><br><span class="line">				<span class="keyword">return</span></span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;()</span><br><span class="line">	<span class="keyword">return</span> done</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> PrintInfo() &#123;</span><br><span class="line">	fmt.Println(<span class="string">"hello"</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>上述代码通过<code>startTicker</code>创建一个<code>ticker</code>, 当想要关闭这个<code>ticker</code>并同时退出对应<code>goroutine</code>中的<code>for</code>时，可以直接<code>close()</code>，发送<code>done</code>信号直接返回退出<code>startTicker</code>即可.</p>
+		<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>现在golang已经可以通过<code>vendor</code>来管理第三方依赖包了，但是之前的一个老项目用的是<code>git submodule</code>来管理的，但是<code>.gitsubmodule</code>文件中只记录管理了项目的部分依赖包， 需要把还没有被管理的第三包也加上，下面总结使用<code>git submodule</code>的过程。<br><a id="more"></a></p>
+<h2 id="u6DFB_u52A0_u7B2C_u4E09_u65B9_u5305"><a href="#u6DFB_u52A0_u7B2C_u4E09_u65B9_u5305" class="headerlink" title="添加第三方包"></a>添加第三方包</h2><p>为当前工程添加submodule，命令如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git submodule add 仓库地址 保存路经路径</span><br></pre></td></tr></table></figure>
+<p>例如要为gomail包添加<code>submodule</code>管理，<br>gomail包 仓库地址: <code>https://github.com/go-gomail/gomail.git</code><br>gomail包要保存在项目里的路经为: <code>src/github.com/go-gomail/gomail</code>, 则命令为:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git submodule add https://github.com/go-gomail/gomail   src/github.com/go-gomail/gomail</span><br></pre></td></tr></table></figure>
+<p>但是老项目遇到的情况是在保存路经<code>src/github.com/go-gomail/gomail</code>中已经存在<code>gomail</code>, 这里只是需要把这个第三包用<code>git submodule</code>记录下来编译管理， 所以需要加一个强制参数， 则命令为如下:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git submodule add <span class="operator">-f</span> https://github.com/go-gomail/gomail   src/github.com/go-gomail/gomail</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>其中，仓库地址是指子模块仓库地址，路径指将子模块放置在当前工程下的路径。<br>注意：路径不能以 / 结尾（会造成修改不生效）、不能是现有工程已有的目录（不能順利 Clone）</p>
+</blockquote>
+<p>命令执行完成，会在当前工程根路径下生成一个名为<code>.gitmodules</code>的文件，其中记录了子模块的信息。添加完成以后，再将子模块所在的文件夹添加到工程中即可。</p>
+<h2 id="u5220_u9664_u7B2C_u4E09_u65B9_u5305"><a href="#u5220_u9664_u7B2C_u4E09_u65B9_u5305" class="headerlink" title="删除第三方包"></a>删除第三方包</h2><p>submodule的删除稍微麻烦点:首先，要在“.gitmodules”文件中删除相应配置信息。然后，执行“git rm –cached ”命令将子模块所在的文件从git中删除。</p>
+<h2 id="u4E0B_u8F7D_u7684_u5DE5_u7A0B_u5E26_u6709submodule"><a href="#u4E0B_u8F7D_u7684_u5DE5_u7A0B_u5E26_u6709submodule" class="headerlink" title="下载的工程带有submodule"></a>下载的工程带有submodule</h2><p>当使用git clone下来的工程中带有submodule时，初始的时候，submodule的内容并不会自动下载下来的，此时，只需执行如下命令：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git submodule update --init --recursive</span><br></pre></td></tr></table></figure></p>
+<p>即可将子模块内容下载下来后工程才不会缺少相应的文件。</p>
+<h2 id="u95EE_u9898"><a href="#u95EE_u9898" class="headerlink" title="问题"></a>问题</h2><p>当第三包被<code>git submodule</code>记录之后，<code>git status</code>命令会出现下面的情况,<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ git status vendor | grep modified:</span><br><span class="line"><span class="comment">#       modified:   vendor/rails (modified content)</span></span><br></pre></td></tr></table></figure></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">$ git diff vendor/</span><br><span class="line">diff --git a/vendor/rails b/vendor/rails</span><br><span class="line">--- a/vendor/rails</span><br><span class="line">+++ b/vendor/rails</span><br><span class="line">@@ -<span class="number">1</span> +<span class="number">1</span> @@</span><br><span class="line">-Subproject commit <span class="number">046</span>c900df27994d454b7f906caa0e4226bb42b6f</span><br><span class="line">+Subproject commit <span class="number">046</span>c900df27994d454b7f906caa0e4226bb42b6f-dirty</span><br></pre></td></tr></table></figure>
+<p>如何让<code>git status</code>不显示那个<code>modified content</code>呢？<br>修改<code>.gitmodule</code>文件， 在显示<code>modified content</code>的第三包管理下添加一个<code>ignore = dirty</code>， 如下:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[submodule <span class="string">"bundle/fugitive"</span>]</span><br><span class="line">    path = bundle/fugitive</span><br><span class="line">    url = git://github.com/tpope/vim-fugitive.git</span><br><span class="line">    ignore = dirty</span><br></pre></td></tr></table></figure></p>
+<p>上述三个步骤一般就能解决问题了， 如果想深入理解<code>git submodule</code>,可进一步参考<a href="http://www.kafeitu.me/git/2012/03/27/git-submodule.html" target="_blank" rel="external">git submodule使用完整教程</a></p>
   
 	</div>
 		<div style="padding: 10px 44px 30px 44px;" >
@@ -105,8 +120,8 @@
 </div>
 <div>
  <p style="margin-top:0px;">作者署名：<b><a target="_blank" href="http://www.grdtechs.com/">朴实的一线攻城狮</a></b>
-<br />本文标题：<b><a href="/2016/10/16/close-ticker-correctly/" target="_blank" title="优雅的关闭ticker">优雅的关闭ticker</a></b> 
-<br />本文出处：<b><a href="/2016/10/16/close-ticker-correctly/" target="_blank" title="优雅的关闭ticker">http://www.grdtechs.com/2016/10/16/close-ticker-correctly/</a></b>
+<br />本文标题：<b><a href="/2017/01/18/git-submodule/" target="_blank" title="git submodule使用总结">git submodule使用总结</a></b> 
+<br />本文出处：<b><a href="/2017/01/18/git-submodule/" target="_blank" title="git submodule使用总结">http://www.grdtechs.com/2017/01/18/git-submodule/</a></b>
 <br />版权声明：本文由<b><a href="/about" target="_blank" title="Lee Hong">Lee Hong</a></b>创作和发表,采用<b>署名(BY)</b>-<b>非商业性使用(NC)</b>-<b>相同方式共享(SA)</b>国际许可协议进行许可,转载请注明作者及出处, 否则保留追究法律责任的权利。 </p>
 </div>
 </div>
@@ -118,13 +133,13 @@
 
 <div class="article-categories">
   <span></span>
-  <a class="article-category-link" href="/categories/golang/">golang</a>
+  <a class="article-category-link" href="/categories/DevOps/">DevOps</a>
 </div>
 
 
   <div class="article-tags">
   
-  <span></span> <a href="/tags/ticker/">ticker</a>
+  <span></span> <a href="/tags/submodule/">submodule</a>
   </div>
 
 </div>
@@ -169,19 +184,11 @@
 	
 <nav class="article-nav clearfix">
  
- <div class="prev" >
- <a href="/2016/10/16/mac-update-vim8-0/" title="mac vim7.3 升级到vim8.0">
-  <strong>上一篇：</strong><br/>
-  <span>
-  mac vim7.3 升级到vim8.0</span>
-</a>
-</div>
-
 
 <div class="next">
-<a href="/2016/09/07/go-postform/"  title="Golang发送post表单请求">
+<a href="/2017/01/06/go-printf-format/"  title="总结printf 格式化标识">
  <strong>下一篇：</strong><br/> 
- <span>Golang发送post表单请求
+ <span>总结printf 格式化标识
 </span>
 </a>
 </div>
@@ -190,7 +197,7 @@
 
 	
 <section id="comments" class="comment">
-	<div class="ds-thread" data-thread-key="2016/10/16/close-ticker-correctly/" data-title="优雅的关闭ticker" data-url="http://www.grdtechs.com/2016/10/16/close-ticker-correctly/"></div>
+	<div class="ds-thread" data-thread-key="2017/01/18/git-submodule/" data-title="git submodule使用总结" data-url="http://www.grdtechs.com/2017/01/18/git-submodule/"></div>
 </section>
 
 
