@@ -85,4 +85,12 @@ Origin := r.Header.Get("Origin")
     }
 ```
 
-更多参考[前端跨域请求原理与实践](http://www.open-open.com/lib/view/open1473667695212.html)
+> 当不添加 `Access-Control-Allow-Methods`属性时， 默认支持使用GET、HEAD或者POST请求方法跨域请求
+
+更多参考
+
+[前端跨域请求原理与实践](http://www.open-open.com/lib/view/open1473667695212.html)
+
+[探讨跨域请求资源的几种方式](http://www.cnblogs.com/dojo-lzz/p/4265637.html)
+
+[关于CORS](https://github.com/hstarorg/HstarDoc/blob/master/%E5%89%8D%E7%AB%AF%E7%9B%B8%E5%85%B3/CORS%E8%AF%A6%E8%A7%A3.md)
