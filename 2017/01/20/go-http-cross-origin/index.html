@@ -4,23 +4,23 @@
 <head>
   <meta charset="UTF-8">
   
-    <title>golang类型转换(指定精度/四舍五入) | 朴实的一线攻城狮</title>
+    <title>golang server 跨域解决总结 | 朴实的一线攻城狮</title>
     <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
     
     <meta name="author" content="Lee Hong">
     
 
     
-    <meta name="description" content="前言Go的数据类型很多都需要显示转换才能使用,比如string转float64指定精度等。转换中常用到的第三方包为strconv和math包。">
+    <meta name="description" content="前言server提供api服务直接对接前端js, 但是存在跨域问题，本文使用先查询请求过来的host 然后判断主域名是否存在，存在返回头部设置这个请求域名充许跨域访问。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="golang类型转换(指定精度/四舍五入)">
-<meta property="og:url" content="http://www.grdtechs.com/2016/03/24/go-type-convert/index.html">
+<meta property="og:title" content="golang server 跨域解决总结">
+<meta property="og:url" content="http://www.grdtechs.com/2017/01/20/go-http-cross-origin/index.html">
 <meta property="og:site_name" content="朴实的一线攻城狮">
-<meta property="og:description" content="前言Go的数据类型很多都需要显示转换才能使用,比如string转float64指定精度等。转换中常用到的第三方包为strconv和math包。">
+<meta property="og:description" content="前言server提供api服务直接对接前端js, 但是存在跨域问题，本文使用先查询请求过来的host 然后判断主域名是否存在，存在返回头部设置这个请求域名充许跨域访问。">
 <meta property="og:updated_time" content="2017-01-20T07:43:52.948Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="golang类型转换(指定精度/四舍五入)">
-<meta name="twitter:description" content="前言Go的数据类型很多都需要显示转换才能使用,比如string转float64指定精度等。转换中常用到的第三方包为strconv和math包。">
+<meta name="twitter:title" content="golang server 跨域解决总结">
+<meta name="twitter:description" content="前言server提供api服务直接对接前端js, 但是存在跨域问题，本文使用先查询请求过来的host 然后判断主域名是否存在，存在返回头部设置这个请求域名充许跨域访问。">
 
     
     <link rel="alternative" href="/atom.xml" title="朴实的一线攻城狮" type="application/atom+xml">
@@ -73,14 +73,14 @@
 		<header class="article-info clearfix">
   <h1 itemprop="name">
     
-      <a href="/2016/03/24/go-type-convert/" title="golang类型转换(指定精度/四舍五入)" itemprop="url">golang类型转换(指定精度/四舍五入)</a>
+      <a href="/2017/01/20/go-http-cross-origin/" title="golang server 跨域解决总结" itemprop="url">golang server 跨域解决总结</a>
   </h1>
   <p class="article-author">By
        
 		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
 		
   <p class="article-time">
-    <time datetime="2016-03-24T02:06:54.000Z" itemprop="datePublished"> 发表于 2016-03-24</time>
+    <time datetime="2017-01-20T15:30:40.000Z" itemprop="datePublished"> 发表于 2017-01-20</time>
     
   </p>
 </header>
@@ -89,20 +89,15 @@
 		<div id="toc" class="toc-article">
 			<strong class="toc-title">文章目录</strong>
 		
-			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#u524D_u8A00"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u6574_u578B_u8F6C_u5B57_u7B26_u4E32"><span class="toc-number">2.</span> <span class="toc-text">整型转字符串</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u5B57_u7B26_u4E32_u8F6C_u6574_u578B"><span class="toc-number">3.</span> <span class="toc-text">字符串转整型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#bytes_u8F6Cfloat64"><span class="toc-number">4.</span> <span class="toc-text">bytes转float64</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#float64_u8F6Cbytes"><span class="toc-number">5.</span> <span class="toc-text">float64转bytes</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#float64_u8F6Cstring"><span class="toc-number">6.</span> <span class="toc-text">float64转string</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#string_u8F6Cfloat64"><span class="toc-number">7.</span> <span class="toc-text">string转float64</span></a></li></ol>
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#u524D_u8A00"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u83B7_u53D6_u5B8C_u6574url"><span class="toc-number">2.</span> <span class="toc-text">获取完整url</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u52A8_u6001_u8BB8_u53EF_u8DE8_u57DF"><span class="toc-number">3.</span> <span class="toc-text">动态许可跨域</span></a></li></ol>
 		
 		</div>
 		
-		<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p><code>Go</code>的数据类型很多都需要显示转换才能使用,比如<code>string</code>转<code>float64</code>指定精度等。转换中常用到的第三方包为<code>strconv</code>和<code>math</code>包。<br><a id="more"></a></p>
-<h2 id="u6574_u578B_u8F6C_u5B57_u7B26_u4E32"><a href="#u6574_u578B_u8F6C_u5B57_u7B26_u4E32" class="headerlink" title="整型转字符串"></a>整型转字符串</h2><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">strconv.Itoa(i) <span class="comment">//方法1</span></span><br><span class="line">strconv.FormatInt(<span class="typename">int64</span>(i),<span class="number">10</span>) <span class="comment">//方法2</span></span><br></pre></td></tr></table></figure>
-<h2 id="u5B57_u7B26_u4E32_u8F6C_u6574_u578B"><a href="#u5B57_u7B26_u4E32_u8F6C_u6574_u578B" class="headerlink" title="字符串转整型"></a>字符串转整型</h2><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">strconv.Atoi(s) <span class="comment">//方法1</span></span><br><span class="line">strconv.ParseInt(s,<span class="number">10</span>,<span class="number">0</span>) <span class="comment">//方法2</span></span><br></pre></td></tr></table></figure>
-<h2 id="bytes_u8F6Cfloat64"><a href="#bytes_u8F6Cfloat64" class="headerlink" title="bytes转float64"></a>bytes转float64</h2><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">func</span> bytesToFloat64(bytes []<span class="typename">byte</span>) <span class="typename">float64</span> &#123;</span><br><span class="line">	bits := binary.LittleEndian.Uint64(bytes)</span><br><span class="line">	<span class="keyword">return</span> math.Float64frombits(bits)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h2 id="float64_u8F6Cbytes"><a href="#float64_u8F6Cbytes" class="headerlink" title="float64转bytes"></a>float64转bytes</h2><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">func</span> float64ToBytes(input <span class="typename">float64</span>) []<span class="typename">byte</span> &#123;</span><br><span class="line">	bits := math.Float64bits(input)</span><br><span class="line">	bytes := <span class="built_in">make</span>([]<span class="typename">byte</span>,<span class="number">8</span>) <span class="comment">//这里表示[]uint8, 所以用了 8</span></span><br><span class="line">	binary.LittleEndian.PutUint64(bytes,bits)</span><br><span class="line">	<span class="keyword">return</span> bytes</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h2 id="float64_u8F6Cstring"><a href="#float64_u8F6Cstring" class="headerlink" title="float64转string"></a>float64转string</h2><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">func</span> FloatToStr(num <span class="typename">float64</span>, floatPartLen <span class="typename">int</span>) <span class="typename">string</span> &#123;</span><br><span class="line">	<span class="keyword">return</span> strconv.FormatFloat(num,<span class="string">'f'</span>,floatPartLen,<span class="number">64</span>) <span class="comment">//这里64改为32，则表示float32</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h2 id="string_u8F6Cfloat64"><a href="#string_u8F6Cfloat64" class="headerlink" title="string转float64"></a>string转float64</h2><p><code>string</code>转<code>float64</code> 这里有两种方法，都支持指定精度。<strong> 注意：所有数字要在表现层显示最好转换为字符串传送给表现层，如果用于后端计算则转换为数字即可。比如：数字2.10 如果用保持5位数字精度显示： 那么 数字2.10 显示为：2.1, 而将2.10转换为字符串同时保持5位精度，则显示为: 2.10000。但是它们都是转换为了5位精度的，只是显示的时候，数字2.10000 直接显示为2.1了， 所以要显示精度则转换为字符串，要用于计算则转换为数字。</strong></p>
-<p>方法1： 只支持指定精度<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">func</span> strToFloat64(str <span class="typename">string</span>, <span class="built_in">len</span> <span class="typename">int</span>) <span class="typename">float64</span> &#123;</span><br><span class="line">	lenstr := <span class="string">"%."</span> + strconv.Itoa(<span class="built_in">len</span>) + <span class="string">"f"</span></span><br><span class="line">	value,_ := strconv.ParseFloat(str,<span class="number">64</span>)</span><br><span class="line">	nstr := fmt.Sprintf(lenstr,value)</span><br><span class="line">	val,_ := strconv.ParseFloat(nstr,<span class="number">64</span>)</span><br><span class="line">	<span class="keyword">return</span> val</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>方法2：支持指定精度，支持是否四舍五入<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">func</span> strToFloat64Round(str <span class="typename">string</span>, prec <span class="typename">int</span>, round <span class="typename">bool</span>) <span class="typename">float64</span> &#123;</span><br><span class="line">	f,_ := strconv.ParseFloat(str,<span class="number">64</span>)</span><br><span class="line">	<span class="keyword">return</span> Precision(f,prec,round)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> Precision(f <span class="typename">float64</span>, prec <span class="typename">int</span>, round <span class="typename">bool</span>) <span class="typename">float64</span> &#123;</span><br><span class="line">	pow10_n := math.Pow10(prec)</span><br><span class="line">	<span class="keyword">if</span> round &#123;</span><br><span class="line">		<span class="keyword">return</span> math.Trunc(f + <span class="number">0.5</span>/pow10_n)*pow10_n) / pow10_n	</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> math.Trunc((f)*pow10_n) / pow10_n</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>具体请参考[<a href="https://github.com/researchlab/golearning/blob/master/base/convert.go" target="_blank" rel="external">示例代码</a>]</p>
+		<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>server提供api服务直接对接前端js, 但是存在跨域问题，本文使用先查询请求过来的host 然后判断主域名是否存在，存在返回头部设置这个请求域名充许跨域访问。<br><a id="more"></a></p>
+<h2 id="u83B7_u53D6_u5B8C_u6574url"><a href="#u83B7_u53D6_u5B8C_u6574url" class="headerlink" title="获取完整url"></a>获取完整url</h2><p>查阅了r *http.Request对象中的所有属性，没有发现可以直接获取完整的url的方法。于是尝试根据host和请求地址进行拼接。在golang中可以通过r.Host获取hostname，r.RequestURI获取相应的请求地址。</p>
+<p>但是还少一个协议的判断，怎么区分是http和https呢？一开始尝试通过r.Proto属性判断，但是发现该属性不管是http，还是https都是返回HTTP/1.1，又寻找了下发现TLS属性，在https协议下有对应值，在http下为nil。</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"> </span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">    <span class="string">"fmt"</span></span><br><span class="line">    <span class="string">"log"</span></span><br><span class="line">    <span class="string">"net/http"</span></span><br><span class="line">    <span class="string">"strings"</span></span><br><span class="line">)</span><br><span class="line"> </span><br><span class="line"><span class="keyword">func</span> index(w http.ResponseWriter, r *http.Request) &#123;</span><br><span class="line">    fmt.Println(r.Proto)</span><br><span class="line">    <span class="comment">// output:HTTP/1.1</span></span><br><span class="line">    fmt.Println(r.TLS)</span><br><span class="line">    <span class="comment">// output: &lt;nil&gt;</span></span><br><span class="line">    fmt.Println(r.Host)</span><br><span class="line">    <span class="comment">// output: localhost:9090</span></span><br><span class="line">    fmt.Println(r.RequestURI)</span><br><span class="line">    <span class="comment">// output: /index?id=1</span></span><br><span class="line"> </span><br><span class="line">    scheme := <span class="string">"http://"</span></span><br><span class="line">    <span class="keyword">if</span> r.TLS != <span class="constant">nil</span> &#123;</span><br><span class="line">        scheme = <span class="string">"https://"</span></span><br><span class="line">    &#125;</span><br><span class="line">    fmt.Println(strings.Join([]<span class="typename">string</span>&#123;scheme, r.Host, r.RequestURI&#125;, <span class="string">""</span>))</span><br><span class="line">    <span class="comment">// output: http://localhost:9090/index?id=1</span></span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line"><span class="keyword">func</span> main() &#123;</span><br><span class="line">    http.HandleFunc(<span class="string">"/index"</span>, index)</span><br><span class="line"> </span><br><span class="line">    err := http.ListenAndServe(<span class="string">":9090"</span>, <span class="constant">nil</span>)</span><br><span class="line">    <span class="keyword">if</span> err != <span class="constant">nil</span> &#123;</span><br><span class="line">        log.Fatal(<span class="string">"ListenAndServe: "</span>, err)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="u52A8_u6001_u8BB8_u53EF_u8DE8_u57DF"><a href="#u52A8_u6001_u8BB8_u53EF_u8DE8_u57DF" class="headerlink" title="动态许可跨域"></a>动态许可跨域</h2><p>从上一步获取子域名(scheme + r.Host)之后, 先判断是否存在，并且是否包含主域名，然后设置跨域.<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Origin := r.Header.Get(<span class="string">"Origin"</span>)</span><br><span class="line">    <span class="keyword">if</span> <span class="number">0</span> != <span class="built_in">len</span>(Origin) &amp;&amp; strings.Contains(Origin, <span class="string">"domain.com"</span>)&#123;</span><br><span class="line">        w.Header().Add(<span class="string">"Access-Control-Allow-Origin"</span>, Origin)</span><br><span class="line">        w.Header().Add(<span class="string">"Access-Control-Allow-Methods"</span>, <span class="string">"POST,GET,OPTIONS,DELETE"</span>)</span><br><span class="line">        w.Header().Add(<span class="string">"Access-Control-Allow-Headers"</span>, <span class="string">"x-requested-with,content-type"</span>)</span><br><span class="line">        w.Header().Add(<span class="string">"Access-Control-Allow-Credentials"</span>, <span class="string">"true"</span>)</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure></p>
   
 	</div>
 		<div style="padding: 10px 44px 30px 44px;" >
@@ -112,8 +107,8 @@
 </div>
 <div>
  <p style="margin-top:0px;">作者署名：<b><a target="_blank" href="http://www.grdtechs.com/">朴实的一线攻城狮</a></b>
-<br />本文标题：<b><a href="/2016/03/24/go-type-convert/" target="_blank" title="golang类型转换(指定精度/四舍五入)">golang类型转换(指定精度/四舍五入)</a></b> 
-<br />本文出处：<b><a href="/2016/03/24/go-type-convert/" target="_blank" title="golang类型转换(指定精度/四舍五入)">http://www.grdtechs.com/2016/03/24/go-type-convert/</a></b>
+<br />本文标题：<b><a href="/2017/01/20/go-http-cross-origin/" target="_blank" title="golang server 跨域解决总结">golang server 跨域解决总结</a></b> 
+<br />本文出处：<b><a href="/2017/01/20/go-http-cross-origin/" target="_blank" title="golang server 跨域解决总结">http://www.grdtechs.com/2017/01/20/go-http-cross-origin/</a></b>
 <br />版权声明：本文由<b><a href="/about" target="_blank" title="Lee Hong">Lee Hong</a></b>创作和发表,采用<b>署名(BY)</b>-<b>非商业性使用(NC)</b>-<b>相同方式共享(SA)</b>国际许可协议进行许可,转载请注明作者及出处, 否则保留追究法律责任的权利。 </p>
 </div>
 </div>
@@ -176,19 +171,11 @@
 	
 <nav class="article-nav clearfix">
  
- <div class="prev" >
- <a href="/2016/03/29/gin-setcookie/" title="gin中使用设置cookie过期时间总结">
-  <strong>上一篇：</strong><br/>
-  <span>
-  gin中使用设置cookie过期时间总结</span>
-</a>
-</div>
-
 
 <div class="next">
-<a href="/2016/02/26/observer-pattern-in-go-md/"  title="golang 设计模式之observer使用总结">
+<a href="/2017/01/18/git-submodule/"  title="git submodule使用总结">
  <strong>下一篇：</strong><br/> 
- <span>golang 设计模式之observer使用总结
+ <span>git submodule使用总结
 </span>
 </a>
 </div>
@@ -197,7 +184,7 @@
 
 	
 <section id="comments" class="comment">
-	<div class="ds-thread" data-thread-key="2016/03/24/go-type-convert/" data-title="golang类型转换(指定精度/四舍五入)" data-url="http://www.grdtechs.com/2016/03/24/go-type-convert/"></div>
+	<div class="ds-thread" data-thread-key="2017/01/20/go-http-cross-origin/" data-title="golang server 跨域解决总结" data-url="http://www.grdtechs.com/2017/01/20/go-http-cross-origin/"></div>
 </section>
 
 
