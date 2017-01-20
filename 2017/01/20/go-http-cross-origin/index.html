@@ -11,17 +11,17 @@
     
 
     
-    <meta name="description" content="前言server提供api服务直接对接前端js, 但是存在跨域问题，本文使用先查询请求过来的host 然后判断主域名是否存在，存在返回头部设置这个请求域名充许跨域访问。">
+    <meta name="description" content="前言server提供api服务直接对接前端js, 但是存在跨域问题，本文使用先查询请求过来的host 然后判断主域名是否存在，存在,则在返回头部设置这个请求域名充许跨域访问。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="golang server 跨域解决总结">
 <meta property="og:url" content="http://www.grdtechs.com/2017/01/20/go-http-cross-origin/index.html">
 <meta property="og:site_name" content="朴实的一线攻城狮">
-<meta property="og:description" content="前言server提供api服务直接对接前端js, 但是存在跨域问题，本文使用先查询请求过来的host 然后判断主域名是否存在，存在返回头部设置这个请求域名充许跨域访问。">
+<meta property="og:description" content="前言server提供api服务直接对接前端js, 但是存在跨域问题，本文使用先查询请求过来的host 然后判断主域名是否存在，存在,则在返回头部设置这个请求域名充许跨域访问。">
 <meta property="og:image" content="http://www.grdtechs.com/imgs/cross-website.png">
-<meta property="og:updated_time" content="2017-01-20T10:12:55.936Z">
+<meta property="og:updated_time" content="2017-01-20T10:16:29.474Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="golang server 跨域解决总结">
-<meta name="twitter:description" content="前言server提供api服务直接对接前端js, 但是存在跨域问题，本文使用先查询请求过来的host 然后判断主域名是否存在，存在返回头部设置这个请求域名充许跨域访问。">
+<meta name="twitter:description" content="前言server提供api服务直接对接前端js, 但是存在跨域问题，本文使用先查询请求过来的host 然后判断主域名是否存在，存在,则在返回头部设置这个请求域名充许跨域访问。">
 
     
     <link rel="alternative" href="/atom.xml" title="朴实的一线攻城狮" type="application/atom+xml">
@@ -94,7 +94,7 @@
 		
 		</div>
 		
-		<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>server提供api服务直接对接前端js, 但是存在跨域问题，本文使用先查询请求过来的host 然后判断主域名是否存在，存在返回头部设置这个请求域名充许跨域访问。<br><a id="more"></a></p>
+		<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>server提供api服务直接对接前端js, 但是存在跨域问题，本文使用先查询请求过来的host 然后判断主域名是否存在，存在,则在返回头部设置这个请求域名充许跨域访问。<br><a id="more"></a></p>
 <h2 id="u8DE8_u57DF_u6982_u5FF5"><a href="#u8DE8_u57DF_u6982_u5FF5" class="headerlink" title="跨域概念"></a>跨域概念</h2><p>浏览器的同源策略，出于防范跨站脚本的攻击，禁止客户端脚本（如 JavaScript）对不同域的服务进行跨站调用。</p>
 <p>一般的，只要网站的 协议名protocol 、 主机host 、 端口号port 这三个中的任意一个不同，网站间的数据请求与传输便构成了跨域调用。</p>
 <p>一般的，发起跨域请求而没有被设置许可跨域时，则会返回类型下面的说明</p>
