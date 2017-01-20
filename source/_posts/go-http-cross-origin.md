@@ -84,3 +84,5 @@ Origin := r.Header.Get("Origin")
         w.Header().Add("Access-Control-Allow-Credentials", "true")
     }
 ```
+
+更多参考[前端跨域请求原理与实践](http://www.open-open.com/lib/view/open1473667695212.html)
