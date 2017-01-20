@@ -18,7 +18,7 @@
 <meta property="og:site_name" content="朴实的一线攻城狮">
 <meta property="og:description" content="前言server提供api服务直接对接前端js, 但是存在跨域问题，本文使用先查询请求过来的host 然后判断主域名是否存在，存在返回头部设置这个请求域名充许跨域访问。">
 <meta property="og:image" content="http://www.grdtechs.com/imgs/cross-website.png">
-<meta property="og:updated_time" content="2017-01-20T10:07:43.199Z">
+<meta property="og:updated_time" content="2017-01-20T10:12:55.936Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="golang server 跨域解决总结">
 <meta name="twitter:description" content="前言server提供api服务直接对接前端js, 但是存在跨域问题，本文使用先查询请求过来的host 然后判断主域名是否存在，存在返回头部设置这个请求域名充许跨域访问。">
@@ -107,6 +107,7 @@
 <h2 id="u52A8_u6001_u8BB8_u53EF_u8DE8_u57DF"><a href="#u52A8_u6001_u8BB8_u53EF_u8DE8_u57DF" class="headerlink" title="动态许可跨域"></a>动态许可跨域</h2><p>1.直接取头部的<code>Origin</code>字段， 如果取到， 则判断是否包含主域名，然后设置跨域，如果<code>Origin</code>字段为空不存在，则转下面第2步;<br>2.获取子域名(scheme + r.Host)之后, 先判断是否存在，并且是否包含主域名，然后设置跨域, 如果<code>r.Host</code>字段为空， 则转下面第3步;<br>3.获取子域名(scheme + r.URL.Host)之后， 判断是否存在， 并且是否包含主域名， 然后设置跨域，</p>
 <p>还有一种方法是利用redis缓存，同样通过上述三个方法获取子域名， 然后查询redis缓存是否存在这个域名，如果有则设置许可跨域; redis缓存的数据来源是 另外准备一个后台，当后台有修改许可跨域网站时，写完db(mysql)的同时先清空缓存，然后在回填缓存即可。</p>
 <figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Origin := r.Header.Get(<span class="string">"Origin"</span>)</span><br><span class="line">    <span class="keyword">if</span> <span class="number">0</span> != <span class="built_in">len</span>(Origin) &amp;&amp; strings.Contains(Origin, <span class="string">"domain.com"</span>)&#123;</span><br><span class="line">        w.Header().Add(<span class="string">"Access-Control-Allow-Origin"</span>, Origin)</span><br><span class="line">        w.Header().Add(<span class="string">"Access-Control-Allow-Methods"</span>, <span class="string">"POST,GET,OPTIONS,DELETE"</span>)</span><br><span class="line">        w.Header().Add(<span class="string">"Access-Control-Allow-Headers"</span>, <span class="string">"x-requested-with,content-type"</span>)</span><br><span class="line">        w.Header().Add(<span class="string">"Access-Control-Allow-Credentials"</span>, <span class="string">"true"</span>)</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>更多参考<a href="http://www.open-open.com/lib/view/open1473667695212.html" target="_blank" rel="external">前端跨域请求原理与实践</a></p>
   
 	</div>
 		<div style="padding: 10px 44px 30px 44px;" >
