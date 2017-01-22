@@ -74,6 +74,70 @@
         <header class="article-info clearfix">
   <h1 itemprop="name">
     
+      <a href="/2017/01/22/linux-signal-golang/" title="Linux Signal及Golang中的信号处理" itemprop="url">Linux Signal及Golang中的信号处理</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
+		
+  <p class="article-time">
+    <time datetime="2017-01-22T14:35:45.000Z" itemprop="datePublished"> 发表于 2017-01-22</time>
+    
+  </p>
+</header>
+    <div class="article-content">
+        
+        <h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>信号(Signal)是Linux, 类Unix和其它POSIX兼容的操作系统中用来进程间通讯的一种方式。一个信号就是一个异步的通知，发送给某个进程，或者同进程的某个线程，告诉它们某个事件发生了。<br>当信号发送到某个进程中时，操作系统会中断该进程的正常流程，并进入相应的信号处理函数执行操作，完成后再回到中断的地方继续执行。<br>如果目标进程先前注册了某个信号的处理程序(signal handler),则此处理程序会被调用，否则缺省的处理程序被调用。</p>
+        
+        
+        <p class="article-more-link">
+          
+            <a href="/2017/01/22/linux-signal-golang/#more">Read More</a>
+          
+       </p>
+    </div>
+    <footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/golang/">golang</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/signal/">signal</a>
+  </div>
+
+</div>
+
+
+
+
+<div class="comments-count">
+	
+	  	<span></span>
+		<a href="/2017/01/22/linux-signal-golang/#comments" class="ds-thread-count comments-count-link" data-thread-key="2017/01/22/linux-signal-golang/" data-count-type="comments">&nbsp;</a>
+	
+</div>
+
+</footer>
+
+
+    </article>
+
+
+
+
+
+
+   
+    
+    <article class="post-expand post" itemprop="articleBody"> 
+        <header class="article-info clearfix">
+  <h1 itemprop="name">
+    
       <a href="/2017/01/20/go-http-cross-origin/" title="golang server 跨域解决总结" itemprop="url">golang server 跨域解决总结</a>
   </h1>
   <p class="article-author">By
@@ -634,70 +698,6 @@
 
 
 
-   
-    
-    <article class="post-expand post" itemprop="articleBody"> 
-        <header class="article-info clearfix">
-  <h1 itemprop="name">
-    
-      <a href="/2016/10/16/mac-update-vim8-0/" title="mac vim7.3 升级到vim8.0" itemprop="url">mac vim7.3 升级到vim8.0</a>
-  </h1>
-  <p class="article-author">By
-       
-		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
-		
-  <p class="article-time">
-    <time datetime="2016-10-16T23:08:56.000Z" itemprop="datePublished"> 发表于 2016-10-16</time>
-    
-  </p>
-</header>
-    <div class="article-content">
-        
-        <h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>将mac自带的vim7.3 升级到vim8.0<br>
-        
-        
-        <p class="article-more-link">
-          
-            <a href="/2016/10/16/mac-update-vim8-0/#more">Read More</a>
-          
-       </p>
-    </div>
-    <footer class="article-footer clearfix">
-<div class="article-catetags">
-
-<div class="article-categories">
-  <span></span>
-  <a class="article-category-link" href="/categories/DevOps/">DevOps</a>
-</div>
-
-
-  <div class="article-tags">
-  
-  <span></span> <a href="/tags/vim8-0/">vim8.0</a>
-  </div>
-
-</div>
-
-
-
-
-<div class="comments-count">
-	
-	  	<span></span>
-		<a href="/2016/10/16/mac-update-vim8-0/#comments" class="ds-thread-count comments-count-link" data-thread-key="2016/10/16/mac-update-vim8-0/" data-count-type="comments">&nbsp;</a>
-	
-</div>
-
-</footer>
-
-
-    </article>
-
-
-
-
-
-
 
   <nav id="page-nav" class="clearfix">
     <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><a class="extend next" rel="next" href="/page/2/">Next<span></span></a>
@@ -759,7 +759,7 @@
 		  
 		
 		  
-			<li><a href="/categories/golang/" title="golang">golang<sup>18</sup></a></li>
+			<li><a href="/categories/golang/" title="golang">golang<sup>19</sup></a></li>
 		  
 		
 		  
@@ -825,6 +825,10 @@
 			
 		
 			
+				<li><a href="/tags/signal/" title="signal">signal<sup>1</sup></a></li>
+			
+		
+			
 				<li><a href="/tags/json/" title="json">json<sup>1</sup></a></li>
 			
 		
@@ -854,10 +858,6 @@
 		
 			
 				<li><a href="/tags/reflect/" title="reflect">reflect<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/form/" title="form">form<sup>1</sup></a></li>
 			
 		
 		</ul>
