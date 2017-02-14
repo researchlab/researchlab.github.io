@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://www.grdtechs.com/"/>
-  <updated>2017-01-22T09:38:55.185Z</updated>
+  <updated>2017-02-14T03:47:07.985Z</updated>
   <id>http://www.grdtechs.com/</id>
   
   <author>
@@ -20,7 +20,7 @@
     <link href="http://www.grdtechs.com/2017/01/22/linux-signal-golang/"/>
     <id>http://www.grdtechs.com/2017/01/22/linux-signal-golang/</id>
     <published>2017-01-22T14:35:45.000Z</published>
-    <updated>2017-01-22T09:38:55.185Z</updated>
+    <updated>2017-02-14T03:47:07.985Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>信号(Signal)是Linux, 类Unix和其它POSIX兼容的操作系统中用来进程间通讯的一种方式。一个信号就是一个异步的通知，发送给某个进程，或者同进程的某个线程，告诉它们某个事件发生了。<br>当信号发送到某个进程中时，操作系统会中断该进程的正常流程，并进入相应的信号处理函数执行操作，完成后再回到中断的地方继续执行。<br>如果目标进程先前注册了某个信号的处理程序(signal handler),则此处理程序会被调用，否则缺省的处理程序被调用。</p>
 <a id="more"></a>
@@ -289,7 +289,7 @@
     <link href="http://www.grdtechs.com/2017/01/20/go-http-cross-origin/"/>
     <id>http://www.grdtechs.com/2017/01/20/go-http-cross-origin/</id>
     <published>2017-01-20T15:30:40.000Z</published>
-    <updated>2017-01-22T09:38:55.185Z</updated>
+    <updated>2017-02-14T03:47:07.985Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>server提供api服务直接对接前端js, 但是存在跨域问题，本文使用先查询请求过来的host 然后判断主域名是否存在，存在,则在返回头部设置这个请求域名充许跨域访问。<br><a id="more"></a></p>
 <h2 id="u8DE8_u57DF_u6982_u5FF5"><a href="#u8DE8_u57DF_u6982_u5FF5" class="headerlink" title="跨域概念"></a>跨域概念</h2><p>浏览器的同源策略，出于防范跨站脚本的攻击，禁止客户端脚本（如 JavaScript）对不同域的服务进行跨站调用。</p>
@@ -331,7 +331,7 @@
     <link href="http://www.grdtechs.com/2017/01/18/git-submodule/"/>
     <id>http://www.grdtechs.com/2017/01/18/git-submodule/</id>
     <published>2017-01-18T17:11:52.000Z</published>
-    <updated>2017-01-22T09:38:55.185Z</updated>
+    <updated>2017-02-14T03:47:07.985Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>现在golang已经可以通过<code>vendor</code>来管理第三方依赖包了，但是之前的一个老项目用的是<code>git submodule</code>来管理的，但是<code>.gitsubmodule</code>文件中只记录管理了项目的部分依赖包， 需要把还没有被管理的第三包也加上，下面总结使用<code>git submodule</code>的过程。<br><a id="more"></a></p>
 <h2 id="u6DFB_u52A0_u7B2C_u4E09_u65B9_u5305"><a href="#u6DFB_u52A0_u7B2C_u4E09_u65B9_u5305" class="headerlink" title="添加第三方包"></a>添加第三方包</h2><p>为当前工程添加submodule，命令如下：</p>
@@ -367,11 +367,72 @@
   </entry>
   
   <entry>
+    <title>linux too many open files 问题解决总结</title>
+    <link href="http://www.grdtechs.com/2017/01/14/too-many-open-files-solution/"/>
+    <id>http://www.grdtechs.com/2017/01/14/too-many-open-files-solution/</id>
+    <published>2017-01-14T10:58:37.000Z</published>
+    <updated>2017-02-14T03:47:07.985Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>运行在Linux系统上的网络程序可能会出现”Too many open files”的异常情况，且常见于高并发访问文件系统，多线程网络连接等场景。<br><a id="more"></a></p>
+<h2 id="u6982_u5FF5"><a href="#u6982_u5FF5" class="headerlink" title="概念"></a>概念</h2><p>程序经常访问的文件、socket等在Linux中都是指的文件file，系统需要记录每个当前访问file的name、location、access authority等相关信息，这样的一个实体被称为file entry。<code>open files table</code>存储这些file entry，以数组的形式线性管理。文件描述符(file descriptor)是作为<code>进程</code>到<code>open files table</code>的指针，也就是<code>open files table</code>的下标索引，将每个进程与它所访问的文件关联起来了。 </p>
+<center><img src="/imgs/too-many-files.jpg" alt="too many open files theory"></center>
+
+<p> 每个进程中都有一个<code>file descriptor table</code>管理当前进程所访问(open or create)的所有文件file，文件描述符关联着<code>open files table</code>中文件的file entry。对于<code>open files table</code>能容纳多少file entry, 可由Linux系统配置<code>open files table</code>的文件限制，如果超过配置值，就会拒绝其它文件操作的请求，并抛出Too many open files异常。这种限制有系统级和用户级之分。 </p>
+<ul>
+<li><p>系统级：<br>  系统级设置对所有用户有效。可通过两种方式查看系统最大文件限制<br>  1  cat /proc/sys/fs/file-max<br>  2  sysctl -a 查看结果中fs.file-max这项的配置数量<br>  如果需要增加配置数量就修改/etc/sysctl.conf文件，配置fs.file-max属性，如果属性不存在就添加, 配置完成后使用sysctl -p来通知系统启用这项配置 </p>
+</li>
+<li><p>用户级：<br>  Linux限制每个登录用户的可连接文件数。可通过<code>ulimit -n</code>来查看当前有效设置。如果想修改这个值就使用<code>ulimit -n &lt;setting number&gt;</code>命令。<br>  对于文件描述符增加的比例，资料推荐是以2的幂次为参考。如当前文件描述符数量是1024，可增加到2048，如果不够，可设置到4096，依此类推。<br>  在出现Too many open files问题后，首先得找出主要原因。最大的可能是打开的文件或是socket没有正常关闭。为了定位问题是否由目标网络进程引起，通过目标网络程序进程号查看当前进程占用文件描述符情况： </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">lsof -p <span class="variable">$target_pid</span> <span class="comment">#每个文件描述符的具体属性</span></span><br><span class="line">lsof -p <span class="variable">$target_pid</span> | wc <span class="operator">-l</span>  <span class="comment">#当前目标网络进程file descriptor table中FD的总量</span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h2 id="u89E3_u51B3_u65B9_u6848_u603B_u7ED3"><a href="#u89E3_u51B3_u65B9_u6848_u603B_u7ED3" class="headerlink" title="解决方案总结"></a>解决方案总结</h2><p>方案一:</p>
+<p>查看系统许可的最大文件限制， 如果不够可以修改此值。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root nginx]<span class="comment"># cat /proc/sys/fs/file-max</span></span><br><span class="line"><span class="number">8096</span></span><br></pre></td></tr></table></figure></p>
+<p>文件系统最大可打开文件数<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root nginx]<span class="comment"># ulimit -n</span></span><br><span class="line"><span class="number">1024</span></span><br></pre></td></tr></table></figure></p>
+<p>程序限制只能打开1024个文件</p>
+<p>使用[root nginx]# ulimit -n 8096调整一下<br>或者永久调整打开文件数 可在启动文件/etc/rc.d/rc.local末尾添加（在/etc/sysctl.conf末尾添加fs.file-max=xxx无效）<br>ulimit -n 8096 </p>
+<p>方案二:</p>
+<p>Linux内核有时会报告<code>Too many open files</code>，起因是file-max默认值（8096）太小, 要解决这个问题，可以root身份执行下列命令（或将它们加入/etc/rcS.d/*下的init脚本。）</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">echo</span> <span class="string">"65536"</span>  &gt; /proc/sys/fs/file-max  <span class="comment"># 适用于2.2和2.4版内核</span></span><br><span class="line"><span class="comment">#或者</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">"131072"</span> &gt; /proc/sys/fs/inode-max <span class="comment"># 仅适用于2.2版内核</span></span><br></pre></td></tr></table></figure>
+<p>方案三:</p>
+<p>办法是修改操作系统的打开文件数量限制，方法如下:</p>
+<p>1.按照最大打开文件数量的需求设置系统，并且通过检查/proc/sys/fs/file-max文件来确认最大打开文件数已经被正确设置。 </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cat /proc/sys/fs/file-max</span><br></pre></td></tr></table></figure>
+<p>如果设置值太小， 修改文件/etc/sysctl.conf的变量到合适的值。 这样会在每次重启之后生效。(如果设置值够大，跳过下步)</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">echo</span> <span class="number">2048</span> &gt; /proc/sys/fs/file-max</span><br></pre></td></tr></table></figure>
+<p>编辑文件/etc/sysctl.conf，整体修改如下:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#kernel2.6之后的内核版本添加如下配置：                                                                                                                                                                          </span></span><br><span class="line">net.nf_conntrack_max = <span class="number">3276800</span>                                                                                                                                                                                  </span><br><span class="line">net.netfilter.nf_conntrack_tcp_timeout_established = <span class="number">1200</span>                                                                                                                                                       </span><br><span class="line">                                                                                                                                                                                                                </span><br><span class="line"><span class="comment">#当出现SYN等待队列溢出时，启用cookies来处理，可防范少量SYN攻击，默认为0，表示关闭                                                                                                                               </span></span><br><span class="line">net.ipv4.tcp_syncookies = <span class="number">1</span>                                                                                                                                                                                     </span><br><span class="line"><span class="comment">#开启TCP连接中TIME-WAIT sockets的快速回收，默认为0，表示关闭。                                                                                                                                                  </span></span><br><span class="line">net.ipv4.tcp_tw_recycle = <span class="number">1</span>                                                                                                                                                                                     </span><br><span class="line"><span class="comment">#开启重用，将TIME-WAIT sockets重新用于新的TCP连接，默认为0，表示关闭；                                                                                                                                          </span></span><br><span class="line">net.ipv4.tcp_tw_reuse = <span class="number">1</span>                                                                                                                                                                                       </span><br><span class="line"><span class="comment">#修改系統默认的 TIMEOUT 时间                                                                                                                                                                                    </span></span><br><span class="line">net.ipv4.tcp_fin_timeout = <span class="number">25</span>                                                                                                                                                                                   </span><br><span class="line">net.ipv4.tcp_orphan_retries = <span class="number">1</span>                                                                                                                                                                                 </span><br><span class="line">net.ipv4.tcp_max_orphans = <span class="number">8192</span>                                                                                                                                                                                 </span><br><span class="line">net.ipv4.ip_<span class="built_in">local</span>_port_range = <span class="number">32768</span> <span class="number">61000</span>                                                                                                                                                                      </span><br><span class="line">                                                                                                                                                                                                                </span><br><span class="line"><span class="comment"># Disabled ipV6                                                                                                                                                                                                 </span></span><br><span class="line">net.ipv6.conf.all.disable_ipv6 = <span class="number">1</span>                                                                                                                                                                              </span><br><span class="line">net.ipv6.conf.default.disable_ipv6 = <span class="number">1</span>                                                                                                                                                                          </span><br><span class="line">net.ipv6.conf.lo.disable_ipv6 = <span class="number">1</span></span><br></pre></td></tr></table></figure>
+<p>2.在/etc/security/limits.conf文件中设置最大打开文件数，添加如下这行:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">* - nofile <span class="number">8192</span></span><br></pre></td></tr></table></figure>
+<p>这行设置了每个用户的默认打开文件数为2048。注意<code>nofile</code>项有两个可能的限制措施。就是项下的hard和soft, 要使修改过的最大打开文件数生效，必须对这两种限制进行设定。 如果使用”-“字符设定, 则hard和soft设定会同时被设定。硬限制表明soft限制中所能设定的最大值。soft限制指的是当前系统生效的设置值。hard限制值可以被普通用户降低, 但是不能增加。soft限制不能设置的比hard限制更高。只有root用户才能够增加hard限制值。当增加文件限制描述，可以简单的把当前值双倍。 例: 如果你要提高默认值1024， 最好提高到2048， 如果还要继续增加， 就需要设置成4096。<br>另外一种情况是在创建索引的时候，也有两种可能，一种是合并因子太小，导致创建文件数量超过操作系统限制，这时可以修改合并因子，也可以修改操作系统的打开文件数限制；另外一种是合并因子受虚拟机内存的限制，无法调整到更大，而需要索引的doc数量又非常的大，这个时候就只能通过修改操作系统的打开文件数限制来解决了。</p>
+<p>在此基础上，我还修改了以下一个配置文件</p>
+<p>vim /etc/sysctl.conf, 添加：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Decrease the time default value for tcp_fin_timeout connection</span></span><br><span class="line">net.ipv4.tcp_fin_timeout = <span class="number">30</span></span><br><span class="line"><span class="comment"># Decrease the time default value for tcp_keepalive_time connection</span></span><br><span class="line">net.ipv4.tcp_keepalive_time = <span class="number">1800</span></span><br><span class="line"><span class="comment"># Turn off tcp_window_scaling</span></span><br><span class="line">net.ipv4.tcp_window_scaling = <span class="number">0</span></span><br><span class="line"><span class="comment"># Turn off the tcp_sack</span></span><br><span class="line">net.ipv4.tcp_sack = <span class="number">0</span></span><br><span class="line"><span class="comment">#Turn off tcp_timestamps</span></span><br><span class="line">net.ipv4.tcp_timestamps = <span class="number">0</span></span><br></pre></td></tr></table></figure>
+<p>然后 service network restart, 这些都和<code>TCP sockets</code>有关的优化。</p>
+<p>另外需要在 /etc/rc.d/rc.local里添加已使得重启的时候生效。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">echo</span> <span class="string">"30"</span>&gt;/proc/sys/net/ipv4/tcp_fin_timeout</span><br><span class="line"><span class="built_in">echo</span> <span class="string">"1800"</span>&gt;/proc/sys/net/ipv4/tcp_keepalive_time</span><br><span class="line"><span class="built_in">echo</span> <span class="string">"0"</span>&gt;/proc/sys/net/ipv4/tcp_window_scaling</span><br><span class="line"><span class="built_in">echo</span> <span class="string">"0"</span>&gt;/proc/sys/net/ipv4/tcp_sack</span><br><span class="line"><span class="built_in">echo</span> <span class="string">"0"</span>&gt;/proc/sys/net/ipv4/tcp_timestamps</span><br></pre></td></tr></table></figure>
+<p>因为不是所有的程序都在root下跑的，所有linux有对hard与soft open files的区分，普通用户受hard的限制，无论ulimit -n $数值调到多高，都跑不到 /etc/security/limits.conf里nofile的值。</p>
+<p>这样的优化后 lsof -p $target_pid|wc -l可以跑到4千以上都不会抛出too many open files。</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;u524D_u8A00&quot;&gt;&lt;a href=&quot;#u524D_u8A00&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h2&gt;&lt;p&gt;运行在Linux系统上的网络程序可能会出现”Too many open files”的异常情况，且常见于高并发访问文件系统，多线程网络连接等场景。&lt;br&gt;
+    
+    </summary>
+    
+      <category term="DevOps" scheme="http://www.grdtechs.com/categories/DevOps/"/>
+    
+    
+      <category term="linux" scheme="http://www.grdtechs.com/tags/linux/"/>
+    
+  </entry>
+  
+  <entry>
     <title>总结printf 格式化标识</title>
     <link href="http://www.grdtechs.com/2017/01/06/go-printf-format/"/>
     <id>http://www.grdtechs.com/2017/01/06/go-printf-format/</id>
     <published>2017-01-06T15:49:13.000Z</published>
-    <updated>2017-01-22T09:38:55.185Z</updated>
+    <updated>2017-02-14T03:47:07.985Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>项目中总是时不时的要使用<code>fmt.Printf</code>或<code>fmt.Sprintf</code>来处理某些数据类型,总结一下常用的标识符用途及场景.</p>
 <a id="more"></a>
@@ -394,7 +455,7 @@
     <link href="http://www.grdtechs.com/2016/12/17/go-cache-component/"/>
     <id>http://www.grdtechs.com/2016/12/17/go-cache-component/</id>
     <published>2016-12-17T11:32:51.000Z</published>
-    <updated>2017-01-22T09:38:55.185Z</updated>
+    <updated>2017-02-14T03:47:07.985Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>总结用golang从分析，设计到实现一个可用的缓存组件。<br><a id="more"></a></p>
 <h2 id="u7F13_u5B58"><a href="#u7F13_u5B58" class="headerlink" title="缓存"></a>缓存</h2><ul>
@@ -490,7 +551,7 @@
     <link href="http://www.grdtechs.com/2016/11/23/uml-symbol-desc/"/>
     <id>http://www.grdtechs.com/2016/11/23/uml-symbol-desc/</id>
     <published>2016-11-23T11:47:43.000Z</published>
-    <updated>2017-01-22T09:38:55.185Z</updated>
+    <updated>2017-02-14T03:47:07.985Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>在UML的定义中，描述类和对象之间的关系，包括以下几种方式：依赖（<code>Dependency</code>）、关联（<code>Association</code>）、聚合（<code>Aggregation</code>）、组合（<code>Composition</code>）、泛化（<code>Generalization</code>）和实现（<code>Realization</code>）。现分别说明如下：<br><a id="more"></a></p>
 <h2 id="u5B9A_u4E49"><a href="#u5B9A_u4E49" class="headerlink" title="定义"></a>定义</h2><p>类图基本符号可拆分为四类:<code>线</code>(<code>虚线</code>和<code>实线</code>)，<code>箭头</code>，<code>三角</code>(<code>空心右三角</code>和<code>实心右三角</code>)，<code>菱形</code>(<code>空心菱形</code>和<code>实心菱形</code>); 由这些基本的图形进行组合构成了类图的基本符号。这里要注意这几个符号的顺序，代表了类与类之间关系的耦合程度, 越向右耦合度越高。</p>
@@ -621,7 +682,7 @@
     <link href="http://www.grdtechs.com/2016/11/23/go-dealwith-database-nullvalue/"/>
     <id>http://www.grdtechs.com/2016/11/23/go-dealwith-database-nullvalue/</id>
     <published>2016-11-23T11:40:54.000Z</published>
-    <updated>2017-01-22T09:38:55.185Z</updated>
+    <updated>2017-02-14T03:47:07.985Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>golang是强类型语言，在赋值和解析过程中需要先定义好数据类型，否在会报类型错误，下面总结在处理数据库表时遇到字段为空或零值的情况<br><a id="more"></a></p>
 <h2 id="u573A_u666F"><a href="#u573A_u666F" class="headerlink" title="场景"></a>场景</h2><p>假如存在如下没有指定<code>not null</code>的场合<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="operator"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> <span class="string">"users"</span> (</span><br><span class="line">    <span class="string">"id"</span> <span class="built_in">serial</span> <span class="keyword">not</span> <span class="literal">null</span> primary <span class="keyword">key</span>,</span><br><span class="line">    <span class="string">"name"</span> <span class="built_in">text</span>,</span><br><span class="line">    <span class="string">"age"</span> <span class="built_in">integer</span></span><br><span class="line">)</span></span><br></pre></td></tr></table></figure></p>
@@ -650,7 +711,7 @@
     <link href="http://www.grdtechs.com/2016/11/19/go-install-binaries/"/>
     <id>http://www.grdtechs.com/2016/11/19/go-install-binaries/</id>
     <published>2016-11-19T00:18:37.000Z</published>
-    <updated>2017-01-22T09:38:55.185Z</updated>
+    <updated>2017-02-14T03:47:07.985Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>golang tool chains 提供了很多好用的工具， 但是如果直接安装的话，大多数需要翻墙才能安装， 而且比较麻烦； 本文记录一种不需要翻墙就能顺利安装相应的工具的方法.</p>
 <a id="more"></a>
@@ -684,7 +745,7 @@
     <link href="http://www.grdtechs.com/2016/11/11/go-use-mysql/"/>
     <id>http://www.grdtechs.com/2016/11/11/go-use-mysql/</id>
     <published>2016-11-11T13:21:16.000Z</published>
-    <updated>2017-01-22T09:38:55.185Z</updated>
+    <updated>2017-02-14T03:47:07.985Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>Golang 提供了<code>database/sql</code>包用于对<code>SQL数据库</code>的访问, 作为操作数据库的入口对象<code>sql.DB</code>, 主要为我们提供了两个重要的功能:<br><a id="more"></a></p>
 <ul>
@@ -769,7 +830,7 @@
     <link href="http://www.grdtechs.com/2016/10/23/go-build-small-exec/"/>
     <id>http://www.grdtechs.com/2016/10/23/go-build-small-exec/</id>
     <published>2016-10-23T14:00:32.000Z</published>
-    <updated>2017-01-22T09:38:55.185Z</updated>
+    <updated>2017-02-14T03:47:07.985Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>尽管go1.7.3编译生成的可执行程序已经很小了,但是通过编译参数控制还能编译出更小的可执行文件，总结如下,<br><a id="more"></a></p>
 <h2 id="u52A0-ldflags_u53C2_u6570"><a href="#u52A0-ldflags_u53C2_u6570" class="headerlink" title="加-ldflags参数"></a>加-ldflags参数</h2><p>在程序编译的时候可以加上<code>-ldflags &quot;-s -w&quot;</code> 参数来优化编译程序, 其实通过去除部分连接和调试等信息来使得编译之后的执行程序更小,具体参数如下:</p>
@@ -807,7 +868,7 @@
     <link href="http://www.grdtechs.com/2016/10/16/mac-update-vim8-0/"/>
     <id>http://www.grdtechs.com/2016/10/16/mac-update-vim8-0/</id>
     <published>2016-10-16T23:08:56.000Z</published>
-    <updated>2017-01-22T09:38:55.185Z</updated>
+    <updated>2017-02-14T03:47:07.985Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>将mac自带的vim7.3 升级到vim8.0<br><a id="more"></a></p>
 <h2 id="u5347_u7EA7vim8-0"><a href="#u5347_u7EA7vim8-0" class="headerlink" title="升级vim8.0"></a>升级vim8.0</h2><ul>
@@ -865,7 +926,7 @@
     <link href="http://www.grdtechs.com/2016/10/16/close-ticker-correctly/"/>
     <id>http://www.grdtechs.com/2016/10/16/close-ticker-correctly/</id>
     <published>2016-10-16T14:27:39.000Z</published>
-    <updated>2017-01-22T09:38:55.185Z</updated>
+    <updated>2017-02-14T03:47:07.981Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>在<code>ticker</code>和<code>goroutine</code>组合使用中当调用<code>ticker.Stop()</code>关闭<code>ticker</code>之后，相应的<code>goroutine</code>中的<code>ticker.C</code>并没有停掉，下面总结一种优雅的方式关闭<code>ticker</code>.<br><a id="more"></a></p>
 <h2 id="u4F18_u96C5_u7684_u5173_u95EDticker"><a href="#u4F18_u96C5_u7684_u5173_u95EDticker" class="headerlink" title="优雅的关闭ticker"></a>优雅的关闭<code>ticker</code></h2><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">"fmt"</span></span><br><span class="line">	<span class="string">"time"</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> main() &#123;</span><br><span class="line">	Demo()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> Demo() &#123;</span><br><span class="line">	done := startTicker(PrintInfo)</span><br><span class="line">	time.Sleep(time.Duration(<span class="number">12</span>) * time.Second)</span><br><span class="line">	<span class="built_in">close</span>(done)</span><br><span class="line">	time.Sleep(time.Duration(<span class="number">1</span>) * time.Minute)</span><br><span class="line">	fmt.Println(<span class="string">"main finished"</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> startTicker(f <span class="keyword">func</span>()) <span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125; &#123;</span><br><span class="line">	done := <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;, <span class="number">1</span>)</span><br><span class="line">	<span class="keyword">go</span> <span class="keyword">func</span>() &#123;</span><br><span class="line">		ticker := time.NewTicker(<span class="number">5</span> * time.Second)</span><br><span class="line">		<span class="comment">//	ticker := time.NewTicker(5 * time.Minute)</span></span><br><span class="line">		<span class="keyword">defer</span> ticker.Stop()</span><br><span class="line"></span><br><span class="line">		<span class="keyword">for</span> &#123;</span><br><span class="line">			<span class="keyword">select</span> &#123;</span><br><span class="line">			<span class="keyword">case</span> &lt;-ticker.C:</span><br><span class="line">				f()</span><br><span class="line">			<span class="keyword">case</span> &lt;-done:</span><br><span class="line">				<span class="keyword">return</span></span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;()</span><br><span class="line">	<span class="keyword">return</span> done</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> PrintInfo() &#123;</span><br><span class="line">	fmt.Println(<span class="string">"hello"</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -890,7 +951,7 @@
     <link href="http://www.grdtechs.com/2016/09/07/go-postform/"/>
     <id>http://www.grdtechs.com/2016/09/07/go-postform/</id>
     <published>2016-09-07T16:00:32.000Z</published>
-    <updated>2017-01-22T09:38:55.185Z</updated>
+    <updated>2017-02-14T03:47:07.985Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>golang这边将<code>map</code>结构序列化通常采用<code>json.Marshal</code>和<code>json.Unmarshal</code>来做，但是在php server端还需要做<code>json</code>反序列化解析才能用， 用golang模拟表单提交, php server端则非常方便提取相应的数据字段.<br><a id="more"></a></p>
 <h2 id="u65B9_u6CD5"><a href="#u65B9_u6CD5" class="headerlink" title="方法"></a>方法</h2><p>方法是利用golang<code>net/http</code>包提供的<code>PostForm</code>提交post表单提交。<code>ParseForm</code>解析<code>URL</code>中的查询字符串，并将解析结果更新到<code>r.Form</code>字段。对于<code>POST</code>或<code>PUT</code>请求，<code>ParseForm</code>还会将<code>body</code>当作表单解析，并将结果既更新到<code>r.PostForm</code>也更新到<code>r.Form</code>。解析结果中，<code>POST</code>或<code>PUT</code>请求主体要优先于<code>URL</code>查询字符串（同名变量，主体的值在查询字符串的值前面）。如果请求的主体的大小没有被<code>MaxBytesReader</code>函数设定限制，其大小默认限制为开头10MB。</p>
@@ -922,7 +983,7 @@
     <link href="http://www.grdtechs.com/2016/08/02/php7-redis-install/"/>
     <id>http://www.grdtechs.com/2016/08/02/php7-redis-install/</id>
     <published>2016-08-02T18:56:05.000Z</published>
-    <updated>2017-01-22T09:38:55.185Z</updated>
+    <updated>2017-02-14T03:47:07.985Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>在<code>Ubuntu16.04</code>上， 安装<code>php7</code>的<code>redis</code>扩展, 记录安装过程。<br><a id="more"></a></p>
 <h3 id="u5B89_u88C5phpredis"><a href="#u5B89_u88C5phpredis" class="headerlink" title="安装phpredis"></a>安装phpredis</h3><p><code>Redis</code>已经有了<code>PHP7</code>版本，可以从<code>github</code> 上获取项目克隆，然后手动切换到 <code>php7</code> 分支即可安装</p>
@@ -952,7 +1013,7 @@
     <link href="http://www.grdtechs.com/2016/07/30/php-mvc-1/"/>
     <id>http://www.grdtechs.com/2016/07/30/php-mvc-1/</id>
     <published>2016-07-30T16:34:45.000Z</published>
-    <updated>2017-01-22T09:38:55.185Z</updated>
+    <updated>2017-02-14T03:47:07.985Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>尽管MVC(model view controller pattern)模式在<code>PHP</code>web开发中很受欢迎，但是网上很难找到一套代码简单又能清楚阐述<code>PHP MVC</code>模式的案例，本文希望通过理论和代码实践简单阐述<code>PHP MVC</code>模式。</p>
 <a id="more"></a>
@@ -1017,7 +1078,7 @@
     <link href="http://www.grdtechs.com/2016/07/10/browse-refresh-saveinputolderval/"/>
     <id>http://www.grdtechs.com/2016/07/10/browse-refresh-saveinputolderval/</id>
     <published>2016-07-10T18:22:43.000Z</published>
-    <updated>2017-01-22T09:38:55.185Z</updated>
+    <updated>2017-02-14T03:47:07.981Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>html页面中的input框如果在浏览器刷新前有值，怎么在刷新后依然保留这个值不被清空呢？下面用<code>setCookie</code>的方案来解决这个问题.<br><a id="more"></a><br>首选判断input框中有值时,<code>setcookie</code>, 每次刷新浏览器时，读取<code>Cookie</code>值,如果存在<code>Cookie</code>值，则用此值初始化input值。</p>
 <h2 id="u7EAFjs_u5B9E_u73B0"><a href="#u7EAFjs_u5B9E_u73B0" class="headerlink" title="纯js实现"></a>纯js实现</h2><h3 id="u8BBE_u7F6ECookie"><a href="#u8BBE_u7F6ECookie" class="headerlink" title="设置Cookie"></a>设置Cookie</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span><br><span class="line">* @cname  cookie name </span><br><span class="line">* @cvalue cookie value </span><br><span class="line">* @ exdays cookie expires(天)</span><br><span class="line">*/</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">setCookie</span>(<span class="params">cname,cvalue,exdays</span>)</span><br><span class="line"></span>&#123;</span><br><span class="line">	<span class="keyword">if</span>(!(<span class="built_in">document</span>.cookie || navigator.cookieEnabled))</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="built_in">console</span>.log(<span class="string">'浏览器 cookie 未打开!'</span>);</span><br><span class="line">	&#125; </span><br><span class="line"></span><br><span class="line">	<span class="keyword">var</span> d = <span class="keyword">new</span> <span class="built_in">Date</span>();</span><br><span class="line">	d.setTime(d.getTime()+(exdays*<span class="number">24</span>*<span class="number">60</span>*<span class="number">60</span>*<span class="number">1000</span>));</span><br><span class="line">	<span class="keyword">var</span> expires = <span class="string">"expires="</span>+d.toGMTString();</span><br><span class="line">	<span class="built_in">document</span>.cookie = cname+<span class="string">"="</span>+cvalue+<span class="string">"; "</span>+expires;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -1067,7 +1128,7 @@
     <link href="http://www.grdtechs.com/2016/07/10/go-setcookie/"/>
     <id>http://www.grdtechs.com/2016/07/10/go-setcookie/</id>
     <published>2016-07-10T16:51:56.000Z</published>
-    <updated>2017-01-22T09:38:55.185Z</updated>
+    <updated>2017-02-14T03:47:07.985Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p><code>Go</code>web开发中，经常需要设置获取cookies, 不管是从client端设置获取还是server设置获取，其实都差不多，下面就总结一下常用的方法。<br><a id="more"></a></p>
 <h2 id="golang_u4E2Dcookie__u8BE6_u7EC6_u5B9A_u4E49"><a href="#golang_u4E2Dcookie__u8BE6_u7EC6_u5B9A_u4E49" class="headerlink" title="golang中cookie 详细定义"></a>golang中cookie 详细定义</h2><p>golang 官方文档中对<code>Cookie</code>结构的定义<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> Cookie <span class="keyword">struct</span> &#123;</span><br><span class="line">    Name       <span class="typename">string</span></span><br><span class="line">    Value      <span class="typename">string</span></span><br><span class="line">    Path       <span class="typename">string</span></span><br><span class="line">    Domain     <span class="typename">string</span></span><br><span class="line">    Expires    time.Time</span><br><span class="line">    RawExpires <span class="typename">string</span></span><br><span class="line">    <span class="comment">// MaxAge=0表示未设置Max-Age属性</span></span><br><span class="line">    <span class="comment">// MaxAge&lt;0表示立刻删除该cookie，等价于"Max-Age: 0"</span></span><br><span class="line">    <span class="comment">// MaxAge&gt;0表示存在Max-Age属性，单位是秒</span></span><br><span class="line">    MaxAge   <span class="typename">int</span></span><br><span class="line">    Secure   <span class="typename">bool</span></span><br><span class="line">    HttpOnly <span class="typename">bool</span></span><br><span class="line">    Raw      <span class="typename">string</span></span><br><span class="line">    Unparsed []<span class="typename">string</span> <span class="comment">// 未解析的“属性-值”对的原始文本</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
@@ -1122,7 +1183,7 @@
     <link href="http://www.grdtechs.com/2016/06/17/jsonfmt/"/>
     <id>http://www.grdtechs.com/2016/06/17/jsonfmt/</id>
     <published>2016-06-17T10:55:21.000Z</published>
-    <updated>2017-01-22T09:38:55.185Z</updated>
+    <updated>2017-02-14T03:47:07.985Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p><code>json</code>字符串在html用js美化输出使用总结。<br><a id="more"></a></p>
 <h2 id="JSON-stringify_28_29_u51FD_u6570_u539F_u578B"><a href="#JSON-stringify_28_29_u51FD_u6570_u539F_u578B" class="headerlink" title="JSON.stringify()函数原型"></a>JSON.stringify()函数原型</h2><p><strong>语法：</strong><br>　　<code>JSON.stringify(value [, replacer] [, space])</code></p>
@@ -1156,7 +1217,7 @@
     <link href="http://www.grdtechs.com/2016/06/14/go-time-summary/"/>
     <id>http://www.grdtechs.com/2016/06/14/go-time-summary/</id>
     <published>2016-06-14T14:05:28.000Z</published>
-    <updated>2017-01-22T09:38:55.185Z</updated>
+    <updated>2017-02-14T03:47:07.985Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p><code>golang</code> 中经常需要格式化时间和日期来满足不同的业务需求,下面总结格式化时间日期中遇到的问题。<br><a id="more"></a></p>
 <h2 id="golang_time_u5305__u65F6_u95F4_u65E5_u671F_u683C_u5F0F_u5316_u5B9A_u4E49"><a href="#golang_time_u5305__u65F6_u95F4_u65E5_u671F_u683C_u5F0F_u5316_u5B9A_u4E49" class="headerlink" title="golang time包 时间日期格式化定义"></a>golang time包 时间日期格式化定义</h2><p>go 的time package 提供了time.Format函数，用来对时间进行格式化输出;类似的还有time.Parse用来解析字符串类型的时间到time.Time。这是两个互逆的函数。</p>
@@ -1228,84 +1289,6 @@
       <category term="golang" scheme="http://www.grdtechs.com/tags/golang/"/>
     
       <category term="time" scheme="http://www.grdtechs.com/tags/time/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Go Vendoring Tools 使用总结</title>
-    <link href="http://www.grdtechs.com/2016/05/24/comparison-of-Go-Vendoring-Tools/"/>
-    <id>http://www.grdtechs.com/2016/05/24/comparison-of-Go-Vendoring-Tools/</id>
-    <published>2016-05-24T14:03:36.000Z</published>
-    <updated>2017-01-22T09:38:55.185Z</updated>
-    
-    <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>golang1.5版本开始支持第三方包到依赖管理,当多个项目在同一个<code>GOPATH</code>下，每个项目包含到第三方包通过<code>go get</code>命令都会<code>get</code>到<code>GOPATH</code>下到<code>src</code>目录中，而不是各个项目的文件夹中，这就导致第三方包的不同版本不能同时被<code>GOPATH</code>下到多个项目使用，从<code>golang</code>需要设置<code>GOPATH</code>来看,<code>golang</code>其实把每个项目当作一个个独立的第三包来看待。<br><a id="more"></a><br>关于<code>golang</code>包管理工具的topic, 在<code>golang</code>的官方wiki要有一篇总结对比的文章:<a href="https://github.com/golang/go/wiki/PackageManagementTools" target="_blank" rel="external">PackageManagementTools</a>。下面主要就项目中用过的<code>godep</code>,<code>govendor</code>,<code>glide</code>做一个简要的对比分析。</p>
-<h2 id="godep"><a href="#godep" class="headerlink" title="godep"></a>godep</h2><p><a href="https://github.com/tools/godep" target="_blank" rel="external">godep</a> helps build packages reproducibly by fixing their dependencies.</p>
-<p><strong>前置条件</strong></p>
-<ul>
-<li>项目处在<code>GOPATH</code>下</li>
-<li>项目能被<code>go install</code>通过</li>
-<li>项目能被<code>go test</code>通过</li>
-</ul>
-<p><strong>包初始化管理</strong><br>在项目根目录下执行<code>godep save</code>命令<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ godep save</span><br></pre></td></tr></table></figure></p>
-<p>会在项目根目录下生成两个文件夹: </p>
-<p><code>Godeps</code>目录</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">➜  Godeps tree</span><br><span class="line">.</span><br><span class="line">├── Godeps.json</span><br><span class="line">└── Readme</span><br><span class="line"></span><br><span class="line"><span class="number">0</span> directories, <span class="number">2</span> files</span><br><span class="line">➜  Godeps cat Godeps.json </span><br><span class="line">&#123;</span><br><span class="line">	<span class="string">"ImportPath"</span>: <span class="string">"yaml"</span>,</span><br><span class="line">	<span class="string">"GoVersion"</span>: <span class="string">"go1.6"</span>,</span><br><span class="line">	<span class="string">"GodepVersion"</span>: <span class="string">"v70"</span>,</span><br><span class="line">	<span class="string">"Packages"</span>: [</span><br><span class="line">		<span class="string">"./..."</span></span><br><span class="line">	],</span><br><span class="line">	<span class="string">"Deps"</span>: [</span><br><span class="line">		&#123;</span><br><span class="line">			<span class="string">"ImportPath"</span>: <span class="string">"gopkg.in/yaml.v2"</span>,</span><br><span class="line">			<span class="string">"Rev"</span>: <span class="string">"a83829b6f1293c91addabc89d0571c246397bbf4"</span></span><br><span class="line">		&#125;</span><br><span class="line">	]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p><code>vendor</code>目录:</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">➜  vendor tree</span><br><span class="line">.</span><br><span class="line">└── gopkg.in</span><br><span class="line">    └── yaml.v2</span><br><span class="line">        ├── apic.go</span><br><span class="line">        ├── decode.go</span><br><span class="line">        ├── emitterc.go</span><br><span class="line">        ├── encode.go</span><br><span class="line">        ├── LICENSE</span><br><span class="line">        ├── LICENSE.libyaml</span><br><span class="line">        ├── parserc.go</span><br><span class="line">        ├── readerc.go</span><br><span class="line">        ├── README.md</span><br><span class="line">        ├── resolve.go</span><br><span class="line">        ├── scannerc.go</span><br><span class="line">        ├── sorter.go</span><br><span class="line">        ├── writerc.go</span><br><span class="line">        ├── yaml.go</span><br><span class="line">        ├── yamlh.go</span><br><span class="line">        └── yamlprivateh.go</span><br><span class="line"></span><br><span class="line"><span class="number">2</span> directories, <span class="number">16</span> files</span><br></pre></td></tr></table></figure>
-<p>可以看到，<code>godep</code>把第三包的版本依赖信息记录在<code>Godeps.json</code>下，并且把第三包完整拷贝一份到<code>vendor</code>下面。通过对<code>Godeps.json</code>文件进行版本管理即可以管理整个项目的第三方包依赖信息。</p>
-<p><strong>添加新包</strong><br>方法一：</p>
-<p>go get 把新增的第三方包get到<code>GOPATH</code>的<code>src</code>目录下，然后再执行<code>godep save</code></p>
-<p>方法二：</p>
-<p>godep get <url> 同样是把第三方包get到<code>GOPATH</code>的<code>src</code>下，然后再执行<code>godep save</code></url></p>
-<p>可以看到<code>godep</code>只是把第三方包进行单独到依赖管理，而新增到第三包还是会被get到<code>GOPATH</code>中, 如果多个项目用同一个第三包的不同版本时，显然不能满足。</p>
-<p><strong>更新包</strong><br><code>godep</code>通过<code>godep update</code> 更新制定的第三包以及<code>golang</code>的版本。</p>
-<h2 id="govendor"><a href="#govendor" class="headerlink" title="govendor"></a>govendor</h2><p><a href="https://github.com/kardianos/govendor" target="_blank" rel="external">govendor</a> Uses the go1.5+ vendor folder. Multiple workflows supported, single tool.</p>
-<p><strong>Quick Start</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Setup your project.</span></span><br><span class="line"><span class="built_in">cd</span> <span class="string">"my project in GOPATH"</span></span><br><span class="line">govendor init</span><br><span class="line"></span><br><span class="line"><span class="comment"># Add existing GOPATH files to vendor.</span></span><br><span class="line">govendor add +external</span><br><span class="line"></span><br><span class="line"><span class="comment"># View your work.</span></span><br><span class="line">govendor list</span><br><span class="line"></span><br><span class="line"><span class="comment"># Look at what is using a package</span></span><br><span class="line">govendor list -v fmt</span><br><span class="line"></span><br><span class="line"><span class="comment"># Specify a specific version or revision to fetch</span></span><br><span class="line">govendor fetch golang.org/x/net/context@a4bbce9fcae005b22ae5443f6af064d80a6f5a55</span><br><span class="line">govendor fetch golang.org/x/net/context@v1   <span class="comment"># Get latest v1.*.* tag or branch.</span></span><br><span class="line">govendor fetch golang.org/x/net/context@=v1  <span class="comment"># Get the tag or branch named "v1".</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Update a package to latest, given any prior version constraint</span></span><br><span class="line">govendor fetch golang.org/x/net/context</span><br></pre></td></tr></table></figure>
-<p><strong>Sub-commands</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">init     Create the <span class="string">"vendor"</span> folder and the <span class="string">"vendor.json"</span> file.</span><br><span class="line">    list     List and filter existing dependencies and packages.</span><br><span class="line">    add      Add packages from <span class="variable">$GOPATH</span>.</span><br><span class="line">    update   Update packages from <span class="variable">$GOPATH</span>.</span><br><span class="line">    remove   Remove packages from the vendor folder.</span><br><span class="line">    status   Lists any packages missing, out-of-date, or modified locally.</span><br><span class="line">    fetch    Add new or update vendor folder packages from remote repository.</span><br><span class="line">    sync     Pull packages into vendor folder from remote repository with revisions</span><br><span class="line">                 from vendor.json file.</span><br><span class="line">    migrate  Move packages from a legacy tool to the vendor folder with metadata.</span><br><span class="line">    get      Like <span class="string">"go get"</span> but copies dependencies into a <span class="string">"vendor"</span> folder.</span><br><span class="line">    license  List discovered licenses <span class="keyword">for</span> the given status or import paths.</span><br><span class="line">    shell    Run a <span class="string">"shell"</span> to make multiple sub-commands more efficent <span class="keyword">for</span> large</span><br><span class="line">                 projects.</span><br><span class="line"></span><br><span class="line">    go tool commands that are wrapped:</span><br><span class="line">      `+&lt;status&gt;` package selection may be used with them</span><br><span class="line">    fmt, build, install, clean, <span class="built_in">test</span>, vet, generate</span><br></pre></td></tr></table></figure>
-<p><strong>Status</strong> </p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">+<span class="built_in">local</span>    (l) packages <span class="keyword">in</span> your project</span><br><span class="line">    +external (e) referenced packages <span class="keyword">in</span> GOPATH but not <span class="keyword">in</span> current project</span><br><span class="line">    +vendor   (v) packages <span class="keyword">in</span> the vendor folder</span><br><span class="line">    +std      (s) packages <span class="keyword">in</span> the standard library</span><br><span class="line"></span><br><span class="line">    +unused   (u) packages <span class="keyword">in</span> the vendor folder, but unused</span><br><span class="line">    +missing  (m) referenced packages but not found</span><br><span class="line"></span><br><span class="line">    +program  (p) package is a main package</span><br><span class="line"></span><br><span class="line">    +outside  +external +missing</span><br><span class="line">    +all      +all packages</span><br></pre></td></tr></table></figure>
-<p>可以看到<code>govendor init</code>之后会在根目录下生成一个<code>vendor</code>文件夹 </p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">➜  yaml tree <span class="operator">-d</span></span><br><span class="line">.</span><br><span class="line">└── vendor</span><br><span class="line">    ├── github.com</span><br><span class="line">    │   └── cihub</span><br><span class="line">    │       └── seelog</span><br><span class="line">    └── gopkg.in</span><br><span class="line">        └── yaml.v2</span><br><span class="line"></span><br><span class="line"><span class="number">6</span> directories</span><br><span class="line">➜  yaml cat vendor/vendor.json </span><br><span class="line">&#123;</span><br><span class="line">	<span class="string">"comment"</span>: <span class="string">""</span>,</span><br><span class="line">	<span class="string">"ignore"</span>: <span class="string">"test"</span>,</span><br><span class="line">	<span class="string">"package"</span>: [</span><br><span class="line">		&#123;</span><br><span class="line">			<span class="string">"checksumSHA1"</span>: <span class="string">"Nc93Ubautl47L3RP6x4lTY+ud68="</span>,</span><br><span class="line">			<span class="string">"path"</span>: <span class="string">"github.com/cihub/seelog"</span>,</span><br><span class="line">			<span class="string">"revision"</span>: <span class="string">"cedd97ac8c6c2ec413a97864185f9510fb1775cc"</span>,</span><br><span class="line">			<span class="string">"revisionTime"</span>: <span class="string">"2016-05-20T13:10:56Z"</span></span><br><span class="line">		&#125;,</span><br><span class="line">		&#123;</span><br><span class="line">			<span class="string">"checksumSHA1"</span>: <span class="string">"+OgOXBoiQ+X+C2dsAeiOHwBIEH0="</span>,</span><br><span class="line">			<span class="string">"path"</span>: <span class="string">"gopkg.in/yaml.v2"</span>,</span><br><span class="line">			<span class="string">"revision"</span>: <span class="string">"a83829b6f1293c91addabc89d0571c246397bbf4"</span>,</span><br><span class="line">			<span class="string">"revisionTime"</span>: <span class="string">"2016-03-01T20:40:22Z"</span></span><br><span class="line">		&#125;</span><br><span class="line">	],</span><br><span class="line">	<span class="string">"rootPath"</span>: <span class="string">"yaml"</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>用<code>govendor fetch &lt;url1&gt; &lt;url2&gt;</code>新增的第三方包直接被get到根目录的<code>vendor</code>文件夹下,不会与其它的项目混用第三方包，完美避免多个项目同用同一个第三方包的不同版本问题。</p>
-<p>只需要对<code>vendor/vendor.json</code>进行版本控制，即可对第三包依赖关系进行控制。</p>
-<h2 id="glide"><a href="#glide" class="headerlink" title="glide"></a>glide</h2><p><a href="https://github.com/Masterminds/glide" target="_blank" rel="external">Glide</a> Vendor Package Management for Golang.</p>
-<p><strong>Usage</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">➜  yaml glide --help</span><br><span class="line">USAGE:</span><br><span class="line">   glide [global options] <span class="built_in">command</span> [<span class="built_in">command</span> options] [arguments...]</span><br><span class="line"></span><br><span class="line">	create, init	Initialize a new project, creating a glide.yaml file</span><br><span class="line">    get			Install one or more packages into `vendor/` and add dependency to glide.yaml.</span><br><span class="line">    remove, rm		Remove a package from the glide.yaml file, and regenerate the lock file.</span><br><span class="line">    import		Import files from other dependency management systems.</span><br><span class="line">    name		Print the name of this project.</span><br><span class="line">    novendor, nv	List all non-vendor paths <span class="keyword">in</span> a directory.</span><br><span class="line">    rebuild		Rebuild (<span class="string">'go build'</span>) the dependencies</span><br><span class="line">    install, i		Install a project<span class="string">'s dependencies</span><br><span class="line">    update, up		Update a project'</span>s dependencies</span><br><span class="line">    tree		Tree prints the dependencies of this project as a tree.</span><br><span class="line">    list		List prints all dependencies that the present code references.</span><br><span class="line">    info		Info prints information about this project</span><br><span class="line">    about		Learn about Glide</span><br><span class="line"></span><br><span class="line">GLOBAL OPTIONS:</span><br><span class="line">   --yaml, -y <span class="string">"glide.yaml"</span>	Set a YAML configuration file.</span><br><span class="line">   --quiet, -q			Quiet (no info or debug messages)</span><br><span class="line">   --debug			Print Debug messages (verbose)</span><br><span class="line">   --home <span class="string">"/home/dev/.glide"</span>	The location of Glide files [<span class="variable">$GLIDE_HOME</span>]</span><br><span class="line">   --no-color			Turn off colored output <span class="keyword">for</span> <span class="built_in">log</span> messages</span><br><span class="line">   --help, -h			show <span class="built_in">help</span></span><br><span class="line">   --version, -v		<span class="built_in">print</span> the version</span><br></pre></td></tr></table></figure>
-<p><code>glide</code>    通过<code>glide create</code>或<code>glide init</code>命令初始化第三方包管理，会在项目根目录下生成一个<code>glide.yaml</code>，这个文件记录用到的第三方包的依赖关系，支持编辑修改。<br><code>glide</code>通过<code>glide install</code>, 会把所有缺少的第三方包都下载到<code>vendor</code>文件夹下，并且会在<code>glide.yaml</code>中添加所有依赖的第三方包名称，在<code>glide.lock</code>文件中记录具体的版本管理信息。</p>
-<p><strong>glide install</strong></p>
-<p>When you want to install the specific versions from the glide.lock file use glide install.</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ glide install</span><br></pre></td></tr></table></figure>
-<p>This will read the <code>glide.lock</code> file and install the commit id specific versions there.</p>
-<p>When the glide.lock file doesn’t tie to the <code>glide.yaml</code> file, such as there being a change, it will provide a warning. Running glide up will recreate the <code>glide.lock</code> file when updating the dependency tree.</p>
-<p>If no glide.lock file is present glide install will perform an update and generate a lock file.</p>
-<h2 id="u603B_u7ED3"><a href="#u603B_u7ED3" class="headerlink" title="总结"></a>总结</h2><ul>
-<li><code>godep</code>,<code>govendor</code>,<code>glide</code> 都可以很好的进行包管理。<code>govendor</code>,<code>glide</code>提供的可操作命令更丰富。</li>
-<li><code>godep</code> 会在根目录生成<code>Godeps</code>和<code>vendor</code>两个文件夹; <code>govendor</code>把所有信息都生成在<code>vendor</code>目录下; <code>glide</code> 会在根目录下生成<code>glide.yaml</code>, <code>glide.lock</code>文件及<code>vendor</code>目录; 从<code>简洁度</code>和<code>尽量不污染项目</code>来看，<code>govendor</code>最优，<code>glide</code>次之。</li>
-<li><p><code>godep</code>, <code>govendor</code>, <code>glide</code> 都提供get 第三方包的命令，但是 <code>glide</code>的<code>glide install</code> 最为方便， 并且直接把第三方包get到本项目的vendor目录下，并且<code>glide</code>提供的<code>便捷</code>命令也丰富。</p>
-</li>
-<li><p><strong> 在生产项目中推荐使用<code>govendor</code>, 更简洁; 在试验项目中推荐试用<code>glide</code>, 更方便。</strong></p>
-</li>
-</ul>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;h2 id=&quot;u524D_u8A00&quot;&gt;&lt;a href=&quot;#u524D_u8A00&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h2&gt;&lt;p&gt;golang1.5版本开始支持第三方包到依赖管理,当多个项目在同一个&lt;code&gt;GOPATH&lt;/code&gt;下，每个项目包含到第三方包通过&lt;code&gt;go get&lt;/code&gt;命令都会&lt;code&gt;get&lt;/code&gt;到&lt;code&gt;GOPATH&lt;/code&gt;下到&lt;code&gt;src&lt;/code&gt;目录中，而不是各个项目的文件夹中，这就导致第三方包的不同版本不能同时被&lt;code&gt;GOPATH&lt;/code&gt;下到多个项目使用，从&lt;code&gt;golang&lt;/code&gt;需要设置&lt;code&gt;GOPATH&lt;/code&gt;来看,&lt;code&gt;golang&lt;/code&gt;其实把每个项目当作一个个独立的第三包来看待。&lt;br&gt;
-    
-    </summary>
-    
-      <category term="golang" scheme="http://www.grdtechs.com/categories/golang/"/>
-    
-    
-      <category term="glide" scheme="http://www.grdtechs.com/tags/glide/"/>
-    
-      <category term="godep" scheme="http://www.grdtechs.com/tags/godep/"/>
-    
-      <category term="govendor" scheme="http://www.grdtechs.com/tags/govendor/"/>
-    
-      <category term="vendoring" scheme="http://www.grdtechs.com/tags/vendoring/"/>
     
   </entry>
   
