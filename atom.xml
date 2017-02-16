@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://www.grdtechs.com/"/>
-  <updated>2017-02-15T10:31:56.929Z</updated>
+  <updated>2017-02-16T07:34:05.381Z</updated>
   <id>http://www.grdtechs.com/</id>
   
   <author>
@@ -20,7 +20,7 @@
     <link href="http://www.grdtechs.com/2017/01/22/linux-signal-golang/"/>
     <id>http://www.grdtechs.com/2017/01/22/linux-signal-golang/</id>
     <published>2017-01-22T14:35:45.000Z</published>
-    <updated>2017-02-15T10:31:56.929Z</updated>
+    <updated>2017-02-16T07:34:05.381Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>信号(Signal)是Linux, 类Unix和其它POSIX兼容的操作系统中用来进程间通讯的一种方式。一个信号就是一个异步的通知，发送给某个进程，或者同进程的某个线程，告诉它们某个事件发生了。<br>当信号发送到某个进程中时，操作系统会中断该进程的正常流程，并进入相应的信号处理函数执行操作，完成后再回到中断的地方继续执行。<br>如果目标进程先前注册了某个信号的处理程序(signal handler),则此处理程序会被调用，否则缺省的处理程序被调用。</p>
 <a id="more"></a>
@@ -289,7 +289,7 @@
     <link href="http://www.grdtechs.com/2017/01/20/go-http-cross-origin/"/>
     <id>http://www.grdtechs.com/2017/01/20/go-http-cross-origin/</id>
     <published>2017-01-20T15:30:40.000Z</published>
-    <updated>2017-02-15T10:31:56.925Z</updated>
+    <updated>2017-02-16T07:34:05.381Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>server提供api服务直接对接前端js, 但是存在跨域问题，本文使用先查询请求过来的host 然后判断主域名是否存在，存在,则在返回头部设置这个请求域名充许跨域访问。<br><a id="more"></a></p>
 <h2 id="u8DE8_u57DF_u6982_u5FF5"><a href="#u8DE8_u57DF_u6982_u5FF5" class="headerlink" title="跨域概念"></a>跨域概念</h2><p>浏览器的同源策略，出于防范跨站脚本的攻击，禁止客户端脚本（如 JavaScript）对不同域的服务进行跨站调用。</p>
@@ -334,7 +334,7 @@
     <link href="http://www.grdtechs.com/2017/01/18/git-submodule/"/>
     <id>http://www.grdtechs.com/2017/01/18/git-submodule/</id>
     <published>2017-01-18T17:11:52.000Z</published>
-    <updated>2017-02-15T10:31:56.925Z</updated>
+    <updated>2017-02-16T07:34:05.377Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>现在golang已经可以通过<code>vendor</code>来管理第三方依赖包了，但是之前的一个老项目用的是<code>git submodule</code>来管理的，但是<code>.gitsubmodule</code>文件中只记录管理了项目的部分依赖包， 需要把还没有被管理的第三包也加上，下面总结使用<code>git submodule</code>的过程。<br><a id="more"></a></p>
 <h2 id="u6DFB_u52A0_u7B2C_u4E09_u65B9_u5305"><a href="#u6DFB_u52A0_u7B2C_u4E09_u65B9_u5305" class="headerlink" title="添加第三方包"></a>添加第三方包</h2><p>为当前工程添加submodule，命令如下：</p>
@@ -370,11 +370,110 @@
   </entry>
   
   <entry>
+    <title>一致性哈希算法总结</title>
+    <link href="http://www.grdtechs.com/2017/01/16/consistent-hashing-summary/"/>
+    <id>http://www.grdtechs.com/2017/01/16/consistent-hashing-summary/</id>
+    <published>2017-01-16T11:02:50.000Z</published>
+    <updated>2017-02-16T07:34:05.377Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>存在一种场景, 当一个缓存服务由多个服务器组共同提供时, key应该路由到哪一个服务。这里假如采用最通用的方式取模求余: <code>key%N</code>(N为服务器数目), 这样做均衡性没有什么问题, 但是当服务器数目发送增加或减少时, 分配方式则变为<code>key%(N+1)</code>或<code>key%(N-1)</code>。这里将会有大量的key失效迁移, 如果后端key对应的是有状态的存储数据,那么毫无疑问,这种做法将导致服务器间大量的数据迁移,从而造成服务的不稳定。解决思路，采用一致性哈希方法可以解决此问题。 </p>
+<a id="more"></a>
+<h2 id="u7B97_u6CD5_u539F_u7406"><a href="#u7B97_u6CD5_u539F_u7406" class="headerlink" title="算法原理"></a>算法原理</h2><p>一致性哈希算法在1997年由麻省理工学院提出的一种分布式哈希(DHT)实现算法，设计目标是为了解决因特网中的热点(Hot spot)问题，初衷和CARP十分类似。一致性哈希修正了CARP使用的简 单哈希算法带来的问题，使得分布式哈希(DHT)可以在P2P环境中真正得到应用。 </p>
+<p>一致性hash算法提出了在动态变化的Cache环境中，判定哈希算法好坏的四个定义:</p>
+<p>1.<code>平衡性(Balance)</code>: 平衡性是指哈希的结果能够尽可能分布到所有的缓冲中去，这样可以使得所有的缓冲空间都得到利用。很多哈希算法都能够满足这一条件。</p>
+<p>2.<code>单调性(Monotonicity)</code>: 单调性是指如果已经有一些内容通过哈希分派到了相应的缓冲中，又有新的缓冲加入到系统中。哈希的结果应能够保证原有已分配的内容可以被映射到原有的或者新的缓冲中去，而不会被映射到旧的缓冲集合中的其他缓冲区。 </p>
+<p>3.<code>分散性(Spread)</code>: 在分布式环境中，终端有可能看不到所有的缓冲，而是只能看到其中的一部分。当终端希望通过哈希过程将内容映射到缓冲上时，由于不同终端所见的缓冲范围有可能不同，从而导致哈希的结果不一致，最终的结果是相同的内容被不同的终端映射到不同的缓冲区中。这种情况显然是应该避免的，因为它导致相同内容被存储到不同缓冲中去，降低了系统存储的效率。分散性的定义就是上述情况发生的严重程度。好的哈希算法应能够尽量避免不一致的情况发生，也就是尽量降低分散性。 </p>
+<p>4.<code>负载(Load)</code>: 负载问题实际上是从另一个角度看待分散性问题。既然不同的终端可能将相同的内容映射到不同的缓冲区中，那么对于一个特定的缓冲区而言，也可能被不同的用户映射为不同 的内容。与分散性一样，这种情况也是应当避免的，因此好的哈希算法应能够尽量降低缓冲的负荷。</p>
+<p>在分布式集群中，对机器的添加删除，或者机器故障后自动脱离集群这些操作是分布式集群管理最基本的功能。如果采用常用的hash(object)%N算法，那么在有机器添加或者删除后，很多原有的数据就无法找到了，这样严重的违反了单调性原则。在移除/添加一个cache时，利用一致性哈希算法能够尽可能小的改变已存在key映射关系，尽可能的满足单调性的要求。</p>
+<p>下面就来按照5个步骤简单讲讲 consistent hashing 算法的基本原理:</p>
+<p><strong> 1 环形hash空间 </strong></p>
+<p>考虑通常的hash算法都是将value映射到一个32位的key值, 也即是0~2^32-1次方的数值空间上; 可以将这个空间想象成一个首(0)尾(2^32-1)相接的圆环, 如图1所示,</p>
+<center><img src="/imgs/hashring.jpg" alt="hash ring">图1 环形hash空间</center>
+
+<p><strong> 2 把对象映射到hash空间 </strong></p>
+<p>接下来考虑4个对象object1~object4，通过hash函数计算出的hash值key在环上的分布如图2所示,</p>
+<p>hash(object1) = key1;<br>… …<br>hash(object4) = key4;</p>
+<center><img src="/imgs/object.jpg" alt="hash ring">图2 4个对象的key值分布</center>
+
+<p><strong> 3 把cache server映射到hash空间 </strong></p>
+<p>一致性哈希算法的基本思想就是将对象和cache server都映射到同一个hash数值空间中，并且使用相同的hash算法。</p>
+<p>假设当前有A, B和C共3台cache server，那么其映射结果将如图3所示，他们在hash空间中，以对应的hash值排列(一般采用升序，好便于后继将对象映射到相应的cache server上)。</p>
+<p>hash(cache A) = key A;<br>… …<br>hash(cache C) = key C;</p>
+<center><img src="/imgs/cache.jpg" alt="hash ring">图3 cache server 和对象的key值分布</center>
+
+<font color="red">通常cache server的hash计算, 是用cache机器的IP地址或机器名作为hash输入, 后继的实现案例中利用了cache server的IP地址作为参数因子。</font>
+
+<p><strong> 4 把对象映射到cache server上 </strong></p>
+<p>现在cache server和对象都已经通过同一个hash算法映射到hash数值空间中了，接下来要考虑的就是如何将对象映射到cache server上面了。<br>在这个环形空间中，如果沿着顺时针方向从对象的key值出发，直到遇见一个cache server，那么就将该对象存储在这个cache server上，因为对象和cache server的hash值是固定的，因此这个cache server必然是唯一和确定的。这样不就找到了对象和cache server的映射方法了吗?! (程序实现时可以对hash环进行升序排序， 然后按顺时针从对象的key值出发，找到与这个key相邻的第一个大于key值的cache server hash值，则将这个key值映射到这个cache server上)</p>
+<p>依然继续上面的例子(参见图3)，那么根据上面的方法，对象object1将被存储到cache server A上; object2和 object3 对应到 cache  server C; object4 对应到 cache server B; </p>
+<p><strong> 5 考察cache server的变动 </strong><br>前面讲过，通过hash求余的方法带来的最大问题就在于不能满足单调性，当cache server有所变动时，存储在原位置上的cache数据失效了，就需要做相应的迁移, 进而对后台服务器造成巨大的冲击，现在就来分析一致性哈希算法,</p>
+<p>5.1 移除cache server </p>
+<p>假设cache server B 挂掉了, 根据上面讲到的映射方法，这时受影响的将仅是那些沿cache server B 逆时针遍历直到下一个cache server (cache server A)之间的对象，也即是本来映射到cache  server B上的那些对象。</p>
+<p>因此这里仅需要变动对象object4，将其重新映射到cache server C上即可; 参见图4。</p>
+<center><img src="/imgs/remove.jpg" alt="hash ring">图4 Cache server B被移除后的cache server映射</center>
+
+<p>5.2 添加cache server</p>
+<p>再考虑添加一台新的cache server D的情况，假设在这个环形hash空间中，cache server D被映射在对象object2和object3之间。这时受影响的将仅是那些沿cache server D逆时针遍历直到下一个cache server (cache server B)之间的对象(它们是也本来映射到cache server C上对象的一部分)，将这些对象重新映射到cache server D上即可。因此这里仅需要变动对象object2, 将其重新映射到cache server D上; 参见图5。</p>
+<center><img src="/imgs/add.jpg" alt="hash ring">图5 添加cache server D后的映射关系</center>
+
+<p><strong> 6 虚拟节点 </strong></p>
+<p>考量Hash算法的另一个指标是<code>平衡性(Balance)</code>，定义如下:<br><strong> 平衡性 </strong> 是指哈希的结果能够尽可能分布到所有的缓冲中去，这样可以使得所有的缓冲空间都得到利用, hash算法并不是保证绝对的平衡，如果cache server较少的话，对象并不能被均匀的映射到cache server上，比如在上面的例子中，仅部署cache server A 和 cache server C的情况下，在4个对象中，cache server A仅存储了object1，而cache server C则存储了object2, object3和object4; 分布是很不均衡的。</p>
+<p>为了解决这种情况, 一致性哈希引入了”虚拟节点”的概念, 它可以如下定义:</p>
+<font color="red">“虚拟节点”(virtual node)是实际节点在hash空间的复制品(replica)，一实际个节点对应了若干个”虚拟节点”，这个对应个数也成为”复制个数”，”虚拟节点”在hash空间中以hash值排列。</font>
+
+<p>仍以仅部署cache server A 和cache server C 的情况为例, 在图4中我们已经看到, cache server分布并不均匀。现在我们引入虚拟节点，并设置”复制个数”为2，这就意味着一共会存在4个”虚拟节点”, cache server A1, cache server A2代表了cache server A; cache server C1, cache server C2代表了cache server C; 假设一种比较理想的情况，参见图6,</p>
+<center><img src="/imgs/virtual.jpg" alt="hash ring">图6 引入”虚拟节点”后的映射关系</center>
+
+<p>此时, 对象到”虚拟节点”的映射关系为:</p>
+<p>objec1-&gt;cache A2; objec2-&gt;cache A1; objec3-&gt;cache C1; objec4-&gt;cache C2; </p>
+<p>因此对象object1和object2都被映射到了cache server A上，而object3和object4映射到了cache server C上; 平衡性有了很大提高。</p>
+<p>引入”虚拟节点”后, 映射关系就从<code>{对象-&gt;节点}</code>转换到了<code>{对象-&gt;虚拟节点}</code>。查询物体所在cache server时的映射关系如图7所示,</p>
+<center><img src="/imgs/map.jpg" alt="object to virtual node">图7 查询对象所在cache server</center>
+
+<p>“虚拟节点”的hash计算可以采用对应节点的IP地址加数字后缀的方式。例如假设cache server A 的IP地址为202.168.14.241。</p>
+<p>引入”虚拟节点”前，计算cache server A的hash值:</p>
+<p>Hash(“202.168.14.241”);</p>
+<p>引入”虚拟节点”后，计算”虚拟节点”cache server A1和cache server A2的hash值:</p>
+<p>Hash(“202.168.14.241-1-1”);  // cache server A1 [Hash(server_IP-virtual_node_id-physical-node-id)]</p>
+<p>Hash(“202.168.14.241-2-1”);  // cache server A2 [Hash(server_IP-virtual_node_id-physical-node-id)]</p>
+<h2 id="u7B97_u6CD5_u5B9E_u73B0"><a href="#u7B97_u6CD5_u5B9E_u73B0" class="headerlink" title="算法实现"></a>算法实现</h2><p>上面详细讲述了一致性哈希算法的原理，下面通过golang语言来实现一致性哈希算法，具体实现思想:<br>1.通过一致性哈希函数将这些cache server映射到一个哈希环上，并将这个哈希环按升序排序;<br>2.将待写入到cache server中的key-value值对象，可以用这个对象的key作为因子用上述同一个一致性哈希函数计算出一个hash值，然后按顺时针在哈希环上找到第一个大于这个hash值的cache server hash值;<br>3.通过找到的这个cache server hash值可以找到对应的cache server;<br>4.然后将上述的key-value对象存入到这个cache server中。 </p>
+<p>具体实现过程大致可以分为一下几个步骤:</p>
+<p>1.定义cache server节点实体, 用于计算cache server节点hash值的字符串;<br>2.定义一致性哈希结构，用于构建cache server的哈希环;<br>3.定义添加哈希节点的函数;<br>4.定义获取哈希节点的函数;<br>5.定义删除哈希节点的函数。</p>
+<p>1.定义cache server节点实体,<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> Node <span class="keyword">struct</span> &#123;</span><br><span class="line">  Id       <span class="typename">int</span></span><br><span class="line">  Ip       <span class="typename">string</span></span><br><span class="line">  Port     <span class="typename">int</span></span><br><span class="line">  HostName <span class="typename">string</span></span><br><span class="line">  Weight   <span class="typename">int</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>上面定义了一个cache server node的实体, 作用是用于计算代表cache server node的唯一hash值, 在本程序中将采用缓存服务器的Id, IP, Weight以及虚拟节点Id作为计算字符串，说明如下:</p>
+<p><code>Id</code>: 缓存服务器节点id<br><code>Ip</code>: 缓存服务器ip<br><code>Port</code>: 缓存服务器port<br><code>HostName</code>: 缓存服务器主机名(unique)<br><code>Weight</code>: 缓存服务器权重</p>
+<p>2.定义一致性哈希结构，</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> Consistent <span class="keyword">struct</span> &#123;</span><br><span class="line">  Nodes     <span class="keyword">map</span>[<span class="typename">uint32</span>]Node</span><br><span class="line">  numReps   <span class="typename">int</span></span><br><span class="line">  Resources <span class="keyword">map</span>[<span class="typename">int</span>]<span class="typename">bool</span></span><br><span class="line">  ring      HashRing</span><br><span class="line">  sync.RWMutex</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>上面定义了一致性哈希结构，说明如下,</p>
+<p><code>Nodes</code>: 用于保存所有的hash-cache server node 映射关系<br><code>numReps</code>: 复制个数, 用于设置每个物理节点所虚拟的个数，即每个物理节点最后虚拟出多少个节点个数<br><code>Resources</code>: 用于标识当前物理节点是否已经被映射过了<br><code>ring</code>: 是一个切片数组， 用于保存所有的虚拟节点，即上面<code>Nodes</code>中的所有<code>key</code>值，可以通过这个<code>key</code>值到<code>Nodes</code>中去取对应的cache server信息，这个切片数组是排序过的，可以想象成一个环，及所谓的hash 环。<br><code>sync.RWMutex</code>: 读写锁，全部数据操作一致性。</p>
+<p>3.定义添加哈希节点函数, 用于构建哈希环<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">func</span> (c *Consistent) Add(node *Node) <span class="typename">bool</span> &#123;</span><br><span class="line">	c.Lock()</span><br><span class="line">	<span class="keyword">defer</span> c.Unlock()</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> _, ok := c.Resources[node.Id]; ok &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="constant">false</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	count := c.numReps * node.Weight</span><br><span class="line">	<span class="keyword">for</span> i := <span class="number">0</span>; i &lt; count; i++ &#123;</span><br><span class="line">		str := c.joinStr(i, node)</span><br><span class="line">		c.Nodes[c.hashStr(str)] = *(node)</span><br><span class="line">	&#125;</span><br><span class="line">	c.Resources[node.Id] = <span class="constant">true</span></span><br><span class="line">	c.sortHashRing()</span><br><span class="line">	<span class="keyword">return</span> <span class="constant">true</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>上述添加哈希节点过程其实就是在计算一个一个cache server node的hash值，并构建排序过的哈希环， 大致分为以下几步:<br>1.检查当前物理节点是否已经被映射到哈希环上了，没有则进入下一步，<br>2.根据权重值计算出本物理节点的最终虚拟节点个数，然后分别计算对应虚拟节点的hash值,保存到<code>Nodes</code>结构中，<br>3.构建哈希环并排序，</p>
+<p>4.定义获取哈希节点的函数, 用于将待存储的热点值存入到对应的cache server上,<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">func</span> (c *Consistent) Get(key <span class="typename">string</span>) Node &#123;</span><br><span class="line">	c.RLock()</span><br><span class="line">	<span class="keyword">defer</span> c.RUnlock()</span><br><span class="line"></span><br><span class="line">	hash := c.hashStr(key)</span><br><span class="line">	hit_index := c.search(hash)</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> c.Nodes[c.ring[hit_index]]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>大致过程，<br>1.计算对象key的hash值，<br>2.根据上面计算的hash值，用二分搜索法到哈希环搜索自上述hash值起离它最近的一个cache server node hash值节点key，<br>3.根据查找到的cache server节点key, 返回<code>Nodes</code>结构中存储的cache sever信息，</p>
+<p>5.定义删除哈希节点的函数, 当某个cache server 挂掉之后，用于删除这个节点(一般情况下不建议删除节点，而是将当前坏节点上的数据迁移到好的节点上)<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">func</span> (c *Consistent) Remove(node *Node) &#123;</span><br><span class="line">	c.Lock()</span><br><span class="line">	<span class="keyword">defer</span> c.Unlock()</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> _, ok := c.Resources[node.Id]; !ok &#123;</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="built_in">delete</span>(c.Resources, node.Id)</span><br><span class="line"></span><br><span class="line">	count := c.numReps * node.Weight</span><br><span class="line">	<span class="keyword">for</span> i := <span class="number">0</span>; i &lt; count; i++ &#123;</span><br><span class="line">		str := c.joinStr(i, node)</span><br><span class="line">		<span class="built_in">delete</span>(c.Nodes, c.hashStr(str))</span><br><span class="line">	&#125;</span><br><span class="line">	c.sortHashRing()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>大致过程，<br>1.判断待删除物理节点是否存在哈希环中，存在则删除，并进入下一步，<br>2.删除改物理节点映射在哈希环中的所有虚拟节点,<br>3.重新排序哈希环,</p>
+<p>至此一致性哈希算法基本实现， 详细代码请参见 <a href="https://github.com/researchlab/experiments/tree/master/consistent_hash" target="_blank" rel="external">https://github.com/researchlab/experiments/tree/master/consistent_hash</a></p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;u524D_u8A00&quot;&gt;&lt;a href=&quot;#u524D_u8A00&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h2&gt;&lt;p&gt;存在一种场景, 当一个缓存服务由多个服务器组共同提供时, key应该路由到哪一个服务。这里假如采用最通用的方式取模求余: &lt;code&gt;key%N&lt;/code&gt;(N为服务器数目), 这样做均衡性没有什么问题, 但是当服务器数目发送增加或减少时, 分配方式则变为&lt;code&gt;key%(N+1)&lt;/code&gt;或&lt;code&gt;key%(N-1)&lt;/code&gt;。这里将会有大量的key失效迁移, 如果后端key对应的是有状态的存储数据,那么毫无疑问,这种做法将导致服务器间大量的数据迁移,从而造成服务的不稳定。解决思路，采用一致性哈希方法可以解决此问题。 &lt;/p&gt;
+    
+    </summary>
+    
+      <category term="algorithm" scheme="http://www.grdtechs.com/categories/algorithm/"/>
+    
+    
+      <category term="golang" scheme="http://www.grdtechs.com/tags/golang/"/>
+    
+  </entry>
+  
+  <entry>
     <title>linux too many open files 问题解决总结</title>
     <link href="http://www.grdtechs.com/2017/01/14/too-many-open-files-solution/"/>
     <id>http://www.grdtechs.com/2017/01/14/too-many-open-files-solution/</id>
     <published>2017-01-14T10:58:37.000Z</published>
-    <updated>2017-02-15T10:31:56.929Z</updated>
+    <updated>2017-02-16T07:34:05.381Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>运行在Linux系统上的网络程序可能会出现”Too many open files”的异常情况，且常见于高并发访问文件系统，多线程网络连接等场景。<br><a id="more"></a></p>
 <h2 id="u6982_u5FF5"><a href="#u6982_u5FF5" class="headerlink" title="概念"></a>概念</h2><p>程序经常访问的文件、socket等在Linux中都是指的文件file，系统需要记录每个当前访问file的name、location、access authority等相关信息，这样的一个实体被称为file entry。<code>open files table</code>存储这些file entry，以数组的形式线性管理。文件描述符(file descriptor)是作为<code>进程</code>到<code>open files table</code>的指针，也就是<code>open files table</code>的下标索引，将每个进程与它所访问的文件关联起来了。 </p>
@@ -435,7 +534,7 @@
     <link href="http://www.grdtechs.com/2017/01/06/go-printf-format/"/>
     <id>http://www.grdtechs.com/2017/01/06/go-printf-format/</id>
     <published>2017-01-06T15:49:13.000Z</published>
-    <updated>2017-02-15T10:31:56.925Z</updated>
+    <updated>2017-02-16T07:34:05.381Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>项目中总是时不时的要使用<code>fmt.Printf</code>或<code>fmt.Sprintf</code>来处理某些数据类型,总结一下常用的标识符用途及场景.</p>
 <a id="more"></a>
@@ -458,7 +557,7 @@
     <link href="http://www.grdtechs.com/2016/12/17/go-cache-component/"/>
     <id>http://www.grdtechs.com/2016/12/17/go-cache-component/</id>
     <published>2016-12-17T11:32:51.000Z</published>
-    <updated>2017-02-15T10:31:56.925Z</updated>
+    <updated>2017-02-16T07:34:05.377Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>总结用golang从分析，设计到实现一个可用的缓存组件。<br><a id="more"></a></p>
 <h2 id="u7F13_u5B58"><a href="#u7F13_u5B58" class="headerlink" title="缓存"></a>缓存</h2><ul>
@@ -554,7 +653,7 @@
     <link href="http://www.grdtechs.com/2016/11/23/uml-symbol-desc/"/>
     <id>http://www.grdtechs.com/2016/11/23/uml-symbol-desc/</id>
     <published>2016-11-23T11:47:43.000Z</published>
-    <updated>2017-02-15T10:31:56.929Z</updated>
+    <updated>2017-02-16T07:34:05.381Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>在UML的定义中，描述类和对象之间的关系，包括以下几种方式：依赖（<code>Dependency</code>）、关联（<code>Association</code>）、聚合（<code>Aggregation</code>）、组合（<code>Composition</code>）、泛化（<code>Generalization</code>）和实现（<code>Realization</code>）。现分别说明如下：<br><a id="more"></a></p>
 <h2 id="u5B9A_u4E49"><a href="#u5B9A_u4E49" class="headerlink" title="定义"></a>定义</h2><p>类图基本符号可拆分为四类:<code>线</code>(<code>虚线</code>和<code>实线</code>)，<code>箭头</code>，<code>三角</code>(<code>空心右三角</code>和<code>实心右三角</code>)，<code>菱形</code>(<code>空心菱形</code>和<code>实心菱形</code>); 由这些基本的图形进行组合构成了类图的基本符号。这里要注意这几个符号的顺序，代表了类与类之间关系的耦合程度, 越向右耦合度越高。</p>
@@ -685,7 +784,7 @@
     <link href="http://www.grdtechs.com/2016/11/23/go-dealwith-database-nullvalue/"/>
     <id>http://www.grdtechs.com/2016/11/23/go-dealwith-database-nullvalue/</id>
     <published>2016-11-23T11:40:54.000Z</published>
-    <updated>2017-02-15T10:31:56.925Z</updated>
+    <updated>2017-02-16T07:34:05.381Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>golang是强类型语言，在赋值和解析过程中需要先定义好数据类型，否在会报类型错误，下面总结在处理数据库表时遇到字段为空或零值的情况<br><a id="more"></a></p>
 <h2 id="u573A_u666F"><a href="#u573A_u666F" class="headerlink" title="场景"></a>场景</h2><p>假如存在如下没有指定<code>not null</code>的场合<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="operator"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> <span class="string">"users"</span> (</span><br><span class="line">    <span class="string">"id"</span> <span class="built_in">serial</span> <span class="keyword">not</span> <span class="literal">null</span> primary <span class="keyword">key</span>,</span><br><span class="line">    <span class="string">"name"</span> <span class="built_in">text</span>,</span><br><span class="line">    <span class="string">"age"</span> <span class="built_in">integer</span></span><br><span class="line">)</span></span><br></pre></td></tr></table></figure></p>
@@ -714,7 +813,7 @@
     <link href="http://www.grdtechs.com/2016/11/19/go-install-binaries/"/>
     <id>http://www.grdtechs.com/2016/11/19/go-install-binaries/</id>
     <published>2016-11-19T00:18:37.000Z</published>
-    <updated>2017-02-15T10:31:56.925Z</updated>
+    <updated>2017-02-16T07:34:05.381Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>golang tool chains 提供了很多好用的工具， 但是如果直接安装的话，大多数需要翻墙才能安装， 而且比较麻烦； 本文记录一种不需要翻墙就能顺利安装相应的工具的方法.</p>
 <a id="more"></a>
@@ -748,7 +847,7 @@
     <link href="http://www.grdtechs.com/2016/11/11/go-use-mysql/"/>
     <id>http://www.grdtechs.com/2016/11/11/go-use-mysql/</id>
     <published>2016-11-11T13:21:16.000Z</published>
-    <updated>2017-02-15T10:31:56.925Z</updated>
+    <updated>2017-02-16T07:34:05.381Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>Golang 提供了<code>database/sql</code>包用于对<code>SQL数据库</code>的访问, 作为操作数据库的入口对象<code>sql.DB</code>, 主要为我们提供了两个重要的功能:<br><a id="more"></a></p>
 <ul>
@@ -833,7 +932,7 @@
     <link href="http://www.grdtechs.com/2016/10/23/go-build-small-exec/"/>
     <id>http://www.grdtechs.com/2016/10/23/go-build-small-exec/</id>
     <published>2016-10-23T14:00:32.000Z</published>
-    <updated>2017-02-15T10:31:56.925Z</updated>
+    <updated>2017-02-16T07:34:05.377Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>尽管go1.7.3编译生成的可执行程序已经很小了,但是通过编译参数控制还能编译出更小的可执行文件，总结如下,<br><a id="more"></a></p>
 <h2 id="u52A0-ldflags_u53C2_u6570"><a href="#u52A0-ldflags_u53C2_u6570" class="headerlink" title="加-ldflags参数"></a>加-ldflags参数</h2><p>在程序编译的时候可以加上<code>-ldflags &quot;-s -w&quot;</code> 参数来优化编译程序, 其实通过去除部分连接和调试等信息来使得编译之后的执行程序更小,具体参数如下:</p>
@@ -871,7 +970,7 @@
     <link href="http://www.grdtechs.com/2016/10/16/mac-update-vim8-0/"/>
     <id>http://www.grdtechs.com/2016/10/16/mac-update-vim8-0/</id>
     <published>2016-10-16T23:08:56.000Z</published>
-    <updated>2017-02-15T10:31:56.929Z</updated>
+    <updated>2017-02-16T07:34:05.381Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>将mac自带的vim7.3 升级到vim8.0<br><a id="more"></a></p>
 <h2 id="u5347_u7EA7vim8-0"><a href="#u5347_u7EA7vim8-0" class="headerlink" title="升级vim8.0"></a>升级vim8.0</h2><ul>
@@ -929,7 +1028,7 @@
     <link href="http://www.grdtechs.com/2016/10/16/close-ticker-correctly/"/>
     <id>http://www.grdtechs.com/2016/10/16/close-ticker-correctly/</id>
     <published>2016-10-16T14:27:39.000Z</published>
-    <updated>2017-02-15T10:31:56.925Z</updated>
+    <updated>2017-02-16T07:34:05.377Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>在<code>ticker</code>和<code>goroutine</code>组合使用中当调用<code>ticker.Stop()</code>关闭<code>ticker</code>之后，相应的<code>goroutine</code>中的<code>ticker.C</code>并没有停掉，下面总结一种优雅的方式关闭<code>ticker</code>.<br><a id="more"></a></p>
 <h2 id="u4F18_u96C5_u7684_u5173_u95EDticker"><a href="#u4F18_u96C5_u7684_u5173_u95EDticker" class="headerlink" title="优雅的关闭ticker"></a>优雅的关闭<code>ticker</code></h2><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">"fmt"</span></span><br><span class="line">	<span class="string">"time"</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> main() &#123;</span><br><span class="line">	Demo()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> Demo() &#123;</span><br><span class="line">	done := startTicker(PrintInfo)</span><br><span class="line">	time.Sleep(time.Duration(<span class="number">12</span>) * time.Second)</span><br><span class="line">	<span class="built_in">close</span>(done)</span><br><span class="line">	time.Sleep(time.Duration(<span class="number">1</span>) * time.Minute)</span><br><span class="line">	fmt.Println(<span class="string">"main finished"</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> startTicker(f <span class="keyword">func</span>()) <span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125; &#123;</span><br><span class="line">	done := <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;, <span class="number">1</span>)</span><br><span class="line">	<span class="keyword">go</span> <span class="keyword">func</span>() &#123;</span><br><span class="line">		ticker := time.NewTicker(<span class="number">5</span> * time.Second)</span><br><span class="line">		<span class="comment">//	ticker := time.NewTicker(5 * time.Minute)</span></span><br><span class="line">		<span class="keyword">defer</span> ticker.Stop()</span><br><span class="line"></span><br><span class="line">		<span class="keyword">for</span> &#123;</span><br><span class="line">			<span class="keyword">select</span> &#123;</span><br><span class="line">			<span class="keyword">case</span> &lt;-ticker.C:</span><br><span class="line">				f()</span><br><span class="line">			<span class="keyword">case</span> &lt;-done:</span><br><span class="line">				<span class="keyword">return</span></span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;()</span><br><span class="line">	<span class="keyword">return</span> done</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> PrintInfo() &#123;</span><br><span class="line">	fmt.Println(<span class="string">"hello"</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -954,7 +1053,7 @@
     <link href="http://www.grdtechs.com/2016/09/07/go-postform/"/>
     <id>http://www.grdtechs.com/2016/09/07/go-postform/</id>
     <published>2016-09-07T16:00:32.000Z</published>
-    <updated>2017-02-15T10:31:56.925Z</updated>
+    <updated>2017-02-16T07:34:05.381Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>golang这边将<code>map</code>结构序列化通常采用<code>json.Marshal</code>和<code>json.Unmarshal</code>来做，但是在php server端还需要做<code>json</code>反序列化解析才能用， 用golang模拟表单提交, php server端则非常方便提取相应的数据字段.<br><a id="more"></a></p>
 <h2 id="u65B9_u6CD5"><a href="#u65B9_u6CD5" class="headerlink" title="方法"></a>方法</h2><p>方法是利用golang<code>net/http</code>包提供的<code>PostForm</code>提交post表单提交。<code>ParseForm</code>解析<code>URL</code>中的查询字符串，并将解析结果更新到<code>r.Form</code>字段。对于<code>POST</code>或<code>PUT</code>请求，<code>ParseForm</code>还会将<code>body</code>当作表单解析，并将结果既更新到<code>r.PostForm</code>也更新到<code>r.Form</code>。解析结果中，<code>POST</code>或<code>PUT</code>请求主体要优先于<code>URL</code>查询字符串（同名变量，主体的值在查询字符串的值前面）。如果请求的主体的大小没有被<code>MaxBytesReader</code>函数设定限制，其大小默认限制为开头10MB。</p>
@@ -986,7 +1085,7 @@
     <link href="http://www.grdtechs.com/2016/08/02/php7-redis-install/"/>
     <id>http://www.grdtechs.com/2016/08/02/php7-redis-install/</id>
     <published>2016-08-02T18:56:05.000Z</published>
-    <updated>2017-02-15T10:31:56.929Z</updated>
+    <updated>2017-02-16T07:34:05.381Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>在<code>Ubuntu16.04</code>上， 安装<code>php7</code>的<code>redis</code>扩展, 记录安装过程。<br><a id="more"></a></p>
 <h3 id="u5B89_u88C5phpredis"><a href="#u5B89_u88C5phpredis" class="headerlink" title="安装phpredis"></a>安装phpredis</h3><p><code>Redis</code>已经有了<code>PHP7</code>版本，可以从<code>github</code> 上获取项目克隆，然后手动切换到 <code>php7</code> 分支即可安装</p>
@@ -1016,7 +1115,7 @@
     <link href="http://www.grdtechs.com/2016/07/30/php-mvc-1/"/>
     <id>http://www.grdtechs.com/2016/07/30/php-mvc-1/</id>
     <published>2016-07-30T16:34:45.000Z</published>
-    <updated>2017-02-15T10:31:56.929Z</updated>
+    <updated>2017-02-16T07:34:05.381Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>尽管MVC(model view controller pattern)模式在<code>PHP</code>web开发中很受欢迎，但是网上很难找到一套代码简单又能清楚阐述<code>PHP MVC</code>模式的案例，本文希望通过理论和代码实践简单阐述<code>PHP MVC</code>模式。</p>
 <a id="more"></a>
@@ -1081,7 +1180,7 @@
     <link href="http://www.grdtechs.com/2016/07/10/browse-refresh-saveinputolderval/"/>
     <id>http://www.grdtechs.com/2016/07/10/browse-refresh-saveinputolderval/</id>
     <published>2016-07-10T18:22:43.000Z</published>
-    <updated>2017-02-15T10:31:56.925Z</updated>
+    <updated>2017-02-16T07:34:05.377Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>html页面中的input框如果在浏览器刷新前有值，怎么在刷新后依然保留这个值不被清空呢？下面用<code>setCookie</code>的方案来解决这个问题.<br><a id="more"></a><br>首选判断input框中有值时,<code>setcookie</code>, 每次刷新浏览器时，读取<code>Cookie</code>值,如果存在<code>Cookie</code>值，则用此值初始化input值。</p>
 <h2 id="u7EAFjs_u5B9E_u73B0"><a href="#u7EAFjs_u5B9E_u73B0" class="headerlink" title="纯js实现"></a>纯js实现</h2><h3 id="u8BBE_u7F6ECookie"><a href="#u8BBE_u7F6ECookie" class="headerlink" title="设置Cookie"></a>设置Cookie</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span><br><span class="line">* @cname  cookie name </span><br><span class="line">* @cvalue cookie value </span><br><span class="line">* @ exdays cookie expires(天)</span><br><span class="line">*/</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">setCookie</span>(<span class="params">cname,cvalue,exdays</span>)</span><br><span class="line"></span>&#123;</span><br><span class="line">	<span class="keyword">if</span>(!(<span class="built_in">document</span>.cookie || navigator.cookieEnabled))</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="built_in">console</span>.log(<span class="string">'浏览器 cookie 未打开!'</span>);</span><br><span class="line">	&#125; </span><br><span class="line"></span><br><span class="line">	<span class="keyword">var</span> d = <span class="keyword">new</span> <span class="built_in">Date</span>();</span><br><span class="line">	d.setTime(d.getTime()+(exdays*<span class="number">24</span>*<span class="number">60</span>*<span class="number">60</span>*<span class="number">1000</span>));</span><br><span class="line">	<span class="keyword">var</span> expires = <span class="string">"expires="</span>+d.toGMTString();</span><br><span class="line">	<span class="built_in">document</span>.cookie = cname+<span class="string">"="</span>+cvalue+<span class="string">"; "</span>+expires;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -1131,7 +1230,7 @@
     <link href="http://www.grdtechs.com/2016/07/10/go-setcookie/"/>
     <id>http://www.grdtechs.com/2016/07/10/go-setcookie/</id>
     <published>2016-07-10T16:51:56.000Z</published>
-    <updated>2017-02-15T10:31:56.925Z</updated>
+    <updated>2017-02-16T07:34:05.381Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p><code>Go</code>web开发中，经常需要设置获取cookies, 不管是从client端设置获取还是server设置获取，其实都差不多，下面就总结一下常用的方法。<br><a id="more"></a></p>
 <h2 id="golang_u4E2Dcookie__u8BE6_u7EC6_u5B9A_u4E49"><a href="#golang_u4E2Dcookie__u8BE6_u7EC6_u5B9A_u4E49" class="headerlink" title="golang中cookie 详细定义"></a>golang中cookie 详细定义</h2><p>golang 官方文档中对<code>Cookie</code>结构的定义<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> Cookie <span class="keyword">struct</span> &#123;</span><br><span class="line">    Name       <span class="typename">string</span></span><br><span class="line">    Value      <span class="typename">string</span></span><br><span class="line">    Path       <span class="typename">string</span></span><br><span class="line">    Domain     <span class="typename">string</span></span><br><span class="line">    Expires    time.Time</span><br><span class="line">    RawExpires <span class="typename">string</span></span><br><span class="line">    <span class="comment">// MaxAge=0表示未设置Max-Age属性</span></span><br><span class="line">    <span class="comment">// MaxAge&lt;0表示立刻删除该cookie，等价于"Max-Age: 0"</span></span><br><span class="line">    <span class="comment">// MaxAge&gt;0表示存在Max-Age属性，单位是秒</span></span><br><span class="line">    MaxAge   <span class="typename">int</span></span><br><span class="line">    Secure   <span class="typename">bool</span></span><br><span class="line">    HttpOnly <span class="typename">bool</span></span><br><span class="line">    Raw      <span class="typename">string</span></span><br><span class="line">    Unparsed []<span class="typename">string</span> <span class="comment">// 未解析的“属性-值”对的原始文本</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
@@ -1186,7 +1285,7 @@
     <link href="http://www.grdtechs.com/2016/06/17/jsonfmt/"/>
     <id>http://www.grdtechs.com/2016/06/17/jsonfmt/</id>
     <published>2016-06-17T10:55:21.000Z</published>
-    <updated>2017-02-15T10:31:56.929Z</updated>
+    <updated>2017-02-16T07:34:05.381Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p><code>json</code>字符串在html用js美化输出使用总结。<br><a id="more"></a></p>
 <h2 id="JSON-stringify_28_29_u51FD_u6570_u539F_u578B"><a href="#JSON-stringify_28_29_u51FD_u6570_u539F_u578B" class="headerlink" title="JSON.stringify()函数原型"></a>JSON.stringify()函数原型</h2><p><strong>语法：</strong><br>　　<code>JSON.stringify(value [, replacer] [, space])</code></p>
@@ -1212,86 +1311,6 @@
       <category term="html" scheme="http://www.grdtechs.com/tags/html/"/>
     
       <category term="json" scheme="http://www.grdtechs.com/tags/json/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>golang 格式化时间总结</title>
-    <link href="http://www.grdtechs.com/2016/06/14/go-time-summary/"/>
-    <id>http://www.grdtechs.com/2016/06/14/go-time-summary/</id>
-    <published>2016-06-14T14:05:28.000Z</published>
-    <updated>2017-02-15T10:31:56.925Z</updated>
-    
-    <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p><code>golang</code> 中经常需要格式化时间和日期来满足不同的业务需求,下面总结格式化时间日期中遇到的问题。<br><a id="more"></a></p>
-<h2 id="golang_time_u5305__u65F6_u95F4_u65E5_u671F_u683C_u5F0F_u5316_u5B9A_u4E49"><a href="#golang_time_u5305__u65F6_u95F4_u65E5_u671F_u683C_u5F0F_u5316_u5B9A_u4E49" class="headerlink" title="golang time包 时间日期格式化定义"></a>golang time包 时间日期格式化定义</h2><p>go 的time package 提供了time.Format函数，用来对时间进行格式化输出;类似的还有time.Parse用来解析字符串类型的时间到time.Time。这是两个互逆的函数。</p>
-<p><strong> 下面看<code>golang</code>中<code>time</code>包对于时间的详细定义 </strong></p>
-<ul>
-<li>月份 1,01,Jan,January</li>
-<li>日　 2,02,_2</li>
-<li>时　 3,03,15,PM,pm,AM,am</li>
-<li>分　 4,04</li>
-<li>秒　 5,05</li>
-<li>年　 06,2006</li>
-<li>时区 -07,-0700,Z0700,Z07:00,-07:00,MST</li>
-<li>周几 Mon,Monday</li>
-</ul>
-<p><strong> 比如小时的表示(原定义是下午3时，也就是15时) </strong></p>
-<ul>
-<li>3 用12小时制表示，去掉前导0</li>
-<li>03 用12小时制表示，保留前导0</li>
-<li>15 用24小时制表示，保留前导0</li>
-<li>03pm 用24小时制am/pm表示上下午表示，保留前导0</li>
-<li>3pm 用24小时制am/pm表示上下午表示，去掉前导0</li>
-</ul>
-<p><strong> 又比如月份 </strong></p>
-<ul>
-<li>1 数字表示月份，去掉前导0</li>
-<li>01 数字表示月份，保留前导0</li>
-<li>Jan 缩写单词表示月份</li>
-<li>January 全单词表示月份</li>
-</ul>
-<h2 id="u65F6_u95F4_u65E5_u671F_u683C_u5F0F_u5316"><a href="#u65F6_u95F4_u65E5_u671F_u683C_u5F0F_u5316" class="headerlink" title="时间日期格式化"></a>时间日期格式化</h2><ul>
-<li>本地当期时间</li>
-</ul>
-<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">fmt.Println(time.Now()) <span class="comment">//2016-07-14 14:27:28.214512532 +0800 CST</span></span><br></pre></td></tr></table></figure>
-<ul>
-<li>时间格式化</li>
-</ul>
-<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">fmt.Println(time.Now().Format(<span class="string">"3:04:05.000 PM Mon Jan"</span>))            <span class="comment">// 2:27:05.702 PM Thu Jul</span></span><br><span class="line">fmt.Println(time.Now().Format(<span class="string">"2006-01-_2 3:04:05.000 PM Mon Jan"</span>)) <span class="comment">// 2016-07-14 2:54:11.442 PM Thu Jul</span></span><br><span class="line">fmt.Println(time.Now().Format(<span class="string">"2006-01-02 15:04:05"</span>))  <span class="comment">// 2016-07-14 14:54:11.442239513 +0800 CST</span></span><br></pre></td></tr></table></figure>
-<ul>
-<li>本地当前时间戳(10位)</li>
-</ul>
-<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">fmt.Println(time.Now().Unix()) <span class="comment">//1468479251</span></span><br></pre></td></tr></table></figure>
-<ul>
-<li>本地当前时间戳(19位)</li>
-</ul>
-<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">fmt.Println(time.Now().UnixNano()) <span class="comment">//1468480006774460462</span></span><br></pre></td></tr></table></figure>
-<ul>
-<li>时间戳转时间 </li>
-</ul>
-<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">fmt.Println(time.Unix(<span class="number">1389058332</span>, <span class="number">0</span>).Format(<span class="string">"2006-01-02 15:04:05"</span>)) <span class="comment">//2014-01-07 09:32:12</span></span><br></pre></td></tr></table></figure>
-<ul>
-<li>时间转时间戳</li>
-</ul>
-<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">fmt.Println(time.Date(<span class="number">2014</span>, <span class="number">1</span>, <span class="number">7</span>, <span class="number">5</span>, <span class="number">50</span>, <span class="number">4</span>, <span class="number">0</span>, time.Local).Unix())</span><br></pre></td></tr></table></figure>
-<ul>
-<li>时间转换为UTC时间和本地时间( UTC:零时区 +0000， China: 东八区 +0800)</li>
-</ul>
-<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">dateStr := <span class="string">"2016-07-14 14:24:51"</span> </span><br><span class="line">timestamp1, _ := time.Parse(<span class="string">"2006-01-02 15:04:05"</span>, dateStr)</span><br><span class="line">timestamp2, _ := time.ParseInLocation(<span class="string">"2006-01-02 15:04:05"</span>, dateStr, time.Local)</span><br><span class="line">fmt.Println(timestamp1, timestamp2)               <span class="comment">//2016-07-14 14:24:51 +0000 UTC 2016-07-14 14:24:51 +0800 CST </span></span><br><span class="line">fmt.Println(timestamp1.Unix(), timestamp2.Unix()) <span class="comment">//1468506291 1468477491 </span></span><br><span class="line"></span><br><span class="line">now := time.Now()                </span><br><span class="line">year, mon, day := now.UTC().Date()</span><br><span class="line">hour, min, sec := now.UTC().Clock()</span><br><span class="line">zone, _ := now.UTC().Zone()     </span><br><span class="line">fmt.Printf(<span class="string">"UTC 时间是 %d-%d-%d %02d:%02d:%02d %s\n"</span>,         </span><br><span class="line">    year, mon, day, hour, min, sec, zone) <span class="comment">// UTC 时间是 2016-7-14 07:06:46 UTC</span></span><br><span class="line">                                                           </span><br><span class="line">year, mon, day = now.Date()</span><br><span class="line">hour, min, sec = now.Clock()</span><br><span class="line">zone, _ = now.Zone()</span><br><span class="line">fmt.Printf(<span class="string">"本地时间是 %d-%d-%d %02d:%02d:%02d %s\n"</span>,</span><br><span class="line">    year, mon, day, hour, min, sec, zone) <span class="comment">// 本地时间是 2016-7-14 15:06:46 CST</span></span><br></pre></td></tr></table></figure>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;h2 id=&quot;u524D_u8A00&quot;&gt;&lt;a href=&quot;#u524D_u8A00&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h2&gt;&lt;p&gt;&lt;code&gt;golang&lt;/code&gt; 中经常需要格式化时间和日期来满足不同的业务需求,下面总结格式化时间日期中遇到的问题。&lt;br&gt;
-    
-    </summary>
-    
-      <category term="golang" scheme="http://www.grdtechs.com/categories/golang/"/>
-    
-    
-      <category term="golang" scheme="http://www.grdtechs.com/tags/golang/"/>
-    
-      <category term="time" scheme="http://www.grdtechs.com/tags/time/"/>
     
   </entry>
   
