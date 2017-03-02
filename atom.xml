@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://www.grdtechs.com/"/>
-  <updated>2017-03-02T05:38:27.198Z</updated>
+  <updated>2017-03-02T07:27:20.181Z</updated>
   <id>http://www.grdtechs.com/</id>
   
   <author>
@@ -16,11 +16,42 @@
   <generator uri="http://hexo.io/">Hexo</generator>
   
   <entry>
+    <title>基于fzzy/radix/redis封装新的redispool</title>
+    <link href="http://www.grdtechs.com/2017/03/02/redispool-baseon-fzzy-radix/"/>
+    <id>http://www.grdtechs.com/2017/03/02/redispool-baseon-fzzy-radix/</id>
+    <published>2017-03-02T14:42:42.000Z</published>
+    <updated>2017-03-02T07:27:20.181Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>之前的老项目的redis client sdk 直接大名鼎鼎的<code>github.com/fzzy/radix</code>提供的<code>redis client</code> 和<code>redis pool</code>, 当访问峰值达到一定的值后会出现<code>too many open files</code>等tcp连接错误，同时也没有直接提供authorization 密钥认证的接口，为满足这些新需求基于<code>fzzy/radix</code>封装出的新的<code>redispool</code>, 已投入生产使用半年来暂无问题，本文总结如下,<br><a id="more"></a></p>
+<h2 id="auth_u8BA4_u8BC1"><a href="#auth_u8BA4_u8BC1" class="headerlink" title="auth认证"></a>auth认证</h2><p>如果redis server 需要密钥访问的话，每新建一个client 连接后都需要先通过authorization认证之后才能被使用，如果每次都通过新建一个redis client 再oauth认证来用显然没什么问题，但对于要频繁进行redis操作的系统而言，最好采用redis pool 的办法来解决，用redis conn 池本来也很好解决， 就是在新建redis conn pool时 每新建一个redis client就auth认证一下然后再保存起来就可以使用了，并且这个连接以后都不需要在进行auth认证了。<br>如果redis pool在新建之后就固定的话， 是可以如上面这么简单的，但是采用的<code>fzzy/radix</code>包在实现的方案是可根据需要自动伸缩地新建redis client conn,之前设置的redis 连接池的大小其实是最小的空闲连接池，当业务需求需要的redis client连接数大于pool中的数目时则会通过redis.Dial()的方法新建一个redis client conn 以满足业务的需求，即在建立redis连接池的时候auth认证的redis client conn 和最后回到pool池中的redis client conn 可能就不是同一个client了，因为当新的redis client conn 塞满redis 连接池后 之前auth认证过的旧的redis client conn就会被Close关闭到而不再回到pool池中，具体实现如下:<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">func</span> (p *RedisPool) getRedisClient() (*redis.Client, error) &#123;</span><br><span class="line">	client, err := redis.Dial(p.network, p.addr)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="constant">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="constant">nil</span>, err</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> <span class="built_in">len</span>(p.pwd) != <span class="number">0</span> &#123;</span><br><span class="line">		<span class="keyword">if</span> client, err = p.redisAuth(client); err != <span class="constant">nil</span> &#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="constant">nil</span>, err</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> client, <span class="constant">nil</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> (p *RedisPool) redisAuth(client *redis.Client) (*redis.Client, error) &#123;</span><br><span class="line">	<span class="keyword">if</span> _, err := client.Cmd(<span class="string">"AUTH"</span>, p.pwd).Str(); err != <span class="constant">nil</span> &#123;</span><br><span class="line">		client.Close()</span><br><span class="line">		<span class="keyword">return</span> client, err</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> client, <span class="constant">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>上述代码提供了一个redisAuth方法来提供auth认证，这样不管是通过新建redis池还是当池中redis client conn耗尽之后单独新建的redis client 都通过上述提供getRedisClient()方法来获取新建的redis client conn ,这样便可保证每次新建的redis client conn 都是通过auth认证的(当然上次实现的时候如果没有设置密码，则不进行密钥认证，只有设置了密钥才会调用auth进行认证授权)。</p>
+<h2 id="qps_u9650_u5236"><a href="#qps_u9650_u5236" class="headerlink" title="qps限制"></a>qps限制</h2><p>因为<code>fzzy/radix</code>包当初始化创建的redis 连接池中的redis client 耗尽后会通过redis.Dial()方法新建一个redis.client, 如果在某一个峰值redis连接池耗尽的同时大量新建redis.client 而不能及时Close掉这些redis.Client,则后继再redis.Dial()新建的redis client conn 就会因为受系统限制无法分配文件句柄地址而报”too many open files”错误。具体试验可以先限制redis连接池为100, 然后同时发起10w redis 连接请求， 可以通过下面的命令观察到当redis client conn最大分配的大小，超过之后程序也会崩掉。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">watch -n <span class="number">1</span> <span class="string">"redis-cli -h localhost -p 6379 -a 123456 client list | wc -l"</span> <span class="comment"># redis client 连接数</span></span><br><span class="line">watch -n <span class="number">1</span> <span class="string">"lsof -i:6379 | wc -l "</span> <span class="comment"># redis tcp 连接数</span></span><br></pre></td></tr></table></figure></p>
+<p>上述命令可以动态看到每一秒内当前的redis client 连接数目 和 tcp 连接数</p>
+<p>显然程序不能仍由业务需求无限的取申请redis client 连接数， 本文设计通过每次成功Get到一个redis client时 则通过<code>sync/atomic</code>包原子的给qps新增一 进行计数，当Put到池或Empty全部清空时则进行减一 计数操作, 具体实现如下,<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Retrieves an available redis client. If there are none available it will</span></span><br><span class="line"><span class="comment">// create a new one on the fly</span></span><br><span class="line"><span class="keyword">func</span> (p *RedisPool) Get() (client *redis.Client, err error) &#123;</span><br><span class="line">	<span class="keyword">if</span> p.qpsLimit &gt; <span class="number">0</span> &#123;</span><br><span class="line">		<span class="keyword">for</span> p.qps &gt; p.qpsLimit &#123;</span><br><span class="line">			time.Sleep(time.Millisecond * time.Duration(<span class="number">10</span>))</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">3</span>; i++ &#123;</span><br><span class="line">		<span class="keyword">if</span> client, err = p.get(); err != <span class="constant">nil</span> &#123;</span><br><span class="line">			<span class="keyword">break</span></span><br><span class="line">		&#125; <span class="keyword">else</span> <span class="keyword">if</span> pstate, perr := client.Cmd(<span class="string">"PING"</span>).Str(); pstate == <span class="string">"PONG"</span> &amp;&amp; perr == <span class="constant">nil</span> &#123;</span><br><span class="line">			<span class="keyword">break</span></span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> err == <span class="constant">nil</span> &#123;</span><br><span class="line">		atomic.AddInt32(&amp;p.qps, <span class="number">1</span>)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Returns a client back to the pool. If the pool is full the client is closed</span></span><br><span class="line"><span class="comment">// instead. If the client is already closed (due to connection failure or</span></span><br><span class="line"><span class="comment">// what-have-you) it should not be put back in the pool. The pool will create</span></span><br><span class="line"><span class="comment">// more connections as needed.</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> (p *RedisPool) Put(conn *redis.Client) &#123;</span><br><span class="line">	<span class="keyword">select</span> &#123;</span><br><span class="line">	<span class="keyword">case</span> p.pool &lt;- conn:</span><br><span class="line">	<span class="keyword">default</span>:</span><br><span class="line">		conn.Close()</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> p.qps &gt; <span class="number">0</span> &#123;</span><br><span class="line">		atomic.AddInt32(&amp;p.qps, -<span class="number">1</span>)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Removes and calls Close() on all the connections currently in the pool.</span></span><br><span class="line"><span class="comment">// Assuming there are no other connections waiting to be Put back this method</span></span><br><span class="line"><span class="comment">// effectively closes and cleans up the pool.</span></span><br><span class="line"><span class="keyword">func</span> (p *RedisPool) Empty() &#123;</span><br><span class="line">	<span class="keyword">var</span> conn *redis.Client</span><br><span class="line">	<span class="keyword">for</span> &#123;</span><br><span class="line">		<span class="keyword">select</span> &#123;</span><br><span class="line">		<span class="keyword">case</span> conn = &lt;-p.pool:</span><br><span class="line">			conn.Close()</span><br><span class="line">		<span class="keyword">default</span>:</span><br><span class="line">			<span class="keyword">return</span></span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">if</span> p.qps &gt; <span class="number">0</span> &#123;</span><br><span class="line">			atomic.AddInt32(&amp;p.qps, -<span class="number">1</span>)</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>完整的代码设计及测试代码请参见: <a href="https://github.com/researchlab/experiments/tree/master/redispool" target="_blank" rel="external">https://github.com/researchlab/experiments/tree/master/redispool</a></p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;u524D_u8A00&quot;&gt;&lt;a href=&quot;#u524D_u8A00&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h2&gt;&lt;p&gt;之前的老项目的redis client sdk 直接大名鼎鼎的&lt;code&gt;github.com/fzzy/radix&lt;/code&gt;提供的&lt;code&gt;redis client&lt;/code&gt; 和&lt;code&gt;redis pool&lt;/code&gt;, 当访问峰值达到一定的值后会出现&lt;code&gt;too many open files&lt;/code&gt;等tcp连接错误，同时也没有直接提供authorization 密钥认证的接口，为满足这些新需求基于&lt;code&gt;fzzy/radix&lt;/code&gt;封装出的新的&lt;code&gt;redispool&lt;/code&gt;, 已投入生产使用半年来暂无问题，本文总结如下,&lt;br&gt;
+    
+    </summary>
+    
+      <category term="golang" scheme="http://www.grdtechs.com/categories/golang/"/>
+    
+    
+      <category term="golang" scheme="http://www.grdtechs.com/tags/golang/"/>
+    
+      <category term="redispool" scheme="http://www.grdtechs.com/tags/redispool/"/>
+    
+  </entry>
+  
+  <entry>
     <title>mysql 数据库表及数据导入导出方法总结</title>
     <link href="http://www.grdtechs.com/2017/02/22/mysql-import-export-summary/"/>
     <id>http://www.grdtechs.com/2017/02/22/mysql-import-export-summary/</id>
     <published>2017-02-22T10:50:36.000Z</published>
-    <updated>2017-03-02T05:38:27.198Z</updated>
+    <updated>2017-03-02T07:27:20.181Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>由于公司的MySQL是搭建在服务器上，为了避免对服务器进行直接改动，想远程导出和导入MySQL的数据库表结构及数据进行操作, 刚好Mysql本身提供了命令行导出工具<code>Mysqldump</code>和<code>Mysql Source</code>导入命令进行SQL数据导入导出工作，通过Mysql命令行导出工具Mysqldump命令能够将Mysql数据导出为文本格式(txt)的SQL文件，通过Mysql Source命令能够将SQL文件导入Mysql数据库中，下面通过Mysql导入导出SQL实例详解Mysqldump和Source命令的用法</p>
 <a id="more"></a>
@@ -108,7 +139,7 @@
     <link href="http://www.grdtechs.com/2017/01/22/linux-signal-golang/"/>
     <id>http://www.grdtechs.com/2017/01/22/linux-signal-golang/</id>
     <published>2017-01-22T14:35:45.000Z</published>
-    <updated>2017-03-02T05:38:27.198Z</updated>
+    <updated>2017-03-02T07:27:20.181Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>信号(Signal)是Linux, 类Unix和其它POSIX兼容的操作系统中用来进程间通讯的一种方式。一个信号就是一个异步的通知，发送给某个进程，或者同进程的某个线程，告诉它们某个事件发生了。<br>当信号发送到某个进程中时，操作系统会中断该进程的正常流程，并进入相应的信号处理函数执行操作，完成后再回到中断的地方继续执行。<br>如果目标进程先前注册了某个信号的处理程序(signal handler),则此处理程序会被调用，否则缺省的处理程序被调用。</p>
 <a id="more"></a>
@@ -377,7 +408,7 @@
     <link href="http://www.grdtechs.com/2017/01/20/go-http-cross-origin/"/>
     <id>http://www.grdtechs.com/2017/01/20/go-http-cross-origin/</id>
     <published>2017-01-20T15:30:40.000Z</published>
-    <updated>2017-03-02T05:38:27.198Z</updated>
+    <updated>2017-03-02T07:27:20.181Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>server提供api服务直接对接前端js, 但是存在跨域问题，本文使用先查询请求过来的host 然后判断主域名是否存在，存在,则在返回头部设置这个请求域名充许跨域访问。<br><a id="more"></a></p>
 <h2 id="u8DE8_u57DF_u6982_u5FF5"><a href="#u8DE8_u57DF_u6982_u5FF5" class="headerlink" title="跨域概念"></a>跨域概念</h2><p>浏览器的同源策略，出于防范跨站脚本的攻击，禁止客户端脚本（如 JavaScript）对不同域的服务进行跨站调用。</p>
@@ -422,7 +453,7 @@
     <link href="http://www.grdtechs.com/2017/01/18/git-submodule/"/>
     <id>http://www.grdtechs.com/2017/01/18/git-submodule/</id>
     <published>2017-01-18T17:11:52.000Z</published>
-    <updated>2017-03-02T05:38:27.194Z</updated>
+    <updated>2017-03-02T07:27:20.177Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>现在golang已经可以通过<code>vendor</code>来管理第三方依赖包了，但是之前的一个老项目用的是<code>git submodule</code>来管理的，但是<code>.gitsubmodule</code>文件中只记录管理了项目的部分依赖包， 需要把还没有被管理的第三包也加上，下面总结使用<code>git submodule</code>的过程。<br><a id="more"></a></p>
 <h2 id="u6DFB_u52A0_u7B2C_u4E09_u65B9_u5305"><a href="#u6DFB_u52A0_u7B2C_u4E09_u65B9_u5305" class="headerlink" title="添加第三方包"></a>添加第三方包</h2><p>为当前工程添加submodule，命令如下：</p>
@@ -462,7 +493,7 @@
     <link href="http://www.grdtechs.com/2017/01/17/http-cache/"/>
     <id>http://www.grdtechs.com/2017/01/17/http-cache/</id>
     <published>2017-01-17T17:54:18.000Z</published>
-    <updated>2017-03-02T05:38:27.198Z</updated>
+    <updated>2017-03-02T07:27:20.181Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>Http缓存机制作为web性能优化的重要手段, 本文对网络中，工作中使用的http缓存知识进行归纳总结。<br><a id="more"></a></p>
 <h2 id="u7F13_u5B58_u5206_u7C7B"><a href="#u7F13_u5B58_u5206_u7C7B" class="headerlink" title="缓存分类"></a>缓存分类</h2><p>缓存分为<code>服务端缓存</code>(server side，比如Nginx、Apache)和<code>客户端缓存</code>(client side，比如 web browser)。</p>
@@ -744,7 +775,7 @@
     <link href="http://www.grdtechs.com/2017/01/16/consistent-hashing-summary/"/>
     <id>http://www.grdtechs.com/2017/01/16/consistent-hashing-summary/</id>
     <published>2017-01-16T11:02:50.000Z</published>
-    <updated>2017-03-02T05:38:27.194Z</updated>
+    <updated>2017-03-02T07:27:20.177Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>存在一种场景, 当一个缓存服务由多个服务器组共同提供时, key应该路由到哪一个服务。这里假如采用最通用的方式取模求余: <code>key%N</code>(N为服务器数目), 这样做均衡性没有什么问题, 但是当服务器数目发送增加或减少时, 分配方式则变为<code>key%(N+1)</code>或<code>key%(N-1)</code>。这里将会有大量的key失效迁移, 如果后端key对应的是有状态的存储数据,那么毫无疑问,这种做法将导致服务器间大量的数据迁移,从而造成服务的不稳定。解决思路，采用一致性哈希方法可以解决此问题。 </p>
 <a id="more"></a>
@@ -843,7 +874,7 @@
     <link href="http://www.grdtechs.com/2017/01/14/too-many-open-files-solution/"/>
     <id>http://www.grdtechs.com/2017/01/14/too-many-open-files-solution/</id>
     <published>2017-01-14T10:58:37.000Z</published>
-    <updated>2017-03-02T05:38:27.198Z</updated>
+    <updated>2017-03-02T07:27:20.181Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>运行在Linux系统上的网络程序可能会出现”Too many open files”的异常情况，且常见于高并发访问文件系统，多线程网络连接等场景。<br><a id="more"></a></p>
 <h2 id="u6982_u5FF5"><a href="#u6982_u5FF5" class="headerlink" title="概念"></a>概念</h2><p>程序经常访问的文件、socket等在Linux中都是指的文件file，系统需要记录每个当前访问file的name、location、access authority等相关信息，这样的一个实体被称为file entry。<code>open files table</code>存储这些file entry，以数组的形式线性管理。文件描述符(file descriptor)是作为<code>进程</code>到<code>open files table</code>的指针，也就是<code>open files table</code>的下标索引，将每个进程与它所访问的文件关联起来了。 </p>
@@ -904,7 +935,7 @@
     <link href="http://www.grdtechs.com/2017/01/06/go-printf-format/"/>
     <id>http://www.grdtechs.com/2017/01/06/go-printf-format/</id>
     <published>2017-01-06T15:49:13.000Z</published>
-    <updated>2017-03-02T05:38:27.198Z</updated>
+    <updated>2017-03-02T07:27:20.181Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>项目中总是时不时的要使用<code>fmt.Printf</code>或<code>fmt.Sprintf</code>来处理某些数据类型,总结一下常用的标识符用途及场景.</p>
 <a id="more"></a>
@@ -927,7 +958,7 @@
     <link href="http://www.grdtechs.com/2016/12/17/go-cache-component/"/>
     <id>http://www.grdtechs.com/2016/12/17/go-cache-component/</id>
     <published>2016-12-17T11:32:51.000Z</published>
-    <updated>2017-03-02T05:38:27.194Z</updated>
+    <updated>2017-03-02T07:27:20.181Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>总结用golang从分析，设计到实现一个可用的缓存组件。<br><a id="more"></a></p>
 <h2 id="u7F13_u5B58"><a href="#u7F13_u5B58" class="headerlink" title="缓存"></a>缓存</h2><ul>
@@ -1023,7 +1054,7 @@
     <link href="http://www.grdtechs.com/2016/11/23/uml-symbol-desc/"/>
     <id>http://www.grdtechs.com/2016/11/23/uml-symbol-desc/</id>
     <published>2016-11-23T11:47:43.000Z</published>
-    <updated>2017-03-02T05:38:27.198Z</updated>
+    <updated>2017-03-02T07:27:20.181Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>在UML的定义中，描述类和对象之间的关系，包括以下几种方式：依赖（<code>Dependency</code>）、关联（<code>Association</code>）、聚合（<code>Aggregation</code>）、组合（<code>Composition</code>）、泛化（<code>Generalization</code>）和实现（<code>Realization</code>）。现分别说明如下：<br><a id="more"></a></p>
 <h2 id="u5B9A_u4E49"><a href="#u5B9A_u4E49" class="headerlink" title="定义"></a>定义</h2><p>类图基本符号可拆分为四类:<code>线</code>(<code>虚线</code>和<code>实线</code>)，<code>箭头</code>，<code>三角</code>(<code>空心右三角</code>和<code>实心右三角</code>)，<code>菱形</code>(<code>空心菱形</code>和<code>实心菱形</code>); 由这些基本的图形进行组合构成了类图的基本符号。这里要注意这几个符号的顺序，代表了类与类之间关系的耦合程度, 越向右耦合度越高。</p>
@@ -1154,7 +1185,7 @@
     <link href="http://www.grdtechs.com/2016/11/23/go-dealwith-database-nullvalue/"/>
     <id>http://www.grdtechs.com/2016/11/23/go-dealwith-database-nullvalue/</id>
     <published>2016-11-23T11:40:54.000Z</published>
-    <updated>2017-03-02T05:38:27.198Z</updated>
+    <updated>2017-03-02T07:27:20.181Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>golang是强类型语言，在赋值和解析过程中需要先定义好数据类型，否在会报类型错误，下面总结在处理数据库表时遇到字段为空或零值的情况<br><a id="more"></a></p>
 <h2 id="u573A_u666F"><a href="#u573A_u666F" class="headerlink" title="场景"></a>场景</h2><p>假如存在如下没有指定<code>not null</code>的场合<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="operator"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> <span class="string">"users"</span> (</span><br><span class="line">    <span class="string">"id"</span> <span class="built_in">serial</span> <span class="keyword">not</span> <span class="literal">null</span> primary <span class="keyword">key</span>,</span><br><span class="line">    <span class="string">"name"</span> <span class="built_in">text</span>,</span><br><span class="line">    <span class="string">"age"</span> <span class="built_in">integer</span></span><br><span class="line">)</span></span><br></pre></td></tr></table></figure></p>
@@ -1183,7 +1214,7 @@
     <link href="http://www.grdtechs.com/2016/11/19/go-install-binaries/"/>
     <id>http://www.grdtechs.com/2016/11/19/go-install-binaries/</id>
     <published>2016-11-19T00:18:37.000Z</published>
-    <updated>2017-03-02T05:38:27.198Z</updated>
+    <updated>2017-03-02T07:27:20.181Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>golang tool chains 提供了很多好用的工具， 但是如果直接安装的话，大多数需要翻墙才能安装， 而且比较麻烦； 本文记录一种不需要翻墙就能顺利安装相应的工具的方法.</p>
 <a id="more"></a>
@@ -1217,7 +1248,7 @@
     <link href="http://www.grdtechs.com/2016/11/11/go-use-mysql/"/>
     <id>http://www.grdtechs.com/2016/11/11/go-use-mysql/</id>
     <published>2016-11-11T13:21:16.000Z</published>
-    <updated>2017-03-02T05:38:27.198Z</updated>
+    <updated>2017-03-02T07:27:20.181Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>Golang 提供了<code>database/sql</code>包用于对<code>SQL数据库</code>的访问, 作为操作数据库的入口对象<code>sql.DB</code>, 主要为我们提供了两个重要的功能:<br><a id="more"></a></p>
 <ul>
@@ -1311,7 +1342,7 @@
     <link href="http://www.grdtechs.com/2016/10/23/go-build-small-exec/"/>
     <id>http://www.grdtechs.com/2016/10/23/go-build-small-exec/</id>
     <published>2016-10-23T14:00:32.000Z</published>
-    <updated>2017-03-02T05:38:27.194Z</updated>
+    <updated>2017-03-02T07:27:20.177Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>尽管go1.7.3编译生成的可执行程序已经很小了,但是通过编译参数控制还能编译出更小的可执行文件，总结如下,<br><a id="more"></a></p>
 <h2 id="u52A0-ldflags_u53C2_u6570"><a href="#u52A0-ldflags_u53C2_u6570" class="headerlink" title="加-ldflags参数"></a>加-ldflags参数</h2><p>在程序编译的时候可以加上<code>-ldflags &quot;-s -w&quot;</code> 参数来优化编译程序, 其实通过去除部分连接和调试等信息来使得编译之后的执行程序更小,具体参数如下:</p>
@@ -1349,7 +1380,7 @@
     <link href="http://www.grdtechs.com/2016/10/16/mac-update-vim8-0/"/>
     <id>http://www.grdtechs.com/2016/10/16/mac-update-vim8-0/</id>
     <published>2016-10-16T23:08:56.000Z</published>
-    <updated>2017-03-02T05:38:27.198Z</updated>
+    <updated>2017-03-02T07:27:20.181Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>将mac自带的vim7.3 升级到vim8.0<br><a id="more"></a></p>
 <h2 id="u5347_u7EA7vim8-0"><a href="#u5347_u7EA7vim8-0" class="headerlink" title="升级vim8.0"></a>升级vim8.0</h2><ul>
@@ -1407,7 +1438,7 @@
     <link href="http://www.grdtechs.com/2016/10/16/close-ticker-correctly/"/>
     <id>http://www.grdtechs.com/2016/10/16/close-ticker-correctly/</id>
     <published>2016-10-16T14:27:39.000Z</published>
-    <updated>2017-03-02T05:38:27.194Z</updated>
+    <updated>2017-03-02T07:27:20.177Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>在<code>ticker</code>和<code>goroutine</code>组合使用中当调用<code>ticker.Stop()</code>关闭<code>ticker</code>之后，相应的<code>goroutine</code>中的<code>ticker.C</code>并没有停掉，下面总结一种优雅的方式关闭<code>ticker</code>.<br><a id="more"></a></p>
 <h2 id="u4F18_u96C5_u7684_u5173_u95EDticker"><a href="#u4F18_u96C5_u7684_u5173_u95EDticker" class="headerlink" title="优雅的关闭ticker"></a>优雅的关闭<code>ticker</code></h2><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">"fmt"</span></span><br><span class="line">	<span class="string">"time"</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> main() &#123;</span><br><span class="line">	Demo()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> Demo() &#123;</span><br><span class="line">	done := startTicker(PrintInfo)</span><br><span class="line">	time.Sleep(time.Duration(<span class="number">12</span>) * time.Second)</span><br><span class="line">	<span class="built_in">close</span>(done)</span><br><span class="line">	time.Sleep(time.Duration(<span class="number">1</span>) * time.Minute)</span><br><span class="line">	fmt.Println(<span class="string">"main finished"</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> startTicker(f <span class="keyword">func</span>()) <span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125; &#123;</span><br><span class="line">	done := <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;, <span class="number">1</span>)</span><br><span class="line">	<span class="keyword">go</span> <span class="keyword">func</span>() &#123;</span><br><span class="line">		ticker := time.NewTicker(<span class="number">5</span> * time.Second)</span><br><span class="line">		<span class="comment">//	ticker := time.NewTicker(5 * time.Minute)</span></span><br><span class="line">		<span class="keyword">defer</span> ticker.Stop()</span><br><span class="line"></span><br><span class="line">		<span class="keyword">for</span> &#123;</span><br><span class="line">			<span class="keyword">select</span> &#123;</span><br><span class="line">			<span class="keyword">case</span> &lt;-ticker.C:</span><br><span class="line">				f()</span><br><span class="line">			<span class="keyword">case</span> &lt;-done:</span><br><span class="line">				<span class="keyword">return</span></span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;()</span><br><span class="line">	<span class="keyword">return</span> done</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> PrintInfo() &#123;</span><br><span class="line">	fmt.Println(<span class="string">"hello"</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -1432,7 +1463,7 @@
     <link href="http://www.grdtechs.com/2016/09/07/go-postform/"/>
     <id>http://www.grdtechs.com/2016/09/07/go-postform/</id>
     <published>2016-09-07T16:00:32.000Z</published>
-    <updated>2017-03-02T05:38:27.198Z</updated>
+    <updated>2017-03-02T07:27:20.181Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>golang这边将<code>map</code>结构序列化通常采用<code>json.Marshal</code>和<code>json.Unmarshal</code>来做，但是在php server端还需要做<code>json</code>反序列化解析才能用， 用golang模拟表单提交, php server端则非常方便提取相应的数据字段.<br><a id="more"></a></p>
 <h2 id="u65B9_u6CD5"><a href="#u65B9_u6CD5" class="headerlink" title="方法"></a>方法</h2><p>方法是利用golang<code>net/http</code>包提供的<code>PostForm</code>提交post表单提交。<code>ParseForm</code>解析<code>URL</code>中的查询字符串，并将解析结果更新到<code>r.Form</code>字段。对于<code>POST</code>或<code>PUT</code>请求，<code>ParseForm</code>还会将<code>body</code>当作表单解析，并将结果既更新到<code>r.PostForm</code>也更新到<code>r.Form</code>。解析结果中，<code>POST</code>或<code>PUT</code>请求主体要优先于<code>URL</code>查询字符串（同名变量，主体的值在查询字符串的值前面）。如果请求的主体的大小没有被<code>MaxBytesReader</code>函数设定限制，其大小默认限制为开头10MB。</p>
@@ -1464,7 +1495,7 @@
     <link href="http://www.grdtechs.com/2016/08/02/php7-redis-install/"/>
     <id>http://www.grdtechs.com/2016/08/02/php7-redis-install/</id>
     <published>2016-08-02T18:56:05.000Z</published>
-    <updated>2017-03-02T05:38:27.198Z</updated>
+    <updated>2017-03-02T07:27:20.181Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>在<code>Ubuntu16.04</code>上， 安装<code>php7</code>的<code>redis</code>扩展, 记录安装过程。<br><a id="more"></a></p>
 <h3 id="u5B89_u88C5phpredis"><a href="#u5B89_u88C5phpredis" class="headerlink" title="安装phpredis"></a>安装phpredis</h3><p><code>Redis</code>已经有了<code>PHP7</code>版本，可以从<code>github</code> 上获取项目克隆，然后手动切换到 <code>php7</code> 分支即可安装</p>
@@ -1494,7 +1525,7 @@
     <link href="http://www.grdtechs.com/2016/07/30/php-mvc-1/"/>
     <id>http://www.grdtechs.com/2016/07/30/php-mvc-1/</id>
     <published>2016-07-30T16:34:45.000Z</published>
-    <updated>2017-03-02T05:38:27.198Z</updated>
+    <updated>2017-03-02T07:27:20.181Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>尽管MVC(model view controller pattern)模式在<code>PHP</code>web开发中很受欢迎，但是网上很难找到一套代码简单又能清楚阐述<code>PHP MVC</code>模式的案例，本文希望通过理论和代码实践简单阐述<code>PHP MVC</code>模式。</p>
 <a id="more"></a>
@@ -1551,56 +1582,6 @@
       <category term="mvc" scheme="http://www.grdtechs.com/tags/mvc/"/>
     
       <category term="php" scheme="http://www.grdtechs.com/tags/php/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>浏览器刷新后input输入框依旧保留原值不被清空</title>
-    <link href="http://www.grdtechs.com/2016/07/10/browse-refresh-saveinputolderval/"/>
-    <id>http://www.grdtechs.com/2016/07/10/browse-refresh-saveinputolderval/</id>
-    <published>2016-07-10T18:22:43.000Z</published>
-    <updated>2017-03-02T05:38:27.194Z</updated>
-    
-    <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>html页面中的input框如果在浏览器刷新前有值，怎么在刷新后依然保留这个值不被清空呢？下面用<code>setCookie</code>的方案来解决这个问题.<br><a id="more"></a><br>首选判断input框中有值时,<code>setcookie</code>, 每次刷新浏览器时，读取<code>Cookie</code>值,如果存在<code>Cookie</code>值，则用此值初始化input值。</p>
-<h2 id="u7EAFjs_u5B9E_u73B0"><a href="#u7EAFjs_u5B9E_u73B0" class="headerlink" title="纯js实现"></a>纯js实现</h2><h3 id="u8BBE_u7F6ECookie"><a href="#u8BBE_u7F6ECookie" class="headerlink" title="设置Cookie"></a>设置Cookie</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span><br><span class="line">* @cname  cookie name </span><br><span class="line">* @cvalue cookie value </span><br><span class="line">* @ exdays cookie expires(天)</span><br><span class="line">*/</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">setCookie</span>(<span class="params">cname,cvalue,exdays</span>)</span><br><span class="line"></span>&#123;</span><br><span class="line">	<span class="keyword">if</span>(!(<span class="built_in">document</span>.cookie || navigator.cookieEnabled))</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="built_in">console</span>.log(<span class="string">'浏览器 cookie 未打开!'</span>);</span><br><span class="line">	&#125; </span><br><span class="line"></span><br><span class="line">	<span class="keyword">var</span> d = <span class="keyword">new</span> <span class="built_in">Date</span>();</span><br><span class="line">	d.setTime(d.getTime()+(exdays*<span class="number">24</span>*<span class="number">60</span>*<span class="number">60</span>*<span class="number">1000</span>));</span><br><span class="line">	<span class="keyword">var</span> expires = <span class="string">"expires="</span>+d.toGMTString();</span><br><span class="line">	<span class="built_in">document</span>.cookie = cname+<span class="string">"="</span>+cvalue+<span class="string">"; "</span>+expires;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h3 id="u83B7_u53D6Cookie"><a href="#u83B7_u53D6Cookie" class="headerlink" title="获取Cookie"></a>获取Cookie</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">getCookie</span>(<span class="params">cname</span>)</span><br><span class="line"></span>&#123;</span><br><span class="line">	<span class="keyword">var</span> name = cname + <span class="string">"="</span>;</span><br><span class="line">	<span class="keyword">var</span> ca = <span class="built_in">document</span>.cookie.split(<span class="string">';'</span>);</span><br><span class="line">	<span class="keyword">for</span>(<span class="keyword">var</span> i=<span class="number">0</span>; i&lt;ca.length; i++) </span><br><span class="line">	  &#123;</span><br><span class="line">	  <span class="keyword">var</span> c = ca[i].trim();</span><br><span class="line">	  <span class="keyword">if</span> (c.indexOf(name)==<span class="number">0</span>) <span class="keyword">return</span> c.substring(name.length,c.length);</span><br><span class="line">	  &#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="string">""</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>根据<code>cname</code> 获取相应的cookie值， cookie不存在就返回空字符串.</p>
-<h3 id="checkCookie"><a href="#checkCookie" class="headerlink" title="checkCookie"></a>checkCookie</h3><p>可以将判断Cookie是否存在的下一步处理逻辑封装到<code>checkCookie</code>方法中</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">checkCookie</span>(<span class="params"></span>)</span><br><span class="line"></span>&#123;</span><br><span class="line">	<span class="keyword">var</span> user=getCookie(<span class="string">"username"</span>);</span><br><span class="line">	<span class="keyword">if</span> (user!=<span class="string">""</span>)</span><br><span class="line">	  &#123;</span><br><span class="line">		<span class="built_in">console</span>.log(<span class="string">'user'</span>, user);	</span><br><span class="line">	  &#125;</span><br><span class="line">	<span class="keyword">else</span> </span><br><span class="line">	  &#123;</span><br><span class="line">	  <span class="keyword">if</span> (user!=<span class="string">""</span> &amp;&amp; user!=<span class="literal">null</span>)</span><br><span class="line">	    &#123;</span><br><span class="line">	    setCookie(<span class="string">"username"</span>,user,<span class="number">3000</span>);</span><br><span class="line">	    &#125;</span><br><span class="line">	  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h2 id="u53E6_u4E00_u79CD_u65B9_u5F0F_u662F_u501F_u52A9jQuery_u5B9E_u73B0"><a href="#u53E6_u4E00_u79CD_u65B9_u5F0F_u662F_u501F_u52A9jQuery_u5B9E_u73B0" class="headerlink" title="另一种方式是借助jQuery实现"></a>另一种方式是借助jQuery实现</h2><p>首选引入jquery相应的库</p>
-<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="title">script</span> <span class="attribute">src</span>=<span class="value">"http://apps.bdimg.com/libs/jquery.cookie/1.4.1/jquery.cookie.js"</span>&gt;</span><span class="undefined"></span><span class="tag">&lt;/<span class="title">script</span>&gt;</span></span><br></pre></td></tr></table></figure>
-<h2 id="u521B_u5EFACookie"><a href="#u521B_u5EFACookie" class="headerlink" title="创建Cookie"></a>创建Cookie</h2><p>如创建一个名为“example”，值为“foo”的cookie：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$.cookie(<span class="string">"example"</span>, <span class="string">"foo"</span>);</span><br></pre></td></tr></table></figure></p>
-<p>要设置cookie的有效期，可以设置expires值，如设置cookie的过期时间为10天：</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$.cookie(<span class="string">"example"</span>, <span class="string">"foo"</span>,&#123;expires:<span class="number">10</span>&#125;);</span><br></pre></td></tr></table></figure>
-<p>设置cookie一小时后过期：</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> cookietime = <span class="keyword">new</span> <span class="built_in">Date</span>(); </span><br><span class="line">cookietime.setTime(date.getTime() + (<span class="number">60</span> * <span class="number">60</span> * <span class="number">1000</span>));<span class="comment">//coockie保存一小时 </span></span><br><span class="line">$.cookie(<span class="string">"example"</span>, <span class="string">"foo"</span>,&#123;expires:cookietime&#125;);</span><br></pre></td></tr></table></figure>
-<p>要设置cookie的保存路径，可以设置path值，如设置路径为根目录：</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$.cookie(<span class="string">"example"</span>, <span class="string">"foo"</span>,&#123;path:<span class="string">"/"</span>&#125;);</span><br></pre></td></tr></table></figure>
-<p>如果要设置路径为/admin，则：</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$.cookie(<span class="string">"example"</span>, <span class="string">"foo"</span>,&#123;path:<span class="string">"/admin"</span>&#125;);</span><br></pre></td></tr></table></figure>
-<h2 id="u83B7_u53D6cookie_u503C"><a href="#u83B7_u53D6cookie_u503C" class="headerlink" title="获取cookie值"></a>获取cookie值</h2><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$.cookie(<span class="string">"example"</span>);</span><br></pre></td></tr></table></figure>
-<h2 id="u5220_u9664Cookie"><a href="#u5220_u9664Cookie" class="headerlink" title="删除Cookie"></a>删除Cookie</h2><p>使用jQuery删除cookie，只需要将cookie的值为null，注意如果设置值为空的字符串时，并不能删除cookie，只是将cookie值清空而已。<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$.cookie(<span class="string">"example"</span>,<span class="literal">null</span>);</span><br></pre></td></tr></table></figure></p>
-<p>或者<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$.cookie(<span class="string">'the_cookie'</span>, <span class="string">''</span>, &#123; expires: -<span class="number">1</span> &#125;); <span class="comment">// 删除 cookie</span></span><br></pre></td></tr></table></figure></p>
-<p><a href="https://github.com/researchlab/CodeSnippets" target="_blank" rel="external">github源码demo</a></p>
-<ul>
-<li>js-setcookie.html</li>
-<li>jquery-setcookie.html</li>
-</ul>
-<h2 id="u603B_u7ED3"><a href="#u603B_u7ED3" class="headerlink" title="总结"></a>总结</h2><p>cookie是基于域名来储存的, cookie具有不同域名下储存不可共享的特性。 这也是cookie支持设置<code>path</code>和<code>domain</code>的作用之一。<br>所以要测试cookie是否生效，需要放到测试服务器上或者本地localhost服务器上才会生效。<strong><font color="red">单纯的本地一个html页面打开是无效的。</font></strong></p>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;h2 id=&quot;u524D_u8A00&quot;&gt;&lt;a href=&quot;#u524D_u8A00&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h2&gt;&lt;p&gt;html页面中的input框如果在浏览器刷新前有值，怎么在刷新后依然保留这个值不被清空呢？下面用&lt;code&gt;setCookie&lt;/code&gt;的方案来解决这个问题.&lt;br&gt;
-    
-    </summary>
-    
-      <category term="javascript" scheme="http://www.grdtechs.com/categories/javascript/"/>
-    
-    
-      <category term="getcookie" scheme="http://www.grdtechs.com/tags/getcookie/"/>
-    
-      <category term="setcookie" scheme="http://www.grdtechs.com/tags/setcookie/"/>
     
   </entry>
   
