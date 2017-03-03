@@ -1,0 +1,598 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>beego/orm使用总结 | 朴实的一线攻城狮</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="Lee Hong">
+    
+
+    
+    <meta name="description" content="前言很早之前的一个老项目就使用过ORM，当时使用的是xorm，后来新的项目设计说考虑性能什么的又用写原生sql来做了，在项目中使用一直没什么问题， 但是代码中到处写着原生的sql语句,并且有很多重复的语句，很不好维护，于是最近又重新考虑采用orm的方式来操作数据库，最近看中beego/orm这个包， 它的官方文档也写了很详细的使用说明，下面还是简要总结一下自己在项目中的使用经历,">
+<meta property="og:type" content="article">
+<meta property="og:title" content="beego/orm使用总结">
+<meta property="og:url" content="http://www.grdtechs.com/2017/03/01/use-beego-orm-summary/index.html">
+<meta property="og:site_name" content="朴实的一线攻城狮">
+<meta property="og:description" content="前言很早之前的一个老项目就使用过ORM，当时使用的是xorm，后来新的项目设计说考虑性能什么的又用写原生sql来做了，在项目中使用一直没什么问题， 但是代码中到处写着原生的sql语句,并且有很多重复的语句，很不好维护，于是最近又重新考虑采用orm的方式来操作数据库，最近看中beego/orm这个包， 它的官方文档也写了很详细的使用说明，下面还是简要总结一下自己在项目中的使用经历,">
+<meta property="og:updated_time" content="2017-03-03T03:59:22.287Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="beego/orm使用总结">
+<meta name="twitter:description" content="前言很早之前的一个老项目就使用过ORM，当时使用的是xorm，后来新的项目设计说考虑性能什么的又用写原生sql来做了，在项目中使用一直没什么问题， 但是代码中到处写着原生的sql语句,并且有很多重复的语句，很不好维护，于是最近又重新考虑采用orm的方式来操作数据库，最近看中beego/orm这个包， 它的官方文档也写了很详细的使用说明，下面还是简要总结一下自己在项目中的使用经历,">
+
+    
+    <link rel="alternative" href="/atom.xml" title="朴实的一线攻城狮" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="stylesheet" href="/css/style.css" type="text/css">
+</head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="朴实的一线攻城狮">朴实的一线攻城狮</a></h1>
+				<h2 class="blog-motto">十年磨一剑，一步一步脚踏实地的耕种</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">首页</a></li>
+					
+						<li><a href="/archives">归档</a></li>
+					
+						<li><a href="/about">关于</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:www.grdtechs.com">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2017/03/01/use-beego-orm-summary/" title="beego/orm使用总结" itemprop="url">beego/orm使用总结</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
+		
+  <p class="article-time">
+    <time datetime="2017-03-01T10:44:29.000Z" itemprop="datePublished"> 发表于 2017-03-01</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#u524D_u8A00"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#ORM"><span class="toc-number">2.</span> <span class="toc-text">ORM</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#beego/orm__u4F7F_u7528"><span class="toc-number">3.</span> <span class="toc-text">beego/orm 使用</span></a></li></ol>
+		
+		</div>
+		
+		<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>很早之前的一个老项目就使用过ORM，当时使用的是<code>xorm</code>，后来新的项目设计说考虑性能什么的又用写原生sql来做了，在项目中使用一直没什么问题， 但是代码中到处写着原生的sql语句,并且有很多重复的语句，很不好维护，于是最近又重新考虑采用orm的方式来操作数据库，最近看中<code>beego/orm</code>这个包， 它的官方文档也写了很详细的使用说明，下面还是简要总结一下自己在项目中的使用经历,<br><a id="more"></a></p>
+<h2 id="ORM"><a href="#ORM" class="headerlink" title="ORM"></a>ORM</h2><p>ORM, 即Object-Relational Mapping(对象关系映射)，它的作用是在关系型数据库和业务实体对象之间作一个映射，这样在具体的操作业务对象的时候，就不需要再去和复杂的SQL语句打交道，只需简单的操作对象的属性和方法。</p>
+<p><strong> 优势 </strong> </p>
+<ul>
+<li><p>隐藏了数据访问细节，也是ORM的核心所在, “封闭”的通用数据库交互。使数据库交互变得简单易行，并且完全不用考虑SQL语句。快速开发，由此而来。</p>
+</li>
+<li><p>ORM使构造固化数据结构变得简单易行。在使用ORM之前, 需要将对象模型转化为一条一条的SQL语句，通过直连或是DB helper在关系数据库构造想要的数据库体系。而基本上所有的ORM框架都提供了通过对象模型构造关系数据库结构的功能。</p>
+</li>
+</ul>
+<p>ORM有优势也存在缺点，</p>
+<p><strong> 缺点 </strong></p>
+<ul>
+<li><p>无可避免的，自动化意味着映射和关联管理，代价是牺牲性能(早期，这是所有不喜欢ORM人的共同点)。现各种ORM框架都在尝试使用各种方法来减轻这块(LazyLoad，Cache),效果还是很显著的。</p>
+</li>
+<li><p>面向对象的查询语言(X-QL)作为一种数据库与对象之间的过渡, 虽然隐藏了数据层面的业务抽象, 但并不能完全的屏蔽掉数据库层的设计, 并且无疑将增加学习成本。</p>
+</li>
+<li><p>对于复杂查询，ORM仍然力不从心。虽然可以实现，但是不值的。视图可以解决大部分calculated column，case，group，having, order by, exists，但是查询条件(a and b and not c and (d or d))。</p>
+</li>
+</ul>
+<p>从ORM优缺点来看， ORM适合使用在较大型复杂的系统中或数据库操作很多的系统中， 当即便使用了ORM的复杂项目在特殊情况下也应考虑用原生SQL来解决复杂查询和性能问题，小的项目则看性能苛刻来考虑了，如果性能苛刻则用原生的SQL实现更合适，如果没有什么要求则用不用ORM都没啥关系。</p>
+<h2 id="beego/orm__u4F7F_u7528"><a href="#beego/orm__u4F7F_u7528" class="headerlink" title="beego/orm 使用"></a>beego/orm 使用</h2><p>据beego/orm官方文档说明目前其还处在开发中只支持<code>MySQL</code>,<code>PostgreSQL</code>, <code>Sqlite3</code>三种数据库驱动，目前beego/orm包支持以下特性,</p>
+<ul>
+<li>支持 Go 的所有类型存储</li>
+<li>轻松上手，采用简单的 CRUD 风格</li>
+<li>自动 Join 关联表</li>
+<li>跨数据库兼容查询</li>
+<li>允许直接使用 SQL 查询／映射</li>
+<li>严格完整的测试保证 ORM 的稳定与健壮</li>
+</ul>
+<p>官方使用案例,<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">"fmt"</span></span><br><span class="line"></span><br><span class="line">	<span class="string">"github.com/astaxie/beego/orm"</span></span><br><span class="line">	_ <span class="string">"github.com/go-sql-driver/mysql"</span> <span class="comment">//import your used driver</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="comment">// Model Struct</span></span><br><span class="line"><span class="keyword">type</span> User <span class="keyword">struct</span> &#123;</span><br><span class="line">	Id   <span class="typename">int</span></span><br><span class="line">	Name <span class="typename">string</span> <span class="string">`orm:"size(100)"`</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> init() &#123;</span><br><span class="line">	<span class="comment">// set default database</span></span><br><span class="line">	orm.RegisterDataBase(<span class="string">"default"</span>, <span class="string">"mysql"</span>, <span class="string">"root:123456@/my_db?charset=utf8"</span>, <span class="number">30</span>)</span><br><span class="line"></span><br><span class="line">	<span class="comment">// register model</span></span><br><span class="line">	orm.RegisterModel(<span class="built_in">new</span>(User))</span><br><span class="line"></span><br><span class="line">	<span class="comment">// create table</span></span><br><span class="line">	orm.RunSyncdb(<span class="string">"default"</span>, <span class="constant">false</span>, <span class="constant">true</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> main() &#123;</span><br><span class="line">	o := orm.NewOrm()</span><br><span class="line"></span><br><span class="line">	user := User&#123;Name: <span class="string">"slene"</span>&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// insert</span></span><br><span class="line">	id, err := o.Insert(&amp;user)</span><br><span class="line">	fmt.Printf(<span class="string">"ID: %d, ERR: %v\n"</span>, id, err)</span><br><span class="line"></span><br><span class="line">	<span class="comment">// update</span></span><br><span class="line">	user.Name = <span class="string">"astaxie"</span></span><br><span class="line">	num, err := o.Update(&amp;user)</span><br><span class="line">	fmt.Printf(<span class="string">"NUM: %d, ERR: %v\n"</span>, num, err)</span><br><span class="line"></span><br><span class="line">	<span class="comment">// read one</span></span><br><span class="line">	u := User&#123;Id: user.Id&#125;</span><br><span class="line">	err = o.Read(&amp;u)</span><br><span class="line">	fmt.Printf(<span class="string">"ERR: %v\n"</span>, err)</span><br><span class="line">	fmt.Println(<span class="string">"u:"</span>, u)</span><br><span class="line"></span><br><span class="line">	<span class="comment">// delete</span></span><br><span class="line">	num, err = o.Delete(&amp;u)</span><br><span class="line">	fmt.Printf(<span class="string">"NUM: %d, ERR: %v\n"</span>, num, err)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>从上述代码可知，使用ORM大致分以下几步，<br>1.注册数据库;<br>2.注册待使用的数据库表结构对象;<br>3.在数据库中生成上述注册的数据库表结构对象;<br>4.得到一个待操作ORMER对象;<br>5.用上述的得到ORMER对象即可对数据库进行CURD操作了。</p>
+<p>可以看到整个过程几乎不用写SQL语句， 并且逻辑清晰，当然性能方面跟直接用原生的SQL语句写肯定要差一些，因为beego/orm源码里面为了判断数据类型/转换数据类型等用了很多反射/强转等操作，这样做虽然是为了最大限度兼容各类数据操作，但对于本就不涉及复杂繁多的SQL的系统而言， 还是多考虑用原生SQL语句来写了。</p>
+<p>下面是工作中应用抽取出来的一个代码片段，<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">"log"</span></span><br><span class="line">	<span class="string">"strconv"</span></span><br><span class="line">	<span class="string">"sync"</span></span><br><span class="line">	<span class="string">"time"</span></span><br><span class="line"></span><br><span class="line">	<span class="string">"github.com/astaxie/beego/orm"</span></span><br><span class="line">	_ <span class="string">"github.com/go-sql-driver/mysql"</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> (</span><br><span class="line">	DEBUG = <span class="constant">true</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> db orm.Ormer</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> init() &#123;</span><br><span class="line">	orm.RegisterDriver(<span class="string">"mysql"</span>, orm.DRMySQL)</span><br><span class="line">	err := orm.RegisterDataBase(<span class="string">"default"</span>, <span class="string">"mysql"</span>, *dsn)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="constant">nil</span> &#123;</span><br><span class="line">		log.Fatalf(<span class="string">"connect database error: %v\n"</span>, err)</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		log.Println(<span class="string">"connect db success"</span>)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	orm.RegisterModel(<span class="built_in">new</span>(Record))</span><br><span class="line"></span><br><span class="line">	err = orm.RunSyncdb(<span class="string">"default"</span>, <span class="constant">false</span>, <span class="constant">false</span>)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="constant">nil</span> &#123;</span><br><span class="line">		log.Fatalf(err)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	db = orm.NewOrm()</span><br><span class="line">	<span class="keyword">if</span> DEBUG &#123;</span><br><span class="line">		orm.Debug = <span class="constant">true</span></span><br><span class="line">	&#125;</span><br><span class="line">	recordsChan = <span class="built_in">make</span>(<span class="keyword">chan</span> *Record, *insertBatchNum)</span><br><span class="line">	recordInsterLoop(done)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> GetDB() orm.Ormer &#123;</span><br><span class="line">	<span class="keyword">return</span> db</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> newRecord(param *requestParameter, resp *responseData) *Record &#123;</span><br><span class="line">	r := <span class="built_in">new</span>(Record)</span><br><span class="line">	r.Src = param.values.Get(<span class="string">"src"</span>)</span><br><span class="line">	r.OpenID = param.values.Get(<span class="string">"openid"</span>)</span><br><span class="line">	r.IdempotentStr = param.values.Get(<span class="string">"idempotent_str"</span>)</span><br><span class="line">	r.Noncestr = param.values.Get(<span class="string">"noncestr"</span>)</span><br><span class="line">	r.ReqTimestamp, _ = strconv.Atoi(param.values.Get(<span class="string">"timestamp"</span>))</span><br><span class="line">	r.ActivityID, _ = strconv.Atoi(param.values.Get(<span class="string">"activity_id"</span>))</span><br><span class="line">	r.BatchID, _ = strconv.Atoi(param.values.Get(<span class="string">"batch_id"</span>))</span><br><span class="line">	r.Sign = param.values.Get(<span class="string">"sign"</span>)</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> resp != <span class="constant">nil</span> &#123;</span><br><span class="line">		r.ErrorCode = resp.ErrorCode</span><br><span class="line">		r.ErrorMsg = resp.ErrorMsg</span><br><span class="line">		<span class="keyword">if</span> resp.Timestamp == <span class="number">0</span> &#123;</span><br><span class="line">			r.RespTimestamp = <span class="typename">int</span>(time.Now().Unix())</span><br><span class="line">		&#125;</span><br><span class="line">		r.CouponID = resp.CouponID</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> r</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> Record <span class="keyword">struct</span> &#123;</span><br><span class="line">	ID            <span class="typename">int</span>    <span class="string">`orm:"column(id)" json:"record_id"`</span></span><br><span class="line">	Src           <span class="typename">string</span> <span class="string">`json:"str"`</span></span><br><span class="line">	OpenID        <span class="typename">string</span> <span class="string">`orm:"column(open_id)" json:"open_id"`</span></span><br><span class="line">	IdempotentStr <span class="typename">string</span> <span class="string">`json:"idempotent_str"`</span></span><br><span class="line">	Noncestr      <span class="typename">string</span> <span class="string">`json:"noncestr"`</span></span><br><span class="line">	ReqTimestamp  <span class="typename">int</span>    <span class="string">`json:"req_timestamp"`</span></span><br><span class="line">	ActivityID    <span class="typename">int</span>    <span class="string">`orm:"column(activity_id)" json:"activity_id"`</span></span><br><span class="line">	BatchID       <span class="typename">int</span>    <span class="string">`orm:"column(batch_id)" json:"batch_id"`</span></span><br><span class="line">	Sign          <span class="typename">string</span> <span class="string">`json:"sign"`</span></span><br><span class="line">	ErrorCode     <span class="typename">int</span>    <span class="string">`json:"error_code"`</span></span><br><span class="line">	ErrorMsg      <span class="typename">string</span> <span class="string">`json:"error_msg"`</span></span><br><span class="line">	RespTimestamp <span class="typename">int</span>    <span class="string">`json:"resp_timestamp"`</span></span><br><span class="line">	CouponID      <span class="typename">int</span>    <span class="string">`orm:"column(coupon_id)" json:"coupon_id"`</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> (Record) TableName() <span class="typename">string</span> &#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="string">"records"</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> recordsChan <span class="keyword">chan</span> *Record</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> (r *Record) InsertRecord() &#123;</span><br><span class="line">	recordsChan &lt;- r</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> recordInsterLoop(done &lt;-<span class="keyword">chan</span> <span class="typename">bool</span>) &#123;</span><br><span class="line">	<span class="keyword">var</span> mu sync.Mutex</span><br><span class="line">	<span class="keyword">go</span> <span class="keyword">func</span>() &#123;</span><br><span class="line">		records := <span class="built_in">make</span>([]*Record, <span class="number">0</span>, *insertBatchNum)</span><br><span class="line">		<span class="keyword">for</span> &#123;</span><br><span class="line">			<span class="keyword">select</span> &#123;</span><br><span class="line">			<span class="keyword">case</span> &lt;-done:</span><br><span class="line">				recordCopy := Copyrecode(records)</span><br><span class="line">				insertMulti(recordLen, recordCopy)</span><br><span class="line"></span><br><span class="line">			<span class="keyword">case</span> &lt;-time.After(time.Duration(<span class="number">5</span>) * time.Second):</span><br><span class="line"></span><br><span class="line">				recordCopy, recordLen := Copyrecode(records)</span><br><span class="line">				insertMulti(recordLen, recordCopy)</span><br><span class="line"></span><br><span class="line">			<span class="keyword">case</span> r := &lt;-recordsChan:</span><br><span class="line">				records = <span class="built_in">append</span>(records, r)</span><br><span class="line">				recordLen := <span class="built_in">len</span>(records)</span><br><span class="line"></span><br><span class="line">				<span class="keyword">if</span> recordLen &gt;= *insertBatchNum &#123;</span><br><span class="line">					recordCopy, recordLen := Copyrecode(records)</span><br><span class="line">					insertMulti(recordLen, recordCopy)</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="built_in">close</span>(recordsChan)</span><br><span class="line">	&#125;()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> Copyrecode(records []*Record) (recordCopy []*Record, recordLen <span class="typename">int</span>) &#123;</span><br><span class="line">	mu.Lock()</span><br><span class="line">	recordLen = <span class="built_in">len</span>(records)</span><br><span class="line">	recordCopy = <span class="built_in">make</span>([]*Record, recordLen)</span><br><span class="line">	<span class="built_in">copy</span>(recordCopy, records)</span><br><span class="line">	records = <span class="built_in">make</span>([]*Record, <span class="number">0</span>, *insertBatchNum)</span><br><span class="line">	mu.Unlock()</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">func</span> insertMulti(n <span class="typename">int</span>, rs []*Record) (<span class="typename">int64</span>, error) &#123;</span><br><span class="line">	<span class="keyword">return</span> GetDB().InsertMulti(n, rs)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>上述代码就是用ORM将数据插入到指定数据库表中，实现过程考虑到了数据插入超时及强制退出时将records中预留的数据插入数据库一定程度上保证数据不丢失。</p>
+  
+	</div>
+		<div style="padding: 10px 44px 30px 44px;" >
+<div style="border: 1px dashed #e0e0e0; padding: 10px 10px 10px 10px; background-color: #fffeee; background-repeat: no-repeat; background-attachment: scroll; background-position: 1% 50%; -moz-background-size: auto auto; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">
+<div style="float:left;margin-top:0px;">
+<img src="/img/weixin.jpg" width="125px" height="125px" style="border:1px solid #ccc; margin: 6px 5px 0px 0px"/>
+</div>
+<div>
+ <p style="margin-top:0px;">作者署名：<b><a target="_blank" href="http://www.grdtechs.com/">朴实的一线攻城狮</a></b>
+<br />本文标题：<b><a href="/2017/03/01/use-beego-orm-summary/" target="_blank" title="beego/orm使用总结">beego/orm使用总结</a></b> 
+<br />本文出处：<b><a href="/2017/03/01/use-beego-orm-summary/" target="_blank" title="beego/orm使用总结">http://www.grdtechs.com/2017/03/01/use-beego-orm-summary/</a></b>
+<br />版权声明：本文由<b><a href="/about" target="_blank" title="Lee Hong">Lee Hong</a></b>创作和发表,采用<b>署名(BY)</b>-<b>非商业性使用(NC)</b>-<b>相同方式共享(SA)</b>国际许可协议进行许可,转载请注明作者及出处, 否则保留追究法律责任的权利。 </p>
+</div>
+</div>
+</div>
+
+   	       
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/golang/">golang</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/beego-orm/">beego/orm</a><a href="/tags/golang/">golang</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	<div class="share-jiathis">
+	  
+<div class="jiathis_style_24x24">
+	<a class="jiathis_button_weixin"></a>
+	<a class="jiathis_button_tsina"></a>
+	<a class="jiathis_button_tqq"></a>
+	<a class="jiathis_button_qzone"></a>
+    <a class="jiathis_button_googleplus"></a>
+	<a class="jiathis_button_douban"></a>
+	<a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+    var jiathis_config={
+    data_track_clickback:true,
+    sm:"copy,renren,cqq",
+    pic:"",
+    summary:"",
+    
+  </script> 
+<script type="text/javascript" src="//v3.jiathis.com/code/jia.js?uid=
+2084050" charset="utf-8"></script>      
+
+
+	 </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2017/03/02/redispool-baseon-fzzy-radix/" title="基于fzzy/radix/redis封装新的redispool">
+  <strong>上一篇：</strong><br/>
+  <span>
+  基于fzzy/radix/redis封装新的redispool</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2017/02/22/mysql-import-export-summary/"  title="mysql 数据库表及数据导入导出方法总结">
+ <strong>下一篇：</strong><br/> 
+ <span>mysql 数据库表及数据导入导出方法总结
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+<section id="comments" class="comment">
+	<div class="ds-thread" data-thread-key="2017/03/01/use-beego-orm-summary/" data-title="beego/orm使用总结" data-url="http://www.grdtechs.com/2017/03/01/use-beego-orm-summary/"></div>
+</section>
+
+
+</div>  
+
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+<div id="asidepart">
+
+  <div class="widget tag">
+<p margin="0" style="text-align:center">
+<a class="ahref" href="http://researchlab.github.io/about/">
+<img id="aboutpic"  src="/img/weixin.jpg" alt="加我微信" height="200" width="200" style="box-shadow: 0px 0px 2px 2px #9edeff;border-radius: 8px;" >
+</a></p>
+<!--<hr noshade color="#ccc">-->
+<!-- <p style="text-align:center">Mike.Lee</p> -->
+<p style="text-align:center"><font size="2" color="grey">扫一扫上面的二维码 加我微信</font></p>
+<ul>
+<table border="0" font-size="1">
+<tr>
+<td align="right"><font size="2" >现状: </font></td>
+<td align="left"><font size="2" >软件开发攻城狮</font><td>
+</tr>
+<tr>
+<td align="right"><font size="2" >QQ号: </font></td>
+<td align="left"><font size="2" >975508300</font></td>
+</tr>
+<tr>
+<td align="right"><font color="red" size="2">Hexo交流群: </font></td>
+<td align="left"><font color="red" size="2">287306637</font></td>
+</tr>
+
+</table>
+</ul>
+
+</div>
+
+
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/DevOps/" title="DevOps">DevOps<sup>5</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Hexo/" title="Hexo">Hexo<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/algorithm/" title="algorithm">algorithm<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/go-bootcamp/" title="go-bootcamp">go-bootcamp<sup>6</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/go-pattern/" title="go-pattern">go-pattern<sup>3</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/golang/" title="golang">golang<sup>21</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/javascript/" title="javascript">javascript<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/php/" title="php">php<sup>2</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/golang/" title="golang">golang<sup>23</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/setcookie/" title="setcookie">setcookie<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Hexo/" title="Hexo">Hexo<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Blog/" title="Blog">Blog<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mysql/" title="mysql">mysql<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/cache/" title="cache">cache<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/concurrency/" title="concurrency">concurrency<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/redispool/" title="redispool">redispool<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/php-redis/" title="php_redis">php_redis<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/phpize/" title="phpize">phpize<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/php/" title="php">php<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mvc/" title="mvc">mvc<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/observer/" title="observer">observer<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/getcookie/" title="getcookie">getcookie<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/vim8-0/" title="vim8.0">vim8.0<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/signal/" title="signal">signal<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/json/" title="json">json<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/beego-orm/" title="beego/orm">beego/orm<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/uml/" title="uml">uml<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/xorm/" title="xorm">xorm<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="http://blog.csdn.net/xiaolongwang2010" target="_blank" title="小龙王2010csdn技术博客">Linux/c/c++</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  
+
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+  <iframe width="100%" height="550" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=550&fansRow=1&ptype=1&speed=0&skin=1&isTitle=1&noborder=1&isWeibo=1&isFans=1&uid=5141203275&verifier=a533edf5&dpc=1"></iframe>
+
+
+</aside>
+</div>
+
+    </div>
+    <footer><div id="footer" >
+	
+	
+	<div class="social-font" class="clearfix">
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2017 
+		
+		<a href="/about" target="_blank" title="Lee Hong">Lee Hong</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+
+
+<script type="text/javascript">
+  var duoshuoQuery = {short_name:"gamedp"};
+  (function() {
+    var ds = document.createElement('script');
+    ds.type = 'text/javascript';ds.async = true;
+    ds.src = '//static.duoshuo.com/embed.js';
+    ds.charset = 'UTF-8';
+    (document.getElementsByTagName('head')[0] 
+    || document.getElementsByTagName('body')[0]).appendChild(ds);
+  })();
+</script> 
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>
