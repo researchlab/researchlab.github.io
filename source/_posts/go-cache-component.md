@@ -265,4 +265,4 @@ func (c *Cache) LoadFile(file string) error {
 
 
 至此整个缓存系统基本实现，支持数据对象添加，删除，替换，和查询操作，同时还支持过期数据的删除。
-[github-完整代码示例]()
+[github-完整代码示例](https://github.com/comlibs/cache)
