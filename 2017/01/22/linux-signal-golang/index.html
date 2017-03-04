@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   
-    <title>Linux Signal及Golang中的信号处理 | 朴实的一线攻城狮</title>
+    <title>Linux Signal及Golang中的信号处理 | 一线攻城狮</title>
     <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
     
     <meta name="author" content="Lee Hong">
@@ -15,15 +15,15 @@
 <meta property="og:type" content="article">
 <meta property="og:title" content="Linux Signal及Golang中的信号处理">
 <meta property="og:url" content="http://www.grdtechs.com/2017/01/22/linux-signal-golang/index.html">
-<meta property="og:site_name" content="朴实的一线攻城狮">
+<meta property="og:site_name" content="一线攻城狮">
 <meta property="og:description" content="前言信号(Signal)是Linux, 类Unix和其它POSIX兼容的操作系统中用来进程间通讯的一种方式。一个信号就是一个异步的通知，发送给某个进程，或者同进程的某个线程，告诉它们某个事件发生了。当信号发送到某个进程中时，操作系统会中断该进程的正常流程，并进入相应的信号处理函数执行操作，完成后再回到中断的地方继续执行。如果目标进程先前注册了某个信号的处理程序(signal handler),则此">
-<meta property="og:updated_time" content="2017-03-03T05:24:45.229Z">
+<meta property="og:updated_time" content="2017-03-04T17:52:24.761Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Linux Signal及Golang中的信号处理">
 <meta name="twitter:description" content="前言信号(Signal)是Linux, 类Unix和其它POSIX兼容的操作系统中用来进程间通讯的一种方式。一个信号就是一个异步的通知，发送给某个进程，或者同进程的某个线程，告诉它们某个事件发生了。当信号发送到某个进程中时，操作系统会中断该进程的正常流程，并进入相应的信号处理函数执行操作，完成后再回到中断的地方继续执行。如果目标进程先前注册了某个信号的处理程序(signal handler),则此">
 
     
-    <link rel="alternative" href="/atom.xml" title="朴实的一线攻城狮" type="application/atom+xml">
+    <link rel="alternative" href="/atom.xml" title="一线攻城狮" type="application/atom+xml">
     
     
     <link rel="icon" href="/img/favicon.ico">
@@ -38,7 +38,7 @@
 <div>
 		
 			<div id="textlogo">
-				<h1 class="site-name"><a href="/" title="朴实的一线攻城狮">朴实的一线攻城狮</a></h1>
+				<h1 class="site-name"><a href="/" title="一线攻城狮">一线攻城狮</a></h1>
 				<h2 class="blog-motto">十年磨一剑，一步一步脚踏实地的耕种</h2>
 			</div>
 			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
