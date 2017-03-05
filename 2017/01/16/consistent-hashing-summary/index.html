@@ -24,7 +24,7 @@
 <meta property="og:image" content="http://www.grdtechs.com/imgs/add.jpg">
 <meta property="og:image" content="http://www.grdtechs.com/imgs/virtual.jpg">
 <meta property="og:image" content="http://www.grdtechs.com/imgs/map.jpg">
-<meta property="og:updated_time" content="2017-03-05T15:17:28.198Z">
+<meta property="og:updated_time" content="2017-03-05T15:26:53.758Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="一致性哈希算法总结">
 <meta name="twitter:description" content="前言存在一种场景, 当一个缓存服务由多个服务器组共同提供时, key应该路由到哪一个服务。这里假如采用最通用的方式取模求余: key%N(N为服务器数目), 这样做均衡性没有什么问题, 但是当服务器数目发送增加或减少时, 分配方式则变为key%(N+1)或key%(N-1)。这里将会有大量的key失效迁移, 如果后端key对应的是有状态的存储数据,那么毫无疑问,这种做法将导致服务器间大量的数据迁移">
@@ -96,7 +96,7 @@
 		<div id="toc" class="toc-article">
 			<strong class="toc-title">文章目录</strong>
 		
-			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#u524D_u8A00"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u7B97_u6CD5_u539F_u7406"><span class="toc-number">2.</span> <span class="toc-text">算法原理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u7B97_u6CD5_u5B9E_u73B0"><span class="toc-number">3.</span> <span class="toc-text">算法实现</span></a></li></ol>
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#u524D_u8A00"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u7B97_u6CD5_u539F_u7406"><span class="toc-number">2.</span> <span class="toc-text">算法原理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u7B97_u6CD5_u5B9E_u73B0"><span class="toc-number">3.</span> <span class="toc-text">算法实现</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u603B_u7ED3"><span class="toc-number">4.</span> <span class="toc-text">总结</span></a></li></ol>
 		
 		</div>
 		
@@ -177,6 +177,11 @@
 <p>5.定义删除哈希节点的函数, 当某个cache server 挂掉之后，用于删除这个节点(一般情况下不建议删除节点，而是将当前坏节点上的数据迁移到好的节点上)<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">func</span> (c *Consistent) Remove(node *Node) &#123;</span><br><span class="line">	c.Lock()</span><br><span class="line">	<span class="keyword">defer</span> c.Unlock()</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> _, ok := c.Resources[node.Id]; !ok &#123;</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="built_in">delete</span>(c.Resources, node.Id)</span><br><span class="line"></span><br><span class="line">	count := c.numReps * node.Weight</span><br><span class="line">	<span class="keyword">for</span> i := <span class="number">0</span>; i &lt; count; i++ &#123;</span><br><span class="line">		str := c.joinStr(i, node)</span><br><span class="line">		<span class="built_in">delete</span>(c.Nodes, c.hashStr(str))</span><br><span class="line">	&#125;</span><br><span class="line">	c.sortHashRing()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
 <p>大致过程，<br>1.判断待删除物理节点是否存在哈希环中，存在则删除，并进入下一步，<br>2.删除改物理节点映射在哈希环中的所有虚拟节点,<br>3.重新排序哈希环,</p>
 <p>至此一致性哈希算法基本实现， 详细代码请参见 <a href="https://github.com/researchlab/experiments/tree/master/consistent_hash" target="_blank" rel="external">https://github.com/researchlab/experiments/tree/master/consistent_hash</a></p>
+<h2 id="u603B_u7ED3"><a href="#u603B_u7ED3" class="headerlink" title="总结"></a>总结</h2><ul>
+<li>详细阐述了一致性哈希算法实现原理及适合场景</li>
+<li>采用slice + sort 方式构建哈希环，并用golang实现了一致性哈希算法</li>
+<li>可以尝试采用红黑树的方式来构建哈希环，在性能上可能更好，有待进一步尝试 </li>
+</ul>
   
 	</div>
 		<div style="padding: 10px 44px 30px 44px;" >
