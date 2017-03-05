@@ -245,3 +245,8 @@ func (c *Consistent) Remove(node *Node) {
 
 
 至此一致性哈希算法基本实现， 详细代码请参见 https://github.com/researchlab/experiments/tree/master/consistent_hash
+
+## 总结
+- 详细阐述了一致性哈希算法实现原理及适合场景
+- 采用slice + sort 方式构建哈希环，并用golang实现了一致性哈希算法
+- 可以尝试采用红黑树的方式来构建哈希环，在性能上可能更好，有待进一步尝试 
