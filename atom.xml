@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://www.grdtechs.com/"/>
-  <updated>2017-03-05T15:26:53.758Z</updated>
+  <updated>2017-03-06T16:42:30.493Z</updated>
   <id>http://www.grdtechs.com/</id>
   
   <author>
@@ -20,7 +20,7 @@
     <link href="http://www.grdtechs.com/2017/03/04/docker-basic-use/"/>
     <id>http://www.grdtechs.com/2017/03/04/docker-basic-use/</id>
     <published>2017-03-04T09:05:58.000Z</published>
-    <updated>2017-03-05T15:26:53.758Z</updated>
+    <updated>2017-03-06T16:42:30.493Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>很早就使用docker了，只是工作上一直没用起来， 加之工作多/杂，就只是断断续续自己瞎折腾，现在打算系统的整理总结一下docker使用经历，这个第一篇主要总结一下几个方面，<br><a id="more"></a></p>
 <ul>
@@ -50,7 +50,8 @@
 <p>此时就可以在浏览器中输入<code>http://0.0.0.0/</code>, 看到nginx服务器的欢迎界面咯，</p>
 <center><img src="/imgs/hi-nginx.png" alt="webserver-nginx"></center>
 
-<p>可以通过docker stats命令查看当前所有container的运行状态,<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">➜  ~ docker stats</span><br><span class="line">CONTAINER           CPU %               MEM USAGE / LIMIT       MEM %               NET I/O             BLOCK I/O           PIDS</span><br><span class="line">c1760b8f9359        <span class="number">0.00</span>%               <span class="number">1.859</span> MiB / <span class="number">1.952</span> GiB   <span class="number">0.09</span>%               <span class="number">16.1</span> kB / <span class="number">4.58</span> kB   <span class="number">0</span> B / <span class="number">0</span> B           <span class="number">2</span></span><br><span class="line">CONTAINER           CPU %               MEM USAGE / LIMIT       MEM %               NET I/O             BLOCK I/O           PIDS</span><br><span class="line">c1760b8f9359        <span class="number">0.00</span>%               <span class="number">1.859</span> MiB / <span class="number">1.952</span> GiB   <span class="number">0.09</span>%               <span class="number">16.1</span> kB / <span class="number">4.58</span> kB   <span class="number">0</span> B / <span class="number">0</span> B           <span class="number">2</span></span><br></pre></td></tr></table></figure></p>
+<p>可以通过<code>docker stats</code>命令查看当前所有container的运行状态,<code>docker stats</code> 可以查看到运行状态容器的CPU，内存及网络使用率。在实际工作中，我们通常会把这个命令的输出连接到类似Logstash一类的服务用来分析。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">➜  ~ docker stats</span><br><span class="line">CONTAINER           CPU %               MEM USAGE / LIMIT       MEM %               NET I/O             BLOCK I/O           PIDS</span><br><span class="line">c1760b8f9359        <span class="number">0.00</span>%               <span class="number">1.859</span> MiB / <span class="number">1.952</span> GiB   <span class="number">0.09</span>%               <span class="number">16.1</span> kB / <span class="number">4.58</span> kB   <span class="number">0</span> B / <span class="number">0</span> B           <span class="number">2</span></span><br><span class="line">CONTAINER           CPU %               MEM USAGE / LIMIT       MEM %               NET I/O             BLOCK I/O           PIDS</span><br><span class="line">c1760b8f9359        <span class="number">0.00</span>%               <span class="number">1.859</span> MiB / <span class="number">1.952</span> GiB   <span class="number">0.09</span>%               <span class="number">16.1</span> kB / <span class="number">4.58</span> kB   <span class="number">0</span> B / <span class="number">0</span> B           <span class="number">2</span></span><br></pre></td></tr></table></figure></p>
+<p>这个命令的输出是实时刷新的(类似Linux上的top命令），如果需要退出可以使用<code>Ctrl-C</code>组合键。</p>
 <h2 id="u521B_u5EFAdocker_u5E94_u7528"><a href="#u521B_u5EFAdocker_u5E94_u7528" class="headerlink" title="创建docker应用"></a>创建docker应用</h2><p><strong> 需求描述 </strong></p>
 <p>Docker 安装后，下面来创建第一个Docker 应用。这个应用很简单，作用就是输出一句 HelloWorld!。</p>
 <p><strong> 需求分析 </strong></p>
@@ -61,7 +62,7 @@
 <p>执行 docker ps 命令查看运行的容器列表，但看不到任何容器在运行，原因是容器运行了echo 命令后已经终止，进入到停止状态，需要用 docker ps -a 命令查看,<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">➜  ~ docker ps</span><br><span class="line">CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES</span><br><span class="line">➜  ~ docker ps <span class="operator">-a</span></span><br><span class="line">CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS                          PORTS               NAMES</span><br><span class="line"><span class="number">65948</span>b8f61eb        busybox             <span class="string">"echo HelloWorld"</span>        About an hour ago   Exited (<span class="number">0</span>) <span class="number">2</span> minutes ago                            xenodochial_bohr</span><br></pre></td></tr></table></figure></p>
 <p>在这个命令的输出中我们看到列表里有一个处于 Exited (0) 2 minutes ago 的容器，这个容器表示大约2分钟之前终止。列表中还包括该容器的ID，使用的镜像，执行的命令，创建的时间等信息。最后一个是为容器随机设置的名称，也可以通过run的参数进行设置为指定名称，注意同一个服务器上的容器不可以同名。</p>
 <h2 id="u5BB9_u5668_u7BA1_u7406"><a href="#u5BB9_u5668_u7BA1_u7406" class="headerlink" title="容器管理"></a>容器管理</h2><p>上面通过docker run 命令在指定的镜像中运行一个容器，然后在容器中执行我们的应用程序，下面通过实践来了解docker容器管理中最常用的几个命令,</p>
-<p><strong> docker run </strong></p>
+<p><strong> 1. 创建运行并容器: docker run </strong></p>
 <p>最主要的是创建运行容器的命令<code>docker run</code>，这个命令的参数非常多，可以通过<code>docker run --help</code> 查看。<br>继续上一节实验，echo 命令运行后容器就退出了，如果我们需要一个保持运行的容器呢，最简单的方法就是给这个容器一个可以保持的应用，比如bash，运行 ubuntu 容器并进入容器的 bash：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -t -i ubuntu /bin/bash</span><br></pre></td></tr></table></figure></p>
 <p>上面命令的说明：<br><code>-t</code>：分配一个 pseudo-TTY<br><code>-i</code>：–interactive参数缩写，表示交互模式<br><code>ubuntu</code>：运行的镜像名称，默认为latest 标签<br><code>/bin/bash</code>：容器中运行的应用<br>通过这个简单的命令，我们现在进入了新创建容器的bash中，在bash里执行的任何命令都不会影响到我们的宿主机，可以随意操作。你可以看到主机名和环境变量HOSTNAME都已经显示为容器的ID了。在这个bash下，我们可以进行各种Ubuntu系统上的操作，当然因为Docker本身的限制，有些涉及到磁盘、网络、设备等Linux特权命令是无法执行的，可以试试reboot命令，会提示你shutdown: Unable to shutdown system。</p>
 <p>如何退出这个bash呢？有两种方法，两种方法的效果完全不同,</p>
@@ -72,19 +73,62 @@
 <p>上述第二种方法比较常用，此时使用<code>docker ps</code> 查看，能看到容器仍然在运行中：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">➜  ~ docker run -t -i ubuntu /bin/bash</span><br><span class="line">Unable to find image <span class="string">'ubuntu:latest'</span> locally</span><br><span class="line">latest: Pulling from library/ubuntu</span><br><span class="line">d54efb8db41d: Pull complete</span><br><span class="line">f8b845f45a87: Pull complete</span><br><span class="line">e8db7bf7c39f: Pull complete</span><br><span class="line"><span class="number">9654</span>c40e9079: Pull complete</span><br><span class="line"><span class="number">6</span>d9ef359eaaa: Pull complete</span><br><span class="line">Digest: sha256:f649e49c1ed34607912626a152efbc23238678af1ac37859b6223ef28e711a3f</span><br><span class="line">Status: Downloaded newer image <span class="keyword">for</span> ubuntu:latest</span><br><span class="line">root@<span class="number">65</span><span class="built_in">fc</span>97a6b032:/<span class="comment"># %</span></span><br><span class="line">➜  ~ docker ps</span><br><span class="line">CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES</span><br><span class="line"><span class="number">65</span><span class="built_in">fc</span>97a6b032        ubuntu              <span class="string">"/bin/bash"</span>         About an hour ago   Up <span class="number">4</span> minutes                            kickass_goodall</span><br></pre></td></tr></table></figure></p>
 <p>如果想再次回到刚才的bash中，只需要使用<code>docker attach</code>命令就可以再次连接到运行的bash里：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">➜  ~ docker ps</span><br><span class="line">CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES</span><br><span class="line"><span class="number">65</span><span class="built_in">fc</span>97a6b032        ubuntu              <span class="string">"/bin/bash"</span>         About an hour ago   Up <span class="number">4</span> minutes                            kickass_goodall</span><br><span class="line">➜  ~ docker attach <span class="number">65</span><span class="built_in">fc</span>9</span><br><span class="line">root@<span class="number">65</span><span class="built_in">fc</span>97a6b032:/<span class="comment">#</span></span><br></pre></td></tr></table></figure></p>
 <p><strong> 注意</strong> ：命令后面的参数是容器的ID，并不需要输入完整的数字，只要能唯一定位这个容器即可，通常输入4位就足够了。</p>
-<p><strong> docker ps </strong></p>
-<p><code>docker ps</code>命令用来查看正在运行的容器,几个最常用的参数：<br><code>-a</code>：查看所有容器，含停止运行的<br><code>-l</code>：查看刚启动的容器<br><code>-q</code>：只显示容器ID</p>
+<p><code>docker run</code>命令的执行分一下几步，<br>1.查找镜像或下载镜像<br>2.创建容器<br>3.分配文件系统及虚拟网络（网桥，接口，IP地址），其中容器中的DNS默认挂载宿主机的<code>/etc/resolve.conf</code>和<code>/etc/hosts</code>。<br>4.执行应用, 默认执行镜像中指定的<code>Cmd</code>参数，也可以在<code>docker run</code>后面跟应用来覆盖<code>Cmd</code>命令。</p>
+<p>如果容器中的应用执行完成, 则容器进入到终止状态。</p>
+<p><code>docker run</code>的参数非常多, 假设按如下容器配置设定创建新容器,</p>
+<ul>
+<li>设置容器名称 bash（使用–name，如果不加该参数，Docker会随机产生一个名字）。</li>
+<li>设置容器的主机名 bashHost(使用–hostname参数）</li>
+<li>设定网络信息，这里只使用一个简单的参数设置MAC地址（–mac-address参数）</li>
+<li>设置资源限制，设置容器中最大的进程数，包括soft和hard两个限制值（使用-ulimit nproc=…等参数）</li>
+<li>创建容器过程中也可以挂载数据卷，数据卷在下一节实验中会详细介绍。这里不过多涉及。</li>
+</ul>
+<p>根据上述的需求我们通过查询<code>docker run --help</code>, 使用相关参数, 创建符合要求的容器,<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">➜  helloworldimage docker run --name bash --hostname bashHost --mac-address <span class="number">00</span>:<span class="number">01</span>:<span class="number">02</span>:<span class="number">03</span>:<span class="number">04</span>:<span class="number">05</span> --ulimit nproc=<span class="number">1024</span>:<span class="number">2048</span> -t -i ubuntu /bin/bash</span><br></pre></td></tr></table></figure></p>
+<p>进入容器中我们可以对一些参数进行验证,<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">➜  helloworldimage docker run --name bash --hostname bashHost --mac-address <span class="number">00</span>:<span class="number">01</span>:<span class="number">02</span>:<span class="number">03</span>:<span class="number">04</span>:<span class="number">05</span> --ulimit nproc=<span class="number">1024</span>:<span class="number">2048</span> -t -i ubuntu /bin/bash</span><br><span class="line">root@bashHost:/<span class="comment"># hostname</span></span><br><span class="line">bashHost</span><br><span class="line">root@bashHost:/<span class="comment"># ulimit</span></span><br><span class="line">unlimited</span><br><span class="line">root@bashHost:/<span class="comment"># % </span></span><br><span class="line">➜  helloworldimage docker inspect <span class="operator">-f</span> <span class="string">'&#123;&#123;.HostConfig.Ulimits&#125;&#125;'</span> bash</span><br><span class="line">[nproc=<span class="number">1024</span>:<span class="number">2048</span>]</span><br></pre></td></tr></table></figure></p>
+<p>注，容器中的 ulimit 不会有任何输出，查看实际的ulimit信息可以在宿主机上使用docker inspect查看,</p>
+<p><strong> 2. 查看容器列表: docker ps </strong></p>
+<p><code>docker ps</code>命令用来查看正在运行的容器信息,几个最常用的参数：<br><code>-a</code>：查看所有容器，含停止运行的<br><code>-l</code>：查看刚启动的容器<br><code>-q</code>：只显示容器ID</p>
 <p>例如查看所有容器的ID列表,则执行<code>docker ps -a -q</code>命令即可。</p>
-<p><strong> docker start </strong></p>
-<p>docker start 启动容器，此处我们尝试启动先前的运行/bin/bash的容器,<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker start <span class="number">65</span><span class="built_in">fc</span></span><br></pre></td></tr></table></figure></p>
-<p>通过<code>docker start</code>启动容器之后， 可以通过<code>docker attach</code>命令直接进入到该容器中, 如果要停止正在运行的容器则可用<code>docker stop</code>命令，如果要重启则用<code>docker restart</code>命令即可。</p>
-<p><strong> docker inspect </strong></p>
-<p>查看Docker容器或镜像的一些内部信息, 如启动并查看<code>/bin/bash</code>容器,<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">➜  ~ docker start <span class="number">65</span><span class="built_in">fc</span></span><br><span class="line"><span class="number">65</span><span class="built_in">fc</span></span><br><span class="line">➜  ~ docker inspect <span class="number">65</span><span class="built_in">fc</span></span><br><span class="line">[</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="string">"Id"</span>: <span class="string">"65fc97a6b0324436f4f9843f06657473d6cf441318937d243b395aff13d6d466"</span>,</span><br><span class="line">        <span class="string">"Created"</span>: <span class="string">"2017-03-05T12:47:04.372874677Z"</span>,</span><br><span class="line">        <span class="string">"Path"</span>: <span class="string">"/bin/bash"</span>,</span><br><span class="line">        <span class="string">"Args"</span>: [],</span><br><span class="line">.....</span><br></pre></td></tr></table></figure></p>
-<p>返回的信息非常多，是JSON格式，每一项内容具体含义本节不做详细介绍，可以参考官方文档。</p>
-<p><strong> docker rm </strong></p>
-<p>删除容器操作。该命令默认不可以删除运行的容器，但提供了强制删除的参数<code>-f</code>，</p>
-<p><strong> docker top </strong></p>
+<p><strong> 3. 查看容器详细信息: docker inspect </strong></p>
+<p>docker inspect 查看容器的细节信息，包括创建时间，操作命令，端口映射信息，IP地址等等。<br>查看Docker容器或镜像的一些内部信息, 默认输出JSON格式的信息，可以通过-f指定输出的项目。 如启动并查看<code>/bin/bash</code>容器,<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">➜  ~ docker start <span class="number">65</span><span class="built_in">fc</span></span><br><span class="line"><span class="number">65</span><span class="built_in">fc</span></span><br><span class="line">➜  ~ docker inspect <span class="number">65</span><span class="built_in">fc</span></span><br><span class="line">[</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="string">"Id"</span>: <span class="string">"65fc97a6b0324436f4f9843f06657473d6cf441318937d243b395aff13d6d466"</span>,</span><br><span class="line">        <span class="string">"Created"</span>: <span class="string">"2017-03-05T12:47:04.372874677Z"</span>,</span><br><span class="line">        <span class="string">"Path"</span>: <span class="string">"/bin/bash"</span>,</span><br><span class="line">        <span class="string">"Args"</span>: [],</span><br><span class="line">.....</span><br><span class="line">➜  helloworldimage docker ps <span class="operator">-a</span></span><br><span class="line">CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS               NAMES</span><br><span class="line">d3efa7a729ba        ubuntu              <span class="string">"/bin/bash -c 'whi..."</span>   <span class="number">4</span> hours ago         Up <span class="number">6</span> minutes                            bash</span><br><span class="line">➜  helloworldimage docker inspect <span class="operator">-f</span> <span class="string">'&#123;&#123;.NetworkSettings.IPAddress&#125;&#125;'</span> d3ef</span><br><span class="line"><span class="number">172.17</span>.<span class="number">0.2</span></span><br><span class="line">➜  helloworldimage docker inspect <span class="operator">-f</span> <span class="string">'&#123;&#123;.NetworkSettings.Gateway&#125;&#125;'</span> bash</span><br><span class="line"><span class="number">172.17</span>.<span class="number">0.1</span></span><br></pre></td></tr></table></figure></p>
+<p>返回的信息非常多，是JSON格式，每一项内容具体含义本节不做详细介绍，可以参考官方文档。<br>上述命令中我们查看了网络配置信息中的IP地址和Gateway地址。</p>
+<p><strong> 4. 查看容器内进程信息: docker top </strong></p>
 <p>查看容器中运行的进程信息，显示容器中进程的PID，UID，PPID，时间，tty等信息,<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">➜  ~ docker top <span class="number">65</span><span class="built_in">fc</span></span><br><span class="line">PID                 USER                TIME                COMMAND</span><br><span class="line"><span class="number">3073</span>                root                <span class="number">0</span>:<span class="number">00</span>                /bin/bash</span><br></pre></td></tr></table></figure></p>
+<p><strong> 5. 查看容器输出信息: docker logs </strong><br>获取容器的输出信息可以使用<code>docker logs</code>命令，使用<code>docker attach</code> 回到刚才创建的<code>/bin/bash容器</code>中，写一个循环输出信息的脚本，然后再使用<code>Ctrl-P Ctrl-Q</code>组合键退出。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">➜  helloworldimage docker run -t -i --name bash ubuntu /bin/bash -c <span class="string">"while true; do echo 'Hello world'; sleep 1; done"</span></span><br></pre></td></tr></table></figure></p>
+<p>在宿主机的终端中，我们可以用<code>docker logs</code>命令查看输出信息。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">➜  helloworldimage docker logs bash</span><br><span class="line">Hello world</span><br><span class="line">Hello world</span><br><span class="line">Hello world</span><br></pre></td></tr></table></figure></p>
+<p><code>docker logs</code>只会显示截止到当前的所有输出，如果想动态查看实时输出，也可以加<code>-f</code>参数，类似<code>tail</code>命令</p>
+<p><strong> 6. 查看容器中的修改: docker diff </strong></p>
+<p><code>docker diff</code> 查看容器中对镜像做了哪些变化。</p>
+<p>先执行<code>docker diff</code> 查看现有的容器中的变化，发现没有任何文件变化, 连接到容器内部，<code>Ctrl-C</code>中断先前实验的死循环,再创建几个文件,退出到宿主机,再次使用docker diff命令查看是否有新的修改<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">➜  helloworldimage docker diff bash</span><br><span class="line">➜  helloworldimage docker attach bash</span><br><span class="line">root@efb833099bb1:/<span class="comment">#</span></span><br><span class="line">root@efb833099bb1:/<span class="comment"># cd tmp/</span></span><br><span class="line">root@efb833099bb1:/tmp<span class="comment"># touch s&#123;1,2,3&#125;</span></span><br><span class="line">root@efb833099bb1:/tmp<span class="comment"># %                                                                                             ➜  helloworldimage docker diff bash</span></span><br><span class="line">C /tmp</span><br><span class="line">A /tmp/s1</span><br><span class="line">A /tmp/s2</span><br><span class="line">A /tmp/s3</span><br><span class="line">➜  helloworldimage docker attach bash</span><br><span class="line">root@efb833099bb1:/tmp<span class="comment">#</span></span><br><span class="line">root@efb833099bb1:/tmp<span class="comment"># rm s1</span></span><br><span class="line">root@efb833099bb1:/tmp<span class="comment"># %                                                                                             ➜  helloworldimage docker diff bash</span></span><br><span class="line">C /tmp</span><br><span class="line">A /tmp/s2</span><br><span class="line">A /tmp/s3</span><br></pre></td></tr></table></figure></p>
+<p>输出的信息中<code>A</code> 表示添加，后面的三个新建文件的路径。可以尝试下修改或删除文件会有怎样的diff输出。</p>
+<p><strong> 7. 容器的守护状态 </strong></p>
+<p>首先需要了解的概念是容器的守护状态，类似于守护进程，需要为<code>run</code>命令增加参数<code>-d</code>，此时容器在后台以守护状态(Daemonized)形式运行。</p>
+<p>创建一个守护状态的容器,<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">➜  docker run --name bash <span class="operator">-d</span> ubuntu /bin/bash -c <span class="string">"while true; do echo 'Hello world'; sleep 1; done"</span></span><br></pre></td></tr></table></figure></p>
+<p>会启动一个守护状态的容器在后台运行, 使用<code>docker attach</code> 登录上去可以看到循环输出Hello world 的字符串。</p>
+<p><strong> 8. 停止容器: docker stop </strong></p>
+<p>停止运行状态的容器，进入到终止状态。停止状态的容器可以通过 docker ps -a 查看到。</p>
+<p>首先使用 <code>docker stop container</code> 命令停止名称为container的容器,然后使用docker ps -a 查看容器状态，</p>
+<p><strong> 9. 启动容器: docker start </strong></p>
+<p>启动停止状态的容器。再次启动名称为container的容器,<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker start container</span><br></pre></td></tr></table></figure></p>
+<p><strong> 10. 重启容器: docker restart </strong></p>
+<p>可以将运行状态的容器终止，然后重新启动。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker restart container</span><br></pre></td></tr></table></figure></p>
+<p><strong> 11. 杀死容器: docker kill </strong></p>
+<p>跟进程相同，有的时候正常的终止操作不起作用时，需要使用<code>kill</code>命令杀死进程，在<code>docker kill</code>可以处理异常的运行状态的容器，强制退出, 杀死名为<code>container</code>的容器命令,<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker <span class="built_in">kill</span> container</span><br></pre></td></tr></table></figure></p>
+<p><strong> 12. 暂停和恢复容器: docker pause/unpause </strong></p>
+<p>类似Windows操作系统的睡眠，我们可以先临时将容器的运行挂起，不再使用CPU资源，当需要的时候再恢复成正常的运行状态。<br>先启动容器, 再执行pause操作, 再unpause恢复,<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">docker start container </span><br><span class="line">docker pause container </span><br><span class="line">docker unpause container</span><br></pre></td></tr></table></figure></p>
+<p><strong> 13. 删除容器: docker rm </strong></p>
+<p>当一个容器不再需要时，我们可以删除这个容器。对于停止的容器直接执行<code>docker rm 容器ID</code>, 对于运行状态的容器也可以执行<code>docker rm -f 容器ID强制删除</code>。</p>
+<p>导出和导入容器操作可以将容器导出到压缩包，并可将压缩包导入到Docker系统中成为镜像，为容器的迁移和镜像的制作提供支持。</p>
+<p><strong> 14. 容器导出: docker export </strong></p>
+<p>导出容器快照到本地的tar包。导出后的文件可以拷贝到其他<code>Docker服务器</code>上执行导入命令形成新的镜像，下面选择导出刚才建立的容器new_container到到tar包, 保存到当前目录, 具体命令如下,<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">helloworldimage docker run --name new_container -t -i ubuntu /bin/bash</span><br><span class="line">root@<span class="number">6</span>c8edd28ad65:/<span class="comment"># cd tmp/</span></span><br><span class="line">root@<span class="number">6</span>c8edd28ad65:/tmp<span class="comment"># touch s&#123;1,2,3&#125;</span></span><br><span class="line">root@<span class="number">6</span>c8edd28ad65:/tmp<span class="comment"># ls</span></span><br><span class="line">s1  s2  s3</span><br><span class="line">root@<span class="number">6</span>c8edd28ad65:/tmp<span class="comment"># %                                                                                             ➜  helloworldimage docker diff new_container</span></span><br><span class="line">C /tmp</span><br><span class="line">A /tmp/s1</span><br><span class="line">A /tmp/s2</span><br><span class="line">A /tmp/s3</span><br><span class="line">➜  helloworldimage docker ps <span class="operator">-a</span></span><br><span class="line">CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES</span><br><span class="line"><span class="number">6</span>c8edd28ad65        ubuntu              <span class="string">"/bin/bash"</span>         <span class="number">4</span> hours ago         Up <span class="number">44</span> seconds                           new_container</span><br><span class="line">➜  helloworldimage docker <span class="built_in">export</span> <span class="number">6</span>c8e &gt; new_container.tar</span><br><span class="line">➜  helloworldimage ls</span><br><span class="line">Dockerfile        new_container.tar</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>需要注意的是，当容器导出后，容器仍然在Docker环境中运行，只是拷贝了一份内容到tar包。</p>
+</blockquote>
+<p><strong>  15. 容器导入: docker import </strong></p>
+<p>执行导入命令，将该文件加载到docker系统中，文件加载后会成为镜像，命令执行时需要制定导入后生成的镜像的名字,<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cat new_container.tar | docker import new_container:<span class="number">1.0</span></span><br></pre></td></tr></table></figure></p>
+<p>执行导入后，使用docker images 查看是否有新的镜像产生,<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">➜  helloworldimage docker images</span><br><span class="line">REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE</span><br><span class="line">nginx               latest              <span class="number">6</span>b914bbcb89e        <span class="number">6</span> days ago          <span class="number">182</span> MB</span><br><span class="line">ubuntu              latest              <span class="number">0</span>ef2e08ed3fa        <span class="number">6</span> days ago          <span class="number">130</span> MB</span><br><span class="line">busybox             latest              <span class="number">7968321274</span>dc        <span class="number">7</span> weeks ago         <span class="number">1.11</span> MB</span><br><span class="line">➜  helloworldimage cat new_container.tar| docker import - new_container:<span class="number">1.0</span></span><br><span class="line">sha256:dd10880b0d88c4d4159c3c29c034d46dc52c5d8d9d52ee5385aff687d0967216</span><br><span class="line">➜  helloworldimage docker images</span><br><span class="line">REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE</span><br><span class="line">new_container       <span class="number">1.0</span>                 dd10880b0d88        <span class="number">4</span> hours ago         <span class="number">111</span> MB</span><br><span class="line">nginx               latest              <span class="number">6</span>b914bbcb89e        <span class="number">6</span> days ago          <span class="number">182</span> MB</span><br><span class="line">ubuntu              latest              <span class="number">0</span>ef2e08ed3fa        <span class="number">6</span> days ago          <span class="number">130</span> MB</span><br><span class="line">busybox             latest              <span class="number">7968321274</span>dc        <span class="number">7</span> weeks ago         <span class="number">1.11</span> MB</span><br></pre></td></tr></table></figure></p>
+<p>docker import 命令比较灵活，也可以直接从URL链接进行导入。所以可以记住这是一种创建镜像的方式，将容器导出后拷贝到目标服务器然后导入成镜像。</p>
+<p>使用新镜像创建容器，查看是否与导出的容器内容一致,<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">➜  helloworldimage docker run --name new_new_container -t -i new_container:<span class="number">1.0</span> /bin/bash</span><br><span class="line">root@eeef608f020b:/<span class="comment"># cd tmp/</span></span><br><span class="line">root@eeef608f020b:/tmp<span class="comment"># ls</span></span><br><span class="line">s1  s2  s3</span><br><span class="line">root@eeef608f020b:/tmp<span class="comment">#</span></span><br></pre></td></tr></table></figure></p>
 <h2 id="u955C_u50CF_u7BA1_u7406"><a href="#u955C_u50CF_u7BA1_u7406" class="headerlink" title="镜像管理"></a>镜像管理</h2><p>先来简单了解一下镜像管理的基本概念,</p>
 <p><strong> 查看镜像列表 </strong></p>
 <p><code>docker images</code> 命令可以列出当前系统上所有的镜像信息,<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">➜  ~ docker images</span><br><span class="line">REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE</span><br><span class="line">nginx               latest              <span class="number">6</span>b914bbcb89e        <span class="number">4</span> days ago          <span class="number">182</span> MB</span><br><span class="line">ubuntu              latest              <span class="number">0</span>ef2e08ed3fa        <span class="number">5</span> days ago          <span class="number">130</span> MB</span><br><span class="line">busybox             latest              <span class="number">7968321274</span>dc        <span class="number">7</span> weeks ago         <span class="number">1.11</span> MB</span><br></pre></td></tr></table></figure></p>
@@ -126,7 +170,7 @@
     <link href="http://www.grdtechs.com/2017/03/02/redispool-baseon-fzzy-radix/"/>
     <id>http://www.grdtechs.com/2017/03/02/redispool-baseon-fzzy-radix/</id>
     <published>2017-03-02T14:42:42.000Z</published>
-    <updated>2017-03-05T15:26:53.762Z</updated>
+    <updated>2017-03-06T16:42:30.497Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>之前的老项目的redis client sdk 直接大名鼎鼎的<code>github.com/fzzy/radix</code>提供的<code>redis client</code> 和<code>redis pool</code>, 当访问峰值达到一定的值后会出现<code>too many open files</code>等tcp连接错误，同时也没有直接提供authorization 密钥认证的接口，为满足这些新需求基于<code>fzzy/radix</code>封装出的新的<code>redispool</code>, 已投入生产使用半年来暂无问题，本文总结如下,<br><a id="more"></a></p>
 <h2 id="auth_u8BA4_u8BC1"><a href="#auth_u8BA4_u8BC1" class="headerlink" title="auth认证"></a>auth认证</h2><p>如果redis server 需要密钥访问的话，每新建一个client 连接后都需要先通过authorization认证之后才能被使用，如果每次都通过新建一个redis client 再oauth认证来用显然没什么问题，但对于要频繁进行redis操作的系统而言，最好采用redis pool 的办法来解决，用redis conn 池本来也很好解决， 就是在新建redis conn pool时 每新建一个redis client就auth认证一下然后再保存起来就可以使用了，并且这个连接以后都不需要在进行auth认证了。<br>如果redis pool在新建之后就固定的话， 是可以如上面这么简单的，但是采用的<code>fzzy/radix</code>包在实现的方案是可根据需要自动伸缩地新建redis client conn,之前设置的redis 连接池的大小其实是最小的空闲连接池，当业务需求需要的redis client连接数大于pool中的数目时则会通过redis.Dial()的方法新建一个redis client conn 以满足业务的需求，即在建立redis连接池的时候auth认证的redis client conn 和最后回到pool池中的redis client conn 可能就不是同一个client了，因为当新的redis client conn 塞满redis 连接池后 之前auth认证过的旧的redis client conn就会被Close关闭到而不再回到pool池中，具体实现如下:<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">func</span> (p *RedisPool) getRedisClient() (*redis.Client, error) &#123;</span><br><span class="line">	client, err := redis.Dial(p.network, p.addr)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="constant">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="constant">nil</span>, err</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> <span class="built_in">len</span>(p.pwd) != <span class="number">0</span> &#123;</span><br><span class="line">		<span class="keyword">if</span> client, err = p.redisAuth(client); err != <span class="constant">nil</span> &#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="constant">nil</span>, err</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> client, <span class="constant">nil</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> (p *RedisPool) redisAuth(client *redis.Client) (*redis.Client, error) &#123;</span><br><span class="line">	<span class="keyword">if</span> _, err := client.Cmd(<span class="string">"AUTH"</span>, p.pwd).Str(); err != <span class="constant">nil</span> &#123;</span><br><span class="line">		client.Close()</span><br><span class="line">		<span class="keyword">return</span> client, err</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> client, <span class="constant">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
@@ -157,7 +201,7 @@
     <link href="http://www.grdtechs.com/2017/03/01/use-beego-orm-summary/"/>
     <id>http://www.grdtechs.com/2017/03/01/use-beego-orm-summary/</id>
     <published>2017-03-01T10:44:29.000Z</published>
-    <updated>2017-03-05T15:26:53.762Z</updated>
+    <updated>2017-03-06T16:42:30.497Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>很早之前的一个老项目就使用过ORM，当时使用的是<code>xorm</code>，后来新的项目设计说考虑性能什么的又用写原生sql来做了，在项目中使用一直没什么问题， 但是代码中到处写着原生的sql语句,并且有很多重复的语句，很不好维护，于是最近又重新考虑采用orm的方式来操作数据库，最近看中<code>beego/orm</code>这个包， 它的官方文档也写了很详细的使用说明，下面还是简要总结一下自己在项目中的使用经历,<br><a id="more"></a></p>
 <h2 id="ORM"><a href="#ORM" class="headerlink" title="ORM"></a>ORM</h2><p>ORM, 即Object-Relational Mapping(对象关系映射)，它的作用是在关系型数据库和业务实体对象之间作一个映射，这样在具体的操作业务对象的时候，就不需要再去和复杂的SQL语句打交道，只需简单的操作对象的属性和方法。</p>
@@ -215,7 +259,7 @@
     <link href="http://www.grdtechs.com/2017/02/22/mysql-import-export-summary/"/>
     <id>http://www.grdtechs.com/2017/02/22/mysql-import-export-summary/</id>
     <published>2017-02-22T10:50:36.000Z</published>
-    <updated>2017-03-05T15:26:53.762Z</updated>
+    <updated>2017-03-06T16:42:30.497Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>由于公司的MySQL是搭建在服务器上，为了避免对服务器进行直接改动，想远程导出和导入MySQL的数据库表结构及数据进行操作, 刚好Mysql本身提供了命令行导出工具<code>Mysqldump</code>和<code>Mysql Source</code>导入命令进行SQL数据导入导出工作，通过Mysql命令行导出工具Mysqldump命令能够将Mysql数据导出为文本格式(txt)的SQL文件，通过Mysql Source命令能够将SQL文件导入Mysql数据库中，下面通过Mysql导入导出SQL实例详解Mysqldump和Source命令的用法</p>
 <a id="more"></a>
@@ -303,7 +347,7 @@
     <link href="http://www.grdtechs.com/2017/01/22/linux-signal-golang/"/>
     <id>http://www.grdtechs.com/2017/01/22/linux-signal-golang/</id>
     <published>2017-01-22T14:35:45.000Z</published>
-    <updated>2017-03-05T15:26:53.762Z</updated>
+    <updated>2017-03-06T16:42:30.497Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>信号(Signal)是Linux, 类Unix和其它POSIX兼容的操作系统中用来进程间通讯的一种方式。一个信号就是一个异步的通知，发送给某个进程，或者同进程的某个线程，告诉它们某个事件发生了。<br>当信号发送到某个进程中时，操作系统会中断该进程的正常流程，并进入相应的信号处理函数执行操作，完成后再回到中断的地方继续执行。<br>如果目标进程先前注册了某个信号的处理程序(signal handler),则此处理程序会被调用，否则缺省的处理程序被调用。</p>
 <a id="more"></a>
@@ -572,7 +616,7 @@
     <link href="http://www.grdtechs.com/2017/01/20/go-http-cross-origin/"/>
     <id>http://www.grdtechs.com/2017/01/20/go-http-cross-origin/</id>
     <published>2017-01-20T15:30:40.000Z</published>
-    <updated>2017-03-05T15:26:53.762Z</updated>
+    <updated>2017-03-06T16:42:30.493Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>server提供api服务直接对接前端js, 但是存在跨域问题，本文使用先查询请求过来的host 然后判断主域名是否存在，存在,则在返回头部设置这个请求域名充许跨域访问。<br><a id="more"></a></p>
 <h2 id="u8DE8_u57DF_u6982_u5FF5"><a href="#u8DE8_u57DF_u6982_u5FF5" class="headerlink" title="跨域概念"></a>跨域概念</h2><p>浏览器的同源策略，出于防范跨站脚本的攻击，禁止客户端脚本（如 JavaScript）对不同域的服务进行跨站调用。</p>
@@ -617,7 +661,7 @@
     <link href="http://www.grdtechs.com/2017/01/18/git-submodule/"/>
     <id>http://www.grdtechs.com/2017/01/18/git-submodule/</id>
     <published>2017-01-18T17:11:52.000Z</published>
-    <updated>2017-03-05T15:26:53.758Z</updated>
+    <updated>2017-03-06T16:42:30.493Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>现在golang已经可以通过<code>vendor</code>来管理第三方依赖包了，但是之前的一个老项目用的是<code>git submodule</code>来管理的，但是<code>.gitsubmodule</code>文件中只记录管理了项目的部分依赖包， 需要把还没有被管理的第三包也加上，下面总结使用<code>git submodule</code>的过程。<br><a id="more"></a></p>
 <h2 id="u6DFB_u52A0_u7B2C_u4E09_u65B9_u5305"><a href="#u6DFB_u52A0_u7B2C_u4E09_u65B9_u5305" class="headerlink" title="添加第三方包"></a>添加第三方包</h2><p>为当前工程添加submodule，命令如下：</p>
@@ -657,7 +701,7 @@
     <link href="http://www.grdtechs.com/2017/01/17/http-cache/"/>
     <id>http://www.grdtechs.com/2017/01/17/http-cache/</id>
     <published>2017-01-17T17:54:18.000Z</published>
-    <updated>2017-03-05T15:26:53.762Z</updated>
+    <updated>2017-03-06T16:42:30.497Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>Http缓存机制作为web性能优化的重要手段, 本文对网络中，工作中使用的http缓存知识进行归纳总结。<br><a id="more"></a></p>
 <h2 id="u7F13_u5B58_u5206_u7C7B"><a href="#u7F13_u5B58_u5206_u7C7B" class="headerlink" title="缓存分类"></a>缓存分类</h2><p>缓存分为<code>服务端缓存</code>(server side，比如Nginx、Apache)和<code>客户端缓存</code>(client side，比如 web browser)。</p>
@@ -939,7 +983,7 @@
     <link href="http://www.grdtechs.com/2017/01/16/consistent-hashing-summary/"/>
     <id>http://www.grdtechs.com/2017/01/16/consistent-hashing-summary/</id>
     <published>2017-01-16T11:02:50.000Z</published>
-    <updated>2017-03-05T15:26:53.758Z</updated>
+    <updated>2017-03-06T16:42:30.493Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>存在一种场景, 当一个缓存服务由多个服务器组共同提供时, key应该路由到哪一个服务。这里假如采用最通用的方式取模求余: <code>key%N</code>(N为服务器数目), 这样做均衡性没有什么问题, 但是当服务器数目发送增加或减少时, 分配方式则变为<code>key%(N+1)</code>或<code>key%(N-1)</code>。这里将会有大量的key失效迁移, 如果后端key对应的是有状态的存储数据,那么毫无疑问,这种做法将导致服务器间大量的数据迁移,从而造成服务的不稳定。解决思路，采用一致性哈希方法可以解决此问题。 </p>
 <a id="more"></a>
@@ -1043,7 +1087,7 @@
     <link href="http://www.grdtechs.com/2017/01/14/too-many-open-files-solution/"/>
     <id>http://www.grdtechs.com/2017/01/14/too-many-open-files-solution/</id>
     <published>2017-01-14T10:58:37.000Z</published>
-    <updated>2017-03-05T15:26:53.762Z</updated>
+    <updated>2017-03-06T16:42:30.497Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>运行在Linux系统上的网络程序可能会出现”Too many open files”的异常情况，且常见于高并发访问文件系统，多线程网络连接等场景。<br><a id="more"></a></p>
 <h2 id="u6982_u5FF5"><a href="#u6982_u5FF5" class="headerlink" title="概念"></a>概念</h2><p>程序经常访问的文件、socket等在Linux中都是指的文件file，系统需要记录每个当前访问file的name、location、access authority等相关信息，这样的一个实体被称为file entry。<code>open files table</code>存储这些file entry，以数组的形式线性管理。文件描述符(file descriptor)是作为<code>进程</code>到<code>open files table</code>的指针，也就是<code>open files table</code>的下标索引，将每个进程与它所访问的文件关联起来了。 </p>
@@ -1104,7 +1148,7 @@
     <link href="http://www.grdtechs.com/2017/01/06/go-printf-format/"/>
     <id>http://www.grdtechs.com/2017/01/06/go-printf-format/</id>
     <published>2017-01-06T15:49:13.000Z</published>
-    <updated>2017-03-05T15:26:53.762Z</updated>
+    <updated>2017-03-06T16:42:30.497Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>项目中总是时不时的要使用<code>fmt.Printf</code>或<code>fmt.Sprintf</code>来处理某些数据类型,总结一下常用的标识符用途及场景.</p>
 <a id="more"></a>
@@ -1127,7 +1171,7 @@
     <link href="http://www.grdtechs.com/2016/12/17/go-cache-component/"/>
     <id>http://www.grdtechs.com/2016/12/17/go-cache-component/</id>
     <published>2016-12-17T11:32:51.000Z</published>
-    <updated>2017-03-05T15:26:53.758Z</updated>
+    <updated>2017-03-06T16:42:30.493Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>总结用golang从分析，设计到实现一个可用的缓存组件。<br><a id="more"></a></p>
 <h2 id="u7F13_u5B58"><a href="#u7F13_u5B58" class="headerlink" title="缓存"></a>缓存</h2><ul>
@@ -1223,7 +1267,7 @@
     <link href="http://www.grdtechs.com/2016/11/23/uml-symbol-desc/"/>
     <id>http://www.grdtechs.com/2016/11/23/uml-symbol-desc/</id>
     <published>2016-11-23T11:47:43.000Z</published>
-    <updated>2017-03-05T15:26:53.762Z</updated>
+    <updated>2017-03-06T16:42:30.497Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>在UML的定义中，描述类和对象之间的关系，包括以下几种方式：依赖（<code>Dependency</code>）、关联（<code>Association</code>）、聚合（<code>Aggregation</code>）、组合（<code>Composition</code>）、泛化（<code>Generalization</code>）和实现（<code>Realization</code>）。现分别说明如下：<br><a id="more"></a></p>
 <h2 id="u5B9A_u4E49"><a href="#u5B9A_u4E49" class="headerlink" title="定义"></a>定义</h2><p>类图基本符号可拆分为四类:<code>线</code>(<code>虚线</code>和<code>实线</code>)，<code>箭头</code>，<code>三角</code>(<code>空心右三角</code>和<code>实心右三角</code>)，<code>菱形</code>(<code>空心菱形</code>和<code>实心菱形</code>); 由这些基本的图形进行组合构成了类图的基本符号。这里要注意这几个符号的顺序，代表了类与类之间关系的耦合程度, 越向右耦合度越高。</p>
@@ -1354,7 +1398,7 @@
     <link href="http://www.grdtechs.com/2016/11/23/go-dealwith-database-nullvalue/"/>
     <id>http://www.grdtechs.com/2016/11/23/go-dealwith-database-nullvalue/</id>
     <published>2016-11-23T11:40:54.000Z</published>
-    <updated>2017-03-05T15:26:53.762Z</updated>
+    <updated>2017-03-06T16:42:30.493Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>golang是强类型语言，在赋值和解析过程中需要先定义好数据类型，否在会报类型错误，下面总结在处理数据库表时遇到字段为空或零值的情况<br><a id="more"></a></p>
 <h2 id="u573A_u666F"><a href="#u573A_u666F" class="headerlink" title="场景"></a>场景</h2><p>假如存在如下没有指定<code>not null</code>的场合<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="operator"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> <span class="string">"users"</span> (</span><br><span class="line">    <span class="string">"id"</span> <span class="built_in">serial</span> <span class="keyword">not</span> <span class="literal">null</span> primary <span class="keyword">key</span>,</span><br><span class="line">    <span class="string">"name"</span> <span class="built_in">text</span>,</span><br><span class="line">    <span class="string">"age"</span> <span class="built_in">integer</span></span><br><span class="line">)</span></span><br></pre></td></tr></table></figure></p>
@@ -1383,7 +1427,7 @@
     <link href="http://www.grdtechs.com/2016/11/19/go-install-binaries/"/>
     <id>http://www.grdtechs.com/2016/11/19/go-install-binaries/</id>
     <published>2016-11-19T00:18:37.000Z</published>
-    <updated>2017-03-05T15:26:53.762Z</updated>
+    <updated>2017-03-06T16:42:30.493Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>golang tool chains 提供了很多好用的工具， 但是如果直接安装的话，大多数需要翻墙才能安装， 而且比较麻烦； 本文记录一种不需要翻墙就能顺利安装相应的工具的方法.</p>
 <a id="more"></a>
@@ -1417,7 +1461,7 @@
     <link href="http://www.grdtechs.com/2016/11/11/go-use-mysql/"/>
     <id>http://www.grdtechs.com/2016/11/11/go-use-mysql/</id>
     <published>2016-11-11T13:21:16.000Z</published>
-    <updated>2017-03-05T15:26:53.762Z</updated>
+    <updated>2017-03-06T16:42:30.497Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>Golang 提供了<code>database/sql</code>包用于对<code>SQL数据库</code>的访问, 作为操作数据库的入口对象<code>sql.DB</code>, 主要为我们提供了两个重要的功能:<br><a id="more"></a></p>
 <ul>
@@ -1511,7 +1555,7 @@
     <link href="http://www.grdtechs.com/2016/10/23/go-build-small-exec/"/>
     <id>http://www.grdtechs.com/2016/10/23/go-build-small-exec/</id>
     <published>2016-10-23T14:00:32.000Z</published>
-    <updated>2017-03-05T15:26:53.758Z</updated>
+    <updated>2017-03-06T16:42:30.493Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>尽管go1.7.3编译生成的可执行程序已经很小了,但是通过编译参数控制还能编译出更小的可执行文件，总结如下,<br><a id="more"></a></p>
 <h2 id="u52A0-ldflags_u53C2_u6570"><a href="#u52A0-ldflags_u53C2_u6570" class="headerlink" title="加-ldflags参数"></a>加-ldflags参数</h2><p>在程序编译的时候可以加上<code>-ldflags &quot;-s -w&quot;</code> 参数来优化编译程序, 其实通过去除部分连接和调试等信息来使得编译之后的执行程序更小,具体参数如下:</p>
@@ -1549,7 +1593,7 @@
     <link href="http://www.grdtechs.com/2016/10/16/mac-update-vim8-0/"/>
     <id>http://www.grdtechs.com/2016/10/16/mac-update-vim8-0/</id>
     <published>2016-10-16T23:08:56.000Z</published>
-    <updated>2017-03-05T15:26:53.762Z</updated>
+    <updated>2017-03-06T16:42:30.497Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>将mac自带的vim7.3 升级到vim8.0<br><a id="more"></a></p>
 <h2 id="u5347_u7EA7vim8-0"><a href="#u5347_u7EA7vim8-0" class="headerlink" title="升级vim8.0"></a>升级vim8.0</h2><ul>
@@ -1607,7 +1651,7 @@
     <link href="http://www.grdtechs.com/2016/10/16/close-ticker-correctly/"/>
     <id>http://www.grdtechs.com/2016/10/16/close-ticker-correctly/</id>
     <published>2016-10-16T14:27:39.000Z</published>
-    <updated>2017-03-05T15:26:53.758Z</updated>
+    <updated>2017-03-06T16:42:30.493Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>在<code>ticker</code>和<code>goroutine</code>组合使用中当调用<code>ticker.Stop()</code>关闭<code>ticker</code>之后，相应的<code>goroutine</code>中的<code>ticker.C</code>并没有停掉，下面总结一种优雅的方式关闭<code>ticker</code>.<br><a id="more"></a></p>
 <h2 id="u4F18_u96C5_u7684_u5173_u95EDticker"><a href="#u4F18_u96C5_u7684_u5173_u95EDticker" class="headerlink" title="优雅的关闭ticker"></a>优雅的关闭<code>ticker</code></h2><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">"fmt"</span></span><br><span class="line">	<span class="string">"time"</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> main() &#123;</span><br><span class="line">	Demo()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> Demo() &#123;</span><br><span class="line">	done := startTicker(PrintInfo)</span><br><span class="line">	time.Sleep(time.Duration(<span class="number">12</span>) * time.Second)</span><br><span class="line">	<span class="built_in">close</span>(done)</span><br><span class="line">	time.Sleep(time.Duration(<span class="number">1</span>) * time.Minute)</span><br><span class="line">	fmt.Println(<span class="string">"main finished"</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> startTicker(f <span class="keyword">func</span>()) <span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125; &#123;</span><br><span class="line">	done := <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;, <span class="number">1</span>)</span><br><span class="line">	<span class="keyword">go</span> <span class="keyword">func</span>() &#123;</span><br><span class="line">		ticker := time.NewTicker(<span class="number">5</span> * time.Second)</span><br><span class="line">		<span class="comment">//	ticker := time.NewTicker(5 * time.Minute)</span></span><br><span class="line">		<span class="keyword">defer</span> ticker.Stop()</span><br><span class="line"></span><br><span class="line">		<span class="keyword">for</span> &#123;</span><br><span class="line">			<span class="keyword">select</span> &#123;</span><br><span class="line">			<span class="keyword">case</span> &lt;-ticker.C:</span><br><span class="line">				f()</span><br><span class="line">			<span class="keyword">case</span> &lt;-done:</span><br><span class="line">				<span class="keyword">return</span></span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;()</span><br><span class="line">	<span class="keyword">return</span> done</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> PrintInfo() &#123;</span><br><span class="line">	fmt.Println(<span class="string">"hello"</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -1632,7 +1676,7 @@
     <link href="http://www.grdtechs.com/2016/09/07/go-postform/"/>
     <id>http://www.grdtechs.com/2016/09/07/go-postform/</id>
     <published>2016-09-07T16:00:32.000Z</published>
-    <updated>2017-03-05T15:26:53.762Z</updated>
+    <updated>2017-03-06T16:42:30.497Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>golang这边将<code>map</code>结构序列化通常采用<code>json.Marshal</code>和<code>json.Unmarshal</code>来做，但是在php server端还需要做<code>json</code>反序列化解析才能用， 用golang模拟表单提交, php server端则非常方便提取相应的数据字段.<br><a id="more"></a></p>
 <h2 id="u65B9_u6CD5"><a href="#u65B9_u6CD5" class="headerlink" title="方法"></a>方法</h2><p>方法是利用golang<code>net/http</code>包提供的<code>PostForm</code>提交post表单提交。<code>ParseForm</code>解析<code>URL</code>中的查询字符串，并将解析结果更新到<code>r.Form</code>字段。对于<code>POST</code>或<code>PUT</code>请求，<code>ParseForm</code>还会将<code>body</code>当作表单解析，并将结果既更新到<code>r.PostForm</code>也更新到<code>r.Form</code>。解析结果中，<code>POST</code>或<code>PUT</code>请求主体要优先于<code>URL</code>查询字符串（同名变量，主体的值在查询字符串的值前面）。如果请求的主体的大小没有被<code>MaxBytesReader</code>函数设定限制，其大小默认限制为开头10MB。</p>
