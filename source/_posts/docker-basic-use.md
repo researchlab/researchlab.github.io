@@ -81,7 +81,7 @@ c1760b8f9359        nginx               "nginx -g 'daemon ..."   3 hours ago    
 
 <center>![webserver-nginx](imgs/hi-nginx.png)</center>
 
-可以通过docker stats命令查看当前所有container的运行状态,
+可以通过`docker stats`命令查看当前所有container的运行状态,`docker stats` 可以查看到运行状态容器的CPU，内存及网络使用率。在实际工作中，我们通常会把这个命令的输出连接到类似Logstash一类的服务用来分析。
 ```bash
 ➜  ~ docker stats
 CONTAINER           CPU %               MEM USAGE / LIMIT       MEM %               NET I/O             BLOCK I/O           PIDS
@@ -89,8 +89,10 @@ c1760b8f9359        0.00%               1.859 MiB / 1.952 GiB   0.09%           
 CONTAINER           CPU %               MEM USAGE / LIMIT       MEM %               NET I/O             BLOCK I/O           PIDS
 c1760b8f9359        0.00%               1.859 MiB / 1.952 GiB   0.09%               16.1 kB / 4.58 kB   0 B / 0 B           2
 ```
-## 创建docker应用
 
+这个命令的输出是实时刷新的(类似Linux上的top命令），如果需要退出可以使用`Ctrl-C`组合键。
+
+## 创建docker应用
 ** 需求描述 **
 
 Docker 安装后，下面来创建第一个Docker 应用。这个应用很简单，作用就是输出一句 HelloWorld!。
@@ -129,7 +131,7 @@ CONTAINER ID        IMAGE               COMMAND                  CREATED        
 ## 容器管理
 上面通过docker run 命令在指定的镜像中运行一个容器，然后在容器中执行我们的应用程序，下面通过实践来了解docker容器管理中最常用的几个命令,
 
-** docker run **
+** 1. 创建运行并容器: docker run **
 
 最主要的是创建运行容器的命令`docker run`，这个命令的参数非常多，可以通过`docker run --help` 查看。
 继续上一节实验，echo 命令运行后容器就退出了，如果我们需要一个保持运行的容器呢，最简单的方法就是给这个容器一个可以保持的应用，比如bash，运行 ubuntu 容器并进入容器的 bash：
@@ -175,26 +177,52 @@ root@65fc97a6b032:/#
 ```
 ** 注意** ：命令后面的参数是容器的ID，并不需要输入完整的数字，只要能唯一定位这个容器即可，通常输入4位就足够了。
 
-** docker ps **
+`docker run`命令的执行分一下几步，
+1.查找镜像或下载镜像
+2.创建容器
+3.分配文件系统及虚拟网络（网桥，接口，IP地址），其中容器中的DNS默认挂载宿主机的`/etc/resolve.conf`和`/etc/hosts`。
+4.执行应用, 默认执行镜像中指定的`Cmd`参数，也可以在`docker run`后面跟应用来覆盖`Cmd`命令。
 
-`docker ps`命令用来查看正在运行的容器,几个最常用的参数：
+如果容器中的应用执行完成, 则容器进入到终止状态。
+
+`docker run`的参数非常多, 假设按如下容器配置设定创建新容器,
+
+- 设置容器名称 bash（使用--name，如果不加该参数，Docker会随机产生一个名字）。
+- 设置容器的主机名 bashHost(使用--hostname参数）
+- 设定网络信息，这里只使用一个简单的参数设置MAC地址（--mac-address参数）
+- 设置资源限制，设置容器中最大的进程数，包括soft和hard两个限制值（使用-ulimit nproc=...等参数）
+- 创建容器过程中也可以挂载数据卷，数据卷在下一节实验中会详细介绍。这里不过多涉及。
+
+根据上述的需求我们通过查询`docker run --help`, 使用相关参数, 创建符合要求的容器,
+```bash
+➜  helloworldimage docker run --name bash --hostname bashHost --mac-address 00:01:02:03:04:05 --ulimit nproc=1024:2048 -t -i ubuntu /bin/bash
+```
+进入容器中我们可以对一些参数进行验证,
+```bash
+➜  helloworldimage docker run --name bash --hostname bashHost --mac-address 00:01:02:03:04:05 --ulimit nproc=1024:2048 -t -i ubuntu /bin/bash
+root@bashHost:/# hostname
+bashHost
+root@bashHost:/# ulimit
+unlimited
+root@bashHost:/# % 
+➜  helloworldimage docker inspect -f '{{.HostConfig.Ulimits}}' bash
+[nproc=1024:2048]
+```
+注，容器中的 ulimit 不会有任何输出，查看实际的ulimit信息可以在宿主机上使用docker inspect查看,
+
+** 2. 查看容器列表: docker ps **
+
+`docker ps`命令用来查看正在运行的容器信息,几个最常用的参数：
 `-a`：查看所有容器，含停止运行的
 `-l`：查看刚启动的容器
 `-q`：只显示容器ID
 
 例如查看所有容器的ID列表,则执行`docker ps -a -q`命令即可。
 
-** docker start **
+** 3. 查看容器详细信息: docker inspect **
 
-docker start 启动容器，此处我们尝试启动先前的运行/bin/bash的容器,
-```bash
-docker start 65fc
-```
-通过`docker start`启动容器之后， 可以通过`docker attach`命令直接进入到该容器中, 如果要停止正在运行的容器则可用`docker stop`命令，如果要重启则用`docker restart`命令即可。
-
-** docker inspect **
-
-查看Docker容器或镜像的一些内部信息, 如启动并查看`/bin/bash `容器,
+docker inspect 查看容器的细节信息，包括创建时间，操作命令，端口映射信息，IP地址等等。
+查看Docker容器或镜像的一些内部信息, 默认输出JSON格式的信息，可以通过-f指定输出的项目。 如启动并查看`/bin/bash `容器,
 ```bash
 ➜  ~ docker start 65fc
 65fc
@@ -206,20 +234,175 @@ docker start 65fc
         "Path": "/bin/bash",
         "Args": [],
 .....
+➜  helloworldimage docker ps -a
+CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS               NAMES
+d3efa7a729ba        ubuntu              "/bin/bash -c 'whi..."   4 hours ago         Up 6 minutes                            bash
+➜  helloworldimage docker inspect -f '{{.NetworkSettings.IPAddress}}' d3ef
+172.17.0.2
+➜  helloworldimage docker inspect -f '{{.NetworkSettings.Gateway}}' bash
+172.17.0.1
 ```
 返回的信息非常多，是JSON格式，每一项内容具体含义本节不做详细介绍，可以参考官方文档。
+上述命令中我们查看了网络配置信息中的IP地址和Gateway地址。
 
-** docker rm **
-
-删除容器操作。该命令默认不可以删除运行的容器，但提供了强制删除的参数`-f`，
-
-** docker top **
+** 4. 查看容器内进程信息: docker top **
 
 查看容器中运行的进程信息，显示容器中进程的PID，UID，PPID，时间，tty等信息,
 ```bash
 ➜  ~ docker top 65fc
 PID                 USER                TIME                COMMAND
 3073                root                0:00                /bin/bash
+```
+
+** 5. 查看容器输出信息: docker logs **
+获取容器的输出信息可以使用`docker logs`命令，使用`docker attach` 回到刚才创建的`/bin/bash容器`中，写一个循环输出信息的脚本，然后再使用`Ctrl-P Ctrl-Q`组合键退出。
+```bash
+➜  helloworldimage docker run -t -i --name bash ubuntu /bin/bash -c "while true; do echo 'Hello world'; sleep 1; done"
+```
+在宿主机的终端中，我们可以用`docker logs`命令查看输出信息。
+```bash 
+➜  helloworldimage docker logs bash
+Hello world
+Hello world
+Hello world
+```
+`docker logs`只会显示截止到当前的所有输出，如果想动态查看实时输出，也可以加`-f`参数，类似`tail`命令
+
+** 6. 查看容器中的修改: docker diff **
+
+`docker diff` 查看容器中对镜像做了哪些变化。
+
+先执行`docker diff` 查看现有的容器中的变化，发现没有任何文件变化, 连接到容器内部，`Ctrl-C`中断先前实验的死循环,再创建几个文件,退出到宿主机,再次使用docker diff命令查看是否有新的修改
+```bash
+➜  helloworldimage docker diff bash
+➜  helloworldimage docker attach bash
+root@efb833099bb1:/#
+root@efb833099bb1:/# cd tmp/
+root@efb833099bb1:/tmp# touch s{1,2,3}
+root@efb833099bb1:/tmp# %                                                                                             ➜  helloworldimage docker diff bash
+C /tmp
+A /tmp/s1
+A /tmp/s2
+A /tmp/s3
+➜  helloworldimage docker attach bash
+root@efb833099bb1:/tmp#
+root@efb833099bb1:/tmp# rm s1
+root@efb833099bb1:/tmp# %                                                                                             ➜  helloworldimage docker diff bash
+C /tmp
+A /tmp/s2
+A /tmp/s3
+```
+
+输出的信息中`A` 表示添加，后面的三个新建文件的路径。可以尝试下修改或删除文件会有怎样的diff输出。
+
+** 7. 容器的守护状态 **
+
+首先需要了解的概念是容器的守护状态，类似于守护进程，需要为`run`命令增加参数`-d`，此时容器在后台以守护状态(Daemonized)形式运行。
+
+创建一个守护状态的容器,
+```bash
+➜  docker run --name bash -d ubuntu /bin/bash -c "while true; do echo 'Hello world'; sleep 1; done"
+```
+会启动一个守护状态的容器在后台运行, 使用`docker attach` 登录上去可以看到循环输出Hello world 的字符串。
+
+** 8. 停止容器: docker stop **
+
+停止运行状态的容器，进入到终止状态。停止状态的容器可以通过 docker ps -a 查看到。
+
+首先使用 `docker stop container` 命令停止名称为container的容器,然后使用docker ps -a 查看容器状态，
+
+** 9. 启动容器: docker start **
+
+启动停止状态的容器。再次启动名称为container的容器,
+```bash 
+docker start container
+```
+
+** 10. 重启容器: docker restart **
+
+可以将运行状态的容器终止，然后重新启动。
+```bash 
+docker restart container
+```
+
+** 11. 杀死容器: docker kill **
+
+跟进程相同，有的时候正常的终止操作不起作用时，需要使用`kill`命令杀死进程，在`docker kill`可以处理异常的运行状态的容器，强制退出, 杀死名为`container`的容器命令,
+```bash
+docker kill container
+```
+
+** 12. 暂停和恢复容器: docker pause/unpause **
+
+类似Windows操作系统的睡眠，我们可以先临时将容器的运行挂起，不再使用CPU资源，当需要的时候再恢复成正常的运行状态。
+先启动容器, 再执行pause操作, 再unpause恢复,
+```bash 
+docker start container 
+docker pause container 
+docker unpause container 
+```
+
+** 13. 删除容器: docker rm **
+
+当一个容器不再需要时，我们可以删除这个容器。对于停止的容器直接执行`docker rm 容器ID`, 对于运行状态的容器也可以执行`docker rm -f 容器ID强制删除`。
+
+导出和导入容器操作可以将容器导出到压缩包，并可将压缩包导入到Docker系统中成为镜像，为容器的迁移和镜像的制作提供支持。
+
+** 14. 容器导出: docker export **
+
+导出容器快照到本地的tar包。导出后的文件可以拷贝到其他`Docker服务器`上执行导入命令形成新的镜像，下面选择导出刚才建立的容器new_container到到tar包, 保存到当前目录, 具体命令如下,
+```bash
+  helloworldimage docker run --name new_container -t -i ubuntu /bin/bash
+  root@6c8edd28ad65:/# cd tmp/
+  root@6c8edd28ad65:/tmp# touch s{1,2,3}
+  root@6c8edd28ad65:/tmp# ls
+  s1  s2  s3
+  root@6c8edd28ad65:/tmp# %                                                                                             ➜  helloworldimage docker diff new_container
+  C /tmp
+  A /tmp/s1
+  A /tmp/s2
+  A /tmp/s3
+  ➜  helloworldimage docker ps -a
+  CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
+  6c8edd28ad65        ubuntu              "/bin/bash"         4 hours ago         Up 44 seconds                           new_container
+  ➜  helloworldimage docker export 6c8e > new_container.tar
+  ➜  helloworldimage ls
+  Dockerfile        new_container.tar
+  ```
+
+  > 需要注意的是，当容器导出后，容器仍然在Docker环境中运行，只是拷贝了一份内容到tar包。
+
+**  15. 容器导入: docker import **
+
+执行导入命令，将该文件加载到docker系统中，文件加载后会成为镜像，命令执行时需要制定导入后生成的镜像的名字,
+```bash 
+cat new_container.tar | docker import new_container:1.0
+```
+执行导入后，使用docker images 查看是否有新的镜像产生,
+```bash
+➜  helloworldimage docker images
+REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
+nginx               latest              6b914bbcb89e        6 days ago          182 MB
+ubuntu              latest              0ef2e08ed3fa        6 days ago          130 MB
+busybox             latest              7968321274dc        7 weeks ago         1.11 MB
+➜  helloworldimage cat new_container.tar| docker import - new_container:1.0
+sha256:dd10880b0d88c4d4159c3c29c034d46dc52c5d8d9d52ee5385aff687d0967216
+➜  helloworldimage docker images
+REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
+new_container       1.0                 dd10880b0d88        4 hours ago         111 MB
+nginx               latest              6b914bbcb89e        6 days ago          182 MB
+ubuntu              latest              0ef2e08ed3fa        6 days ago          130 MB
+busybox             latest              7968321274dc        7 weeks ago         1.11 MB
+```
+docker import 命令比较灵活，也可以直接从URL链接进行导入。所以可以记住这是一种创建镜像的方式，将容器导出后拷贝到目标服务器然后导入成镜像。
+
+使用新镜像创建容器，查看是否与导出的容器内容一致,
+```bash 
+➜  helloworldimage docker run --name new_new_container -t -i new_container:1.0 /bin/bash
+root@eeef608f020b:/# cd tmp/
+root@eeef608f020b:/tmp# ls
+s1  s2  s3
+root@eeef608f020b:/tmp#
 ```
 
 ## 镜像管理
