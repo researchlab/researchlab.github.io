@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://www.grdtechs.com/"/>
-  <updated>2017-03-06T16:42:30.493Z</updated>
+  <updated>2017-03-06T17:36:59.642Z</updated>
   <id>http://www.grdtechs.com/</id>
   
   <author>
@@ -16,11 +16,62 @@
   <generator uri="http://hexo.io/">Hexo</generator>
   
   <entry>
+    <title>docker实践--02 数据卷管理</title>
+    <link href="http://www.grdtechs.com/2017/03/05/docker-data-volume/"/>
+    <id>http://www.grdtechs.com/2017/03/05/docker-data-volume/</id>
+    <published>2017-03-05T00:44:31.000Z</published>
+    <updated>2017-03-06T17:36:59.642Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>Docker中的数据可以存储在类似于虚拟机磁盘的介质中，在Docker中称为<code>数据卷</code>(Data Volume)。数据卷可以用来存储Docker应用的数据，也可以用来在Docker容器间进行数据共享。数据卷呈现给Docker容器的形式就是一个目录，支持多个容器间共享，修改也不会影响镜像。使用Docker的数据卷，类似在系统中使用<code>mount</code> 挂载一个文件系统。<br><a id="more"></a></p>
+<h2 id="u521B_u5EFA_u6570_u636E_u5377"><a href="#u521B_u5EFA_u6570_u636E_u5377" class="headerlink" title="创建数据卷"></a>创建数据卷</h2><p>利用<code>docker run</code>创建容器时, 添加<code>-v</code>参数, 就可以创建并挂载一个到多个数据卷到当前运行的容器中，<code>-v</code>参数的作用是将宿主机的一个目录作为容器的数据卷挂载到容器中，使宿主机和容器之间可以共享一个目录，如果本地路径不存在，Docker也会自动创建。</p>
+<p>下面就通过挂载2个数据卷到新创建的容器上来操作一下,<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 创建两个目录</span></span><br><span class="line">➜  mkdir /tmp/data&#123;<span class="number">1</span>,<span class="number">2</span>&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 分别将两个目录挂载到新创建的data容器上</span></span><br><span class="line">➜  docker run -t -i --name data -v /tmp/data1:/data1 -v /tmp/data2:/data2 ubuntu /bin/bash</span><br></pre></td></tr></table></figure></p>
+<p>上述命令中 -v 参数可以使用多次，并挂在多个数据卷到容器中。后面的参数信息中冒号前面是宿主机的本地目录，冒号后面是容器中的挂载目录, 结果如下,<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">➜  mkdir /tmp/data&#123;<span class="number">1</span>,<span class="number">2</span>&#125;</span><br><span class="line">➜  docker run -t -i --name data -v /tmp/data1:/data1 -v /tmp/data2:/data2 ubuntu /bin/bash</span><br><span class="line">root@<span class="number">8</span>a8754728a1c:/<span class="comment"># ls</span></span><br><span class="line">bin  boot  data1  data2  dev  etc  home  lib  lib64  media  mnt  opt  proc  root  run  sbin  srv  sys  tmp  usr  var</span><br><span class="line">root@<span class="number">8</span>a8754728a1c:/<span class="comment"># mount | grep data</span></span><br><span class="line">osxfs on /data1 <span class="built_in">type</span> fuse.osxfs (rw,nosuid,nodev,relatime,user_id=<span class="number">0</span>,group_id=<span class="number">0</span>,allow_other,max_<span class="built_in">read</span>=<span class="number">1048576</span>)</span><br><span class="line">osxfs on /data2 <span class="built_in">type</span> fuse.osxfs (rw,nosuid,nodev,relatime,user_id=<span class="number">0</span>,group_id=<span class="number">0</span>,allow_other,max_<span class="built_in">read</span>=<span class="number">1048576</span>)</span><br><span class="line">/dev/vda1 on /etc/resolv.conf <span class="built_in">type</span> ext4 (rw,relatime,data=ordered)</span><br><span class="line">/dev/vda1 on /etc/hostname <span class="built_in">type</span> ext4 (rw,relatime,data=ordered)</span><br><span class="line">/dev/vda1 on /etc/hosts <span class="built_in">type</span> ext4 (rw,relatime,data=ordered)</span><br><span class="line">root@<span class="number">8</span>a8754728a1c:/<span class="comment"># ls -l data*</span></span><br><span class="line">data1:</span><br><span class="line">total <span class="number">0</span></span><br><span class="line"></span><br><span class="line">data2:</span><br><span class="line">total <span class="number">0</span></span><br><span class="line">root@<span class="number">8</span>a8754728a1c:/<span class="comment">#</span></span><br></pre></td></tr></table></figure></p>
+<p>进入容器后我们可以查看和使用容器卷，尝试向这个容器卷中写入数据，然后在宿主机中查看是否存在,<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">root@<span class="number">8</span>a8754728a1c:/<span class="comment"># touch /data1/test1</span></span><br><span class="line">root@<span class="number">8</span>a8754728a1c:/<span class="comment"># touch /data2/test2</span></span><br><span class="line">root@<span class="number">8</span>a8754728a1c:/<span class="comment"># %                                                                                                ➜  helloworldimage ls /tmp/data1/test1</span></span><br><span class="line">➜  helloworldimage <span class="built_in">cd</span> /tmp/data2/<span class="built_in">test</span>2</span><br><span class="line"><span class="built_in">cd</span>: not a directory: /tmp/data2/<span class="built_in">test</span>2</span><br><span class="line">➜  helloworldimage <span class="built_in">cd</span> /tmp/data2</span><br><span class="line">➜  data2 ls</span><br><span class="line"><span class="built_in">test</span>2</span><br></pre></td></tr></table></figure></p>
+<p>可以看到容器中挂载的数据卷具备可写权限，那么如何对数据卷的权限进行管理呢？比如如何创建一个只读的数据卷呢？</p>
+<h2 id="u7BA1_u7406_u6570_u636E_u5377_u6743_u9650"><a href="#u7BA1_u7406_u6570_u636E_u5377_u6743_u9650" class="headerlink" title="管理数据卷权限"></a>管理数据卷权限</h2><p>挂载的数据卷默认为可读写权限，除非外部文件系统做了特殊限制，在<code>docker run</code>时也可以执行为只读权限,<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 创建一个数据卷目录</span></span><br><span class="line">➜  mkdir /tmp/readonlydata</span><br><span class="line"><span class="comment"># 以只读的方式挂载到data容器上</span></span><br><span class="line">➜  docker run -t -i --name data -v /tmp/readonlydata:/rodata:ro ubuntu /bin/bash</span><br></pre></td></tr></table></figure></p>
+<p>上面的命令中参数很简单, <code>ro</code>表示<code>readonly</code>, 挂载后的数据卷就是只读权限了, 此时再次尝试向数据卷中写入,<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">t@ad5299bae606:/<span class="comment"># mount | grep rodata</span></span><br><span class="line">osxfs on /rodata <span class="built_in">type</span> fuse.osxfs (ro,relatime,user_id=<span class="number">0</span>,group_id=<span class="number">0</span>,allow_other,max_<span class="built_in">read</span>=<span class="number">1048576</span>)</span><br><span class="line">root@ad5299bae606:/<span class="comment"># ls -l /rodata/</span></span><br><span class="line">total <span class="number">0</span></span><br><span class="line">root@ad5299bae606:/<span class="comment"># touch /rodata/readonlydatafile</span></span><br><span class="line">touch: cannot touch <span class="string">'/rodata/readonlydatafile'</span>: Read-only file system</span><br></pre></td></tr></table></figure></p>
+<p>除了可以挂载目录之外，文件也可以作为数据卷挂载到容器中。</p>
+<h2 id="u6302_u8F7D_u5BBF_u4E3B_u673A_u6587_u4EF6"><a href="#u6302_u8F7D_u5BBF_u4E3B_u673A_u6587_u4EF6" class="headerlink" title="挂载宿主机文件"></a>挂载宿主机文件</h2><p>如果想让所有的容器都可以共享宿主机的/etc/apt/sources.list，从而只需要改变宿主机的apt源就能够影响到所有的容器。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -t -i --name file -v /etc/apt/sources.list:/etc/apt/sources.list:ro ubuntu /bin/bash</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>此命令适合linux系统中执行，在mac os中无/etc/apt/sources.list文件</p>
+</blockquote>
+<p>如果想共享一个数据卷给多个容器怎么办，比如设想一个场景，我们有两个处理上传数据的应用运行在不同的容器中，但需要同时读取同一个文件夹下的文件，此时，最好的方式是使用数据卷容器。</p>
+<h2 id="u4F7F_u7528_u6570_u636E_u5377_u5BB9_u5668_u5171_u4EAB_u6570_u636E"><a href="#u4F7F_u7528_u6570_u636E_u5377_u5BB9_u5668_u5171_u4EAB_u6570_u636E" class="headerlink" title="使用数据卷容器共享数据"></a>使用数据卷容器共享数据</h2><p>如果需要在多个容器间共享数据，并希望永久保存这些数据，最好的方式是使用数据卷容器，类似于一个提供网络文件共享服务的NFS服务器。</p>
+<p>数据卷容器创建方法跟普通容器一样，只需要指定宿主机的一个文件夹作为数据卷即可，使用<code>docker create</code>命令创建但不启动数据卷容器,<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">➜ docker create -v /sharedb --name sharedb ubuntu /bin/<span class="literal">true</span></span><br><span class="line">b73abf556db4e76edc79bb7514cfa4067fd891ffb4d26105eec32ab612b83d78</span><br><span class="line">➜ docker ps</span><br><span class="line">dCONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES</span><br><span class="line">➜ docker ps <span class="operator">-a</span></span><br><span class="line">CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES</span><br><span class="line">b73abf556db4        ubuntu              <span class="string">"/bin/true"</span>         <span class="number">4</span> hours ago         Created                                 sharedb</span><br></pre></td></tr></table></figure></p>
+<p>其他使用该数据卷容器的容器创建时候需要使用<code>--volumes-from</code>参数，指定该容器名称或ID,<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run --volumes-from sharedb...</span><br></pre></td></tr></table></figure></p>
+<p>创建site1和site2两个容器挂载数据卷容器sharedb,<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#10140;  ~ docker run --volumes-from sharedb --name site1 -t -i ubuntu /bin/bash&#10;root@e0984656600a:/# %                                                                                                &#10140;  ~ docker run --volumes-from sharedb --name site2 -t -i ubuntu /bin/bash&#10;root@7bf4a2ebe458:/# %                                                                                                &#10140;  ~ docker attach site1&#10;root@e0984656600a:/#&#10;root@e0984656600a:/# ls -l /sharedb/&#10;total 0&#10;root@e0984656600a:/# touch /sharedb/site1file&#10;root@e0984656600a:/# %                                                                                                &#10140;  ~ docker attach site2&#10;root@7bf4a2ebe458:/#&#10;root@7bf4a2ebe458:/# ls -l /sharedb/&#10;total 0&#10;-rw-r--r-- 1 root root 0 Mar  6 13:01 site1file&#10;root@7bf4a2ebe458:/# touch /sharedb/fromsite2file&#10;root@7bf4a2ebe458:/# %                                                                                                &#10140;  ~ docker attach site1&#10;root@e0984656600a:/#&#10;root@e0984656600a:/# ls /sharedb/&#10;fromsite2file  site1file&#10;root@e0984656600a:/#</span><br></pre></td></tr></table></figure></p>
+<p>上面通过连接到这两个容器中对数据卷进行操作，并查看彼此之间已经有了共享文件。</p>
+<h2 id="u6570_u636E_u5377_u5907_u4EFD"><a href="#u6570_u636E_u5377_u5907_u4EFD" class="headerlink" title="数据卷备份"></a>数据卷备份</h2><p>既然可以利用数据卷容器共享数据， 那如何备份这些共享数据呢？下面通过一个完整的案例来操作如何进行数据卷备份，</p>
+<p>1.创建一个新的容器<br>2.挂载数据卷容器<br>3.挂载宿主机本地目录作为数据卷<br>4.将数据卷容器的内容备份到宿主机本地目录挂载的数据卷中<br>5.完成备份操作后容器销毁</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">➜  ~ docker run --rm --volumes-from sharedb -v /tmp/backup:/backup ubuntu tar cvf /backup/sharedb.tar /sharedb</span><br><span class="line">tar: Removing leading `/<span class="string">' from member names</span><br><span class="line">/sharedb/</span><br><span class="line">/sharedb/fromsite2_file</span><br><span class="line">/sharedb/fromsite1_file</span><br><span class="line">/sharedb/fromsite2file</span><br><span class="line">/sharedb/site1file</span><br><span class="line">➜  ~ docker ps</span><br><span class="line">CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES</span><br><span class="line">2207035e4d5c        ubuntu              "/bin/bash"         4 hours ago         Up 2 minutes                            site2</span><br><span class="line">350af1aa2bc6        ubuntu              "/bin/bash"         4 hours ago         Up 3 minutes                            site1</span><br><span class="line">➜  ~ ls /tmp/backup/sharedb.tar</span></span><br></pre></td></tr></table></figure>
+<h2 id="u603B_u7ED3"><a href="#u603B_u7ED3" class="headerlink" title="总结"></a>总结</h2><ul>
+<li>创建数据卷</li>
+<li>管理数据卷权限</li>
+<li>挂载宿主机文件</li>
+<li>使用数据卷容器共享数据</li>
+<li>数据卷备份</li>
+</ul>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;u524D_u8A00&quot;&gt;&lt;a href=&quot;#u524D_u8A00&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h2&gt;&lt;p&gt;Docker中的数据可以存储在类似于虚拟机磁盘的介质中，在Docker中称为&lt;code&gt;数据卷&lt;/code&gt;(Data Volume)。数据卷可以用来存储Docker应用的数据，也可以用来在Docker容器间进行数据共享。数据卷呈现给Docker容器的形式就是一个目录，支持多个容器间共享，修改也不会影响镜像。使用Docker的数据卷，类似在系统中使用&lt;code&gt;mount&lt;/code&gt; 挂载一个文件系统。&lt;br&gt;
+    
+    </summary>
+    
+      <category term="docker-practice" scheme="http://www.grdtechs.com/categories/docker-practice/"/>
+    
+    
+      <category term="docker" scheme="http://www.grdtechs.com/tags/docker/"/>
+    
+  </entry>
+  
+  <entry>
     <title>docker实践--01 创建docker应用</title>
     <link href="http://www.grdtechs.com/2017/03/04/docker-basic-use/"/>
     <id>http://www.grdtechs.com/2017/03/04/docker-basic-use/</id>
     <published>2017-03-04T09:05:58.000Z</published>
-    <updated>2017-03-06T16:42:30.493Z</updated>
+    <updated>2017-03-06T17:36:59.642Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>很早就使用docker了，只是工作上一直没用起来， 加之工作多/杂，就只是断断续续自己瞎折腾，现在打算系统的整理总结一下docker使用经历，这个第一篇主要总结一下几个方面，<br><a id="more"></a></p>
 <ul>
@@ -170,7 +221,7 @@
     <link href="http://www.grdtechs.com/2017/03/02/redispool-baseon-fzzy-radix/"/>
     <id>http://www.grdtechs.com/2017/03/02/redispool-baseon-fzzy-radix/</id>
     <published>2017-03-02T14:42:42.000Z</published>
-    <updated>2017-03-06T16:42:30.497Z</updated>
+    <updated>2017-03-06T17:36:59.642Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>之前的老项目的redis client sdk 直接大名鼎鼎的<code>github.com/fzzy/radix</code>提供的<code>redis client</code> 和<code>redis pool</code>, 当访问峰值达到一定的值后会出现<code>too many open files</code>等tcp连接错误，同时也没有直接提供authorization 密钥认证的接口，为满足这些新需求基于<code>fzzy/radix</code>封装出的新的<code>redispool</code>, 已投入生产使用半年来暂无问题，本文总结如下,<br><a id="more"></a></p>
 <h2 id="auth_u8BA4_u8BC1"><a href="#auth_u8BA4_u8BC1" class="headerlink" title="auth认证"></a>auth认证</h2><p>如果redis server 需要密钥访问的话，每新建一个client 连接后都需要先通过authorization认证之后才能被使用，如果每次都通过新建一个redis client 再oauth认证来用显然没什么问题，但对于要频繁进行redis操作的系统而言，最好采用redis pool 的办法来解决，用redis conn 池本来也很好解决， 就是在新建redis conn pool时 每新建一个redis client就auth认证一下然后再保存起来就可以使用了，并且这个连接以后都不需要在进行auth认证了。<br>如果redis pool在新建之后就固定的话， 是可以如上面这么简单的，但是采用的<code>fzzy/radix</code>包在实现的方案是可根据需要自动伸缩地新建redis client conn,之前设置的redis 连接池的大小其实是最小的空闲连接池，当业务需求需要的redis client连接数大于pool中的数目时则会通过redis.Dial()的方法新建一个redis client conn 以满足业务的需求，即在建立redis连接池的时候auth认证的redis client conn 和最后回到pool池中的redis client conn 可能就不是同一个client了，因为当新的redis client conn 塞满redis 连接池后 之前auth认证过的旧的redis client conn就会被Close关闭到而不再回到pool池中，具体实现如下:<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">func</span> (p *RedisPool) getRedisClient() (*redis.Client, error) &#123;</span><br><span class="line">	client, err := redis.Dial(p.network, p.addr)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="constant">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="constant">nil</span>, err</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> <span class="built_in">len</span>(p.pwd) != <span class="number">0</span> &#123;</span><br><span class="line">		<span class="keyword">if</span> client, err = p.redisAuth(client); err != <span class="constant">nil</span> &#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="constant">nil</span>, err</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> client, <span class="constant">nil</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> (p *RedisPool) redisAuth(client *redis.Client) (*redis.Client, error) &#123;</span><br><span class="line">	<span class="keyword">if</span> _, err := client.Cmd(<span class="string">"AUTH"</span>, p.pwd).Str(); err != <span class="constant">nil</span> &#123;</span><br><span class="line">		client.Close()</span><br><span class="line">		<span class="keyword">return</span> client, err</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> client, <span class="constant">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
@@ -201,7 +252,7 @@
     <link href="http://www.grdtechs.com/2017/03/01/use-beego-orm-summary/"/>
     <id>http://www.grdtechs.com/2017/03/01/use-beego-orm-summary/</id>
     <published>2017-03-01T10:44:29.000Z</published>
-    <updated>2017-03-06T16:42:30.497Z</updated>
+    <updated>2017-03-06T17:36:59.642Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>很早之前的一个老项目就使用过ORM，当时使用的是<code>xorm</code>，后来新的项目设计说考虑性能什么的又用写原生sql来做了，在项目中使用一直没什么问题， 但是代码中到处写着原生的sql语句,并且有很多重复的语句，很不好维护，于是最近又重新考虑采用orm的方式来操作数据库，最近看中<code>beego/orm</code>这个包， 它的官方文档也写了很详细的使用说明，下面还是简要总结一下自己在项目中的使用经历,<br><a id="more"></a></p>
 <h2 id="ORM"><a href="#ORM" class="headerlink" title="ORM"></a>ORM</h2><p>ORM, 即Object-Relational Mapping(对象关系映射)，它的作用是在关系型数据库和业务实体对象之间作一个映射，这样在具体的操作业务对象的时候，就不需要再去和复杂的SQL语句打交道，只需简单的操作对象的属性和方法。</p>
@@ -259,7 +310,7 @@
     <link href="http://www.grdtechs.com/2017/02/22/mysql-import-export-summary/"/>
     <id>http://www.grdtechs.com/2017/02/22/mysql-import-export-summary/</id>
     <published>2017-02-22T10:50:36.000Z</published>
-    <updated>2017-03-06T16:42:30.497Z</updated>
+    <updated>2017-03-06T17:36:59.642Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>由于公司的MySQL是搭建在服务器上，为了避免对服务器进行直接改动，想远程导出和导入MySQL的数据库表结构及数据进行操作, 刚好Mysql本身提供了命令行导出工具<code>Mysqldump</code>和<code>Mysql Source</code>导入命令进行SQL数据导入导出工作，通过Mysql命令行导出工具Mysqldump命令能够将Mysql数据导出为文本格式(txt)的SQL文件，通过Mysql Source命令能够将SQL文件导入Mysql数据库中，下面通过Mysql导入导出SQL实例详解Mysqldump和Source命令的用法</p>
 <a id="more"></a>
@@ -347,7 +398,7 @@
     <link href="http://www.grdtechs.com/2017/01/22/linux-signal-golang/"/>
     <id>http://www.grdtechs.com/2017/01/22/linux-signal-golang/</id>
     <published>2017-01-22T14:35:45.000Z</published>
-    <updated>2017-03-06T16:42:30.497Z</updated>
+    <updated>2017-03-06T17:36:59.642Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>信号(Signal)是Linux, 类Unix和其它POSIX兼容的操作系统中用来进程间通讯的一种方式。一个信号就是一个异步的通知，发送给某个进程，或者同进程的某个线程，告诉它们某个事件发生了。<br>当信号发送到某个进程中时，操作系统会中断该进程的正常流程，并进入相应的信号处理函数执行操作，完成后再回到中断的地方继续执行。<br>如果目标进程先前注册了某个信号的处理程序(signal handler),则此处理程序会被调用，否则缺省的处理程序被调用。</p>
 <a id="more"></a>
@@ -616,7 +667,7 @@
     <link href="http://www.grdtechs.com/2017/01/20/go-http-cross-origin/"/>
     <id>http://www.grdtechs.com/2017/01/20/go-http-cross-origin/</id>
     <published>2017-01-20T15:30:40.000Z</published>
-    <updated>2017-03-06T16:42:30.493Z</updated>
+    <updated>2017-03-06T17:36:59.642Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>server提供api服务直接对接前端js, 但是存在跨域问题，本文使用先查询请求过来的host 然后判断主域名是否存在，存在,则在返回头部设置这个请求域名充许跨域访问。<br><a id="more"></a></p>
 <h2 id="u8DE8_u57DF_u6982_u5FF5"><a href="#u8DE8_u57DF_u6982_u5FF5" class="headerlink" title="跨域概念"></a>跨域概念</h2><p>浏览器的同源策略，出于防范跨站脚本的攻击，禁止客户端脚本（如 JavaScript）对不同域的服务进行跨站调用。</p>
@@ -661,7 +712,7 @@
     <link href="http://www.grdtechs.com/2017/01/18/git-submodule/"/>
     <id>http://www.grdtechs.com/2017/01/18/git-submodule/</id>
     <published>2017-01-18T17:11:52.000Z</published>
-    <updated>2017-03-06T16:42:30.493Z</updated>
+    <updated>2017-03-06T17:36:59.642Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>现在golang已经可以通过<code>vendor</code>来管理第三方依赖包了，但是之前的一个老项目用的是<code>git submodule</code>来管理的，但是<code>.gitsubmodule</code>文件中只记录管理了项目的部分依赖包， 需要把还没有被管理的第三包也加上，下面总结使用<code>git submodule</code>的过程。<br><a id="more"></a></p>
 <h2 id="u6DFB_u52A0_u7B2C_u4E09_u65B9_u5305"><a href="#u6DFB_u52A0_u7B2C_u4E09_u65B9_u5305" class="headerlink" title="添加第三方包"></a>添加第三方包</h2><p>为当前工程添加submodule，命令如下：</p>
@@ -701,7 +752,7 @@
     <link href="http://www.grdtechs.com/2017/01/17/http-cache/"/>
     <id>http://www.grdtechs.com/2017/01/17/http-cache/</id>
     <published>2017-01-17T17:54:18.000Z</published>
-    <updated>2017-03-06T16:42:30.497Z</updated>
+    <updated>2017-03-06T17:36:59.642Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>Http缓存机制作为web性能优化的重要手段, 本文对网络中，工作中使用的http缓存知识进行归纳总结。<br><a id="more"></a></p>
 <h2 id="u7F13_u5B58_u5206_u7C7B"><a href="#u7F13_u5B58_u5206_u7C7B" class="headerlink" title="缓存分类"></a>缓存分类</h2><p>缓存分为<code>服务端缓存</code>(server side，比如Nginx、Apache)和<code>客户端缓存</code>(client side，比如 web browser)。</p>
@@ -983,7 +1034,7 @@
     <link href="http://www.grdtechs.com/2017/01/16/consistent-hashing-summary/"/>
     <id>http://www.grdtechs.com/2017/01/16/consistent-hashing-summary/</id>
     <published>2017-01-16T11:02:50.000Z</published>
-    <updated>2017-03-06T16:42:30.493Z</updated>
+    <updated>2017-03-06T17:36:59.642Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>存在一种场景, 当一个缓存服务由多个服务器组共同提供时, key应该路由到哪一个服务。这里假如采用最通用的方式取模求余: <code>key%N</code>(N为服务器数目), 这样做均衡性没有什么问题, 但是当服务器数目发送增加或减少时, 分配方式则变为<code>key%(N+1)</code>或<code>key%(N-1)</code>。这里将会有大量的key失效迁移, 如果后端key对应的是有状态的存储数据,那么毫无疑问,这种做法将导致服务器间大量的数据迁移,从而造成服务的不稳定。解决思路，采用一致性哈希方法可以解决此问题。 </p>
 <a id="more"></a>
@@ -1087,7 +1138,7 @@
     <link href="http://www.grdtechs.com/2017/01/14/too-many-open-files-solution/"/>
     <id>http://www.grdtechs.com/2017/01/14/too-many-open-files-solution/</id>
     <published>2017-01-14T10:58:37.000Z</published>
-    <updated>2017-03-06T16:42:30.497Z</updated>
+    <updated>2017-03-06T17:36:59.642Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>运行在Linux系统上的网络程序可能会出现”Too many open files”的异常情况，且常见于高并发访问文件系统，多线程网络连接等场景。<br><a id="more"></a></p>
 <h2 id="u6982_u5FF5"><a href="#u6982_u5FF5" class="headerlink" title="概念"></a>概念</h2><p>程序经常访问的文件、socket等在Linux中都是指的文件file，系统需要记录每个当前访问file的name、location、access authority等相关信息，这样的一个实体被称为file entry。<code>open files table</code>存储这些file entry，以数组的形式线性管理。文件描述符(file descriptor)是作为<code>进程</code>到<code>open files table</code>的指针，也就是<code>open files table</code>的下标索引，将每个进程与它所访问的文件关联起来了。 </p>
@@ -1148,7 +1199,7 @@
     <link href="http://www.grdtechs.com/2017/01/06/go-printf-format/"/>
     <id>http://www.grdtechs.com/2017/01/06/go-printf-format/</id>
     <published>2017-01-06T15:49:13.000Z</published>
-    <updated>2017-03-06T16:42:30.497Z</updated>
+    <updated>2017-03-06T17:36:59.642Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>项目中总是时不时的要使用<code>fmt.Printf</code>或<code>fmt.Sprintf</code>来处理某些数据类型,总结一下常用的标识符用途及场景.</p>
 <a id="more"></a>
@@ -1171,7 +1222,7 @@
     <link href="http://www.grdtechs.com/2016/12/17/go-cache-component/"/>
     <id>http://www.grdtechs.com/2016/12/17/go-cache-component/</id>
     <published>2016-12-17T11:32:51.000Z</published>
-    <updated>2017-03-06T16:42:30.493Z</updated>
+    <updated>2017-03-06T17:36:59.642Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>总结用golang从分析，设计到实现一个可用的缓存组件。<br><a id="more"></a></p>
 <h2 id="u7F13_u5B58"><a href="#u7F13_u5B58" class="headerlink" title="缓存"></a>缓存</h2><ul>
@@ -1267,7 +1318,7 @@
     <link href="http://www.grdtechs.com/2016/11/23/uml-symbol-desc/"/>
     <id>http://www.grdtechs.com/2016/11/23/uml-symbol-desc/</id>
     <published>2016-11-23T11:47:43.000Z</published>
-    <updated>2017-03-06T16:42:30.497Z</updated>
+    <updated>2017-03-06T17:36:59.642Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>在UML的定义中，描述类和对象之间的关系，包括以下几种方式：依赖（<code>Dependency</code>）、关联（<code>Association</code>）、聚合（<code>Aggregation</code>）、组合（<code>Composition</code>）、泛化（<code>Generalization</code>）和实现（<code>Realization</code>）。现分别说明如下：<br><a id="more"></a></p>
 <h2 id="u5B9A_u4E49"><a href="#u5B9A_u4E49" class="headerlink" title="定义"></a>定义</h2><p>类图基本符号可拆分为四类:<code>线</code>(<code>虚线</code>和<code>实线</code>)，<code>箭头</code>，<code>三角</code>(<code>空心右三角</code>和<code>实心右三角</code>)，<code>菱形</code>(<code>空心菱形</code>和<code>实心菱形</code>); 由这些基本的图形进行组合构成了类图的基本符号。这里要注意这几个符号的顺序，代表了类与类之间关系的耦合程度, 越向右耦合度越高。</p>
@@ -1398,7 +1449,7 @@
     <link href="http://www.grdtechs.com/2016/11/23/go-dealwith-database-nullvalue/"/>
     <id>http://www.grdtechs.com/2016/11/23/go-dealwith-database-nullvalue/</id>
     <published>2016-11-23T11:40:54.000Z</published>
-    <updated>2017-03-06T16:42:30.493Z</updated>
+    <updated>2017-03-06T17:36:59.642Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>golang是强类型语言，在赋值和解析过程中需要先定义好数据类型，否在会报类型错误，下面总结在处理数据库表时遇到字段为空或零值的情况<br><a id="more"></a></p>
 <h2 id="u573A_u666F"><a href="#u573A_u666F" class="headerlink" title="场景"></a>场景</h2><p>假如存在如下没有指定<code>not null</code>的场合<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="operator"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> <span class="string">"users"</span> (</span><br><span class="line">    <span class="string">"id"</span> <span class="built_in">serial</span> <span class="keyword">not</span> <span class="literal">null</span> primary <span class="keyword">key</span>,</span><br><span class="line">    <span class="string">"name"</span> <span class="built_in">text</span>,</span><br><span class="line">    <span class="string">"age"</span> <span class="built_in">integer</span></span><br><span class="line">)</span></span><br></pre></td></tr></table></figure></p>
@@ -1427,7 +1478,7 @@
     <link href="http://www.grdtechs.com/2016/11/19/go-install-binaries/"/>
     <id>http://www.grdtechs.com/2016/11/19/go-install-binaries/</id>
     <published>2016-11-19T00:18:37.000Z</published>
-    <updated>2017-03-06T16:42:30.493Z</updated>
+    <updated>2017-03-06T17:36:59.642Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>golang tool chains 提供了很多好用的工具， 但是如果直接安装的话，大多数需要翻墙才能安装， 而且比较麻烦； 本文记录一种不需要翻墙就能顺利安装相应的工具的方法.</p>
 <a id="more"></a>
@@ -1461,7 +1512,7 @@
     <link href="http://www.grdtechs.com/2016/11/11/go-use-mysql/"/>
     <id>http://www.grdtechs.com/2016/11/11/go-use-mysql/</id>
     <published>2016-11-11T13:21:16.000Z</published>
-    <updated>2017-03-06T16:42:30.497Z</updated>
+    <updated>2017-03-06T17:36:59.642Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>Golang 提供了<code>database/sql</code>包用于对<code>SQL数据库</code>的访问, 作为操作数据库的入口对象<code>sql.DB</code>, 主要为我们提供了两个重要的功能:<br><a id="more"></a></p>
 <ul>
@@ -1555,7 +1606,7 @@
     <link href="http://www.grdtechs.com/2016/10/23/go-build-small-exec/"/>
     <id>http://www.grdtechs.com/2016/10/23/go-build-small-exec/</id>
     <published>2016-10-23T14:00:32.000Z</published>
-    <updated>2017-03-06T16:42:30.493Z</updated>
+    <updated>2017-03-06T17:36:59.642Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>尽管go1.7.3编译生成的可执行程序已经很小了,但是通过编译参数控制还能编译出更小的可执行文件，总结如下,<br><a id="more"></a></p>
 <h2 id="u52A0-ldflags_u53C2_u6570"><a href="#u52A0-ldflags_u53C2_u6570" class="headerlink" title="加-ldflags参数"></a>加-ldflags参数</h2><p>在程序编译的时候可以加上<code>-ldflags &quot;-s -w&quot;</code> 参数来优化编译程序, 其实通过去除部分连接和调试等信息来使得编译之后的执行程序更小,具体参数如下:</p>
@@ -1593,7 +1644,7 @@
     <link href="http://www.grdtechs.com/2016/10/16/mac-update-vim8-0/"/>
     <id>http://www.grdtechs.com/2016/10/16/mac-update-vim8-0/</id>
     <published>2016-10-16T23:08:56.000Z</published>
-    <updated>2017-03-06T16:42:30.497Z</updated>
+    <updated>2017-03-06T17:36:59.642Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>将mac自带的vim7.3 升级到vim8.0<br><a id="more"></a></p>
 <h2 id="u5347_u7EA7vim8-0"><a href="#u5347_u7EA7vim8-0" class="headerlink" title="升级vim8.0"></a>升级vim8.0</h2><ul>
@@ -1651,7 +1702,7 @@
     <link href="http://www.grdtechs.com/2016/10/16/close-ticker-correctly/"/>
     <id>http://www.grdtechs.com/2016/10/16/close-ticker-correctly/</id>
     <published>2016-10-16T14:27:39.000Z</published>
-    <updated>2017-03-06T16:42:30.493Z</updated>
+    <updated>2017-03-06T17:36:59.638Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>在<code>ticker</code>和<code>goroutine</code>组合使用中当调用<code>ticker.Stop()</code>关闭<code>ticker</code>之后，相应的<code>goroutine</code>中的<code>ticker.C</code>并没有停掉，下面总结一种优雅的方式关闭<code>ticker</code>.<br><a id="more"></a></p>
 <h2 id="u4F18_u96C5_u7684_u5173_u95EDticker"><a href="#u4F18_u96C5_u7684_u5173_u95EDticker" class="headerlink" title="优雅的关闭ticker"></a>优雅的关闭<code>ticker</code></h2><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">"fmt"</span></span><br><span class="line">	<span class="string">"time"</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> main() &#123;</span><br><span class="line">	Demo()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> Demo() &#123;</span><br><span class="line">	done := startTicker(PrintInfo)</span><br><span class="line">	time.Sleep(time.Duration(<span class="number">12</span>) * time.Second)</span><br><span class="line">	<span class="built_in">close</span>(done)</span><br><span class="line">	time.Sleep(time.Duration(<span class="number">1</span>) * time.Minute)</span><br><span class="line">	fmt.Println(<span class="string">"main finished"</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> startTicker(f <span class="keyword">func</span>()) <span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125; &#123;</span><br><span class="line">	done := <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;, <span class="number">1</span>)</span><br><span class="line">	<span class="keyword">go</span> <span class="keyword">func</span>() &#123;</span><br><span class="line">		ticker := time.NewTicker(<span class="number">5</span> * time.Second)</span><br><span class="line">		<span class="comment">//	ticker := time.NewTicker(5 * time.Minute)</span></span><br><span class="line">		<span class="keyword">defer</span> ticker.Stop()</span><br><span class="line"></span><br><span class="line">		<span class="keyword">for</span> &#123;</span><br><span class="line">			<span class="keyword">select</span> &#123;</span><br><span class="line">			<span class="keyword">case</span> &lt;-ticker.C:</span><br><span class="line">				f()</span><br><span class="line">			<span class="keyword">case</span> &lt;-done:</span><br><span class="line">				<span class="keyword">return</span></span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;()</span><br><span class="line">	<span class="keyword">return</span> done</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> PrintInfo() &#123;</span><br><span class="line">	fmt.Println(<span class="string">"hello"</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -1668,38 +1719,6 @@
     
     
       <category term="ticker" scheme="http://www.grdtechs.com/tags/ticker/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Golang发送post表单请求</title>
-    <link href="http://www.grdtechs.com/2016/09/07/go-postform/"/>
-    <id>http://www.grdtechs.com/2016/09/07/go-postform/</id>
-    <published>2016-09-07T16:00:32.000Z</published>
-    <updated>2017-03-06T16:42:30.497Z</updated>
-    
-    <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>golang这边将<code>map</code>结构序列化通常采用<code>json.Marshal</code>和<code>json.Unmarshal</code>来做，但是在php server端还需要做<code>json</code>反序列化解析才能用， 用golang模拟表单提交, php server端则非常方便提取相应的数据字段.<br><a id="more"></a></p>
-<h2 id="u65B9_u6CD5"><a href="#u65B9_u6CD5" class="headerlink" title="方法"></a>方法</h2><p>方法是利用golang<code>net/http</code>包提供的<code>PostForm</code>提交post表单提交。<code>ParseForm</code>解析<code>URL</code>中的查询字符串，并将解析结果更新到<code>r.Form</code>字段。对于<code>POST</code>或<code>PUT</code>请求，<code>ParseForm</code>还会将<code>body</code>当作表单解析，并将结果既更新到<code>r.PostForm</code>也更新到<code>r.Form</code>。解析结果中，<code>POST</code>或<code>PUT</code>请求主体要优先于<code>URL</code>查询字符串（同名变量，主体的值在查询字符串的值前面）。如果请求的主体的大小没有被<code>MaxBytesReader</code>函数设定限制，其大小默认限制为开头10MB。</p>
-<h2 id="http-Client_7B_7D-PostForm"><a href="#http-Client_7B_7D-PostForm" class="headerlink" title="http.Client{}.PostForm"></a>http.Client{}.PostForm</h2><p>利用<code>http.Client{}.PostForm</code>提交post表单。</p>
-<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> <span class="string">"net/http"</span></span><br><span class="line">client := &amp;http.Client&#123;&#125;</span><br><span class="line">res, err := client.PostForm(<span class="string">"http://127.0.0.1:8091/postpage"</span>, url.Values&#123;</span><br><span class="line">	<span class="string">"key"</span>:   &#123;<span class="string">"this is client key"</span>&#125;,</span><br><span class="line">	<span class="string">"value"</span>: &#123;<span class="string">"this is client value"</span>&#125;,</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
-<h2 id="http-PostForm"><a href="#http-PostForm" class="headerlink" title="http.PostForm"></a>http.PostForm</h2><p>直接用<code>http.PostForm</code>提交post表单。</p>
-<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> <span class="string">"net/http"</span></span><br><span class="line"><span class="comment">//data := make(url.Values)</span></span><br><span class="line"><span class="comment">//data["key"] = []string&#123;"this is key"&#125;</span></span><br><span class="line"><span class="comment">//data["value"] = []string&#123;"this is value"&#125;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//把post表单发送给目标服务器</span></span><br><span class="line">res, err := http.PostForm(<span class="string">"http://127.0.0.1:8091/postpage"</span>, url.Values&#123;</span><br><span class="line">	<span class="string">"key"</span>:   &#123;<span class="string">"this is url key"</span>&#125;,</span><br><span class="line">	<span class="string">"value"</span>: &#123;<span class="string">"this is url value"</span>&#125;,</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
-<h2 id="u5BF9_u8868_u5355_u6570_u636E_u7684_u63D0_u53D6"><a href="#u5BF9_u8868_u5355_u6570_u636E_u7684_u63D0_u53D6" class="headerlink" title="对表单数据的提取"></a>对表单数据的提取</h2><p>server端对表单数据的提取<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//接受post请求， 然后打印表单中key和value字段的值</span></span><br><span class="line"><span class="keyword">if</span> r.Method == <span class="string">"POST"</span> &#123;</span><br><span class="line">	<span class="keyword">var</span> (</span><br><span class="line">		key   <span class="typename">string</span> = r.PostFormValue(<span class="string">"key"</span>)</span><br><span class="line">		value <span class="typename">string</span> = r.PostFormValue(<span class="string">"value"</span>)</span><br><span class="line">	)</span><br></pre></td></tr></table></figure></p>
-<p><a href="https://github.com/researchlab/golearning/tree/master/postform" target="_blank" rel="external">github示例代码</a></p>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;h2 id=&quot;u524D_u8A00&quot;&gt;&lt;a href=&quot;#u524D_u8A00&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h2&gt;&lt;p&gt;golang这边将&lt;code&gt;map&lt;/code&gt;结构序列化通常采用&lt;code&gt;json.Marshal&lt;/code&gt;和&lt;code&gt;json.Unmarshal&lt;/code&gt;来做，但是在php server端还需要做&lt;code&gt;json&lt;/code&gt;反序列化解析才能用， 用golang模拟表单提交, php server端则非常方便提取相应的数据字段.&lt;br&gt;
-    
-    </summary>
-    
-      <category term="golang" scheme="http://www.grdtechs.com/categories/golang/"/>
-    
-    
-      <category term="form" scheme="http://www.grdtechs.com/tags/form/"/>
-    
-      <category term="post" scheme="http://www.grdtechs.com/tags/post/"/>
     
   </entry>
   
