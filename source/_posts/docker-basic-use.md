@@ -195,17 +195,17 @@ root@65fc97a6b032:/#
 
 根据上述的需求我们通过查询`docker run --help`, 使用相关参数, 创建符合要求的容器,
 ```bash
-➜  helloworldimage docker run --name bash --hostname bashHost --mac-address 00:01:02:03:04:05 --ulimit nproc=1024:2048 -t -i ubuntu /bin/bash
+➜  docker run --name bash --hostname bashHost --mac-address 00:01:02:03:04:05 --ulimit nproc=1024:2048 -t -i ubuntu /bin/bash
 ```
 进入容器中我们可以对一些参数进行验证,
 ```bash
-➜  helloworldimage docker run --name bash --hostname bashHost --mac-address 00:01:02:03:04:05 --ulimit nproc=1024:2048 -t -i ubuntu /bin/bash
+➜  docker run --name bash --hostname bashHost --mac-address 00:01:02:03:04:05 --ulimit nproc=1024:2048 -t -i ubuntu /bin/bash
 root@bashHost:/# hostname
 bashHost
 root@bashHost:/# ulimit
 unlimited
 root@bashHost:/# % 
-➜  helloworldimage docker inspect -f '{{.HostConfig.Ulimits}}' bash
+➜  docker inspect -f '{{.HostConfig.Ulimits}}' bash
 [nproc=1024:2048]
 ```
 注，容器中的 ulimit 不会有任何输出，查看实际的ulimit信息可以在宿主机上使用docker inspect查看,
@@ -234,12 +234,12 @@ docker inspect 查看容器的细节信息，包括创建时间，操作命令�
         "Path": "/bin/bash",
         "Args": [],
 .....
-➜  helloworldimage docker ps -a
+➜  docker ps -a
 CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS               NAMES
 d3efa7a729ba        ubuntu              "/bin/bash -c 'whi..."   4 hours ago         Up 6 minutes                            bash
-➜  helloworldimage docker inspect -f '{{.NetworkSettings.IPAddress}}' d3ef
+➜  docker inspect -f '{{.NetworkSettings.IPAddress}}' d3ef
 172.17.0.2
-➜  helloworldimage docker inspect -f '{{.NetworkSettings.Gateway}}' bash
+➜  docker inspect -f '{{.NetworkSettings.Gateway}}' bash
 172.17.0.1
 ```
 返回的信息非常多，是JSON格式，每一项内容具体含义本节不做详细介绍，可以参考官方文档。
@@ -257,11 +257,11 @@ PID                 USER                TIME                COMMAND
 ** 5. 查看容器输出信息: docker logs **
 获取容器的输出信息可以使用`docker logs`命令，使用`docker attach` 回到刚才创建的`/bin/bash容器`中，写一个循环输出信息的脚本，然后再使用`Ctrl-P Ctrl-Q`组合键退出。
 ```bash
-➜  helloworldimage docker run -t -i --name bash ubuntu /bin/bash -c "while true; do echo 'Hello world'; sleep 1; done"
+➜  docker run -t -i --name bash ubuntu /bin/bash -c "while true; do echo 'Hello world'; sleep 1; done"
 ```
 在宿主机的终端中，我们可以用`docker logs`命令查看输出信息。
 ```bash 
-➜  helloworldimage docker logs bash
+➜  docker logs bash
 Hello world
 Hello world
 Hello world
@@ -274,20 +274,22 @@ Hello world
 
 先执行`docker diff` 查看现有的容器中的变化，发现没有任何文件变化, 连接到容器内部，`Ctrl-C`中断先前实验的死循环,再创建几个文件,退出到宿主机,再次使用docker diff命令查看是否有新的修改
 ```bash
-➜  helloworldimage docker diff bash
-➜  helloworldimage docker attach bash
+➜  docker diff bash
+➜  docker attach bash
 root@efb833099bb1:/#
 root@efb833099bb1:/# cd tmp/
 root@efb833099bb1:/tmp# touch s{1,2,3}
-root@efb833099bb1:/tmp# %                                                                                             ➜  helloworldimage docker diff bash
+root@efb833099bb1:/tmp# %                                                                                             
+➜  docker diff bash
 C /tmp
 A /tmp/s1
 A /tmp/s2
 A /tmp/s3
-➜  helloworldimage docker attach bash
+➜  docker attach bash
 root@efb833099bb1:/tmp#
 root@efb833099bb1:/tmp# rm s1
-root@efb833099bb1:/tmp# %                                                                                             ➜  helloworldimage docker diff bash
+root@efb833099bb1:/tmp# % 
+➜  docker diff bash
 C /tmp
 A /tmp/s2
 A /tmp/s3
@@ -352,21 +354,22 @@ docker unpause container
 
 导出容器快照到本地的tar包。导出后的文件可以拷贝到其他`Docker服务器`上执行导入命令形成新的镜像，下面选择导出刚才建立的容器new_container到到tar包, 保存到当前目录, 具体命令如下,
 ```bash
-  helloworldimage docker run --name new_container -t -i ubuntu /bin/bash
+  docker run --name new_container -t -i ubuntu /bin/bash
   root@6c8edd28ad65:/# cd tmp/
   root@6c8edd28ad65:/tmp# touch s{1,2,3}
   root@6c8edd28ad65:/tmp# ls
   s1  s2  s3
-  root@6c8edd28ad65:/tmp# %                                                                                             ➜  helloworldimage docker diff new_container
+  root@6c8edd28ad65:/tmp# %                                                                                             
+  ➜  docker diff new_container
   C /tmp
   A /tmp/s1
   A /tmp/s2
   A /tmp/s3
-  ➜  helloworldimage docker ps -a
+  ➜  docker ps -a
   CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
   6c8edd28ad65        ubuntu              "/bin/bash"         4 hours ago         Up 44 seconds                           new_container
-  ➜  helloworldimage docker export 6c8e > new_container.tar
-  ➜  helloworldimage ls
+  ➜  docker export 6c8e > new_container.tar
+  ➜  ls
   Dockerfile        new_container.tar
   ```
 
@@ -380,14 +383,14 @@ cat new_container.tar | docker import new_container:1.0
 ```
 执行导入后，使用docker images 查看是否有新的镜像产生,
 ```bash
-➜  helloworldimage docker images
+➜  docker images
 REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
 nginx               latest              6b914bbcb89e        6 days ago          182 MB
 ubuntu              latest              0ef2e08ed3fa        6 days ago          130 MB
 busybox             latest              7968321274dc        7 weeks ago         1.11 MB
-➜  helloworldimage cat new_container.tar| docker import - new_container:1.0
+➜  cat new_container.tar| docker import - new_container:1.0
 sha256:dd10880b0d88c4d4159c3c29c034d46dc52c5d8d9d52ee5385aff687d0967216
-➜  helloworldimage docker images
+➜  docker images
 REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
 new_container       1.0                 dd10880b0d88        4 hours ago         111 MB
 nginx               latest              6b914bbcb89e        6 days ago          182 MB
@@ -398,7 +401,7 @@ docker import 命令比较灵活，也可以直接从URL链接进行导入。所
 
 使用新镜像创建容器，查看是否与导出的容器内容一致,
 ```bash 
-➜  helloworldimage docker run --name new_new_container -t -i new_container:1.0 /bin/bash
+➜  docker run --name new_new_container -t -i new_container:1.0 /bin/bash
 root@eeef608f020b:/# cd tmp/
 root@eeef608f020b:/tmp# ls
 s1  s2  s3
@@ -449,10 +452,10 @@ docker build -t hellworld .
 ```
 这个命令中第一个参数`-t helloworld`指定创建的新镜像的名字，第二个参数是一个点 `.` 指定从当前目录查找`Dockerfile` 文件，编译结果如图,
 ```bash
-➜  helloworldimage docker build -t HelloWorld .
+➜  docker build -t HelloWorld .
 invalid argument "HelloWorld" for t: Error parsing reference: "HelloWorld" is not a valid repository/tag: repository name must be lowercase
 See 'docker build --help'.
-➜  helloworldimage docker build -t helloworld .
+➜  docker build -t helloworld .
 Sending build context to Docker daemon 2.048 kB
 Step 1/2 : FROM ubuntu:latest
  ---> 0ef2e08ed3fa
@@ -464,13 +467,13 @@ Successfully built de0c24b4dc2e
 ```
 如结果所示，镜像名必须小写。执行`docker images` 命令就可以看到新的`helloworld`镜像了。
 ```bash
-➜  helloworldimage docker images
+➜  docker images
 REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
 helloworld          latest              de0c24b4dc2e        About an hour ago   130 MB
 nginx               latest              6b914bbcb89e        4 days ago          182 MB
 ubuntu              latest              0ef2e08ed3fa        5 days ago          130 MB
 busybox             latest              7968321274dc        7 weeks ago         1.11 MB
-➜  helloworldimage docker run -t -i helloworld /bin/bash
+➜  docker run -t -i helloworld /bin/bash
 root@3ce776c1ee74:/# echo $HOSTNAME
 HelloWorld
 root@3ce776c1ee74:/#
@@ -481,9 +484,9 @@ root@3ce776c1ee74:/#
 
 通过命令退出上述`helloworld`容器后，可使用`docker rm` 命令删除容器，并使用`docker rmi` 删除镜像。
 ```bash
-➜  helloworldimage docker rm -f 3ce7
+➜  docker rm -f 3ce7
 3ce7
-➜  helloworldimage docker rmi helloworld
+➜  docker rmi helloworld
 Untagged: helloworld:latest
 Deleted: sha256:de0c24b4dc2ee6512b8c95d15b532b162dc883c7e5caf8aa00939fa5712fb7d1
 ```
