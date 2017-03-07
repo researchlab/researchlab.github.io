@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://www.grdtechs.com/"/>
-  <updated>2017-03-06T17:36:59.642Z</updated>
+  <updated>2017-03-07T03:59:49.692Z</updated>
   <id>http://www.grdtechs.com/</id>
   
   <author>
@@ -16,11 +16,97 @@
   <generator uri="http://hexo.io/">Hexo</generator>
   
   <entry>
+    <title>docker实践--03 镜像管理</title>
+    <link href="http://www.grdtechs.com/2017/03/06/docker-image-mgr/"/>
+    <id>http://www.grdtechs.com/2017/03/06/docker-image-mgr/</id>
+    <published>2017-03-06T11:06:41.000Z</published>
+    <updated>2017-03-07T03:59:49.692Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>在前面第一篇总结中已了解了一些镜像的概念，简单的说镜像就是一个容器的只读模板，用来创建容器。当运行容器时需要指定镜像，如果本地没有该镜像，则会从Docker Registry下载。默认查找的是<code>Docker Hub</code>。Docker的镜像是增量的修改，每次创建新的镜像都会在老的镜像上面构建一个增量的层，使用到的技术是Another Union File System(AUFS)，具体可参考 <a href="http://www.infoq.com/cn/articles/analysis-of-docker-file-system-aufs-and-devicemapper/" target="_blank" rel="external">剖析Docker文件系统：Aufs与Devicemapper</a>, 下面主要总结记录使用和管理docker镜像的过程。</p>
+<a id="more"></a>
+<h2 id="u67E5_u627E_u548C_u4E0B_u8F7D_u955C_u50CF"><a href="#u67E5_u627E_u548C_u4E0B_u8F7D_u955C_u50CF" class="headerlink" title="查找和下载镜像"></a>查找和下载镜像</h2><p>镜像存储中的核心概念仓库(Repository)是镜像存储的位置。Docker注册服务器(Registry)是仓库存储的位置。每个仓库包含不同的镜像。比如一个镜像名称<code>ubuntu:14.04</code>，冒号前面的ubuntu是仓库名, 后面的14.04是TAG, 不同的TAG可以对应相同的镜像, TAG通常设置为镜像的版本号。<code>Docker Hub</code>是Docker官方提供公共仓库，提供大量的常用镜像，由于国内网络原因经常连接Docker Hub会比较慢，所以我们也可以选择一些国内提供类似Docker Hub镜像服务站点。连接Docker Hub的常用命令包括,</p>
+<ul>
+<li>搜索镜像 docker search</li>
+<li>下载镜像 docker pull<br>假设现在需要一个busybox镜像，首先进行搜索，然后使用docker pull下载到本地,<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">➜  ~ docker images</span><br><span class="line">REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE</span><br><span class="line">nginx               latest              <span class="number">6</span>b914bbcb89e        <span class="number">6</span> days ago          <span class="number">182</span> MB</span><br><span class="line">ubuntu              latest              <span class="number">0</span>ef2e08ed3fa        <span class="number">7</span> days ago          <span class="number">130</span> MB</span><br><span class="line">➜  ~ docker search busybox</span><br><span class="line">NAME                            DESCRIPTION                                     STARS     OFFICIAL   AUTOMATED</span><br><span class="line">busybox                         Busybox base image.                             <span class="number">945</span>       [OK]</span><br><span class="line">progrium/busybox                                                                <span class="number">65</span>                   [OK]</span><br><span class="line">radial/busyboxplus              Full-chain, Internet enabled, busybox made...   <span class="number">11</span>                   [OK]</span><br><span class="line">container4armhf/armhf-busybox   Automated build of Busybox <span class="keyword">for</span> armhf devic...   <span class="number">6</span>                    [OK]</span><br><span class="line">➜  ~</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>查找到的数据中包含仓库名称, 描述, 以及有多少人关注。一般情况只需要下载最基本的Busybox base image就可以, 查找命令返回的结果中通常可以看到不同版本的busybox, 不指定版本号默认下载busybox:latest。使用<code>docker pull</code>命令将镜像下载到本地,<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">➜  ~ docker pull busybox</span><br><span class="line">Using default tag: latest</span><br><span class="line">latest: Pulling from library/busybox</span><br><span class="line"><span class="number">4</span>b0bc1c4050b: Pull complete</span><br><span class="line">Digest: sha256:<span class="number">348432</span>dd709c2<span class="built_in">cd</span>6ca42e56c2a0d157f611c50c908e14c9bfc1e9cb0ed234871</span><br><span class="line">Status: Downloaded newer image <span class="keyword">for</span> busybox:latest</span><br><span class="line">➜  ~ docker images</span><br><span class="line">REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE</span><br><span class="line">nginx               latest              <span class="number">6</span>b914bbcb89e        <span class="number">6</span> days ago          <span class="number">182</span> MB</span><br><span class="line">ubuntu              latest              <span class="number">0</span>ef2e08ed3fa        <span class="number">7</span> days ago          <span class="number">130</span> MB</span><br><span class="line">busybox             latest              <span class="number">7968321274</span>dc        <span class="number">7</span> weeks ago         <span class="number">1.11</span> MB</span><br></pre></td></tr></table></figure></p>
+<p>也可以在Docker Hub上创建一个账户，用来保存所需的镜像，但是在国内使用实在是太慢了。这里简单介绍下Docker中使用命令登陆Docker Hub保存镜像的方式,</p>
+<ul>
+<li>首先在Docker Hub注册一个账号, </li>
+<li>然后可以基于Docker Hub上现有的镜像创建一个镜像</li>
+<li>在本地完成修改后使用docker push命令推送到Docker Hub上</li>
+</ul>
+<p>此外，Docker Hub提供一个强大的自动创建镜像的功能，可以设定跟踪某个镜像中安装的软件，如果有更新则自动重新构建新的镜像。更多有趣的功能可以登录到Docker Hub 官网进行体验。在此不做更多介绍。</p>
+<h2 id="u521B_u5EFA_u955C_u50CF"><a href="#u521B_u5EFA_u955C_u50CF" class="headerlink" title="创建镜像"></a>创建镜像</h2><p><strong> 方法一, 下载镜像 docker pull </strong></p>
+<p>在本地创建镜像的方法有几种，最简单的是直接从Registry服务器上下载, 即通过<code>docker pull</code>命令下载下来，镜像下载中可以看到是分层下载，每一层都有一个唯一的ID值表示，每层下载的大小实际为该层进行的修改增量。</p>
+<p><strong> 方法二,  创建镜像 Dockerfile </strong></p>
+<p><code>Dockerfile</code>可以很方便的基于已有镜像创建新的镜像。<code>Dockerfile</code>文件里包含若干条命令，每个命令都会创建一个新的层, <code>Dockerfile</code>创建的层数不可以超过127层。<code>Dockerfile</code>的详细编写方法后续再说，此处只写一个最简单的Dockerfile来介绍。</p>
+<p>使用vim打开一个文件Dockerfile, 并写入下面两行，<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">from ubuntu:latest</span><br><span class="line">ENV HOSTNAME=new_image</span><br></pre></td></tr></table></figure></p>
+<p>这个<code>Dockerfile</code>中只有两行，第一行表示基于哪个镜像创建新的镜像，类似于程序开发中的<code>import</code>或<code>include</code>, 这里以<code>ubuntu:latest</code>镜像为基础创建新的镜像。第二行是在新的镜像中我们要对基础镜像<code>ubuntu:latest</code>做的改变。这句是设置一个环境变量HOSTNAME等于new_image。完成<code>Dockerfile</code>后，使用<code>docker build</code>命令进行构建,<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker build -t nimage .</span><br></pre></td></tr></table></figure></p>
+<p>这个命令中第一个参数<code>-t nimage</code>指定创建的新镜像的名字，第二个参数是一个点<code>.</code>指定从当前目录查找<code>Dockerfile</code>文件。执行完成后我们 docker images 命令中就可以看到新的nimage镜像了。</p>
+<p><strong> 其它方法创建镜像 </strong><br>创建镜像的方法很多，除了上述两种之外还可以使用下述方法进行创建，如,</p>
+<ul>
+<li>容器管理中总结过的<code>docker import</code></li>
+<li>对容器提交修改<code>docker commit</code></li>
+<li>导入镜像<code>docker load</code></li>
+</ul>
+<h2 id="u67E5_u770B_u955C_u50CF_u4FE1_u606F"><a href="#u67E5_u770B_u955C_u50CF_u4FE1_u606F" class="headerlink" title="查看镜像信息"></a>查看镜像信息</h2><p><strong> 1. 基本命令 docker images </strong><br><code>docker images</code>命令查看本地的镜像列表，信息包括,</p>
+<ul>
+<li><code>REPOSITORY</code>：仓库名称</li>
+<li><code>TAG</code>：标签名，一个仓库可以有若干个标签对应不同的镜像，默认都是latest</li>
+<li><code>IMAGE ID</code>：镜像ID</li>
+<li><code>CREATED</code>：创建时间，注意不是本地的pull时间</li>
+<li><code>SIZE</code>：镜像大小</li>
+</ul>
+<p>其中需要注意的是运行容器时候如果不指定镜像的<code>TAG</code>, 则默认为<code>latest</code>。镜像的唯一标识符是<code>镜像ID</code>, 不是<code>TAG</code>, 有的时候同一个镜像可以有不同的<code>TAG</code>, 但实际指向的是同一个<code>镜像ID</code>。<code>TAG</code>可以理解为镜像的别名。</p>
+<p>查看当前系统中存储的所有镜像信息,<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">➜  ~ docker images</span><br><span class="line">REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE</span><br><span class="line">nginx               latest              <span class="number">6</span>b914bbcb89e        <span class="number">6</span> days ago          <span class="number">182</span> MB</span><br><span class="line">ubuntu              latest              <span class="number">0</span>ef2e08ed3fa        <span class="number">7</span> days ago          <span class="number">130</span> MB</span><br><span class="line">busybox             latest              <span class="number">7968321274</span>dc        <span class="number">7</span> weeks ago         <span class="number">1.11</span> MB</span><br></pre></td></tr></table></figure></p>
+<p><strong> 2. 查看镜像详细信息 docker inspect </strong></p>
+<p><code>docker inspect</code>可以查看指定镜像的详细信息。这条命令可以查看容器或镜像的详细信息，输出是一个JSON格式的内容，比较重要的信息是创建时间，启动命令等, 前面已经总结过，这里就不再赘述。</p>
+<h2 id="u5BFC_u5165_u548C_u5BFC_u51FA_u955C_u50CF"><a href="#u5BFC_u5165_u548C_u5BFC_u51FA_u955C_u50CF" class="headerlink" title="导入和导出镜像"></a>导入和导出镜像</h2><p>与容器的导出和导入类似, 镜像可以被导出到本地文件，也可以从本地文件中加载。导出命令是<code>docker save</code>命令，导出后的镜像如果需要导入到新的Docker 服务器, 则使用<code>docker load</code>命令。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">~ docker save busybox &gt; newbox.tar</span><br><span class="line">➜  ~ docker load -i ~/newbox.tar</span><br><span class="line">Loaded image: busybox:latest</span><br><span class="line">➜  ~ docker images</span><br><span class="line">REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE</span><br><span class="line">nginx               latest              <span class="number">6</span>b914bbcb89e        <span class="number">6</span> days ago          <span class="number">182</span> MB</span><br><span class="line">ubuntu              latest              <span class="number">0</span>ef2e08ed3fa        <span class="number">7</span> days ago          <span class="number">130</span> MB</span><br><span class="line">busybox             latest              <span class="number">7968321274</span>dc        <span class="number">7</span> weeks ago         <span class="number">1.11</span> MB</span><br></pre></td></tr></table></figure></p>
+<h2 id="u66F4_u65B0_u955C_u50CF"><a href="#u66F4_u65B0_u955C_u50CF" class="headerlink" title="更新镜像"></a>更新镜像</h2><p>更新镜像用命令 <code>docker commit</code>, 如果需要对镜像进行更新的话，一种方法是创建容器，在容器中进行修改，然后将修改后容器提交到镜像中。提交使用<code>docker commit</code>命令。<br>注意：本方法不推荐用在生产系统中，未来会很难维护镜像。最好的创建镜像的方法是<code>Dockerfile</code>，修改镜像的方法是<code>修改Dockerfile</code>，然后重新从Dockerfile中构建新的镜像。</p>
+<p>下面先基于ubuntu镜像创建一个容器,<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -t -i --name updateimage ubuntu /bin/bash</span><br></pre></td></tr></table></figure></p>
+<p>进入到容器中进行修改，创建三个新的文件夹，然后退出容器, 通过<code>docker diff</code>命令可以查看到确实做出了修改，然后通过<code>docker commit</code>命令将修改后的内容提交到本地，另存为镜像newbuntu, </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">➜  ~ docker run -t -i --name updateimage ubuntu /bin/bash</span><br><span class="line">root@<span class="number">4</span>a7b3923ad93:/<span class="comment"># touch /tmp/s&#123;1,2,3&#125;</span></span><br><span class="line">root@<span class="number">4</span>a7b3923ad93:/<span class="comment"># ls -la /tmp/</span></span><br><span class="line">total <span class="number">8</span></span><br><span class="line">drwxrwxrwt <span class="number">1</span> root root <span class="number">4096</span> Mar  <span class="number">7</span> <span class="number">03</span>:<span class="number">53</span> .</span><br><span class="line">drwxr-xr-x <span class="number">1</span> root root <span class="number">4096</span> Mar  <span class="number">7</span> <span class="number">03</span>:<span class="number">53</span> ..</span><br><span class="line">-rw-r--r-- <span class="number">1</span> root root    <span class="number">0</span> Mar  <span class="number">7</span> <span class="number">03</span>:<span class="number">53</span> s1</span><br><span class="line">-rw-r--r-- <span class="number">1</span> root root    <span class="number">0</span> Mar  <span class="number">7</span> <span class="number">03</span>:<span class="number">53</span> s2</span><br><span class="line">-rw-r--r-- <span class="number">1</span> root root    <span class="number">0</span> Mar  <span class="number">7</span> <span class="number">03</span>:<span class="number">53</span> s3</span><br><span class="line">root@<span class="number">4</span>a7b3923ad93:/<span class="comment"># %                                                                                                                                                              ➜  ~ docker diff updateimage</span></span><br><span class="line">C /tmp</span><br><span class="line">A /tmp/s1</span><br><span class="line">A /tmp/s2</span><br><span class="line">A /tmp/s3</span><br><span class="line">➜  ~ docker images</span><br><span class="line">REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE</span><br><span class="line">nginx               latest              <span class="number">6</span>b914bbcb89e        <span class="number">6</span> days ago          <span class="number">182</span> MB</span><br><span class="line">ubuntu              latest              <span class="number">0</span>ef2e08ed3fa        <span class="number">7</span> days ago          <span class="number">130</span> MB</span><br><span class="line">➜  ~ docker commit -m <span class="string">'add 3 dirs'</span> <span class="operator">-a</span> <span class="string">'newbuntu'</span> -p updateimage newbuntu</span><br><span class="line">sha256:<span class="number">2557</span>af5f7c99b0f1dd61c32e5c70320c5181f8e288109220437ed51e829c996b</span><br><span class="line">➜  ~ docker images</span><br><span class="line">REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE</span><br><span class="line">newbuntu            latest              <span class="number">2557</span>af5f7c99        <span class="number">2</span> seconds ago       <span class="number">130</span> MB</span><br><span class="line">nginx               latest              <span class="number">6</span>b914bbcb89e        <span class="number">6</span> days ago          <span class="number">182</span> MB</span><br><span class="line">ubuntu              latest              <span class="number">0</span>ef2e08ed3fa        <span class="number">7</span> days ago          <span class="number">130</span> MB</span><br><span class="line">➜  ~</span><br></pre></td></tr></table></figure>
+<p><code>docker commit</code>参数说明,</p>
+<ul>
+<li><code>-m</code>: 本次提交的描述</li>
+<li><code>-a</code>: 指定镜像作者信息</li>
+<li><code>-p</code>: 提交时暂停容器运行</li>
+<li><code>updateimage</code>: 容器的ID或名称</li>
+<li><code>newbuntu</code>: 目标镜像</li>
+</ul>
+<p>如果指定了目标镜像，Docker会创建新的镜像。类似我们修改一个word文档后进行的另存为。</p>
+<h2 id="u5220_u9664_u955C_u50CF"><a href="#u5220_u9664_u955C_u50CF" class="headerlink" title="删除镜像"></a>删除镜像</h2><p>删除镜像命令:<code>docker rmi</code>, <code>docker rmi</code>命令可以删除本地的镜像，删除前需要先使用<code>docker rm</code> 删除所有依赖该镜像的容器。<code>docker rmi -f</code> 可以强制删除存在容器依赖的镜像，但这不是一个好习惯，请先删除容器再清理镜像。</p>
+<h2 id="u603B_u7ED3"><a href="#u603B_u7ED3" class="headerlink" title="总结"></a>总结</h2><ul>
+<li>使用Docker Hub查找和下载镜像</li>
+<li>创建镜像</li>
+<li>查看镜像信息</li>
+<li>导入和导出镜像</li>
+<li>修改镜像</li>
+<li>删除镜像</li>
+</ul>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;u524D_u8A00&quot;&gt;&lt;a href=&quot;#u524D_u8A00&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h2&gt;&lt;p&gt;在前面第一篇总结中已了解了一些镜像的概念，简单的说镜像就是一个容器的只读模板，用来创建容器。当运行容器时需要指定镜像，如果本地没有该镜像，则会从Docker Registry下载。默认查找的是&lt;code&gt;Docker Hub&lt;/code&gt;。Docker的镜像是增量的修改，每次创建新的镜像都会在老的镜像上面构建一个增量的层，使用到的技术是Another Union File System(AUFS)，具体可参考 &lt;a href=&quot;http://www.infoq.com/cn/articles/analysis-of-docker-file-system-aufs-and-devicemapper/&quot;&gt;剖析Docker文件系统：Aufs与Devicemapper&lt;/a&gt;, 下面主要总结记录使用和管理docker镜像的过程。&lt;/p&gt;
+    
+    </summary>
+    
+      <category term="docker-practice" scheme="http://www.grdtechs.com/categories/docker-practice/"/>
+    
+    
+      <category term="docker" scheme="http://www.grdtechs.com/tags/docker/"/>
+    
+  </entry>
+  
+  <entry>
     <title>docker实践--02 数据卷管理</title>
     <link href="http://www.grdtechs.com/2017/03/05/docker-data-volume/"/>
     <id>http://www.grdtechs.com/2017/03/05/docker-data-volume/</id>
     <published>2017-03-05T00:44:31.000Z</published>
-    <updated>2017-03-06T17:36:59.642Z</updated>
+    <updated>2017-03-07T03:59:49.692Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>Docker中的数据可以存储在类似于虚拟机磁盘的介质中，在Docker中称为<code>数据卷</code>(Data Volume)。数据卷可以用来存储Docker应用的数据，也可以用来在Docker容器间进行数据共享。数据卷呈现给Docker容器的形式就是一个目录，支持多个容器间共享，修改也不会影响镜像。使用Docker的数据卷，类似在系统中使用<code>mount</code> 挂载一个文件系统。<br><a id="more"></a></p>
 <h2 id="u521B_u5EFA_u6570_u636E_u5377"><a href="#u521B_u5EFA_u6570_u636E_u5377" class="headerlink" title="创建数据卷"></a>创建数据卷</h2><p>利用<code>docker run</code>创建容器时, 添加<code>-v</code>参数, 就可以创建并挂载一个到多个数据卷到当前运行的容器中，<code>-v</code>参数的作用是将宿主机的一个目录作为容器的数据卷挂载到容器中，使宿主机和容器之间可以共享一个目录，如果本地路径不存在，Docker也会自动创建。</p>
@@ -71,7 +157,7 @@
     <link href="http://www.grdtechs.com/2017/03/04/docker-basic-use/"/>
     <id>http://www.grdtechs.com/2017/03/04/docker-basic-use/</id>
     <published>2017-03-04T09:05:58.000Z</published>
-    <updated>2017-03-06T17:36:59.642Z</updated>
+    <updated>2017-03-07T03:59:49.692Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>很早就使用docker了，只是工作上一直没用起来， 加之工作多/杂，就只是断断续续自己瞎折腾，现在打算系统的整理总结一下docker使用经历，这个第一篇主要总结一下几个方面，<br><a id="more"></a></p>
 <ul>
@@ -221,7 +307,7 @@
     <link href="http://www.grdtechs.com/2017/03/02/redispool-baseon-fzzy-radix/"/>
     <id>http://www.grdtechs.com/2017/03/02/redispool-baseon-fzzy-radix/</id>
     <published>2017-03-02T14:42:42.000Z</published>
-    <updated>2017-03-06T17:36:59.642Z</updated>
+    <updated>2017-03-07T03:59:49.696Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>之前的老项目的redis client sdk 直接大名鼎鼎的<code>github.com/fzzy/radix</code>提供的<code>redis client</code> 和<code>redis pool</code>, 当访问峰值达到一定的值后会出现<code>too many open files</code>等tcp连接错误，同时也没有直接提供authorization 密钥认证的接口，为满足这些新需求基于<code>fzzy/radix</code>封装出的新的<code>redispool</code>, 已投入生产使用半年来暂无问题，本文总结如下,<br><a id="more"></a></p>
 <h2 id="auth_u8BA4_u8BC1"><a href="#auth_u8BA4_u8BC1" class="headerlink" title="auth认证"></a>auth认证</h2><p>如果redis server 需要密钥访问的话，每新建一个client 连接后都需要先通过authorization认证之后才能被使用，如果每次都通过新建一个redis client 再oauth认证来用显然没什么问题，但对于要频繁进行redis操作的系统而言，最好采用redis pool 的办法来解决，用redis conn 池本来也很好解决， 就是在新建redis conn pool时 每新建一个redis client就auth认证一下然后再保存起来就可以使用了，并且这个连接以后都不需要在进行auth认证了。<br>如果redis pool在新建之后就固定的话， 是可以如上面这么简单的，但是采用的<code>fzzy/radix</code>包在实现的方案是可根据需要自动伸缩地新建redis client conn,之前设置的redis 连接池的大小其实是最小的空闲连接池，当业务需求需要的redis client连接数大于pool中的数目时则会通过redis.Dial()的方法新建一个redis client conn 以满足业务的需求，即在建立redis连接池的时候auth认证的redis client conn 和最后回到pool池中的redis client conn 可能就不是同一个client了，因为当新的redis client conn 塞满redis 连接池后 之前auth认证过的旧的redis client conn就会被Close关闭到而不再回到pool池中，具体实现如下:<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">func</span> (p *RedisPool) getRedisClient() (*redis.Client, error) &#123;</span><br><span class="line">	client, err := redis.Dial(p.network, p.addr)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="constant">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="constant">nil</span>, err</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> <span class="built_in">len</span>(p.pwd) != <span class="number">0</span> &#123;</span><br><span class="line">		<span class="keyword">if</span> client, err = p.redisAuth(client); err != <span class="constant">nil</span> &#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="constant">nil</span>, err</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> client, <span class="constant">nil</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> (p *RedisPool) redisAuth(client *redis.Client) (*redis.Client, error) &#123;</span><br><span class="line">	<span class="keyword">if</span> _, err := client.Cmd(<span class="string">"AUTH"</span>, p.pwd).Str(); err != <span class="constant">nil</span> &#123;</span><br><span class="line">		client.Close()</span><br><span class="line">		<span class="keyword">return</span> client, err</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> client, <span class="constant">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
@@ -252,7 +338,7 @@
     <link href="http://www.grdtechs.com/2017/03/01/use-beego-orm-summary/"/>
     <id>http://www.grdtechs.com/2017/03/01/use-beego-orm-summary/</id>
     <published>2017-03-01T10:44:29.000Z</published>
-    <updated>2017-03-06T17:36:59.642Z</updated>
+    <updated>2017-03-07T03:59:49.696Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>很早之前的一个老项目就使用过ORM，当时使用的是<code>xorm</code>，后来新的项目设计说考虑性能什么的又用写原生sql来做了，在项目中使用一直没什么问题， 但是代码中到处写着原生的sql语句,并且有很多重复的语句，很不好维护，于是最近又重新考虑采用orm的方式来操作数据库，最近看中<code>beego/orm</code>这个包， 它的官方文档也写了很详细的使用说明，下面还是简要总结一下自己在项目中的使用经历,<br><a id="more"></a></p>
 <h2 id="ORM"><a href="#ORM" class="headerlink" title="ORM"></a>ORM</h2><p>ORM, 即Object-Relational Mapping(对象关系映射)，它的作用是在关系型数据库和业务实体对象之间作一个映射，这样在具体的操作业务对象的时候，就不需要再去和复杂的SQL语句打交道，只需简单的操作对象的属性和方法。</p>
@@ -310,7 +396,7 @@
     <link href="http://www.grdtechs.com/2017/02/22/mysql-import-export-summary/"/>
     <id>http://www.grdtechs.com/2017/02/22/mysql-import-export-summary/</id>
     <published>2017-02-22T10:50:36.000Z</published>
-    <updated>2017-03-06T17:36:59.642Z</updated>
+    <updated>2017-03-07T03:59:49.696Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>由于公司的MySQL是搭建在服务器上，为了避免对服务器进行直接改动，想远程导出和导入MySQL的数据库表结构及数据进行操作, 刚好Mysql本身提供了命令行导出工具<code>Mysqldump</code>和<code>Mysql Source</code>导入命令进行SQL数据导入导出工作，通过Mysql命令行导出工具Mysqldump命令能够将Mysql数据导出为文本格式(txt)的SQL文件，通过Mysql Source命令能够将SQL文件导入Mysql数据库中，下面通过Mysql导入导出SQL实例详解Mysqldump和Source命令的用法</p>
 <a id="more"></a>
@@ -398,7 +484,7 @@
     <link href="http://www.grdtechs.com/2017/01/22/linux-signal-golang/"/>
     <id>http://www.grdtechs.com/2017/01/22/linux-signal-golang/</id>
     <published>2017-01-22T14:35:45.000Z</published>
-    <updated>2017-03-06T17:36:59.642Z</updated>
+    <updated>2017-03-07T03:59:49.692Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>信号(Signal)是Linux, 类Unix和其它POSIX兼容的操作系统中用来进程间通讯的一种方式。一个信号就是一个异步的通知，发送给某个进程，或者同进程的某个线程，告诉它们某个事件发生了。<br>当信号发送到某个进程中时，操作系统会中断该进程的正常流程，并进入相应的信号处理函数执行操作，完成后再回到中断的地方继续执行。<br>如果目标进程先前注册了某个信号的处理程序(signal handler),则此处理程序会被调用，否则缺省的处理程序被调用。</p>
 <a id="more"></a>
@@ -667,7 +753,7 @@
     <link href="http://www.grdtechs.com/2017/01/20/go-http-cross-origin/"/>
     <id>http://www.grdtechs.com/2017/01/20/go-http-cross-origin/</id>
     <published>2017-01-20T15:30:40.000Z</published>
-    <updated>2017-03-06T17:36:59.642Z</updated>
+    <updated>2017-03-07T03:59:49.692Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>server提供api服务直接对接前端js, 但是存在跨域问题，本文使用先查询请求过来的host 然后判断主域名是否存在，存在,则在返回头部设置这个请求域名充许跨域访问。<br><a id="more"></a></p>
 <h2 id="u8DE8_u57DF_u6982_u5FF5"><a href="#u8DE8_u57DF_u6982_u5FF5" class="headerlink" title="跨域概念"></a>跨域概念</h2><p>浏览器的同源策略，出于防范跨站脚本的攻击，禁止客户端脚本（如 JavaScript）对不同域的服务进行跨站调用。</p>
@@ -712,7 +798,7 @@
     <link href="http://www.grdtechs.com/2017/01/18/git-submodule/"/>
     <id>http://www.grdtechs.com/2017/01/18/git-submodule/</id>
     <published>2017-01-18T17:11:52.000Z</published>
-    <updated>2017-03-06T17:36:59.642Z</updated>
+    <updated>2017-03-07T03:59:49.692Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>现在golang已经可以通过<code>vendor</code>来管理第三方依赖包了，但是之前的一个老项目用的是<code>git submodule</code>来管理的，但是<code>.gitsubmodule</code>文件中只记录管理了项目的部分依赖包， 需要把还没有被管理的第三包也加上，下面总结使用<code>git submodule</code>的过程。<br><a id="more"></a></p>
 <h2 id="u6DFB_u52A0_u7B2C_u4E09_u65B9_u5305"><a href="#u6DFB_u52A0_u7B2C_u4E09_u65B9_u5305" class="headerlink" title="添加第三方包"></a>添加第三方包</h2><p>为当前工程添加submodule，命令如下：</p>
@@ -752,7 +838,7 @@
     <link href="http://www.grdtechs.com/2017/01/17/http-cache/"/>
     <id>http://www.grdtechs.com/2017/01/17/http-cache/</id>
     <published>2017-01-17T17:54:18.000Z</published>
-    <updated>2017-03-06T17:36:59.642Z</updated>
+    <updated>2017-03-07T03:59:49.692Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>Http缓存机制作为web性能优化的重要手段, 本文对网络中，工作中使用的http缓存知识进行归纳总结。<br><a id="more"></a></p>
 <h2 id="u7F13_u5B58_u5206_u7C7B"><a href="#u7F13_u5B58_u5206_u7C7B" class="headerlink" title="缓存分类"></a>缓存分类</h2><p>缓存分为<code>服务端缓存</code>(server side，比如Nginx、Apache)和<code>客户端缓存</code>(client side，比如 web browser)。</p>
@@ -1034,7 +1120,7 @@
     <link href="http://www.grdtechs.com/2017/01/16/consistent-hashing-summary/"/>
     <id>http://www.grdtechs.com/2017/01/16/consistent-hashing-summary/</id>
     <published>2017-01-16T11:02:50.000Z</published>
-    <updated>2017-03-06T17:36:59.642Z</updated>
+    <updated>2017-03-07T03:59:49.692Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>存在一种场景, 当一个缓存服务由多个服务器组共同提供时, key应该路由到哪一个服务。这里假如采用最通用的方式取模求余: <code>key%N</code>(N为服务器数目), 这样做均衡性没有什么问题, 但是当服务器数目发送增加或减少时, 分配方式则变为<code>key%(N+1)</code>或<code>key%(N-1)</code>。这里将会有大量的key失效迁移, 如果后端key对应的是有状态的存储数据,那么毫无疑问,这种做法将导致服务器间大量的数据迁移,从而造成服务的不稳定。解决思路，采用一致性哈希方法可以解决此问题。 </p>
 <a id="more"></a>
@@ -1138,7 +1224,7 @@
     <link href="http://www.grdtechs.com/2017/01/14/too-many-open-files-solution/"/>
     <id>http://www.grdtechs.com/2017/01/14/too-many-open-files-solution/</id>
     <published>2017-01-14T10:58:37.000Z</published>
-    <updated>2017-03-06T17:36:59.642Z</updated>
+    <updated>2017-03-07T03:59:49.696Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>运行在Linux系统上的网络程序可能会出现”Too many open files”的异常情况，且常见于高并发访问文件系统，多线程网络连接等场景。<br><a id="more"></a></p>
 <h2 id="u6982_u5FF5"><a href="#u6982_u5FF5" class="headerlink" title="概念"></a>概念</h2><p>程序经常访问的文件、socket等在Linux中都是指的文件file，系统需要记录每个当前访问file的name、location、access authority等相关信息，这样的一个实体被称为file entry。<code>open files table</code>存储这些file entry，以数组的形式线性管理。文件描述符(file descriptor)是作为<code>进程</code>到<code>open files table</code>的指针，也就是<code>open files table</code>的下标索引，将每个进程与它所访问的文件关联起来了。 </p>
@@ -1199,7 +1285,7 @@
     <link href="http://www.grdtechs.com/2017/01/06/go-printf-format/"/>
     <id>http://www.grdtechs.com/2017/01/06/go-printf-format/</id>
     <published>2017-01-06T15:49:13.000Z</published>
-    <updated>2017-03-06T17:36:59.642Z</updated>
+    <updated>2017-03-07T03:59:49.692Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>项目中总是时不时的要使用<code>fmt.Printf</code>或<code>fmt.Sprintf</code>来处理某些数据类型,总结一下常用的标识符用途及场景.</p>
 <a id="more"></a>
@@ -1222,7 +1308,7 @@
     <link href="http://www.grdtechs.com/2016/12/17/go-cache-component/"/>
     <id>http://www.grdtechs.com/2016/12/17/go-cache-component/</id>
     <published>2016-12-17T11:32:51.000Z</published>
-    <updated>2017-03-06T17:36:59.642Z</updated>
+    <updated>2017-03-07T03:59:49.692Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>总结用golang从分析，设计到实现一个可用的缓存组件。<br><a id="more"></a></p>
 <h2 id="u7F13_u5B58"><a href="#u7F13_u5B58" class="headerlink" title="缓存"></a>缓存</h2><ul>
@@ -1318,7 +1404,7 @@
     <link href="http://www.grdtechs.com/2016/11/23/uml-symbol-desc/"/>
     <id>http://www.grdtechs.com/2016/11/23/uml-symbol-desc/</id>
     <published>2016-11-23T11:47:43.000Z</published>
-    <updated>2017-03-06T17:36:59.642Z</updated>
+    <updated>2017-03-07T03:59:49.696Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>在UML的定义中，描述类和对象之间的关系，包括以下几种方式：依赖（<code>Dependency</code>）、关联（<code>Association</code>）、聚合（<code>Aggregation</code>）、组合（<code>Composition</code>）、泛化（<code>Generalization</code>）和实现（<code>Realization</code>）。现分别说明如下：<br><a id="more"></a></p>
 <h2 id="u5B9A_u4E49"><a href="#u5B9A_u4E49" class="headerlink" title="定义"></a>定义</h2><p>类图基本符号可拆分为四类:<code>线</code>(<code>虚线</code>和<code>实线</code>)，<code>箭头</code>，<code>三角</code>(<code>空心右三角</code>和<code>实心右三角</code>)，<code>菱形</code>(<code>空心菱形</code>和<code>实心菱形</code>); 由这些基本的图形进行组合构成了类图的基本符号。这里要注意这几个符号的顺序，代表了类与类之间关系的耦合程度, 越向右耦合度越高。</p>
@@ -1449,7 +1535,7 @@
     <link href="http://www.grdtechs.com/2016/11/23/go-dealwith-database-nullvalue/"/>
     <id>http://www.grdtechs.com/2016/11/23/go-dealwith-database-nullvalue/</id>
     <published>2016-11-23T11:40:54.000Z</published>
-    <updated>2017-03-06T17:36:59.642Z</updated>
+    <updated>2017-03-07T03:59:49.692Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>golang是强类型语言，在赋值和解析过程中需要先定义好数据类型，否在会报类型错误，下面总结在处理数据库表时遇到字段为空或零值的情况<br><a id="more"></a></p>
 <h2 id="u573A_u666F"><a href="#u573A_u666F" class="headerlink" title="场景"></a>场景</h2><p>假如存在如下没有指定<code>not null</code>的场合<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="operator"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> <span class="string">"users"</span> (</span><br><span class="line">    <span class="string">"id"</span> <span class="built_in">serial</span> <span class="keyword">not</span> <span class="literal">null</span> primary <span class="keyword">key</span>,</span><br><span class="line">    <span class="string">"name"</span> <span class="built_in">text</span>,</span><br><span class="line">    <span class="string">"age"</span> <span class="built_in">integer</span></span><br><span class="line">)</span></span><br></pre></td></tr></table></figure></p>
@@ -1478,7 +1564,7 @@
     <link href="http://www.grdtechs.com/2016/11/19/go-install-binaries/"/>
     <id>http://www.grdtechs.com/2016/11/19/go-install-binaries/</id>
     <published>2016-11-19T00:18:37.000Z</published>
-    <updated>2017-03-06T17:36:59.642Z</updated>
+    <updated>2017-03-07T03:59:49.692Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>golang tool chains 提供了很多好用的工具， 但是如果直接安装的话，大多数需要翻墙才能安装， 而且比较麻烦； 本文记录一种不需要翻墙就能顺利安装相应的工具的方法.</p>
 <a id="more"></a>
@@ -1512,7 +1598,7 @@
     <link href="http://www.grdtechs.com/2016/11/11/go-use-mysql/"/>
     <id>http://www.grdtechs.com/2016/11/11/go-use-mysql/</id>
     <published>2016-11-11T13:21:16.000Z</published>
-    <updated>2017-03-06T17:36:59.642Z</updated>
+    <updated>2017-03-07T03:59:49.692Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>Golang 提供了<code>database/sql</code>包用于对<code>SQL数据库</code>的访问, 作为操作数据库的入口对象<code>sql.DB</code>, 主要为我们提供了两个重要的功能:<br><a id="more"></a></p>
 <ul>
@@ -1606,7 +1692,7 @@
     <link href="http://www.grdtechs.com/2016/10/23/go-build-small-exec/"/>
     <id>http://www.grdtechs.com/2016/10/23/go-build-small-exec/</id>
     <published>2016-10-23T14:00:32.000Z</published>
-    <updated>2017-03-06T17:36:59.642Z</updated>
+    <updated>2017-03-07T03:59:49.692Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>尽管go1.7.3编译生成的可执行程序已经很小了,但是通过编译参数控制还能编译出更小的可执行文件，总结如下,<br><a id="more"></a></p>
 <h2 id="u52A0-ldflags_u53C2_u6570"><a href="#u52A0-ldflags_u53C2_u6570" class="headerlink" title="加-ldflags参数"></a>加-ldflags参数</h2><p>在程序编译的时候可以加上<code>-ldflags &quot;-s -w&quot;</code> 参数来优化编译程序, 其实通过去除部分连接和调试等信息来使得编译之后的执行程序更小,具体参数如下:</p>
@@ -1644,7 +1730,7 @@
     <link href="http://www.grdtechs.com/2016/10/16/mac-update-vim8-0/"/>
     <id>http://www.grdtechs.com/2016/10/16/mac-update-vim8-0/</id>
     <published>2016-10-16T23:08:56.000Z</published>
-    <updated>2017-03-06T17:36:59.642Z</updated>
+    <updated>2017-03-07T03:59:49.696Z</updated>
     
     <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>将mac自带的vim7.3 升级到vim8.0<br><a id="more"></a></p>
 <h2 id="u5347_u7EA7vim8-0"><a href="#u5347_u7EA7vim8-0" class="headerlink" title="升级vim8.0"></a>升级vim8.0</h2><ul>
@@ -1694,31 +1780,6 @@
     
     
       <category term="vim8.0" scheme="http://www.grdtechs.com/tags/vim8-0/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>优雅的关闭ticker</title>
-    <link href="http://www.grdtechs.com/2016/10/16/close-ticker-correctly/"/>
-    <id>http://www.grdtechs.com/2016/10/16/close-ticker-correctly/</id>
-    <published>2016-10-16T14:27:39.000Z</published>
-    <updated>2017-03-06T17:36:59.638Z</updated>
-    
-    <content type="html"><![CDATA[<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>在<code>ticker</code>和<code>goroutine</code>组合使用中当调用<code>ticker.Stop()</code>关闭<code>ticker</code>之后，相应的<code>goroutine</code>中的<code>ticker.C</code>并没有停掉，下面总结一种优雅的方式关闭<code>ticker</code>.<br><a id="more"></a></p>
-<h2 id="u4F18_u96C5_u7684_u5173_u95EDticker"><a href="#u4F18_u96C5_u7684_u5173_u95EDticker" class="headerlink" title="优雅的关闭ticker"></a>优雅的关闭<code>ticker</code></h2><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">"fmt"</span></span><br><span class="line">	<span class="string">"time"</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> main() &#123;</span><br><span class="line">	Demo()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> Demo() &#123;</span><br><span class="line">	done := startTicker(PrintInfo)</span><br><span class="line">	time.Sleep(time.Duration(<span class="number">12</span>) * time.Second)</span><br><span class="line">	<span class="built_in">close</span>(done)</span><br><span class="line">	time.Sleep(time.Duration(<span class="number">1</span>) * time.Minute)</span><br><span class="line">	fmt.Println(<span class="string">"main finished"</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> startTicker(f <span class="keyword">func</span>()) <span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125; &#123;</span><br><span class="line">	done := <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;, <span class="number">1</span>)</span><br><span class="line">	<span class="keyword">go</span> <span class="keyword">func</span>() &#123;</span><br><span class="line">		ticker := time.NewTicker(<span class="number">5</span> * time.Second)</span><br><span class="line">		<span class="comment">//	ticker := time.NewTicker(5 * time.Minute)</span></span><br><span class="line">		<span class="keyword">defer</span> ticker.Stop()</span><br><span class="line"></span><br><span class="line">		<span class="keyword">for</span> &#123;</span><br><span class="line">			<span class="keyword">select</span> &#123;</span><br><span class="line">			<span class="keyword">case</span> &lt;-ticker.C:</span><br><span class="line">				f()</span><br><span class="line">			<span class="keyword">case</span> &lt;-done:</span><br><span class="line">				<span class="keyword">return</span></span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;()</span><br><span class="line">	<span class="keyword">return</span> done</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> PrintInfo() &#123;</span><br><span class="line">	fmt.Println(<span class="string">"hello"</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>上述代码通过<code>startTicker</code>创建一个<code>ticker</code>, 当想要关闭这个<code>ticker</code>并同时退出对应<code>goroutine</code>中的<code>for</code>时，可以直接<code>close()</code>，发送<code>done</code>信号直接返回退出<code>startTicker</code>即可.</p>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;h2 id=&quot;u524D_u8A00&quot;&gt;&lt;a href=&quot;#u524D_u8A00&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h2&gt;&lt;p&gt;在&lt;code&gt;ticker&lt;/code&gt;和&lt;code&gt;goroutine&lt;/code&gt;组合使用中当调用&lt;code&gt;ticker.Stop()&lt;/code&gt;关闭&lt;code&gt;ticker&lt;/code&gt;之后，相应的&lt;code&gt;goroutine&lt;/code&gt;中的&lt;code&gt;ticker.C&lt;/code&gt;并没有停掉，下面总结一种优雅的方式关闭&lt;code&gt;ticker&lt;/code&gt;.&lt;br&gt;
-    
-    </summary>
-    
-      <category term="golang" scheme="http://www.grdtechs.com/categories/golang/"/>
-    
-    
-      <category term="ticker" scheme="http://www.grdtechs.com/tags/ticker/"/>
     
   </entry>
   
