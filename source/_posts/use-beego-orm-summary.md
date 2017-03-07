@@ -208,7 +208,7 @@ func recordInsterLoop(done <-chan bool) {
 		for {
 			select {
 			case <-done:
-				recordCopy := Copyrecode(records)
+				recordCopy, recordLen := Copyrecode(records)
 				insertMulti(recordLen, recordCopy)
 
 			case <-time.After(time.Duration(5) * time.Second):
