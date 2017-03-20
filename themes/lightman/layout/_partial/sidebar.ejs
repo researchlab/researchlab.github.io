@@ -1,0 +1,7 @@
+<div class="openaside"><a class="navbutton" href="#" title="<%= __('showsidebar') %>"></a></div>
+<div id="asidepart">
+<% theme.widgets.forEach(function(widget){ %>
+  <%- partial('../_widget/' + widget) %>
+<% }); %>
+</aside>
+</div>
