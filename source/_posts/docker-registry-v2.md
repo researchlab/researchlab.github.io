@@ -1,5 +1,5 @@
 ---
-title: docker-registry-v2
+title: "搭建私有镜像管理Docker Registry容器服务"
 date: 2017-09-15 14:32:05
 categories: [docker-practice]
 tags: [docker]
@@ -11,17 +11,19 @@ description:
 Docker Registry 是一个用来管理Docker镜像的服务，本身也是一个Docker容器。搭建一个私有的Docker Registry的使用场景主要有下面几个:
 1.当需要对容器镜像存储进行完全控制,就不能依赖官方提供的Docker Hub进行管理;
 2.当内部使用存在网络问题或安全问题等情况都适合搭建私有的Docker Registry对镜像进行管理;
-下面处于需要频繁pull镜像到某内部机器上新建容器的需求来搭建需要认证访问的Docker Registry,这样同时可以解决网络依赖问题及安全问题, 下面是搭建Docker Registry过程的记录和总结;
+
+下面从需频繁pull镜像到某内部机器上新建容器的需求来搭建需要认证访问的Docker Registry,这样同时可以解决网络依赖问题及安全问题, 下面是搭建Docker Registry过程的记录和总结;
+<!--more-->
 
 
 ## 搭建Docker Registry
 
-1.要搭建本地私有Registry, 首先需要一个Docker Registry基础镜像,这个官方已经制作好了直接通过下面的命令pull即可,
+1.要搭建本地私有Registry, 首先需要一个Docker Registry基础镜像,直接pull官方镜像即可,
 ```bash 
 docker pull registry 
 ```
 
-2.通过下面的命令运行一个基于上面pull到的Registry服务, 
+2.通过下面的命令运行一个基于上面pull的Registry容器服务, 
 ```bash
 docker run -d -p 5000:5000 --restart=always -v /opt/registry-var/:/var/lib/registry/ registry:latest
 ```
@@ -35,7 +37,7 @@ docker run -d -p 5000:5000 --restart=always -v /opt/registry-var/:/var/lib/regis
 但上面运行的Registry服务是没有设置认证权限的,即未授权用户也是可以访问上述Registry服务的，为了安全起见一般都会设置认证权限用于访问,
 
 3.配置带用户权限的registry
-到上面为止，registry已经可以使用了。如果想要控制registry的使用权限，使其只有在登录用户名和密码之后才能使用的话，还需要做额外的设置。
+现在registry已经可以使用了。如果想要控制registry的使用权限，使其只有在登录用户名和密码之后才能使用的话，还需要做额外的设置。
 registry的用户名密码文件可以通过htpasswd来生成,
 ```bash 
 mkdir /opt/registry-var/auth/
@@ -96,8 +98,10 @@ Error response from daemon: Get https://100.73.41.17:5000/v2/: http: server gave
 }
 ```
 是的没错, 是通过上述设置即可解决问题,但是这个设置不是设置在Docker Registry启动的那台机器上(上面是:100.73.41.17), 这个是要设置在你在那台机器上进行登录上传下载镜像操作的机器上，
+
 如上面所设置，我的Docker Registry是搭建在100.73.41.17这台远程机器上,而我需要在本地的Mac 机器上登录远程得这个私有的Docker Registry 进行上传下载操作，那么上面的设置就要设置在我的Mac机器的Docker配置中;
-但是我在Mac机器上好像没有发现/etc/docker/daemon.json这个文件，后来我通过docker client的图形界面进行设置的，如下，设置之后需要重启docker server,如我需要重启Mac机器上的docker server;
+
+但是在Mac机器上好像没有发现/etc/docker/daemon.json这个文件，后来通过docker client的图形界面进行设置的，如下，设置之后需要重启docker server,如我需要重启Mac机器上的docker server;
 <center>![set insecure-registries](imgs/set_insecure_registries.png)图1 设置insecure-registries</center>
 
 不过设置`insecure-registries`是非常不安全的，官方文档中也不推荐而是给出自己生成证书的方式进行认证，[官方链接](https://docs.docker.com/registry/insecure/#troubleshoot-insecure-registry)
