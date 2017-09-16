@@ -943,7 +943,7 @@ article header.article-info >p.article-time:before {
   -moz-osx-font-smoothing: grayscale;
 }
 article .article-content {
-  padding: 1.5em 4%;
+  padding: 0.5em 4% 0.5em;
   color: #413f3f;
   font-size: 100%;
 }
@@ -1084,7 +1084,7 @@ article .article-content p {
 }
 @media only screen and (min-width: 1024px) {
   article .article-content p {
-    margin-top: 1em;
+    margin-bottom: 1em;
   }
 }
 article .article-content img,
