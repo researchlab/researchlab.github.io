@@ -11,19 +11,19 @@
     
 
     
-    <meta name="description" content="前言尽管MVC(model view controller pattern)模式在PHPweb开发中很受欢迎，但是网上很难找到一套代码简单又能清楚阐述PHP MVC模式的案例，本文希望通过理论和代码实践简单阐述PHP MVC模式。">
+    <meta name="description" content="尽管MVC(model view controller pattern)模式在PHPweb开发中很受欢迎，但是网上很难找到一套代码简单又能清楚阐述PHP MVC模式的案例，本文希望通过理论和代码实践简单阐述PHP MVC模式。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="php中mvc模式使用总结(一)">
 <meta property="og:url" content="http://www.grdtechs.com/2016/07/30/php-mvc-1/index.html">
 <meta property="og:site_name" content="一线攻城狮">
-<meta property="og:description" content="前言尽管MVC(model view controller pattern)模式在PHPweb开发中很受欢迎，但是网上很难找到一套代码简单又能清楚阐述PHP MVC模式的案例，本文希望通过理论和代码实践简单阐述PHP MVC模式。">
+<meta property="og:description" content="尽管MVC(model view controller pattern)模式在PHPweb开发中很受欢迎，但是网上很难找到一套代码简单又能清楚阐述PHP MVC模式的案例，本文希望通过理论和代码实践简单阐述PHP MVC模式。">
 <meta property="og:image" content="http://www.grdtechs.com/imgs/mvc-collaboration.png">
 <meta property="og:image" content="http://www.grdtechs.com/imgs/mvc-structure.png">
 <meta property="og:image" content="http://www.grdtechs.com/imgs/mvc-sequence1.png">
-<meta property="og:updated_time" content="2017-09-16T14:24:24.234Z">
+<meta property="og:updated_time" content="2017-09-16T14:32:56.907Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="php中mvc模式使用总结(一)">
-<meta name="twitter:description" content="前言尽管MVC(model view controller pattern)模式在PHPweb开发中很受欢迎，但是网上很难找到一套代码简单又能清楚阐述PHP MVC模式的案例，本文希望通过理论和代码实践简单阐述PHP MVC模式。">
+<meta name="twitter:description" content="尽管MVC(model view controller pattern)模式在PHPweb开发中很受欢迎，但是网上很难找到一套代码简单又能清楚阐述PHP MVC模式的案例，本文希望通过理论和代码实践简单阐述PHP MVC模式。">
 
     
     <link rel="alternative" href="/atom.xml" title="一线攻城狮" type="application/atom+xml">
@@ -92,11 +92,11 @@
 		<div id="toc" class="toc-article">
 			<strong class="toc-title">文章目录</strong>
 		
-			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#u524D_u8A00"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Controller__u5C42"><span class="toc-number">2.</span> <span class="toc-text">Controller 层</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Model__u548C_Entity__u7C7B"><span class="toc-number">3.</span> <span class="toc-text">Model 和 Entity 类</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#View_u5C42"><span class="toc-number">4.</span> <span class="toc-text">View层</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#viewbook-php"><span class="toc-number">4.1.</span> <span class="toc-text">viewbook.php</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#booklist-php"><span class="toc-number">4.2.</span> <span class="toc-text">booklist.php</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u603B_u7ED3"><span class="toc-number">5.</span> <span class="toc-text">总结</span></a></li></ol>
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Controller__u5C42"><span class="toc-number">1.</span> <span class="toc-text">Controller 层</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Model__u548C_Entity__u7C7B"><span class="toc-number">2.</span> <span class="toc-text">Model 和 Entity 类</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#View_u5C42"><span class="toc-number">3.</span> <span class="toc-text">View层</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#viewbook-php"><span class="toc-number">3.1.</span> <span class="toc-text">viewbook.php</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#booklist-php"><span class="toc-number">3.2.</span> <span class="toc-text">booklist.php</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u603B_u7ED3"><span class="toc-number">4.</span> <span class="toc-text">总结</span></a></li></ol>
 		
 		</div>
 		
-		<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>尽管MVC(model view controller pattern)模式在<code>PHP</code>web开发中很受欢迎，但是网上很难找到一套代码简单又能清楚阐述<code>PHP MVC</code>模式的案例，本文希望通过理论和代码实践简单阐述<code>PHP MVC</code>模式。</p>
+		<p>尽管MVC(model view controller pattern)模式在<code>PHP</code>web开发中很受欢迎，但是网上很难找到一套代码简单又能清楚阐述<code>PHP MVC</code>模式的案例，本文希望通过理论和代码实践简单阐述<code>PHP MVC</code>模式。</p>
 <a id="more"></a>
 <p><code>MVC</code>模式在应用中分为<code>Model</code>, <code>View</code> 和 <code>Controller</code>三模块:</p>
 <p><code>Model</code>负责处理数据; 主要负责数据有关的业务处理及存储读取工作。</p>

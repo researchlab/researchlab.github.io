@@ -11,16 +11,16 @@
     
 
     
-    <meta name="description" content="前言在Ubuntu16.04上， 安装php7的redis扩展, 记录安装过程。">
+    <meta name="description" content="在Ubuntu16.04上， 安装php7的redis扩展, 记录安装过程。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="php7 安装redis扩展">
 <meta property="og:url" content="http://www.grdtechs.com/2016/08/02/php7-redis-install/index.html">
 <meta property="og:site_name" content="一线攻城狮">
-<meta property="og:description" content="前言在Ubuntu16.04上， 安装php7的redis扩展, 记录安装过程。">
-<meta property="og:updated_time" content="2017-09-16T14:24:24.234Z">
+<meta property="og:description" content="在Ubuntu16.04上， 安装php7的redis扩展, 记录安装过程。">
+<meta property="og:updated_time" content="2017-09-16T14:32:56.907Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="php7 安装redis扩展">
-<meta name="twitter:description" content="前言在Ubuntu16.04上， 安装php7的redis扩展, 记录安装过程。">
+<meta name="twitter:description" content="在Ubuntu16.04上， 安装php7的redis扩展, 记录安装过程。">
 
     
     <link rel="alternative" href="/atom.xml" title="一线攻城狮" type="application/atom+xml">
@@ -89,11 +89,11 @@
 		<div id="toc" class="toc-article">
 			<strong class="toc-title">文章目录</strong>
 		
-			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#u524D_u8A00"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#u5B89_u88C5phpredis"><span class="toc-number">1.1.</span> <span class="toc-text">安装phpredis</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u542F_u52A8_redis__u6269_u5C55"><span class="toc-number">2.</span> <span class="toc-text">启动 redis 扩展</span></a></li></ol>
+			<ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#u5B89_u88C5phpredis"><span class="toc-number">1.</span> <span class="toc-text">安装phpredis</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u542F_u52A8_redis__u6269_u5C55"><span class="toc-number"></span> <span class="toc-text">启动 redis 扩展</span></a>
 		
 		</div>
 		
-		<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>在<code>Ubuntu16.04</code>上， 安装<code>php7</code>的<code>redis</code>扩展, 记录安装过程。<br><a id="more"></a></p>
+		<p>在<code>Ubuntu16.04</code>上， 安装<code>php7</code>的<code>redis</code>扩展, 记录安装过程。<br><a id="more"></a></p>
 <h3 id="u5B89_u88C5phpredis"><a href="#u5B89_u88C5phpredis" class="headerlink" title="安装phpredis"></a>安装phpredis</h3><p><code>Redis</code>已经有了<code>PHP7</code>版本，可以从<code>github</code> 上获取项目克隆，然后手动切换到 <code>php7</code> 分支即可安装</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">$ git <span class="built_in">clone</span> https://github.com/phpredis/phpredis.git </span><br><span class="line">$ <span class="built_in">cd</span> phpredis/ </span><br><span class="line">$ git checkout php7 </span><br><span class="line">$ phpize </span><br><span class="line">$ ./configure </span><br><span class="line">$ make </span><br><span class="line">$ makeinstall</span><br></pre></td></tr></table></figure>
 <p>如果没有安装php7.0-dev, 则没有安装 <code>phpize</code> , 可以直接<code>sudo apt install php7.0-dev</code> 安装即可。 </p>

@@ -11,16 +11,16 @@
     
 
     
-    <meta name="description" content="前言Hexo是一个基于Node.js免费开源的静态博客框架，方便将生成的静态网页托管在github和Heroku上，可快速部署，并支持Markdown写作，这也是选择Hexo部署本站的理由。无特殊说明，本站所有操作均在Mac OS下完成。">
+    <meta name="description" content="Hexo是一个基于Node.js免费开源的静态博客框架，方便将生成的静态网页托管在github和Heroku上，可快速部署，并支持Markdown写作，这也是选择Hexo部署本站的理由。无特殊说明，本站所有操作均在Mac OS下完成。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="用Hexo+github搭建本站">
 <meta property="og:url" content="http://www.grdtechs.com/2016/01/15/hexo-blog-1/index.html">
 <meta property="og:site_name" content="一线攻城狮">
-<meta property="og:description" content="前言Hexo是一个基于Node.js免费开源的静态博客框架，方便将生成的静态网页托管在github和Heroku上，可快速部署，并支持Markdown写作，这也是选择Hexo部署本站的理由。无特殊说明，本站所有操作均在Mac OS下完成。">
-<meta property="og:updated_time" content="2017-09-16T14:24:24.234Z">
+<meta property="og:description" content="Hexo是一个基于Node.js免费开源的静态博客框架，方便将生成的静态网页托管在github和Heroku上，可快速部署，并支持Markdown写作，这也是选择Hexo部署本站的理由。无特殊说明，本站所有操作均在Mac OS下完成。">
+<meta property="og:updated_time" content="2017-09-16T14:32:56.907Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="用Hexo+github搭建本站">
-<meta name="twitter:description" content="前言Hexo是一个基于Node.js免费开源的静态博客框架，方便将生成的静态网页托管在github和Heroku上，可快速部署，并支持Markdown写作，这也是选择Hexo部署本站的理由。无特殊说明，本站所有操作均在Mac OS下完成。">
+<meta name="twitter:description" content="Hexo是一个基于Node.js免费开源的静态博客框架，方便将生成的静态网页托管在github和Heroku上，可快速部署，并支持Markdown写作，这也是选择Hexo部署本站的理由。无特殊说明，本站所有操作均在Mac OS下完成。">
 
     
     <link rel="alternative" href="/atom.xml" title="一线攻城狮" type="application/atom+xml">
@@ -89,11 +89,11 @@
 		<div id="toc" class="toc-article">
 			<strong class="toc-title">文章目录</strong>
 		
-			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#u524D_u8A00"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u642D_u5EFAHexo_u535A_u5BA2"><span class="toc-number">2.</span> <span class="toc-text">搭建Hexo博客</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u914D_u7F6EHexo_u535A_u5BA2"><span class="toc-number">3.</span> <span class="toc-text">配置Hexo博客</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u7528Hexo_u5199_u535A_u5BA2"><span class="toc-number">4.</span> <span class="toc-text">用Hexo写博客</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u4F18_u5316Hexo_u535A_u5BA2"><span class="toc-number">5.</span> <span class="toc-text">优化Hexo博客</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u95EE_u9898_u89E3_u51B3_u65B9_u6848"><span class="toc-number">6.</span> <span class="toc-text">问题解决方案</span></a></li></ol>
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#u642D_u5EFAHexo_u535A_u5BA2"><span class="toc-number">1.</span> <span class="toc-text">搭建Hexo博客</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u914D_u7F6EHexo_u535A_u5BA2"><span class="toc-number">2.</span> <span class="toc-text">配置Hexo博客</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u7528Hexo_u5199_u535A_u5BA2"><span class="toc-number">3.</span> <span class="toc-text">用Hexo写博客</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u4F18_u5316Hexo_u535A_u5BA2"><span class="toc-number">4.</span> <span class="toc-text">优化Hexo博客</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u95EE_u9898_u89E3_u51B3_u65B9_u6848"><span class="toc-number">5.</span> <span class="toc-text">问题解决方案</span></a></li></ol>
 		
 		</div>
 		
-		<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p><a href="https://hexo.io" target="_blank" rel="external">Hexo</a>是一个基于<code>Node.js</code>免费开源的静态博客框架，方便将生成的静态网页托管在<code>github</code>和<code>Heroku</code>上，可快速部署，并支持<code>Markdown</code>写作，这也是选择<code>Hexo</code>部署本站的理由。无特殊说明，本站所有操作均在<code>Mac OS</code>下完成。<br><a id="more"></a></p>
+		<p><a href="https://hexo.io" target="_blank" rel="external">Hexo</a>是一个基于<code>Node.js</code>免费开源的静态博客框架，方便将生成的静态网页托管在<code>github</code>和<code>Heroku</code>上，可快速部署，并支持<code>Markdown</code>写作，这也是选择<code>Hexo</code>部署本站的理由。无特殊说明，本站所有操作均在<code>Mac OS</code>下完成。<br><a id="more"></a></p>
 <h2 id="u642D_u5EFAHexo_u535A_u5BA2"><a href="#u642D_u5EFAHexo_u535A_u5BA2" class="headerlink" title="搭建Hexo博客"></a>搭建Hexo博客</h2><ul>
 <li><p>安装<code>Node.js</code></p>
 <pre><code>$ brew install node #该命令执行后，自动装好node和npm

@@ -11,18 +11,18 @@
     
 
     
-    <meta name="description" content="前言目前，自动化构建、持续集成的理念在整个计算行业非常的流行，大家更愿意去使用自动化代替手动，从而提高效率。Travis CI就是一个在线的、分布式的持续集成服务，用来构建及测试在GitHub托管的代码。利用Travis CI 会在每一次push后生成一个虚拟机来执行事先安排好的自动构建任务，从来进行发布。本文就要用Travis CI来自动构建Hexo博客。">
+    <meta name="description" content="目前，自动化构建、持续集成的理念在整个计算行业非常的流行，大家更愿意去使用自动化代替手动，从而提高效率。Travis CI就是一个在线的、分布式的持续集成服务，用来构建及测试在GitHub托管的代码。利用Travis CI 会在每一次push后生成一个虚拟机来执行事先安排好的自动构建任务，从来进行发布。本文就要用Travis CI来自动构建Hexo博客。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="使用Travis CI自动构建Hexo静态博客">
 <meta property="og:url" content="http://www.grdtechs.com/2016/05/08/travis-ci-deploy-hexo-blog/index.html">
 <meta property="og:site_name" content="一线攻城狮">
-<meta property="og:description" content="前言目前，自动化构建、持续集成的理念在整个计算行业非常的流行，大家更愿意去使用自动化代替手动，从而提高效率。Travis CI就是一个在线的、分布式的持续集成服务，用来构建及测试在GitHub托管的代码。利用Travis CI 会在每一次push后生成一个虚拟机来执行事先安排好的自动构建任务，从来进行发布。本文就要用Travis CI来自动构建Hexo博客。">
+<meta property="og:description" content="目前，自动化构建、持续集成的理念在整个计算行业非常的流行，大家更愿意去使用自动化代替手动，从而提高效率。Travis CI就是一个在线的、分布式的持续集成服务，用来构建及测试在GitHub托管的代码。利用Travis CI 会在每一次push后生成一个虚拟机来执行事先安排好的自动构建任务，从来进行发布。本文就要用Travis CI来自动构建Hexo博客。">
 <meta property="og:image" content="http://www.grdtechs.com/imgs/travis-hexo-flowing.png">
 <meta property="og:image" content="http://www.grdtechs.com/imgs/deploy_keys.png">
-<meta property="og:updated_time" content="2017-09-16T14:24:24.234Z">
+<meta property="og:updated_time" content="2017-09-16T14:32:56.907Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="使用Travis CI自动构建Hexo静态博客">
-<meta name="twitter:description" content="前言目前，自动化构建、持续集成的理念在整个计算行业非常的流行，大家更愿意去使用自动化代替手动，从而提高效率。Travis CI就是一个在线的、分布式的持续集成服务，用来构建及测试在GitHub托管的代码。利用Travis CI 会在每一次push后生成一个虚拟机来执行事先安排好的自动构建任务，从来进行发布。本文就要用Travis CI来自动构建Hexo博客。">
+<meta name="twitter:description" content="目前，自动化构建、持续集成的理念在整个计算行业非常的流行，大家更愿意去使用自动化代替手动，从而提高效率。Travis CI就是一个在线的、分布式的持续集成服务，用来构建及测试在GitHub托管的代码。利用Travis CI 会在每一次push后生成一个虚拟机来执行事先安排好的自动构建任务，从来进行发布。本文就要用Travis CI来自动构建Hexo博客。">
 
     
     <link rel="alternative" href="/atom.xml" title="一线攻城狮" type="application/atom+xml">
@@ -91,11 +91,11 @@
 		<div id="toc" class="toc-article">
 			<strong class="toc-title">文章目录</strong>
 		
-			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#u524D_u8A00"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u5B89_u88C5Hexo"><span class="toc-number">2.</span> <span class="toc-text">安装Hexo</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u90E8_u7F72Travis_CI"><span class="toc-number">3.</span> <span class="toc-text">部署Travis CI</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u9047_u5230Authentication_failed"><span class="toc-number">4.</span> <span class="toc-text">遇到Authentication failed</span></a></li></ol>
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#u5B89_u88C5Hexo"><span class="toc-number">1.</span> <span class="toc-text">安装Hexo</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u90E8_u7F72Travis_CI"><span class="toc-number">2.</span> <span class="toc-text">部署Travis CI</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u9047_u5230Authentication_failed"><span class="toc-number">3.</span> <span class="toc-text">遇到Authentication failed</span></a></li></ol>
 		
 		</div>
 		
-		<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>目前，自动化构建、持续集成的理念在整个计算行业非常的流行，大家更愿意去使用自动化代替手动，从而提高效率。<code>Travis CI</code>就是一个在线的、分布式的持续集成服务，用来构建及测试在GitHub托管的代码。利用Travis CI 会在每一次push后生成一个虚拟机来执行事先安排好的自动构建任务，从来进行发布。本文就要用<code>Travis CI</code>来自动构建<code>Hexo</code>博客。<br><a id="more"></a></p>
+		<p>目前，自动化构建、持续集成的理念在整个计算行业非常的流行，大家更愿意去使用自动化代替手动，从而提高效率。<code>Travis CI</code>就是一个在线的、分布式的持续集成服务，用来构建及测试在GitHub托管的代码。利用Travis CI 会在每一次push后生成一个虚拟机来执行事先安排好的自动构建任务，从来进行发布。本文就要用<code>Travis CI</code>来自动构建<code>Hexo</code>博客。<br><a id="more"></a></p>
 <h2 id="u5B89_u88C5Hexo"><a href="#u5B89_u88C5Hexo" class="headerlink" title="安装Hexo"></a>安装Hexo</h2><ul>
 <li>安装cnpm</li>
 </ul>

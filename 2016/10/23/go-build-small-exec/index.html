@@ -11,16 +11,16 @@
     
 
     
-    <meta name="description" content="前言尽管go1.7.3编译生成的可执行程序已经很小了,但是通过编译参数控制还能编译出更小的可执行文件，总结如下,">
+    <meta name="description" content="尽管go1.7.3编译生成的可执行程序已经很小了,但是通过编译参数控制还能编译出更小的可执行文件，总结如下,">
 <meta property="og:type" content="article">
 <meta property="og:title" content="go编译生成更小的执行程序">
 <meta property="og:url" content="http://www.grdtechs.com/2016/10/23/go-build-small-exec/index.html">
 <meta property="og:site_name" content="一线攻城狮">
-<meta property="og:description" content="前言尽管go1.7.3编译生成的可执行程序已经很小了,但是通过编译参数控制还能编译出更小的可执行文件，总结如下,">
-<meta property="og:updated_time" content="2017-09-16T14:24:24.234Z">
+<meta property="og:description" content="尽管go1.7.3编译生成的可执行程序已经很小了,但是通过编译参数控制还能编译出更小的可执行文件，总结如下,">
+<meta property="og:updated_time" content="2017-09-16T14:32:56.903Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="go编译生成更小的执行程序">
-<meta name="twitter:description" content="前言尽管go1.7.3编译生成的可执行程序已经很小了,但是通过编译参数控制还能编译出更小的可执行文件，总结如下,">
+<meta name="twitter:description" content="尽管go1.7.3编译生成的可执行程序已经很小了,但是通过编译参数控制还能编译出更小的可执行文件，总结如下,">
 
     
     <link rel="alternative" href="/atom.xml" title="一线攻城狮" type="application/atom+xml">
@@ -89,11 +89,11 @@
 		<div id="toc" class="toc-article">
 			<strong class="toc-title">文章目录</strong>
 		
-			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#u524D_u8A00"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u52A0-ldflags_u53C2_u6570"><span class="toc-number">2.</span> <span class="toc-text">加-ldflags参数</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u4F7F_u7528upx"><span class="toc-number">3.</span> <span class="toc-text">使用upx</span></a></li></ol>
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#u52A0-ldflags_u53C2_u6570"><span class="toc-number">1.</span> <span class="toc-text">加-ldflags参数</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u4F7F_u7528upx"><span class="toc-number">2.</span> <span class="toc-text">使用upx</span></a></li></ol>
 		
 		</div>
 		
-		<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>尽管go1.7.3编译生成的可执行程序已经很小了,但是通过编译参数控制还能编译出更小的可执行文件，总结如下,<br><a id="more"></a></p>
+		<p>尽管go1.7.3编译生成的可执行程序已经很小了,但是通过编译参数控制还能编译出更小的可执行文件，总结如下,<br><a id="more"></a></p>
 <h2 id="u52A0-ldflags_u53C2_u6570"><a href="#u52A0-ldflags_u53C2_u6570" class="headerlink" title="加-ldflags参数"></a>加-ldflags参数</h2><p>在程序编译的时候可以加上<code>-ldflags &quot;-s -w&quot;</code> 参数来优化编译程序, 其实通过去除部分连接和调试等信息来使得编译之后的执行程序更小,具体参数如下:</p>
 <ul>
 <li><code>-a</code> 强制编译所有依赖包</li>

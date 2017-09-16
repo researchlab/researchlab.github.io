@@ -11,16 +11,16 @@
     
 
     
-    <meta name="description" content="前言反射是一种检查存储在接口变量中的&amp;lt;值,类型&amp;gt;对的机制，借助go反射包提供的reflect.TypeOf和reflect.ValueOf可以方便的访问到一个接口值的reflect.Type和reflect.Value部分，从而可进一步得到这个接口的结构类型和对其进行值的修改操作。">
+    <meta name="description" content="反射是一种检查存储在接口变量中的&amp;lt;值,类型&amp;gt;对的机制，借助go反射包提供的reflect.TypeOf和reflect.ValueOf可以方便的访问到一个接口值的reflect.Type和reflect.Value部分，从而可进一步得到这个接口的结构类型和对其进行值的修改操作。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="golang reflect使用总结">
 <meta property="og:url" content="http://www.grdtechs.com/2016/02/17/go-reflect-summarize/index.html">
 <meta property="og:site_name" content="一线攻城狮">
-<meta property="og:description" content="前言反射是一种检查存储在接口变量中的&amp;lt;值,类型&amp;gt;对的机制，借助go反射包提供的reflect.TypeOf和reflect.ValueOf可以方便的访问到一个接口值的reflect.Type和reflect.Value部分，从而可进一步得到这个接口的结构类型和对其进行值的修改操作。">
-<meta property="og:updated_time" content="2017-09-16T14:24:24.234Z">
+<meta property="og:description" content="反射是一种检查存储在接口变量中的&amp;lt;值,类型&amp;gt;对的机制，借助go反射包提供的reflect.TypeOf和reflect.ValueOf可以方便的访问到一个接口值的reflect.Type和reflect.Value部分，从而可进一步得到这个接口的结构类型和对其进行值的修改操作。">
+<meta property="og:updated_time" content="2017-09-16T14:32:56.907Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="golang reflect使用总结">
-<meta name="twitter:description" content="前言反射是一种检查存储在接口变量中的&amp;lt;值,类型&amp;gt;对的机制，借助go反射包提供的reflect.TypeOf和reflect.ValueOf可以方便的访问到一个接口值的reflect.Type和reflect.Value部分，从而可进一步得到这个接口的结构类型和对其进行值的修改操作。">
+<meta name="twitter:description" content="反射是一种检查存储在接口变量中的&amp;lt;值,类型&amp;gt;对的机制，借助go反射包提供的reflect.TypeOf和reflect.ValueOf可以方便的访问到一个接口值的reflect.Type和reflect.Value部分，从而可进一步得到这个接口的结构类型和对其进行值的修改操作。">
 
     
     <link rel="alternative" href="/atom.xml" title="一线攻城狮" type="application/atom+xml">
@@ -89,11 +89,11 @@
 		<div id="toc" class="toc-article">
 			<strong class="toc-title">文章目录</strong>
 		
-			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#u524D_u8A00"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u53CD_u5C04_u7684_u4F7F_u7528"><span class="toc-number">2.</span> <span class="toc-text">反射的使用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u901A_u8FC7_u53CD_u5C04_u4FEE_u6539_u5BF9_u8C61"><span class="toc-number">3.</span> <span class="toc-text">通过反射修改对象</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u901A_u8FC7_u53CD_u5C04_u201C_u52A8_u6001_u201D_u8C03_u7528_u65B9_u6CD5"><span class="toc-number">4.</span> <span class="toc-text">通过反射“动态”调用方法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u5C0F_u7ED3"><span class="toc-number">5.</span> <span class="toc-text">小结</span></a></li></ol>
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#u53CD_u5C04_u7684_u4F7F_u7528"><span class="toc-number">1.</span> <span class="toc-text">反射的使用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u901A_u8FC7_u53CD_u5C04_u4FEE_u6539_u5BF9_u8C61"><span class="toc-number">2.</span> <span class="toc-text">通过反射修改对象</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u901A_u8FC7_u53CD_u5C04_u201C_u52A8_u6001_u201D_u8C03_u7528_u65B9_u6CD5"><span class="toc-number">3.</span> <span class="toc-text">通过反射“动态”调用方法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u5C0F_u7ED3"><span class="toc-number">4.</span> <span class="toc-text">小结</span></a></li></ol>
 		
 		</div>
 		
-		<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>反射是一种检查存储在接口变量中的<code>&lt;值,类型&gt;</code>对的机制，借助go反射包提供的<code>reflect.TypeOf</code>和<code>reflect.ValueOf</code>可以方便的访问到一个接口值的<code>reflect.Type</code>和<code>reflect.Value</code>部分，从而可进一步得到这个接口的结构类型和对其进行值的修改操作。<br><a id="more"></a></p>
+		<p>反射是一种检查存储在接口变量中的<code>&lt;值,类型&gt;</code>对的机制，借助go反射包提供的<code>reflect.TypeOf</code>和<code>reflect.ValueOf</code>可以方便的访问到一个接口值的<code>reflect.Type</code>和<code>reflect.Value</code>部分，从而可进一步得到这个接口的结构类型和对其进行值的修改操作。<br><a id="more"></a></p>
 <h2 id="u53CD_u5C04_u7684_u4F7F_u7528"><a href="#u53CD_u5C04_u7684_u4F7F_u7528" class="headerlink" title="反射的使用"></a>反射的使用</h2><ol>
 <li><p><strong>获取接口对象的字段,类型和方法信息</strong><br>先定义个通用的结构体</p>
 <pre><code>type User struct{

@@ -11,18 +11,18 @@
     
 
     
-    <meta name="description" content="前言由于公司的MySQL是搭建在服务器上，为了避免对服务器进行直接改动，想远程导出和导入MySQL的数据库表结构及数据进行操作, 刚好Mysql本身提供了命令行导出工具Mysqldump和Mysql Source导入命令进行SQL数据导入导出工作，通过Mysql命令行导出工具Mysqldump命令能够将Mysql数据导出为文本格式(txt)的SQL文件，通过Mysql Source命令能够将SQL">
+    <meta name="description" content="由于公司的MySQL是搭建在服务器上，为了避免对服务器进行直接改动，想远程导出和导入MySQL的数据库表结构及数据进行操作, 刚好Mysql本身提供了命令行导出工具Mysqldump和Mysql Source导入命令进行SQL数据导入导出工作，通过Mysql命令行导出工具Mysqldump命令能够将Mysql数据导出为文本格式(txt)的SQL文件，通过Mysql Source命令能够将SQL文件">
 <meta property="og:type" content="article">
 <meta property="og:title" content="mysql 数据库表及数据导入导出方法总结">
 <meta property="og:url" content="http://www.grdtechs.com/2017/02/22/mysql-import-export-summary/index.html">
 <meta property="og:site_name" content="一线攻城狮">
-<meta property="og:description" content="前言由于公司的MySQL是搭建在服务器上，为了避免对服务器进行直接改动，想远程导出和导入MySQL的数据库表结构及数据进行操作, 刚好Mysql本身提供了命令行导出工具Mysqldump和Mysql Source导入命令进行SQL数据导入导出工作，通过Mysql命令行导出工具Mysqldump命令能够将Mysql数据导出为文本格式(txt)的SQL文件，通过Mysql Source命令能够将SQL">
+<meta property="og:description" content="由于公司的MySQL是搭建在服务器上，为了避免对服务器进行直接改动，想远程导出和导入MySQL的数据库表结构及数据进行操作, 刚好Mysql本身提供了命令行导出工具Mysqldump和Mysql Source导入命令进行SQL数据导入导出工作，通过Mysql命令行导出工具Mysqldump命令能够将Mysql数据导出为文本格式(txt)的SQL文件，通过Mysql Source命令能够将SQL文件">
 <meta property="og:image" content="http://www.grdtechs.com/imgs/mysqldump_error.png">
 <meta property="og:image" content="http://www.grdtechs.com/imgs/mysqldump_ret.png">
-<meta property="og:updated_time" content="2017-09-16T14:24:24.234Z">
+<meta property="og:updated_time" content="2017-09-16T14:32:56.907Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="mysql 数据库表及数据导入导出方法总结">
-<meta name="twitter:description" content="前言由于公司的MySQL是搭建在服务器上，为了避免对服务器进行直接改动，想远程导出和导入MySQL的数据库表结构及数据进行操作, 刚好Mysql本身提供了命令行导出工具Mysqldump和Mysql Source导入命令进行SQL数据导入导出工作，通过Mysql命令行导出工具Mysqldump命令能够将Mysql数据导出为文本格式(txt)的SQL文件，通过Mysql Source命令能够将SQL">
+<meta name="twitter:description" content="由于公司的MySQL是搭建在服务器上，为了避免对服务器进行直接改动，想远程导出和导入MySQL的数据库表结构及数据进行操作, 刚好Mysql本身提供了命令行导出工具Mysqldump和Mysql Source导入命令进行SQL数据导入导出工作，通过Mysql命令行导出工具Mysqldump命令能够将Mysql数据导出为文本格式(txt)的SQL文件，通过Mysql Source命令能够将SQL文件">
 
     
     <link rel="alternative" href="/atom.xml" title="一线攻城狮" type="application/atom+xml">
@@ -91,11 +91,11 @@
 		<div id="toc" class="toc-article">
 			<strong class="toc-title">文章目录</strong>
 		
-			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#u524D_u8A00"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u6570_u636E_u5E93_u8868_u53CA_u6570_u636E_u5BFC_u51FA"><span class="toc-number">2.</span> <span class="toc-text">数据库表及数据导出</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u6570_u636E_u5E93_u8868_u53CA_u6570_u636E_u5BFC_u5165"><span class="toc-number">3.</span> <span class="toc-text">数据库表及数据导入</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#mysqldump_u4F7F_u7528_u603B_u7ED3"><span class="toc-number">4.</span> <span class="toc-text">mysqldump使用总结</span></a></li></ol>
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#u6570_u636E_u5E93_u8868_u53CA_u6570_u636E_u5BFC_u51FA"><span class="toc-number">1.</span> <span class="toc-text">数据库表及数据导出</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u6570_u636E_u5E93_u8868_u53CA_u6570_u636E_u5BFC_u5165"><span class="toc-number">2.</span> <span class="toc-text">数据库表及数据导入</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#mysqldump_u4F7F_u7528_u603B_u7ED3"><span class="toc-number">3.</span> <span class="toc-text">mysqldump使用总结</span></a></li></ol>
 		
 		</div>
 		
-		<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>由于公司的MySQL是搭建在服务器上，为了避免对服务器进行直接改动，想远程导出和导入MySQL的数据库表结构及数据进行操作, 刚好Mysql本身提供了命令行导出工具<code>Mysqldump</code>和<code>Mysql Source</code>导入命令进行SQL数据导入导出工作，通过Mysql命令行导出工具Mysqldump命令能够将Mysql数据导出为文本格式(txt)的SQL文件，通过Mysql Source命令能够将SQL文件导入Mysql数据库中，下面通过Mysql导入导出SQL实例详解Mysqldump和Source命令的用法</p>
+		<p>由于公司的MySQL是搭建在服务器上，为了避免对服务器进行直接改动，想远程导出和导入MySQL的数据库表结构及数据进行操作, 刚好Mysql本身提供了命令行导出工具<code>Mysqldump</code>和<code>Mysql Source</code>导入命令进行SQL数据导入导出工作，通过Mysql命令行导出工具Mysqldump命令能够将Mysql数据导出为文本格式(txt)的SQL文件，通过Mysql Source命令能够将SQL文件导入Mysql数据库中，下面通过Mysql导入导出SQL实例详解Mysqldump和Source命令的用法</p>
 <a id="more"></a>
 <h2 id="u6570_u636E_u5E93_u8868_u53CA_u6570_u636E_u5BFC_u51FA"><a href="#u6570_u636E_u5E93_u8868_u53CA_u6570_u636E_u5BFC_u51FA" class="headerlink" title="数据库表及数据导出"></a>数据库表及数据导出</h2><p>需求说明是要希望导出整个数据库结构脚本，而MySQL提供的Mysqldump命令刚好可达到此目的而且还可以将数据库中的数据也一并导出，</p>
 <p><strong> mysqldump导出语法以及实践 </strong></p>

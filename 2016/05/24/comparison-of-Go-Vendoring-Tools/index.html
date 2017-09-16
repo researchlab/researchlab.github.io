@@ -11,16 +11,16 @@
     
 
     
-    <meta name="description" content="前言golang1.5版本开始支持第三方包到依赖管理,当多个项目在同一个GOPATH下，每个项目包含到第三方包通过go get命令都会get到GOPATH下到src目录中，而不是各个项目的文件夹中，这就导致第三方包的不同版本不能同时被GOPATH下到多个项目使用，从golang需要设置GOPATH来看,golang其实把每个项目当作一个个独立的第三包来看待。">
+    <meta name="description" content="golang1.5版本开始支持第三方包到依赖管理,当多个项目在同一个GOPATH下，每个项目包含到第三方包通过go get命令都会get到GOPATH下到src目录中，而不是各个项目的文件夹中，这就导致第三方包的不同版本不能同时被GOPATH下到多个项目使用，从golang需要设置GOPATH来看,golang其实把每个项目当作一个个独立的第三包来看待。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Go Vendoring Tools 使用总结">
 <meta property="og:url" content="http://www.grdtechs.com/2016/05/24/comparison-of-Go-Vendoring-Tools/index.html">
 <meta property="og:site_name" content="一线攻城狮">
-<meta property="og:description" content="前言golang1.5版本开始支持第三方包到依赖管理,当多个项目在同一个GOPATH下，每个项目包含到第三方包通过go get命令都会get到GOPATH下到src目录中，而不是各个项目的文件夹中，这就导致第三方包的不同版本不能同时被GOPATH下到多个项目使用，从golang需要设置GOPATH来看,golang其实把每个项目当作一个个独立的第三包来看待。">
-<meta property="og:updated_time" content="2017-09-16T14:24:24.230Z">
+<meta property="og:description" content="golang1.5版本开始支持第三方包到依赖管理,当多个项目在同一个GOPATH下，每个项目包含到第三方包通过go get命令都会get到GOPATH下到src目录中，而不是各个项目的文件夹中，这就导致第三方包的不同版本不能同时被GOPATH下到多个项目使用，从golang需要设置GOPATH来看,golang其实把每个项目当作一个个独立的第三包来看待。">
+<meta property="og:updated_time" content="2017-09-16T14:32:56.903Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Go Vendoring Tools 使用总结">
-<meta name="twitter:description" content="前言golang1.5版本开始支持第三方包到依赖管理,当多个项目在同一个GOPATH下，每个项目包含到第三方包通过go get命令都会get到GOPATH下到src目录中，而不是各个项目的文件夹中，这就导致第三方包的不同版本不能同时被GOPATH下到多个项目使用，从golang需要设置GOPATH来看,golang其实把每个项目当作一个个独立的第三包来看待。">
+<meta name="twitter:description" content="golang1.5版本开始支持第三方包到依赖管理,当多个项目在同一个GOPATH下，每个项目包含到第三方包通过go get命令都会get到GOPATH下到src目录中，而不是各个项目的文件夹中，这就导致第三方包的不同版本不能同时被GOPATH下到多个项目使用，从golang需要设置GOPATH来看,golang其实把每个项目当作一个个独立的第三包来看待。">
 
     
     <link rel="alternative" href="/atom.xml" title="一线攻城狮" type="application/atom+xml">
@@ -89,11 +89,11 @@
 		<div id="toc" class="toc-article">
 			<strong class="toc-title">文章目录</strong>
 		
-			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#u524D_u8A00"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#godep"><span class="toc-number">2.</span> <span class="toc-text">godep</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#govendor"><span class="toc-number">3.</span> <span class="toc-text">govendor</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#glide"><span class="toc-number">4.</span> <span class="toc-text">glide</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u603B_u7ED3"><span class="toc-number">5.</span> <span class="toc-text">总结</span></a></li></ol>
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#godep"><span class="toc-number">1.</span> <span class="toc-text">godep</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#govendor"><span class="toc-number">2.</span> <span class="toc-text">govendor</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#glide"><span class="toc-number">3.</span> <span class="toc-text">glide</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u603B_u7ED3"><span class="toc-number">4.</span> <span class="toc-text">总结</span></a></li></ol>
 		
 		</div>
 		
-		<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>golang1.5版本开始支持第三方包到依赖管理,当多个项目在同一个<code>GOPATH</code>下，每个项目包含到第三方包通过<code>go get</code>命令都会<code>get</code>到<code>GOPATH</code>下到<code>src</code>目录中，而不是各个项目的文件夹中，这就导致第三方包的不同版本不能同时被<code>GOPATH</code>下到多个项目使用，从<code>golang</code>需要设置<code>GOPATH</code>来看,<code>golang</code>其实把每个项目当作一个个独立的第三包来看待。<br><a id="more"></a><br>关于<code>golang</code>包管理工具的topic, 在<code>golang</code>的官方wiki要有一篇总结对比的文章:<a href="https://github.com/golang/go/wiki/PackageManagementTools" target="_blank" rel="external">PackageManagementTools</a>。下面主要就项目中用过的<code>godep</code>,<code>govendor</code>,<code>glide</code>做一个简要的对比分析。</p>
+		<p>golang1.5版本开始支持第三方包到依赖管理,当多个项目在同一个<code>GOPATH</code>下，每个项目包含到第三方包通过<code>go get</code>命令都会<code>get</code>到<code>GOPATH</code>下到<code>src</code>目录中，而不是各个项目的文件夹中，这就导致第三方包的不同版本不能同时被<code>GOPATH</code>下到多个项目使用，从<code>golang</code>需要设置<code>GOPATH</code>来看,<code>golang</code>其实把每个项目当作一个个独立的第三包来看待。<br><a id="more"></a><br>关于<code>golang</code>包管理工具的topic, 在<code>golang</code>的官方wiki要有一篇总结对比的文章:<a href="https://github.com/golang/go/wiki/PackageManagementTools" target="_blank" rel="external">PackageManagementTools</a>。下面主要就项目中用过的<code>godep</code>,<code>govendor</code>,<code>glide</code>做一个简要的对比分析。</p>
 <h2 id="godep"><a href="#godep" class="headerlink" title="godep"></a>godep</h2><p><a href="https://github.com/tools/godep" target="_blank" rel="external">godep</a> helps build packages reproducibly by fixing their dependencies.</p>
 <p><strong>前置条件</strong></p>
 <ul>

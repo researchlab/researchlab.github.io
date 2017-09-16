@@ -11,16 +11,16 @@
     
 
     
-    <meta name="description" content="前言远程程序调用(Remote procedure call, RPC)是进程间通信的一种基本形式， 并且广泛用于分布式计算中。下面就通过一步一步构建一个简单的RPC服务器来总结加深对RPC应用的理解。">
+    <meta name="description" content="远程程序调用(Remote procedure call, RPC)是进程间通信的一种基本形式， 并且广泛用于分布式计算中。下面就通过一步一步构建一个简单的RPC服务器来总结加深对RPC应用的理解。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="一步一步构建自己的RPC server">
 <meta property="og:url" content="http://www.grdtechs.com/2017/03/20/build-rpc-server-in-golang/index.html">
 <meta property="og:site_name" content="一线攻城狮">
-<meta property="og:description" content="前言远程程序调用(Remote procedure call, RPC)是进程间通信的一种基本形式， 并且广泛用于分布式计算中。下面就通过一步一步构建一个简单的RPC服务器来总结加深对RPC应用的理解。">
-<meta property="og:updated_time" content="2017-09-16T14:24:24.230Z">
+<meta property="og:description" content="远程程序调用(Remote procedure call, RPC)是进程间通信的一种基本形式， 并且广泛用于分布式计算中。下面就通过一步一步构建一个简单的RPC服务器来总结加深对RPC应用的理解。">
+<meta property="og:updated_time" content="2017-09-16T14:32:56.903Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="一步一步构建自己的RPC server">
-<meta name="twitter:description" content="前言远程程序调用(Remote procedure call, RPC)是进程间通信的一种基本形式， 并且广泛用于分布式计算中。下面就通过一步一步构建一个简单的RPC服务器来总结加深对RPC应用的理解。">
+<meta name="twitter:description" content="远程程序调用(Remote procedure call, RPC)是进程间通信的一种基本形式， 并且广泛用于分布式计算中。下面就通过一步一步构建一个简单的RPC服务器来总结加深对RPC应用的理解。">
 
     
     <link rel="alternative" href="/atom.xml" title="一线攻城狮" type="application/atom+xml">
@@ -89,11 +89,11 @@
 		<div id="toc" class="toc-article">
 			<strong class="toc-title">文章目录</strong>
 		
-			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#u524D_u8A00"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u516C_u5171_u63A5_u53E3_u548C_u7ED3_u6784"><span class="toc-number">2.</span> <span class="toc-text">公共接口和结构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u63A5_u53E3_u5B9E_u73B0"><span class="toc-number">3.</span> <span class="toc-text">接口实现</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#RPC_server__u5B9E_u73B0"><span class="toc-number">4.</span> <span class="toc-text">RPC server 实现</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#HTTP_RPC_server/client"><span class="toc-number">4.1.</span> <span class="toc-text">HTTP RPC server/client</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#TCP_RPC_server/client"><span class="toc-number">4.2.</span> <span class="toc-text">TCP RPC server/client</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u603B_u7ED3"><span class="toc-number">5.</span> <span class="toc-text">总结</span></a></li></ol>
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#u516C_u5171_u63A5_u53E3_u548C_u7ED3_u6784"><span class="toc-number">1.</span> <span class="toc-text">公共接口和结构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u63A5_u53E3_u5B9E_u73B0"><span class="toc-number">2.</span> <span class="toc-text">接口实现</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#RPC_server__u5B9E_u73B0"><span class="toc-number">3.</span> <span class="toc-text">RPC server 实现</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#HTTP_RPC_server/client"><span class="toc-number">3.1.</span> <span class="toc-text">HTTP RPC server/client</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#TCP_RPC_server/client"><span class="toc-number">3.2.</span> <span class="toc-text">TCP RPC server/client</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u603B_u7ED3"><span class="toc-number">4.</span> <span class="toc-text">总结</span></a></li></ol>
 		
 		</div>
 		
-		<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p><a href="https://en.wikipedia.org/wiki/Remote_procedure_call" target="_blank" rel="external">远程程序调用(Remote procedure call, RPC)</a>是进程间通信的一种基本形式， 并且广泛用于分布式计算中。下面就通过一步一步构建一个简单的RPC服务器来总结加深对RPC应用的理解。</p>
+		<p><a href="https://en.wikipedia.org/wiki/Remote_procedure_call" target="_blank" rel="external">远程程序调用(Remote procedure call, RPC)</a>是进程间通信的一种基本形式， 并且广泛用于分布式计算中。下面就通过一步一步构建一个简单的RPC服务器来总结加深对RPC应用的理解。</p>
 <a id="more"></a>
 <h2 id="u516C_u5171_u63A5_u53E3_u548C_u7ED3_u6784"><a href="#u516C_u5171_u63A5_u53E3_u548C_u7ED3_u6784" class="headerlink" title="公共接口和结构"></a>公共接口和结构</h2><p>方便起见，假设有一个包含<code>Multiply</code>和<code>Divide</code>方法的接口， 这两个接口分别表示乘法<code>*</code>和除法<code>/</code>操作，另外存在一个<code>Args</code>的结构体用于将客户端参数传递到服务器端， 还存在一个<code>Quotient</code>的公共结构，用于表示乘法和除法操作的输出结果，具体如下，</p>
 <p>公共结构<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//file: shared_structs.go</span></span><br><span class="line"><span class="keyword">package</span> shared </span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> Args <span class="keyword">struct</span> &#123;</span><br><span class="line">	A, B <span class="typename">int</span> </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> Quotient <span class="keyword">struct</span> &#123;</span><br><span class="line">	Quo, Rem <span class="typename">int</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>

@@ -11,17 +11,17 @@
     
 
     
-    <meta name="description" content="前言很早就使用docker了，只是工作上一直没用起来， 加之工作多/杂，就只是断断续续自己瞎折腾，现在打算系统的整理总结一下docker使用经历，这个第一篇主要总结一下几个方面，">
+    <meta name="description" content="很早就使用docker了，只是工作上一直没用起来， 加之工作多/杂，就只是断断续续自己瞎折腾，现在打算系统的整理总结一下docker使用经历，这个第一篇主要总结一下几个方面，">
 <meta property="og:type" content="article">
 <meta property="og:title" content="docker实践--01 创建docker应用">
 <meta property="og:url" content="http://www.grdtechs.com/2017/03/04/docker-basic-use/index.html">
 <meta property="og:site_name" content="一线攻城狮">
-<meta property="og:description" content="前言很早就使用docker了，只是工作上一直没用起来， 加之工作多/杂，就只是断断续续自己瞎折腾，现在打算系统的整理总结一下docker使用经历，这个第一篇主要总结一下几个方面，">
+<meta property="og:description" content="很早就使用docker了，只是工作上一直没用起来， 加之工作多/杂，就只是断断续续自己瞎折腾，现在打算系统的整理总结一下docker使用经历，这个第一篇主要总结一下几个方面，">
 <meta property="og:image" content="http://www.grdtechs.com/imgs/hi-nginx.png">
-<meta property="og:updated_time" content="2017-09-16T14:24:24.230Z">
+<meta property="og:updated_time" content="2017-09-16T14:32:56.903Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="docker实践--01 创建docker应用">
-<meta name="twitter:description" content="前言很早就使用docker了，只是工作上一直没用起来， 加之工作多/杂，就只是断断续续自己瞎折腾，现在打算系统的整理总结一下docker使用经历，这个第一篇主要总结一下几个方面，">
+<meta name="twitter:description" content="很早就使用docker了，只是工作上一直没用起来， 加之工作多/杂，就只是断断续续自己瞎折腾，现在打算系统的整理总结一下docker使用经历，这个第一篇主要总结一下几个方面，">
 
     
     <link rel="alternative" href="/atom.xml" title="一线攻城狮" type="application/atom+xml">
@@ -90,11 +90,11 @@
 		<div id="toc" class="toc-article">
 			<strong class="toc-title">文章目录</strong>
 		
-			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#u524D_u8A00"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Docker__u6982_u5FF5"><span class="toc-number">2.</span> <span class="toc-text">Docker 概念</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u5B89_u88C5docker"><span class="toc-number">3.</span> <span class="toc-text">安装docker</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u521B_u5EFAdocker_u5E94_u7528"><span class="toc-number">4.</span> <span class="toc-text">创建docker应用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u5BB9_u5668_u7BA1_u7406"><span class="toc-number">5.</span> <span class="toc-text">容器管理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u955C_u50CF_u7BA1_u7406"><span class="toc-number">6.</span> <span class="toc-text">镜像管理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u603B_u7ED3"><span class="toc-number">7.</span> <span class="toc-text">总结</span></a></li></ol>
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Docker__u6982_u5FF5"><span class="toc-number">1.</span> <span class="toc-text">Docker 概念</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u5B89_u88C5docker"><span class="toc-number">2.</span> <span class="toc-text">安装docker</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u521B_u5EFAdocker_u5E94_u7528"><span class="toc-number">3.</span> <span class="toc-text">创建docker应用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u5BB9_u5668_u7BA1_u7406"><span class="toc-number">4.</span> <span class="toc-text">容器管理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u955C_u50CF_u7BA1_u7406"><span class="toc-number">5.</span> <span class="toc-text">镜像管理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u603B_u7ED3"><span class="toc-number">6.</span> <span class="toc-text">总结</span></a></li></ol>
 		
 		</div>
 		
-		<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>很早就使用docker了，只是工作上一直没用起来， 加之工作多/杂，就只是断断续续自己瞎折腾，现在打算系统的整理总结一下docker使用经历，这个第一篇主要总结一下几个方面，<br><a id="more"></a></p>
+		<p>很早就使用docker了，只是工作上一直没用起来， 加之工作多/杂，就只是断断续续自己瞎折腾，现在打算系统的整理总结一下docker使用经历，这个第一篇主要总结一下几个方面，<br><a id="more"></a></p>
 <ul>
 <li>理解Docker是什么</li>
 <li>学习如何在Linux上安装Docker</li>

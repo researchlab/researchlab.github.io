@@ -11,16 +11,16 @@
     
 
     
-    <meta name="description" content="前言Goweb开发中，经常需要设置获取cookies, 不管是从client端设置获取还是server设置获取，其实都差不多，下面就总结一下常用的方法。">
+    <meta name="description" content="Goweb开发中，经常需要设置获取cookies, 不管是从client端设置获取还是server设置获取，其实都差不多，下面就总结一下常用的方法。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="go http client/server 设置cookie小结">
 <meta property="og:url" content="http://www.grdtechs.com/2016/07/10/go-setcookie/index.html">
 <meta property="og:site_name" content="一线攻城狮">
-<meta property="og:description" content="前言Goweb开发中，经常需要设置获取cookies, 不管是从client端设置获取还是server设置获取，其实都差不多，下面就总结一下常用的方法。">
-<meta property="og:updated_time" content="2017-09-16T14:24:24.234Z">
+<meta property="og:description" content="Goweb开发中，经常需要设置获取cookies, 不管是从client端设置获取还是server设置获取，其实都差不多，下面就总结一下常用的方法。">
+<meta property="og:updated_time" content="2017-09-16T14:32:56.907Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="go http client/server 设置cookie小结">
-<meta name="twitter:description" content="前言Goweb开发中，经常需要设置获取cookies, 不管是从client端设置获取还是server设置获取，其实都差不多，下面就总结一下常用的方法。">
+<meta name="twitter:description" content="Goweb开发中，经常需要设置获取cookies, 不管是从client端设置获取还是server设置获取，其实都差不多，下面就总结一下常用的方法。">
 
     
     <link rel="alternative" href="/atom.xml" title="一线攻城狮" type="application/atom+xml">
@@ -89,11 +89,11 @@
 		<div id="toc" class="toc-article">
 			<strong class="toc-title">文章目录</strong>
 		
-			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#u524D_u8A00"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#golang_u4E2Dcookie__u8BE6_u7EC6_u5B9A_u4E49"><span class="toc-number">2.</span> <span class="toc-text">golang中cookie 详细定义</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#client__u7AEF_u8BBE_u7F6Ecookie"><span class="toc-number">3.</span> <span class="toc-text">client 端设置cookie</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#server_u7AEF_u63A5_u6536cookie"><span class="toc-number">4.</span> <span class="toc-text">server端接收cookie</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#server_u7AEF_u8BBE_u7F6Ecookie"><span class="toc-number">5.</span> <span class="toc-text">server端设置cookie</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#client__u7AEF_u63A5_u6536cookie"><span class="toc-number">6.</span> <span class="toc-text">client 端接收cookie</span></a></li></ol>
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#golang_u4E2Dcookie__u8BE6_u7EC6_u5B9A_u4E49"><span class="toc-number">1.</span> <span class="toc-text">golang中cookie 详细定义</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#client__u7AEF_u8BBE_u7F6Ecookie"><span class="toc-number">2.</span> <span class="toc-text">client 端设置cookie</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#server_u7AEF_u63A5_u6536cookie"><span class="toc-number">3.</span> <span class="toc-text">server端接收cookie</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#server_u7AEF_u8BBE_u7F6Ecookie"><span class="toc-number">4.</span> <span class="toc-text">server端设置cookie</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#client__u7AEF_u63A5_u6536cookie"><span class="toc-number">5.</span> <span class="toc-text">client 端接收cookie</span></a></li></ol>
 		
 		</div>
 		
-		<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p><code>Go</code>web开发中，经常需要设置获取cookies, 不管是从client端设置获取还是server设置获取，其实都差不多，下面就总结一下常用的方法。<br><a id="more"></a></p>
+		<p><code>Go</code>web开发中，经常需要设置获取cookies, 不管是从client端设置获取还是server设置获取，其实都差不多，下面就总结一下常用的方法。<br><a id="more"></a></p>
 <h2 id="golang_u4E2Dcookie__u8BE6_u7EC6_u5B9A_u4E49"><a href="#golang_u4E2Dcookie__u8BE6_u7EC6_u5B9A_u4E49" class="headerlink" title="golang中cookie 详细定义"></a>golang中cookie 详细定义</h2><p>golang 官方文档中对<code>Cookie</code>结构的定义<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> Cookie <span class="keyword">struct</span> &#123;</span><br><span class="line">    Name       <span class="typename">string</span></span><br><span class="line">    Value      <span class="typename">string</span></span><br><span class="line">    Path       <span class="typename">string</span></span><br><span class="line">    Domain     <span class="typename">string</span></span><br><span class="line">    Expires    time.Time</span><br><span class="line">    RawExpires <span class="typename">string</span></span><br><span class="line">    <span class="comment">// MaxAge=0表示未设置Max-Age属性</span></span><br><span class="line">    <span class="comment">// MaxAge&lt;0表示立刻删除该cookie，等价于"Max-Age: 0"</span></span><br><span class="line">    <span class="comment">// MaxAge&gt;0表示存在Max-Age属性，单位是秒</span></span><br><span class="line">    MaxAge   <span class="typename">int</span></span><br><span class="line">    Secure   <span class="typename">bool</span></span><br><span class="line">    HttpOnly <span class="typename">bool</span></span><br><span class="line">    Raw      <span class="typename">string</span></span><br><span class="line">    Unparsed []<span class="typename">string</span> <span class="comment">// 未解析的“属性-值”对的原始文本</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
 <p><code>Cookie</code>代表一个出现在<code>HTTP回复的头域</code>中<code>Set-Cookie头的值里</code>或者<code>HTTP请求的头域</code>中Cookie头的值里的HTTP cookie。</p>
 <ul>

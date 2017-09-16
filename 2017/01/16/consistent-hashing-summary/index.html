@@ -11,12 +11,12 @@
     
 
     
-    <meta name="description" content="前言存在一种场景, 当一个缓存服务由多个服务器组共同提供时, key应该路由到哪一个服务。这里假如采用最通用的方式取模求余: key%N(N为服务器数目), 这样做均衡性没有什么问题, 但是当服务器数目发送增加或减少时, 分配方式则变为key%(N+1)或key%(N-1)。这里将会有大量的key失效迁移, 如果后端key对应的是有状态的存储数据,那么毫无疑问,这种做法将导致服务器间大量的数据迁移">
+    <meta name="description" content="存在一种场景, 当一个缓存服务由多个服务器组共同提供时, key应该路由到哪一个服务。这里假如采用最通用的方式取模求余: key%N(N为服务器数目), 这样做均衡性没有什么问题, 但是当服务器数目发送增加或减少时, 分配方式则变为key%(N+1)或key%(N-1)。这里将会有大量的key失效迁移, 如果后端key对应的是有状态的存储数据,那么毫无疑问,这种做法将导致服务器间大量的数据迁移,从">
 <meta property="og:type" content="article">
 <meta property="og:title" content="一致性哈希算法总结">
 <meta property="og:url" content="http://www.grdtechs.com/2017/01/16/consistent-hashing-summary/index.html">
 <meta property="og:site_name" content="一线攻城狮">
-<meta property="og:description" content="前言存在一种场景, 当一个缓存服务由多个服务器组共同提供时, key应该路由到哪一个服务。这里假如采用最通用的方式取模求余: key%N(N为服务器数目), 这样做均衡性没有什么问题, 但是当服务器数目发送增加或减少时, 分配方式则变为key%(N+1)或key%(N-1)。这里将会有大量的key失效迁移, 如果后端key对应的是有状态的存储数据,那么毫无疑问,这种做法将导致服务器间大量的数据迁移">
+<meta property="og:description" content="存在一种场景, 当一个缓存服务由多个服务器组共同提供时, key应该路由到哪一个服务。这里假如采用最通用的方式取模求余: key%N(N为服务器数目), 这样做均衡性没有什么问题, 但是当服务器数目发送增加或减少时, 分配方式则变为key%(N+1)或key%(N-1)。这里将会有大量的key失效迁移, 如果后端key对应的是有状态的存储数据,那么毫无疑问,这种做法将导致服务器间大量的数据迁移,从">
 <meta property="og:image" content="http://www.grdtechs.com/imgs/hashring.jpg">
 <meta property="og:image" content="http://www.grdtechs.com/imgs/object.jpg">
 <meta property="og:image" content="http://www.grdtechs.com/imgs/cache.jpg">
@@ -24,10 +24,10 @@
 <meta property="og:image" content="http://www.grdtechs.com/imgs/add.jpg">
 <meta property="og:image" content="http://www.grdtechs.com/imgs/virtual.jpg">
 <meta property="og:image" content="http://www.grdtechs.com/imgs/map.jpg">
-<meta property="og:updated_time" content="2017-09-16T14:24:24.230Z">
+<meta property="og:updated_time" content="2017-09-16T14:32:56.903Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="一致性哈希算法总结">
-<meta name="twitter:description" content="前言存在一种场景, 当一个缓存服务由多个服务器组共同提供时, key应该路由到哪一个服务。这里假如采用最通用的方式取模求余: key%N(N为服务器数目), 这样做均衡性没有什么问题, 但是当服务器数目发送增加或减少时, 分配方式则变为key%(N+1)或key%(N-1)。这里将会有大量的key失效迁移, 如果后端key对应的是有状态的存储数据,那么毫无疑问,这种做法将导致服务器间大量的数据迁移">
+<meta name="twitter:description" content="存在一种场景, 当一个缓存服务由多个服务器组共同提供时, key应该路由到哪一个服务。这里假如采用最通用的方式取模求余: key%N(N为服务器数目), 这样做均衡性没有什么问题, 但是当服务器数目发送增加或减少时, 分配方式则变为key%(N+1)或key%(N-1)。这里将会有大量的key失效迁移, 如果后端key对应的是有状态的存储数据,那么毫无疑问,这种做法将导致服务器间大量的数据迁移,从">
 
     
     <link rel="alternative" href="/atom.xml" title="一线攻城狮" type="application/atom+xml">
@@ -96,11 +96,11 @@
 		<div id="toc" class="toc-article">
 			<strong class="toc-title">文章目录</strong>
 		
-			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#u524D_u8A00"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u7B97_u6CD5_u539F_u7406"><span class="toc-number">2.</span> <span class="toc-text">算法原理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u7B97_u6CD5_u5B9E_u73B0"><span class="toc-number">3.</span> <span class="toc-text">算法实现</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u603B_u7ED3"><span class="toc-number">4.</span> <span class="toc-text">总结</span></a></li></ol>
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#u7B97_u6CD5_u539F_u7406"><span class="toc-number">1.</span> <span class="toc-text">算法原理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u7B97_u6CD5_u5B9E_u73B0"><span class="toc-number">2.</span> <span class="toc-text">算法实现</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u603B_u7ED3"><span class="toc-number">3.</span> <span class="toc-text">总结</span></a></li></ol>
 		
 		</div>
 		
-		<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>存在一种场景, 当一个缓存服务由多个服务器组共同提供时, key应该路由到哪一个服务。这里假如采用最通用的方式取模求余: <code>key%N</code>(N为服务器数目), 这样做均衡性没有什么问题, 但是当服务器数目发送增加或减少时, 分配方式则变为<code>key%(N+1)</code>或<code>key%(N-1)</code>。这里将会有大量的key失效迁移, 如果后端key对应的是有状态的存储数据,那么毫无疑问,这种做法将导致服务器间大量的数据迁移,从而造成服务的不稳定。解决思路，采用一致性哈希方法可以解决此问题。 </p>
+		<p>存在一种场景, 当一个缓存服务由多个服务器组共同提供时, key应该路由到哪一个服务。这里假如采用最通用的方式取模求余: <code>key%N</code>(N为服务器数目), 这样做均衡性没有什么问题, 但是当服务器数目发送增加或减少时, 分配方式则变为<code>key%(N+1)</code>或<code>key%(N-1)</code>。这里将会有大量的key失效迁移, 如果后端key对应的是有状态的存储数据,那么毫无疑问,这种做法将导致服务器间大量的数据迁移,从而造成服务的不稳定。解决思路，采用一致性哈希方法可以解决此问题。 </p>
 <a id="more"></a>
 <h2 id="u7B97_u6CD5_u539F_u7406"><a href="#u7B97_u6CD5_u539F_u7406" class="headerlink" title="算法原理"></a>算法原理</h2><p>一致性哈希算法在1997年由麻省理工学院提出的一种分布式哈希(DHT)实现算法，设计目标是为了解决因特网中的热点(Hot spot)问题，初衷和CARP十分类似。一致性哈希修正了CARP使用的简 单哈希算法带来的问题，使得分布式哈希(DHT)可以在P2P环境中真正得到应用。 </p>
 <p>一致性hash算法提出了在动态变化的Cache环境中，判定哈希算法好坏的四个定义:</p>

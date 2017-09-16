@@ -11,16 +11,16 @@
     
 
     
-    <meta name="description" content="前言现在golang已经可以通过vendor来管理第三方依赖包了，但是之前的一个老项目用的是git submodule来管理的，但是.gitsubmodule文件中只记录管理了项目的部分依赖包， 需要把还没有被管理的第三包也加上，下面总结使用git submodule的过程。">
+    <meta name="description" content="现在golang已经可以通过vendor来管理第三方依赖包了，但是之前的一个老项目用的是git submodule来管理的，但是.gitsubmodule文件中只记录管理了项目的部分依赖包， 需要把还没有被管理的第三包也加上，下面总结使用git submodule的过程。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="git submodule使用总结">
 <meta property="og:url" content="http://www.grdtechs.com/2017/01/18/git-submodule/index.html">
 <meta property="og:site_name" content="一线攻城狮">
-<meta property="og:description" content="前言现在golang已经可以通过vendor来管理第三方依赖包了，但是之前的一个老项目用的是git submodule来管理的，但是.gitsubmodule文件中只记录管理了项目的部分依赖包， 需要把还没有被管理的第三包也加上，下面总结使用git submodule的过程。">
-<meta property="og:updated_time" content="2017-09-16T14:24:24.234Z">
+<meta property="og:description" content="现在golang已经可以通过vendor来管理第三方依赖包了，但是之前的一个老项目用的是git submodule来管理的，但是.gitsubmodule文件中只记录管理了项目的部分依赖包， 需要把还没有被管理的第三包也加上，下面总结使用git submodule的过程。">
+<meta property="og:updated_time" content="2017-09-16T14:32:56.903Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="git submodule使用总结">
-<meta name="twitter:description" content="前言现在golang已经可以通过vendor来管理第三方依赖包了，但是之前的一个老项目用的是git submodule来管理的，但是.gitsubmodule文件中只记录管理了项目的部分依赖包， 需要把还没有被管理的第三包也加上，下面总结使用git submodule的过程。">
+<meta name="twitter:description" content="现在golang已经可以通过vendor来管理第三方依赖包了，但是之前的一个老项目用的是git submodule来管理的，但是.gitsubmodule文件中只记录管理了项目的部分依赖包， 需要把还没有被管理的第三包也加上，下面总结使用git submodule的过程。">
 
     
     <link rel="alternative" href="/atom.xml" title="一线攻城狮" type="application/atom+xml">
@@ -89,11 +89,11 @@
 		<div id="toc" class="toc-article">
 			<strong class="toc-title">文章目录</strong>
 		
-			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#u524D_u8A00"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u6DFB_u52A0_u7B2C_u4E09_u65B9_u5305"><span class="toc-number">2.</span> <span class="toc-text">添加第三方包</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u5220_u9664_u7B2C_u4E09_u65B9_u5305"><span class="toc-number">3.</span> <span class="toc-text">删除第三方包</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u4E0B_u8F7D_u7684_u5DE5_u7A0B_u5E26_u6709submodule"><span class="toc-number">4.</span> <span class="toc-text">下载的工程带有submodule</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u95EE_u9898"><span class="toc-number">5.</span> <span class="toc-text">问题</span></a></li></ol>
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#u6DFB_u52A0_u7B2C_u4E09_u65B9_u5305"><span class="toc-number">1.</span> <span class="toc-text">添加第三方包</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u5220_u9664_u7B2C_u4E09_u65B9_u5305"><span class="toc-number">2.</span> <span class="toc-text">删除第三方包</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u4E0B_u8F7D_u7684_u5DE5_u7A0B_u5E26_u6709submodule"><span class="toc-number">3.</span> <span class="toc-text">下载的工程带有submodule</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u95EE_u9898"><span class="toc-number">4.</span> <span class="toc-text">问题</span></a></li></ol>
 		
 		</div>
 		
-		<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>现在golang已经可以通过<code>vendor</code>来管理第三方依赖包了，但是之前的一个老项目用的是<code>git submodule</code>来管理的，但是<code>.gitsubmodule</code>文件中只记录管理了项目的部分依赖包， 需要把还没有被管理的第三包也加上，下面总结使用<code>git submodule</code>的过程。<br><a id="more"></a></p>
+		<p>现在golang已经可以通过<code>vendor</code>来管理第三方依赖包了，但是之前的一个老项目用的是<code>git submodule</code>来管理的，但是<code>.gitsubmodule</code>文件中只记录管理了项目的部分依赖包， 需要把还没有被管理的第三包也加上，下面总结使用<code>git submodule</code>的过程。<br><a id="more"></a></p>
 <h2 id="u6DFB_u52A0_u7B2C_u4E09_u65B9_u5305"><a href="#u6DFB_u52A0_u7B2C_u4E09_u65B9_u5305" class="headerlink" title="添加第三方包"></a>添加第三方包</h2><p>为当前工程添加submodule，命令如下：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git submodule add 仓库地址 保存路经路径</span><br></pre></td></tr></table></figure>
 <p>例如要为gomail包添加<code>submodule</code>管理，<br>gomail包 仓库地址: <code>https://github.com/go-gomail/gomail.git</code><br>gomail包要保存在项目里的路经为: <code>src/github.com/go-gomail/gomail</code>, 则命令为:</p>

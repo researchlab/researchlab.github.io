@@ -11,18 +11,18 @@
     
 
     
-    <meta name="description" content="前言docker容器是在指定的镜像上运行的, 创建docker镜像的方法也有很多中比如直接到docker Hub上通过docker pull创建一个镜像, 也可以通过修改其它镜像然后提交修改docker commit 来创建新的镜像, 还有如导入某个现有的镜像, 但是在实际中难觅要定制化改进出符合特定场景的镜像, 虽然用上述方式也是可以创建新的镜像的, 但是缺点也很多, 主要缺点是不便于维护, 其">
+    <meta name="description" content="docker容器是在指定的镜像上运行的, 创建docker镜像的方法也有很多中比如直接到docker Hub上通过docker pull创建一个镜像, 也可以通过修改其它镜像然后提交修改docker commit 来创建新的镜像, 还有如导入某个现有的镜像, 但是在实际中难觅要定制化改进出符合特定场景的镜像, 虽然用上述方式也是可以创建新的镜像的, 但是缺点也很多, 主要缺点是不便于维护, 其实创">
 <meta property="og:type" content="article">
 <meta property="og:title" content="docker实践--05 编写Dockerfile">
 <meta property="og:url" content="http://www.grdtechs.com/2017/03/07/docker-dockerfile/index.html">
 <meta property="og:site_name" content="一线攻城狮">
-<meta property="og:description" content="前言docker容器是在指定的镜像上运行的, 创建docker镜像的方法也有很多中比如直接到docker Hub上通过docker pull创建一个镜像, 也可以通过修改其它镜像然后提交修改docker commit 来创建新的镜像, 还有如导入某个现有的镜像, 但是在实际中难觅要定制化改进出符合特定场景的镜像, 虽然用上述方式也是可以创建新的镜像的, 但是缺点也很多, 主要缺点是不便于维护, 其">
+<meta property="og:description" content="docker容器是在指定的镜像上运行的, 创建docker镜像的方法也有很多中比如直接到docker Hub上通过docker pull创建一个镜像, 也可以通过修改其它镜像然后提交修改docker commit 来创建新的镜像, 还有如导入某个现有的镜像, 但是在实际中难觅要定制化改进出符合特定场景的镜像, 虽然用上述方式也是可以创建新的镜像的, 但是缺点也很多, 主要缺点是不便于维护, 其实创">
 <meta property="og:image" content="http://www.grdtechs.com/imgs/apache.png">
 <meta property="og:image" content="http://www.grdtechs.com/imgs/simplecloudhp.png">
-<meta property="og:updated_time" content="2017-09-16T14:24:24.230Z">
+<meta property="og:updated_time" content="2017-09-16T14:32:56.903Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="docker实践--05 编写Dockerfile">
-<meta name="twitter:description" content="前言docker容器是在指定的镜像上运行的, 创建docker镜像的方法也有很多中比如直接到docker Hub上通过docker pull创建一个镜像, 也可以通过修改其它镜像然后提交修改docker commit 来创建新的镜像, 还有如导入某个现有的镜像, 但是在实际中难觅要定制化改进出符合特定场景的镜像, 虽然用上述方式也是可以创建新的镜像的, 但是缺点也很多, 主要缺点是不便于维护, 其">
+<meta name="twitter:description" content="docker容器是在指定的镜像上运行的, 创建docker镜像的方法也有很多中比如直接到docker Hub上通过docker pull创建一个镜像, 也可以通过修改其它镜像然后提交修改docker commit 来创建新的镜像, 还有如导入某个现有的镜像, 但是在实际中难觅要定制化改进出符合特定场景的镜像, 虽然用上述方式也是可以创建新的镜像的, 但是缺点也很多, 主要缺点是不便于维护, 其实创">
 
     
     <link rel="alternative" href="/atom.xml" title="一线攻城狮" type="application/atom+xml">
@@ -91,11 +91,11 @@
 		<div id="toc" class="toc-article">
 			<strong class="toc-title">文章目录</strong>
 		
-			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#u524D_u8A00"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Dockerfile_u57FA_u672C_u6846_u67B6"><span class="toc-number">2.</span> <span class="toc-text">Dockerfile基本框架</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u7F16_u5199Dockerfile_u5E38_u7528_u547D_u4EE4"><span class="toc-number">3.</span> <span class="toc-text">编写Dockerfile常用命令</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u901A_u8FC7Dockerfile__u521B_u5EFA_u955C_u50CF"><span class="toc-number">4.</span> <span class="toc-text">通过Dockerfile 创建镜像</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u603B_u7ED3"><span class="toc-number">5.</span> <span class="toc-text">总结</span></a></li></ol>
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Dockerfile_u57FA_u672C_u6846_u67B6"><span class="toc-number">1.</span> <span class="toc-text">Dockerfile基本框架</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u7F16_u5199Dockerfile_u5E38_u7528_u547D_u4EE4"><span class="toc-number">2.</span> <span class="toc-text">编写Dockerfile常用命令</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u901A_u8FC7Dockerfile__u521B_u5EFA_u955C_u50CF"><span class="toc-number">3.</span> <span class="toc-text">通过Dockerfile 创建镜像</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u603B_u7ED3"><span class="toc-number">4.</span> <span class="toc-text">总结</span></a></li></ol>
 		
 		</div>
 		
-		<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>docker容器是在指定的镜像上运行的, 创建docker镜像的方法也有很多中比如直接到<code>docker Hub</code>上通过<code>docker pull</code>创建一个镜像, 也可以通过修改其它镜像然后提交修改<code>docker commit</code> 来创建新的镜像, 还有如导入某个现有的镜像, 但是在实际中难觅要定制化改进出符合特定场景的镜像, 虽然用上述方式也是可以创建新的镜像的, 但是缺点也很多, 主要缺点是不便于维护, 其实创建docker 镜像还有一种最好的办法就是手工打造<code>Dockerfile</code>, 然后通过<code>docker build</code>编译生成新的镜像, 下面本文就来实践怎么编写符合规范的Dockerfile, 然后又是怎么样通过Dockerfile来创建合适的镜像的。</p>
+		<p>docker容器是在指定的镜像上运行的, 创建docker镜像的方法也有很多中比如直接到<code>docker Hub</code>上通过<code>docker pull</code>创建一个镜像, 也可以通过修改其它镜像然后提交修改<code>docker commit</code> 来创建新的镜像, 还有如导入某个现有的镜像, 但是在实际中难觅要定制化改进出符合特定场景的镜像, 虽然用上述方式也是可以创建新的镜像的, 但是缺点也很多, 主要缺点是不便于维护, 其实创建docker 镜像还有一种最好的办法就是手工打造<code>Dockerfile</code>, 然后通过<code>docker build</code>编译生成新的镜像, 下面本文就来实践怎么编写符合规范的Dockerfile, 然后又是怎么样通过Dockerfile来创建合适的镜像的。</p>
 <a id="more"></a>
 <p><strong> 需求 </strong><br>需求是完成一个<code>Dockerfile</code>, 通过该<code>Dockerfile</code>创建一个Web应用, 该web应用为apache托管的一个静态页面网站, 换句话说, 我们写一个<code>Dockerfile</code>, 用来创建一个实验楼公司的网站应用, 就是 <a href="http://www.simplecloud.cn" target="_blank" rel="external">http://www.simplecloud.cn</a> 这个站点。这个站点是纯静态的页面, 我们也可以直接下载得到。<br>从实现这个需求中去实践和学习关于<code>Dockerfile</code>如下三方面的内容,</p>
 <ul>

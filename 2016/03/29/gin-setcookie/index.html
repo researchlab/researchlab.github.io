@@ -11,16 +11,16 @@
     
 
     
-    <meta name="description" content="前言可以操作Cookie的Http头有两个:Set-Cookie和Cookie。Set-Cookie由服务器发送，它包含在响应请求的头部中。它用于在客户端创建一个Cookie。Cookie头由客户端发送，包含在HTTP请求的头部中。">
+    <meta name="description" content="可以操作Cookie的Http头有两个:Set-Cookie和Cookie。Set-Cookie由服务器发送，它包含在响应请求的头部中。它用于在客户端创建一个Cookie。Cookie头由客户端发送，包含在HTTP请求的头部中。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="gin中使用设置cookie过期时间总结">
 <meta property="og:url" content="http://www.grdtechs.com/2016/03/29/gin-setcookie/index.html">
 <meta property="og:site_name" content="一线攻城狮">
-<meta property="og:description" content="前言可以操作Cookie的Http头有两个:Set-Cookie和Cookie。Set-Cookie由服务器发送，它包含在响应请求的头部中。它用于在客户端创建一个Cookie。Cookie头由客户端发送，包含在HTTP请求的头部中。">
-<meta property="og:updated_time" content="2017-09-16T14:24:24.234Z">
+<meta property="og:description" content="可以操作Cookie的Http头有两个:Set-Cookie和Cookie。Set-Cookie由服务器发送，它包含在响应请求的头部中。它用于在客户端创建一个Cookie。Cookie头由客户端发送，包含在HTTP请求的头部中。">
+<meta property="og:updated_time" content="2017-09-16T14:32:56.903Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="gin中使用设置cookie过期时间总结">
-<meta name="twitter:description" content="前言可以操作Cookie的Http头有两个:Set-Cookie和Cookie。Set-Cookie由服务器发送，它包含在响应请求的头部中。它用于在客户端创建一个Cookie。Cookie头由客户端发送，包含在HTTP请求的头部中。">
+<meta name="twitter:description" content="可以操作Cookie的Http头有两个:Set-Cookie和Cookie。Set-Cookie由服务器发送，它包含在响应请求的头部中。它用于在客户端创建一个Cookie。Cookie头由客户端发送，包含在HTTP请求的头部中。">
 
     
     <link rel="alternative" href="/atom.xml" title="一线攻城狮" type="application/atom+xml">
@@ -89,11 +89,11 @@
 		<div id="toc" class="toc-article">
 			<strong class="toc-title">文章目录</strong>
 		
-			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#u524D_u8A00"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u8BD5_u9A8C_u9700_u6C42"><span class="toc-number">2.</span> <span class="toc-text">试验需求</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u8BD5_u9A8C_u4EE3_u7801"><span class="toc-number">3.</span> <span class="toc-text">试验代码</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u4EE3_u7801_u5206_u6790"><span class="toc-number">4.</span> <span class="toc-text">代码分析</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u603B_u7ED3"><span class="toc-number">5.</span> <span class="toc-text">总结</span></a></li></ol>
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#u8BD5_u9A8C_u9700_u6C42"><span class="toc-number">1.</span> <span class="toc-text">试验需求</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u8BD5_u9A8C_u4EE3_u7801"><span class="toc-number">2.</span> <span class="toc-text">试验代码</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u4EE3_u7801_u5206_u6790"><span class="toc-number">3.</span> <span class="toc-text">代码分析</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u603B_u7ED3"><span class="toc-number">4.</span> <span class="toc-text">总结</span></a></li></ol>
 		
 		</div>
 		
-		<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>可以操作<code>Cookie</code>的<code>Http</code>头有两个:<code>Set-Cookie</code>和<code>Cookie</code>。<code>Set-Cookie</code>由服务器发送，它包含在响应请求的头部中。它用于在客户端创建一个<code>Cookie</code>。<code>Cookie</code>头由客户端发送，包含在<code>HTTP</code>请求的头部中。<br><a id="more"></a></p>
+		<p>可以操作<code>Cookie</code>的<code>Http</code>头有两个:<code>Set-Cookie</code>和<code>Cookie</code>。<code>Set-Cookie</code>由服务器发送，它包含在响应请求的头部中。它用于在客户端创建一个<code>Cookie</code>。<code>Cookie</code>头由客户端发送，包含在<code>HTTP</code>请求的头部中。<br><a id="more"></a></p>
 <font color="red"><strong>注意：<br>1.只有cookie的domain和path与请求的URL匹配才会发送这个cookie;<br>2.客户端发送cookie信息给服务器只发送键-值对到服务器，cookie的属性是不会发送给服务器的。</strong></font>
 
 <h2 id="u8BD5_u9A8C_u9700_u6C42"><a href="#u8BD5_u9A8C_u9700_u6C42" class="headerlink" title="试验需求"></a>试验需求</h2><p>1.服务器给客户端设置cookie，并设置过期时间，客户端每次请求服务器时如果cookie没有过期，则服务器将cookie相应的value 加1并重设cookie, 如果cookie 过期，则重新设置cookie让value 从0开始计数。</p>

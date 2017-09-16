@@ -11,16 +11,16 @@
     
 
     
-    <meta name="description" content="前言golang这边将map结构序列化通常采用json.Marshal和json.Unmarshal来做，但是在php server端还需要做json反序列化解析才能用， 用golang模拟表单提交, php server端则非常方便提取相应的数据字段.">
+    <meta name="description" content="golang这边将map结构序列化通常采用json.Marshal和json.Unmarshal来做，但是在php server端还需要做json反序列化解析才能用， 用golang模拟表单提交, php server端则非常方便提取相应的数据字段.">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Golang发送post表单请求">
 <meta property="og:url" content="http://www.grdtechs.com/2016/09/07/go-postform/index.html">
 <meta property="og:site_name" content="一线攻城狮">
-<meta property="og:description" content="前言golang这边将map结构序列化通常采用json.Marshal和json.Unmarshal来做，但是在php server端还需要做json反序列化解析才能用， 用golang模拟表单提交, php server端则非常方便提取相应的数据字段.">
-<meta property="og:updated_time" content="2017-09-16T14:24:24.234Z">
+<meta property="og:description" content="golang这边将map结构序列化通常采用json.Marshal和json.Unmarshal来做，但是在php server端还需要做json反序列化解析才能用， 用golang模拟表单提交, php server端则非常方便提取相应的数据字段.">
+<meta property="og:updated_time" content="2017-09-16T14:32:56.903Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Golang发送post表单请求">
-<meta name="twitter:description" content="前言golang这边将map结构序列化通常采用json.Marshal和json.Unmarshal来做，但是在php server端还需要做json反序列化解析才能用， 用golang模拟表单提交, php server端则非常方便提取相应的数据字段.">
+<meta name="twitter:description" content="golang这边将map结构序列化通常采用json.Marshal和json.Unmarshal来做，但是在php server端还需要做json反序列化解析才能用， 用golang模拟表单提交, php server端则非常方便提取相应的数据字段.">
 
     
     <link rel="alternative" href="/atom.xml" title="一线攻城狮" type="application/atom+xml">
@@ -89,11 +89,11 @@
 		<div id="toc" class="toc-article">
 			<strong class="toc-title">文章目录</strong>
 		
-			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#u524D_u8A00"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u65B9_u6CD5"><span class="toc-number">2.</span> <span class="toc-text">方法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#http-Client_7B_7D-PostForm"><span class="toc-number">3.</span> <span class="toc-text">http.Client{}.PostForm</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#http-PostForm"><span class="toc-number">4.</span> <span class="toc-text">http.PostForm</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u5BF9_u8868_u5355_u6570_u636E_u7684_u63D0_u53D6"><span class="toc-number">5.</span> <span class="toc-text">对表单数据的提取</span></a></li></ol>
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#u65B9_u6CD5"><span class="toc-number">1.</span> <span class="toc-text">方法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#http-Client_7B_7D-PostForm"><span class="toc-number">2.</span> <span class="toc-text">http.Client{}.PostForm</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#http-PostForm"><span class="toc-number">3.</span> <span class="toc-text">http.PostForm</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u5BF9_u8868_u5355_u6570_u636E_u7684_u63D0_u53D6"><span class="toc-number">4.</span> <span class="toc-text">对表单数据的提取</span></a></li></ol>
 		
 		</div>
 		
-		<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>golang这边将<code>map</code>结构序列化通常采用<code>json.Marshal</code>和<code>json.Unmarshal</code>来做，但是在php server端还需要做<code>json</code>反序列化解析才能用， 用golang模拟表单提交, php server端则非常方便提取相应的数据字段.<br><a id="more"></a></p>
+		<p>golang这边将<code>map</code>结构序列化通常采用<code>json.Marshal</code>和<code>json.Unmarshal</code>来做，但是在php server端还需要做<code>json</code>反序列化解析才能用， 用golang模拟表单提交, php server端则非常方便提取相应的数据字段.<br><a id="more"></a></p>
 <h2 id="u65B9_u6CD5"><a href="#u65B9_u6CD5" class="headerlink" title="方法"></a>方法</h2><p>方法是利用golang<code>net/http</code>包提供的<code>PostForm</code>提交post表单提交。<code>ParseForm</code>解析<code>URL</code>中的查询字符串，并将解析结果更新到<code>r.Form</code>字段。对于<code>POST</code>或<code>PUT</code>请求，<code>ParseForm</code>还会将<code>body</code>当作表单解析，并将结果既更新到<code>r.PostForm</code>也更新到<code>r.Form</code>。解析结果中，<code>POST</code>或<code>PUT</code>请求主体要优先于<code>URL</code>查询字符串（同名变量，主体的值在查询字符串的值前面）。如果请求的主体的大小没有被<code>MaxBytesReader</code>函数设定限制，其大小默认限制为开头10MB。</p>
 <h2 id="http-Client_7B_7D-PostForm"><a href="#http-Client_7B_7D-PostForm" class="headerlink" title="http.Client{}.PostForm"></a>http.Client{}.PostForm</h2><p>利用<code>http.Client{}.PostForm</code>提交post表单。</p>
 <figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> <span class="string">"net/http"</span></span><br><span class="line">client := &amp;http.Client&#123;&#125;</span><br><span class="line">res, err := client.PostForm(<span class="string">"http://127.0.0.1:8091/postpage"</span>, url.Values&#123;</span><br><span class="line">	<span class="string">"key"</span>:   &#123;<span class="string">"this is client key"</span>&#125;,</span><br><span class="line">	<span class="string">"value"</span>: &#123;<span class="string">"this is client value"</span>&#125;,</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>

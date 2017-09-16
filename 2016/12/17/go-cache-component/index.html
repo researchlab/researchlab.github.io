@@ -11,16 +11,16 @@
     
 
     
-    <meta name="description" content="前言总结用golang从分析，设计到实现一个可用的缓存组件。">
+    <meta name="description" content="总结用golang从分析，设计到实现一个可用的缓存组件。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="go实现缓存组件">
 <meta property="og:url" content="http://www.grdtechs.com/2016/12/17/go-cache-component/index.html">
 <meta property="og:site_name" content="一线攻城狮">
-<meta property="og:description" content="前言总结用golang从分析，设计到实现一个可用的缓存组件。">
-<meta property="og:updated_time" content="2017-09-16T14:24:24.234Z">
+<meta property="og:description" content="总结用golang从分析，设计到实现一个可用的缓存组件。">
+<meta property="og:updated_time" content="2017-09-16T14:32:56.903Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="go实现缓存组件">
-<meta name="twitter:description" content="前言总结用golang从分析，设计到实现一个可用的缓存组件。">
+<meta name="twitter:description" content="总结用golang从分析，设计到实现一个可用的缓存组件。">
 
     
     <link rel="alternative" href="/atom.xml" title="一线攻城狮" type="application/atom+xml">
@@ -89,11 +89,11 @@
 		<div id="toc" class="toc-article">
 			<strong class="toc-title">文章目录</strong>
 		
-			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#u524D_u8A00"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u7F13_u5B58"><span class="toc-number">2.</span> <span class="toc-text">缓存</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u7F13_u5B58_u7EC4_u4EF6_u8BBE_u8BA1"><span class="toc-number">3.</span> <span class="toc-text">缓存组件设计</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u7F13_u5B58_u7EC4_u4EF6_u5B9E_u73B0"><span class="toc-number">4.</span> <span class="toc-text">缓存组件实现</span></a></li></ol>
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#u7F13_u5B58"><span class="toc-number">1.</span> <span class="toc-text">缓存</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u7F13_u5B58_u7EC4_u4EF6_u8BBE_u8BA1"><span class="toc-number">2.</span> <span class="toc-text">缓存组件设计</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u7F13_u5B58_u7EC4_u4EF6_u5B9E_u73B0"><span class="toc-number">3.</span> <span class="toc-text">缓存组件实现</span></a></li></ol>
 		
 		</div>
 		
-		<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>总结用golang从分析，设计到实现一个可用的缓存组件。<br><a id="more"></a></p>
+		<p>总结用golang从分析，设计到实现一个可用的缓存组件。<br><a id="more"></a></p>
 <h2 id="u7F13_u5B58"><a href="#u7F13_u5B58" class="headerlink" title="缓存"></a>缓存</h2><ul>
 <li><p>为什么要设计缓存<br>  电脑的内存是以系统总线的时钟频率工作的，这个频率通常也就是CPU的外频(对于雷鸟、毒龙系列的处理器，由于在设计采用了DDR技术，CPU工作的外频为系统总线频率的两倍)。但是，CPU的工作频率(主频)是外频与倍频因子的乘积。这样一来，内存的工作频率就远低于CPU的工作频率了,造成的直接结果是：CPU在执行完一条指令后，常常需要”等待”一些时间才能再次访问内存，极大降了CPU工作效率。在这样一种情况下，Cache就应运而生,Cache是一种特殊的存储器，它由Cache 存储部件和Cache控制部件组成。Cache 存储部件一般采用与CPU同类型的半导体存储器件，存取速度比内存快几倍甚至十几倍。<br>  缓存(Cache)在计算机硬件中普遍存在。比如在CPU中就有一级缓存，二级缓存，甚至三级缓存。缓存的工作原理一般是CPU需要读取数据时，会首先从缓存中查找需要的数据，如果找到了就直接进行处理，如果没有找到则从内存中读取数据。缓存不仅仅存在于硬件中，在各种软件系统中也处处可见。比如在Web系统中，缓存存在于服务器端，客户端或者代理服务器中。广泛使用的CDN网络，也可以看作一个巨大的缓存系统。缓存在Web系统中的使用有很多好处，不仅可以减少网络流量，降低客户访问延迟，还可以减轻服务器负载。</p>
 </li>

@@ -11,16 +11,16 @@
     
 
     
-    <meta name="description" content="前言go能处理高并发的根本原因在于执行go协程只需极少的栈内存(大概4~5KB),并且能根据需要动态增长和缩减占用的资源。">
+    <meta name="description" content="go能处理高并发的根本原因在于执行go协程只需极少的栈内存(大概4~5KB),并且能根据需要动态增长和缩减占用的资源。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="golang 并发concurrency 使用总结">
 <meta property="og:url" content="http://www.grdtechs.com/2016/02/17/go-concurrency-summarize/index.html">
 <meta property="og:site_name" content="一线攻城狮">
-<meta property="og:description" content="前言go能处理高并发的根本原因在于执行go协程只需极少的栈内存(大概4~5KB),并且能根据需要动态增长和缩减占用的资源。">
-<meta property="og:updated_time" content="2017-09-16T14:24:24.234Z">
+<meta property="og:description" content="go能处理高并发的根本原因在于执行go协程只需极少的栈内存(大概4~5KB),并且能根据需要动态增长和缩减占用的资源。">
+<meta property="og:updated_time" content="2017-09-16T14:32:56.903Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="golang 并发concurrency 使用总结">
-<meta name="twitter:description" content="前言go能处理高并发的根本原因在于执行go协程只需极少的栈内存(大概4~5KB),并且能根据需要动态增长和缩减占用的资源。">
+<meta name="twitter:description" content="go能处理高并发的根本原因在于执行go协程只需极少的栈内存(大概4~5KB),并且能根据需要动态增长和缩减占用的资源。">
 
     
     <link rel="alternative" href="/atom.xml" title="一线攻城狮" type="application/atom+xml">
@@ -89,11 +89,11 @@
 		<div id="toc" class="toc-article">
 			<strong class="toc-title">文章目录</strong>
 		
-			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#u524D_u8A00"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u9AD8_u5E76_u53D1_u7684_u672C_u8D28goroutine"><span class="toc-number">2.</span> <span class="toc-text">高并发的本质goroutine</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u5F00_u542F_u591A_u6838_u5E76_u884C_u5E76_u53D1_u6267_u884C"><span class="toc-number">3.</span> <span class="toc-text">开启多核并行并发执行</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#go_u5E76_u53D1_u6267_u884C_u5B89_u5168_u95EE_u9898"><span class="toc-number">4.</span> <span class="toc-text">go并发执行安全问题</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u6279_u91CF_u5904_u7406_u591A_u4E2AChannel_u64CD_u4F5C"><span class="toc-number">5.</span> <span class="toc-text">批量处理多个Channel操作</span></a></li></ol>
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#u9AD8_u5E76_u53D1_u7684_u672C_u8D28goroutine"><span class="toc-number">1.</span> <span class="toc-text">高并发的本质goroutine</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u5F00_u542F_u591A_u6838_u5E76_u884C_u5E76_u53D1_u6267_u884C"><span class="toc-number">2.</span> <span class="toc-text">开启多核并行并发执行</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#go_u5E76_u53D1_u6267_u884C_u5B89_u5168_u95EE_u9898"><span class="toc-number">3.</span> <span class="toc-text">go并发执行安全问题</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u6279_u91CF_u5904_u7406_u591A_u4E2AChannel_u64CD_u4F5C"><span class="toc-number">4.</span> <span class="toc-text">批量处理多个Channel操作</span></a></li></ol>
 		
 		</div>
 		
-		<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>go能处理高并发的根本原因在于执行go协程只需极少的栈内存(大概4~5KB),并且能根据需要动态增长和缩减占用的资源。<br><a id="more"></a></p>
+		<p>go能处理高并发的根本原因在于执行go协程只需极少的栈内存(大概4~5KB),并且能根据需要动态增长和缩减占用的资源。<br><a id="more"></a></p>
 <h2 id="u9AD8_u5E76_u53D1_u7684_u672C_u8D28goroutine"><a href="#u9AD8_u5E76_u53D1_u7684_u672C_u8D28goroutine" class="headerlink" title="高并发的本质goroutine"></a>高并发的本质goroutine</h2><p>简单而言,<code>goroutine</code>就是一段代码，一个函数入口，以及在堆上为其分配的一个堆栈。所以它非常廉价，我们可以很轻松的创建上万个<code>goroutine</code>，但它们并不是被操作系统所调度执行,而是通过系统的线程来多路派遣这些函数的执行，使得每个用go关键字执行的函数可以运行成为一个单位协程。当一个协程阻塞的时候，调度器就会自动把其他协程安排到另外的线程中去执行，从而实现了程序无等待并行化运行。而且调度的开销非常小，一颗CPU调度的规模不下于每秒百万次，这使得在程序中能够创建大量的<code>goroutine</code>，实现高并发的同时，依旧能保持高性能。<br><code>goroutine</code>是通过通信来共享内存,go中是通过<code>Channel</code>来实现通信的，<code>Channel</code>本身就像一根管道，go就通过这根管道进行数据的传递,实现消息通信。先来看一个简单的示例：<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">c := <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="typename">bool</span>)</span><br><span class="line"><span class="keyword">go</span> <span class="keyword">func</span>() &#123;</span><br><span class="line">	fmt.Println(<span class="string">"Go concurrency"</span>)</span><br><span class="line">	c &lt;- <span class="constant">true</span></span><br><span class="line">	<span class="built_in">close</span>(c)</span><br><span class="line">&#125;()</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span>  v := <span class="keyword">range</span> c &#123;</span><br><span class="line">	fmt.Println(v)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
 <ul>
 <li>上面的代码首先创建一个<code>bool</code>的<code>Channel</code>对象<code>c</code>,然后通过<code>go</code>关键字执行一个<code>goroutine</code>,紧接着执行一个<code>for</code>循环;<code>for</code>会循环去读取<code>c</code>中的值，如果读取到值，则执行<code>for</code>循环体（打印v的值），没读取到则<code>for</code>被阻塞等待,直到读取到<code>c</code>中的值再去执行<code>for</code>循环体然后继续循环读取<code>c</code>，如果执行了<code>close(c)</code>把<code>Channel</code>对象<code>c</code>关闭了，那<code>for</code>循环就退出不执行了。 这就是通过<code>Channel</code>通信执行<code>goroutine</code>的一个简单示例。</li>

@@ -11,12 +11,12 @@
     
 
     
-    <meta name="description" content="前言Http缓存机制作为web性能优化的重要手段, 本文对网络中，工作中使用的http缓存知识进行归纳总结。">
+    <meta name="description" content="Http缓存机制作为web性能优化的重要手段, 本文对网络中，工作中使用的http缓存知识进行归纳总结。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="http 缓存知识总结">
 <meta property="og:url" content="http://www.grdtechs.com/2017/01/17/http-cache/index.html">
 <meta property="og:site_name" content="一线攻城狮">
-<meta property="og:description" content="前言Http缓存机制作为web性能优化的重要手段, 本文对网络中，工作中使用的http缓存知识进行归纳总结。">
+<meta property="og:description" content="Http缓存机制作为web性能优化的重要手段, 本文对网络中，工作中使用的http缓存知识进行归纳总结。">
 <meta property="og:image" content="http://www.grdtechs.com/imgs/cache_where.png">
 <meta property="og:image" content="http://www.grdtechs.com/imgs/etag.png">
 <meta property="og:image" content="http://www.grdtechs.com/imgs/if-none-match.png">
@@ -27,10 +27,10 @@
 <meta property="og:image" content="http://www.grdtechs.com/imgs/cache_sys.png">
 <meta property="og:image" content="http://www.grdtechs.com/imgs/cache_sys_relation.png">
 <meta property="og:image" content="http://www.grdtechs.com/imgs/cache_data1.jpg">
-<meta property="og:updated_time" content="2017-09-16T14:24:24.234Z">
+<meta property="og:updated_time" content="2017-09-16T14:32:56.907Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="http 缓存知识总结">
-<meta name="twitter:description" content="前言Http缓存机制作为web性能优化的重要手段, 本文对网络中，工作中使用的http缓存知识进行归纳总结。">
+<meta name="twitter:description" content="Http缓存机制作为web性能优化的重要手段, 本文对网络中，工作中使用的http缓存知识进行归纳总结。">
 
     
     <link rel="alternative" href="/atom.xml" title="一线攻城狮" type="application/atom+xml">
@@ -99,11 +99,11 @@
 		<div id="toc" class="toc-article">
 			<strong class="toc-title">文章目录</strong>
 		
-			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#u524D_u8A00"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u7F13_u5B58_u5206_u7C7B"><span class="toc-number">2.</span> <span class="toc-text">缓存分类</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u7F13_u5B58_u65B0_u9C9C_u5EA6"><span class="toc-number">3.</span> <span class="toc-text">缓存新鲜度</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u6848_u4F8B_u5206_u6790"><span class="toc-number">4.</span> <span class="toc-text">案例分析</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#reference"><span class="toc-number">5.</span> <span class="toc-text">reference</span></a></li></ol>
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#u7F13_u5B58_u5206_u7C7B"><span class="toc-number">1.</span> <span class="toc-text">缓存分类</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u7F13_u5B58_u65B0_u9C9C_u5EA6"><span class="toc-number">2.</span> <span class="toc-text">缓存新鲜度</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u6848_u4F8B_u5206_u6790"><span class="toc-number">3.</span> <span class="toc-text">案例分析</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#reference"><span class="toc-number">4.</span> <span class="toc-text">reference</span></a></li></ol>
 		
 		</div>
 		
-		<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>Http缓存机制作为web性能优化的重要手段, 本文对网络中，工作中使用的http缓存知识进行归纳总结。<br><a id="more"></a></p>
+		<p>Http缓存机制作为web性能优化的重要手段, 本文对网络中，工作中使用的http缓存知识进行归纳总结。<br><a id="more"></a></p>
 <h2 id="u7F13_u5B58_u5206_u7C7B"><a href="#u7F13_u5B58_u5206_u7C7B" class="headerlink" title="缓存分类"></a>缓存分类</h2><p>缓存分为<code>服务端缓存</code>(server side，比如Nginx、Apache)和<code>客户端缓存</code>(client side，比如 web browser)。</p>
 <ul>
 <li><code>服务端缓存</code>又分为<code>代理服务器缓存</code>和<code>反向代理服务器缓存</code>(也叫网关缓存，比如Nginx反向代理、Squid等)，其实广泛使用的CDN也是一种服务端缓存，目的都是让用户的请求走”捷径”(一般用CDN缓存图片、文件等静态资源)。</li>

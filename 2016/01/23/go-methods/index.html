@@ -11,16 +11,16 @@
     
 
     
-    <meta name="description" content="前言从技术上来将，Go并不是一门面向对象的编程语言,所以与充许将类型和方法以面向对象的方式编程有些差别,最大的差异在于Go不支持类型继承,但是提供一个接口的概念. 在本章中，我们主要来讨论在Go编程中使用方法和接口.">
+    <meta name="description" content="从技术上来将，Go并不是一门面向对象的编程语言,所以与充许将类型和方法以面向对象的方式编程有些差别,最大的差异在于Go不支持类型继承,但是提供一个接口的概念. 在本章中，我们主要来讨论在Go编程中使用方法和接口.">
 <meta property="og:type" content="article">
 <meta property="og:title" content="[译]GO BOOTCAMP 第六章：方法">
 <meta property="og:url" content="http://www.grdtechs.com/2016/01/23/go-methods/index.html">
 <meta property="og:site_name" content="一线攻城狮">
-<meta property="og:description" content="前言从技术上来将，Go并不是一门面向对象的编程语言,所以与充许将类型和方法以面向对象的方式编程有些差别,最大的差异在于Go不支持类型继承,但是提供一个接口的概念. 在本章中，我们主要来讨论在Go编程中使用方法和接口.">
-<meta property="og:updated_time" content="2017-09-16T14:24:24.234Z">
+<meta property="og:description" content="从技术上来将，Go并不是一门面向对象的编程语言,所以与充许将类型和方法以面向对象的方式编程有些差别,最大的差异在于Go不支持类型继承,但是提供一个接口的概念. 在本章中，我们主要来讨论在Go编程中使用方法和接口.">
+<meta property="og:updated_time" content="2017-09-16T14:32:56.903Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="[译]GO BOOTCAMP 第六章：方法">
-<meta name="twitter:description" content="前言从技术上来将，Go并不是一门面向对象的编程语言,所以与充许将类型和方法以面向对象的方式编程有些差别,最大的差异在于Go不支持类型继承,但是提供一个接口的概念. 在本章中，我们主要来讨论在Go编程中使用方法和接口.">
+<meta name="twitter:description" content="从技术上来将，Go并不是一门面向对象的编程语言,所以与充许将类型和方法以面向对象的方式编程有些差别,最大的差异在于Go不支持类型继承,但是提供一个接口的概念. 在本章中，我们主要来讨论在Go编程中使用方法和接口.">
 
     
     <link rel="alternative" href="/atom.xml" title="一线攻城狮" type="application/atom+xml">
@@ -89,11 +89,11 @@
 		<div id="toc" class="toc-article">
 			<strong class="toc-title">文章目录</strong>
 		
-			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#u524D_u8A00"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u7EC4_u7EC7_u4EE3_u7801"><span class="toc-number">2.</span> <span class="toc-text">组织代码</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u7C7B_u578B_u522B_u540D"><span class="toc-number">3.</span> <span class="toc-text">类型别名</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u65B9_u6CD5_u63A5_u6536_u8005"><span class="toc-number">4.</span> <span class="toc-text">方法接收者</span></a></li></ol>
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#u7EC4_u7EC7_u4EE3_u7801"><span class="toc-number">1.</span> <span class="toc-text">组织代码</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u7C7B_u578B_u522B_u540D"><span class="toc-number">2.</span> <span class="toc-text">类型别名</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u65B9_u6CD5_u63A5_u6536_u8005"><span class="toc-number">3.</span> <span class="toc-text">方法接收者</span></a></li></ol>
 		
 		</div>
 		
-		<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>从技术上来将，<code>Go</code>并不是一门面向对象的编程语言,所以与充许将类型和方法以面向对象的方式编程有些差别,最大的差异在于<code>Go</code>不支持类型继承,但是提供一个<code>接口</code>的概念. 在本章中，我们主要来讨论在<code>Go</code>编程中使用方法和接口.<br><a id="more"></a></p>
+		<p>从技术上来将，<code>Go</code>并不是一门面向对象的编程语言,所以与充许将类型和方法以面向对象的方式编程有些差别,最大的差异在于<code>Go</code>不支持类型继承,但是提供一个<code>接口</code>的概念. 在本章中，我们主要来讨论在<code>Go</code>编程中使用方法和接口.<br><a id="more"></a></p>
 <p><strong> 函数和方法的区别？</strong><br>方法是定义了接收者的函数，从面向对象的角度来讲,方法是对象实例上的一个函数。</p>
 <p><code>Go</code>语言没有<code>class</code>类的概念，但是你可以在结构体类型中定义方法.<br>方法的接收者在<code>func</code>关键字和方法名之间，并以它自己的参数形式出现. 下面是一个拥有<code>FirstName</code>和<code>LastName</code>字段的<code>User</code>结构体的示例<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">"fmt"</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> User <span class="keyword">struct</span> &#123;</span><br><span class="line">	FirstName, LastName <span class="typename">string</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> (u User) Greeting() <span class="typename">string</span> &#123;</span><br><span class="line">	<span class="keyword">return</span> fmt.Sprintf(<span class="string">"Dear %s %s"</span>, u.FirstName, u.LastName)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> main() &#123;</span><br><span class="line">	u := User&#123;<span class="string">"Matt"</span>, <span class="string">"Aimonetti"</span>&#125;</span><br><span class="line">	fmt.Println(u.Greeting())</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
 <p>注意上述代码中，是如何在结构体外定义方法的，如果你做过面向对象编程，你可能会觉得有点奇怪. <code>User</code>结构体上的方法可以定义在包内的任意位置.</p>

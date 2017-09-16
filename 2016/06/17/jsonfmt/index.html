@@ -11,17 +11,17 @@
     
 
     
-    <meta name="description" content="前言json字符串在html用js美化输出使用总结。">
+    <meta name="description" content="json字符串在html用js美化输出使用总结。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="html 美化输出 json 字符串">
 <meta property="og:url" content="http://www.grdtechs.com/2016/06/17/jsonfmt/index.html">
 <meta property="og:site_name" content="一线攻城狮">
-<meta property="og:description" content="前言json字符串在html用js美化输出使用总结。">
+<meta property="og:description" content="json字符串在html用js美化输出使用总结。">
 <meta property="og:image" content="http://www.grdtechs.com/imgs/jsonfmt.png">
-<meta property="og:updated_time" content="2017-09-16T14:24:24.234Z">
+<meta property="og:updated_time" content="2017-09-16T14:32:56.907Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="html 美化输出 json 字符串">
-<meta name="twitter:description" content="前言json字符串在html用js美化输出使用总结。">
+<meta name="twitter:description" content="json字符串在html用js美化输出使用总结。">
 
     
     <link rel="alternative" href="/atom.xml" title="一线攻城狮" type="application/atom+xml">
@@ -90,11 +90,11 @@
 		<div id="toc" class="toc-article">
 			<strong class="toc-title">文章目录</strong>
 		
-			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#u524D_u8A00"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#JSON-stringify_28_29_u51FD_u6570_u539F_u578B"><span class="toc-number">2.</span> <span class="toc-text">JSON.stringify()函数原型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#JSON-stringify_28_29__u5B9E_u4F8B"><span class="toc-number">3.</span> <span class="toc-text">JSON.stringify() 实例</span></a></li></ol>
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#JSON-stringify_28_29_u51FD_u6570_u539F_u578B"><span class="toc-number">1.</span> <span class="toc-text">JSON.stringify()函数原型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#JSON-stringify_28_29__u5B9E_u4F8B"><span class="toc-number">2.</span> <span class="toc-text">JSON.stringify() 实例</span></a></li></ol>
 		
 		</div>
 		
-		<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p><code>json</code>字符串在html用js美化输出使用总结。<br><a id="more"></a></p>
+		<p><code>json</code>字符串在html用js美化输出使用总结。<br><a id="more"></a></p>
 <h2 id="JSON-stringify_28_29_u51FD_u6570_u539F_u578B"><a href="#JSON-stringify_28_29_u51FD_u6570_u539F_u578B" class="headerlink" title="JSON.stringify()函数原型"></a>JSON.stringify()函数原型</h2><p><strong>语法：</strong><br>　　<code>JSON.stringify(value [, replacer] [, space])</code></p>
 <p><code>value</code>：是必选字段。就是你输入的对象，比如数组，类等。<br><code>replacer</code>：这个是可选的。它又分为2种方式，一种是数组，第二种是方法。<br>　　情况一：<code>replacer</code>为数组时，通过后面的实验可以知道，它是和第一个参数<code>value</code>有关系的。一般来说，系列化后的结果是通过键值对来进行表示的。 所以，如果此时第二个参数的值在第一个存在，那么就以第二个参数的值做<code>key</code>，第一个参数的值为<code>value</code>进行表示，如果不存在，就忽略。</p>
 <p>　　情况二：<code>replacer</code>为方法时，那很简单，就是说把系列化后的每一个对象（记住是每一个）传进方法里面进行处理。 </p>

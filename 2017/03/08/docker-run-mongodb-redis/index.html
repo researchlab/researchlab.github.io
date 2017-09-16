@@ -11,16 +11,16 @@
     
 
     
-    <meta name="description" content="前言上篇文件总结了如何编写Dockerfile及如何通过Dockerfile构建镜像并运行相应的应用需求, 本文将通过编写Dockerfile来创建MongoDB和Redis应用进一步学习实践Docker的运行机制。">
+    <meta name="description" content="上篇文件总结了如何编写Dockerfile及如何通过Dockerfile构建镜像并运行相应的应用需求, 本文将通过编写Dockerfile来创建MongoDB和Redis应用进一步学习实践Docker的运行机制。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="docker实践--06 运行MongoDB和Redis">
 <meta property="og:url" content="http://www.grdtechs.com/2017/03/08/docker-run-mongodb-redis/index.html">
 <meta property="og:site_name" content="一线攻城狮">
-<meta property="og:description" content="前言上篇文件总结了如何编写Dockerfile及如何通过Dockerfile构建镜像并运行相应的应用需求, 本文将通过编写Dockerfile来创建MongoDB和Redis应用进一步学习实践Docker的运行机制。">
-<meta property="og:updated_time" content="2017-09-16T14:24:24.234Z">
+<meta property="og:description" content="上篇文件总结了如何编写Dockerfile及如何通过Dockerfile构建镜像并运行相应的应用需求, 本文将通过编写Dockerfile来创建MongoDB和Redis应用进一步学习实践Docker的运行机制。">
+<meta property="og:updated_time" content="2017-09-16T14:32:56.903Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="docker实践--06 运行MongoDB和Redis">
-<meta name="twitter:description" content="前言上篇文件总结了如何编写Dockerfile及如何通过Dockerfile构建镜像并运行相应的应用需求, 本文将通过编写Dockerfile来创建MongoDB和Redis应用进一步学习实践Docker的运行机制。">
+<meta name="twitter:description" content="上篇文件总结了如何编写Dockerfile及如何通过Dockerfile构建镜像并运行相应的应用需求, 本文将通过编写Dockerfile来创建MongoDB和Redis应用进一步学习实践Docker的运行机制。">
 
     
     <link rel="alternative" href="/atom.xml" title="一线攻城狮" type="application/atom+xml">
@@ -89,11 +89,11 @@
 		<div id="toc" class="toc-article">
 			<strong class="toc-title">文章目录</strong>
 		
-			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#u524D_u8A00"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u7F16_u5199Dockerfile"><span class="toc-number">2.</span> <span class="toc-text">编写Dockerfile</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u7F16_u5199MongoDB_Dockerfile"><span class="toc-number">3.</span> <span class="toc-text">编写MongoDB Dockerfile</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u7F16_u5199Redis_Dockerfile"><span class="toc-number">4.</span> <span class="toc-text">编写Redis Dockerfile</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u521B_u5EFA_u955C_u50CF"><span class="toc-number">5.</span> <span class="toc-text">创建镜像</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u603B_u7ED3"><span class="toc-number">6.</span> <span class="toc-text">总结</span></a></li></ol>
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#u7F16_u5199Dockerfile"><span class="toc-number">1.</span> <span class="toc-text">编写Dockerfile</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u7F16_u5199MongoDB_Dockerfile"><span class="toc-number">2.</span> <span class="toc-text">编写MongoDB Dockerfile</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u7F16_u5199Redis_Dockerfile"><span class="toc-number">3.</span> <span class="toc-text">编写Redis Dockerfile</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u521B_u5EFA_u955C_u50CF"><span class="toc-number">4.</span> <span class="toc-text">创建镜像</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u603B_u7ED3"><span class="toc-number">5.</span> <span class="toc-text">总结</span></a></li></ol>
 		
 		</div>
 		
-		<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>上篇文件总结了如何编写<code>Dockerfile</code>及如何通过<code>Dockerfile</code>构建镜像并运行相应的应用需求, 本文将通过编写<code>Dockerfile</code>来创建MongoDB和Redis应用进一步学习实践<code>Docker</code>的运行机制。<br><a id="more"></a></p>
+		<p>上篇文件总结了如何编写<code>Dockerfile</code>及如何通过<code>Dockerfile</code>构建镜像并运行相应的应用需求, 本文将通过编写<code>Dockerfile</code>来创建MongoDB和Redis应用进一步学习实践<code>Docker</code>的运行机制。<br><a id="more"></a></p>
 <blockquote>
 <p>MongoDB 是一个基于分布式文件存储的数据库。由C++语言编写。旨在为WEB应用提供可扩展的高性能数据存储解决方案。MongoDB 是一个介于关系数据库和非关系数据库之间的产品，是非关系数据库当中功能最丰富，最像关系数据库的数据库。特点是高性能、易部署、易使用，存储数据非常方便。 </p>
 <p>Redis是一个开源的使用ANSI C语言编写、支持网络、可基于内存亦可持久化的日志型、Key-Value数据库，并提供多种语言的API。 </p>

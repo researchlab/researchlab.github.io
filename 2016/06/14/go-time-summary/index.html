@@ -11,16 +11,16 @@
     
 
     
-    <meta name="description" content="前言golang 中经常需要格式化时间和日期来满足不同的业务需求,下面总结格式化时间日期中遇到的问题。">
+    <meta name="description" content="golang 中经常需要格式化时间和日期来满足不同的业务需求,下面总结格式化时间日期中遇到的问题。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="golang 格式化时间总结">
 <meta property="og:url" content="http://www.grdtechs.com/2016/06/14/go-time-summary/index.html">
 <meta property="og:site_name" content="一线攻城狮">
-<meta property="og:description" content="前言golang 中经常需要格式化时间和日期来满足不同的业务需求,下面总结格式化时间日期中遇到的问题。">
-<meta property="og:updated_time" content="2017-09-16T14:24:24.234Z">
+<meta property="og:description" content="golang 中经常需要格式化时间和日期来满足不同的业务需求,下面总结格式化时间日期中遇到的问题。">
+<meta property="og:updated_time" content="2017-09-16T14:32:56.907Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="golang 格式化时间总结">
-<meta name="twitter:description" content="前言golang 中经常需要格式化时间和日期来满足不同的业务需求,下面总结格式化时间日期中遇到的问题。">
+<meta name="twitter:description" content="golang 中经常需要格式化时间和日期来满足不同的业务需求,下面总结格式化时间日期中遇到的问题。">
 
     
     <link rel="alternative" href="/atom.xml" title="一线攻城狮" type="application/atom+xml">
@@ -89,11 +89,11 @@
 		<div id="toc" class="toc-article">
 			<strong class="toc-title">文章目录</strong>
 		
-			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#u524D_u8A00"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#golang_time_u5305__u65F6_u95F4_u65E5_u671F_u683C_u5F0F_u5316_u5B9A_u4E49"><span class="toc-number">2.</span> <span class="toc-text">golang time包 时间日期格式化定义</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u65F6_u95F4_u65E5_u671F_u683C_u5F0F_u5316"><span class="toc-number">3.</span> <span class="toc-text">时间日期格式化</span></a></li></ol>
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#golang_time_u5305__u65F6_u95F4_u65E5_u671F_u683C_u5F0F_u5316_u5B9A_u4E49"><span class="toc-number">1.</span> <span class="toc-text">golang time包 时间日期格式化定义</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u65F6_u95F4_u65E5_u671F_u683C_u5F0F_u5316"><span class="toc-number">2.</span> <span class="toc-text">时间日期格式化</span></a></li></ol>
 		
 		</div>
 		
-		<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p><code>golang</code> 中经常需要格式化时间和日期来满足不同的业务需求,下面总结格式化时间日期中遇到的问题。<br><a id="more"></a></p>
+		<p><code>golang</code> 中经常需要格式化时间和日期来满足不同的业务需求,下面总结格式化时间日期中遇到的问题。<br><a id="more"></a></p>
 <h2 id="golang_time_u5305__u65F6_u95F4_u65E5_u671F_u683C_u5F0F_u5316_u5B9A_u4E49"><a href="#golang_time_u5305__u65F6_u95F4_u65E5_u671F_u683C_u5F0F_u5316_u5B9A_u4E49" class="headerlink" title="golang time包 时间日期格式化定义"></a>golang time包 时间日期格式化定义</h2><p>go 的time package 提供了time.Format函数，用来对时间进行格式化输出;类似的还有time.Parse用来解析字符串类型的时间到time.Time。这是两个互逆的函数。</p>
 <p><strong> 下面看<code>golang</code>中<code>time</code>包对于时间的详细定义 </strong></p>
 <ul>

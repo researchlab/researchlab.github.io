@@ -11,16 +11,16 @@
     
 
     
-    <meta name="description" content="前言在前面第一篇总结中已了解了一些镜像的概念，简单的说镜像就是一个容器的只读模板，用来创建容器。当运行容器时需要指定镜像，如果本地没有该镜像，则会从Docker Registry下载。默认查找的是Docker Hub。Docker的镜像是增量的修改，每次创建新的镜像都会在老的镜像上面构建一个增量的层，使用到的技术是Another Union File System(AUFS)，具体可参考 剖析Do">
+    <meta name="description" content="在前面第一篇总结中已了解了一些镜像的概念，简单的说镜像就是一个容器的只读模板，用来创建容器。当运行容器时需要指定镜像，如果本地没有该镜像，则会从Docker Registry下载。默认查找的是Docker Hub。Docker的镜像是增量的修改，每次创建新的镜像都会在老的镜像上面构建一个增量的层，使用到的技术是Another Union File System(AUFS)，具体可参考 剖析Dock">
 <meta property="og:type" content="article">
 <meta property="og:title" content="docker实践--03 镜像管理">
 <meta property="og:url" content="http://www.grdtechs.com/2017/03/06/docker-image-mgr/index.html">
 <meta property="og:site_name" content="一线攻城狮">
-<meta property="og:description" content="前言在前面第一篇总结中已了解了一些镜像的概念，简单的说镜像就是一个容器的只读模板，用来创建容器。当运行容器时需要指定镜像，如果本地没有该镜像，则会从Docker Registry下载。默认查找的是Docker Hub。Docker的镜像是增量的修改，每次创建新的镜像都会在老的镜像上面构建一个增量的层，使用到的技术是Another Union File System(AUFS)，具体可参考 剖析Do">
-<meta property="og:updated_time" content="2017-09-16T14:24:24.230Z">
+<meta property="og:description" content="在前面第一篇总结中已了解了一些镜像的概念，简单的说镜像就是一个容器的只读模板，用来创建容器。当运行容器时需要指定镜像，如果本地没有该镜像，则会从Docker Registry下载。默认查找的是Docker Hub。Docker的镜像是增量的修改，每次创建新的镜像都会在老的镜像上面构建一个增量的层，使用到的技术是Another Union File System(AUFS)，具体可参考 剖析Dock">
+<meta property="og:updated_time" content="2017-09-16T14:32:56.903Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="docker实践--03 镜像管理">
-<meta name="twitter:description" content="前言在前面第一篇总结中已了解了一些镜像的概念，简单的说镜像就是一个容器的只读模板，用来创建容器。当运行容器时需要指定镜像，如果本地没有该镜像，则会从Docker Registry下载。默认查找的是Docker Hub。Docker的镜像是增量的修改，每次创建新的镜像都会在老的镜像上面构建一个增量的层，使用到的技术是Another Union File System(AUFS)，具体可参考 剖析Do">
+<meta name="twitter:description" content="在前面第一篇总结中已了解了一些镜像的概念，简单的说镜像就是一个容器的只读模板，用来创建容器。当运行容器时需要指定镜像，如果本地没有该镜像，则会从Docker Registry下载。默认查找的是Docker Hub。Docker的镜像是增量的修改，每次创建新的镜像都会在老的镜像上面构建一个增量的层，使用到的技术是Another Union File System(AUFS)，具体可参考 剖析Dock">
 
     
     <link rel="alternative" href="/atom.xml" title="一线攻城狮" type="application/atom+xml">
@@ -89,11 +89,11 @@
 		<div id="toc" class="toc-article">
 			<strong class="toc-title">文章目录</strong>
 		
-			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#u524D_u8A00"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u67E5_u627E_u548C_u4E0B_u8F7D_u955C_u50CF"><span class="toc-number">2.</span> <span class="toc-text">查找和下载镜像</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u521B_u5EFA_u955C_u50CF"><span class="toc-number">3.</span> <span class="toc-text">创建镜像</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u67E5_u770B_u955C_u50CF_u4FE1_u606F"><span class="toc-number">4.</span> <span class="toc-text">查看镜像信息</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u5BFC_u5165_u548C_u5BFC_u51FA_u955C_u50CF"><span class="toc-number">5.</span> <span class="toc-text">导入和导出镜像</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u66F4_u65B0_u955C_u50CF"><span class="toc-number">6.</span> <span class="toc-text">更新镜像</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u5220_u9664_u955C_u50CF"><span class="toc-number">7.</span> <span class="toc-text">删除镜像</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u603B_u7ED3"><span class="toc-number">8.</span> <span class="toc-text">总结</span></a></li></ol>
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#u67E5_u627E_u548C_u4E0B_u8F7D_u955C_u50CF"><span class="toc-number">1.</span> <span class="toc-text">查找和下载镜像</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u521B_u5EFA_u955C_u50CF"><span class="toc-number">2.</span> <span class="toc-text">创建镜像</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u67E5_u770B_u955C_u50CF_u4FE1_u606F"><span class="toc-number">3.</span> <span class="toc-text">查看镜像信息</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u5BFC_u5165_u548C_u5BFC_u51FA_u955C_u50CF"><span class="toc-number">4.</span> <span class="toc-text">导入和导出镜像</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u66F4_u65B0_u955C_u50CF"><span class="toc-number">5.</span> <span class="toc-text">更新镜像</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u5220_u9664_u955C_u50CF"><span class="toc-number">6.</span> <span class="toc-text">删除镜像</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u603B_u7ED3"><span class="toc-number">7.</span> <span class="toc-text">总结</span></a></li></ol>
 		
 		</div>
 		
-		<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>在前面第一篇总结中已了解了一些镜像的概念，简单的说镜像就是一个容器的只读模板，用来创建容器。当运行容器时需要指定镜像，如果本地没有该镜像，则会从Docker Registry下载。默认查找的是<code>Docker Hub</code>。Docker的镜像是增量的修改，每次创建新的镜像都会在老的镜像上面构建一个增量的层，使用到的技术是Another Union File System(AUFS)，具体可参考 <a href="http://www.infoq.com/cn/articles/analysis-of-docker-file-system-aufs-and-devicemapper/" target="_blank" rel="external">剖析Docker文件系统：Aufs与Devicemapper</a>, 下面主要总结记录使用和管理docker镜像的过程。</p>
+		<p>在前面第一篇总结中已了解了一些镜像的概念，简单的说镜像就是一个容器的只读模板，用来创建容器。当运行容器时需要指定镜像，如果本地没有该镜像，则会从Docker Registry下载。默认查找的是<code>Docker Hub</code>。Docker的镜像是增量的修改，每次创建新的镜像都会在老的镜像上面构建一个增量的层，使用到的技术是Another Union File System(AUFS)，具体可参考 <a href="http://www.infoq.com/cn/articles/analysis-of-docker-file-system-aufs-and-devicemapper/" target="_blank" rel="external">剖析Docker文件系统：Aufs与Devicemapper</a>, 下面主要总结记录使用和管理docker镜像的过程。</p>
 <a id="more"></a>
 <h2 id="u67E5_u627E_u548C_u4E0B_u8F7D_u955C_u50CF"><a href="#u67E5_u627E_u548C_u4E0B_u8F7D_u955C_u50CF" class="headerlink" title="查找和下载镜像"></a>查找和下载镜像</h2><p>镜像存储中的核心概念仓库(Repository)是镜像存储的位置。Docker注册服务器(Registry)是仓库存储的位置。每个仓库包含不同的镜像。比如一个镜像名称<code>ubuntu:14.04</code>，冒号前面的ubuntu是仓库名, 后面的14.04是TAG, 不同的TAG可以对应相同的镜像, TAG通常设置为镜像的版本号。<code>Docker Hub</code>是Docker官方提供公共仓库，提供大量的常用镜像，由于国内网络原因经常连接Docker Hub会比较慢，所以我们也可以选择一些国内提供类似Docker Hub镜像服务站点。连接Docker Hub的常用命令包括,</p>
 <ul>

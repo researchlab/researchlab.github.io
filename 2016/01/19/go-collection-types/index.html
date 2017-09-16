@@ -11,16 +11,16 @@
     
 
     
-    <meta name="description" content="前言Go集合类型包含Array,Slice,Range,Map等议题的分析和讨论。">
+    <meta name="description" content="Go集合类型包含Array,Slice,Range,Map等议题的分析和讨论。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="[译]GO BOOTCAMP 第四章：集合类型">
 <meta property="og:url" content="http://www.grdtechs.com/2016/01/19/go-collection-types/index.html">
 <meta property="og:site_name" content="一线攻城狮">
-<meta property="og:description" content="前言Go集合类型包含Array,Slice,Range,Map等议题的分析和讨论。">
-<meta property="og:updated_time" content="2017-09-16T14:24:24.234Z">
+<meta property="og:description" content="Go集合类型包含Array,Slice,Range,Map等议题的分析和讨论。">
+<meta property="og:updated_time" content="2017-09-16T14:32:56.903Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="[译]GO BOOTCAMP 第四章：集合类型">
-<meta name="twitter:description" content="前言Go集合类型包含Array,Slice,Range,Map等议题的分析和讨论。">
+<meta name="twitter:description" content="Go集合类型包含Array,Slice,Range,Map等议题的分析和讨论。">
 
     
     <link rel="alternative" href="/atom.xml" title="一线攻城狮" type="application/atom+xml">
@@ -89,11 +89,11 @@
 		<div id="toc" class="toc-article">
 			<strong class="toc-title">文章目录</strong>
 		
-			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#u524D_u8A00"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Array-_u6570_u7EC4"><span class="toc-number">2.</span> <span class="toc-text">Array-数组</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Slices-_u5207_u7247"><span class="toc-number">3.</span> <span class="toc-text">Slices-切片</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u5FAA_u73AFslice-Range"><span class="toc-number">4.</span> <span class="toc-text">循环slice-Range</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Maps"><span class="toc-number">5.</span> <span class="toc-text">Maps</span></a></li></ol>
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Array-_u6570_u7EC4"><span class="toc-number">1.</span> <span class="toc-text">Array-数组</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Slices-_u5207_u7247"><span class="toc-number">2.</span> <span class="toc-text">Slices-切片</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u5FAA_u73AFslice-Range"><span class="toc-number">3.</span> <span class="toc-text">循环slice-Range</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Maps"><span class="toc-number">4.</span> <span class="toc-text">Maps</span></a></li></ol>
 		
 		</div>
 		
-		<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p><code>Go</code>集合类型包含<code>Array</code>,<code>Slice</code>,<code>Range</code>,<code>Map</code>等议题的分析和讨论。<br><a id="more"></a></p>
+		<p><code>Go</code>集合类型包含<code>Array</code>,<code>Slice</code>,<code>Range</code>,<code>Map</code>等议题的分析和讨论。<br><a id="more"></a></p>
 <h2 id="Array-_u6570_u7EC4"><a href="#Array-_u6570_u7EC4" class="headerlink" title="Array-数组"></a>Array-数组</h2><p><code>[n]T</code> 表示为一个n个数据类型为T的数组.</p>
 <figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> a [<span class="number">10</span>]<span class="typename">int</span></span><br></pre></td></tr></table></figure>
 <p>表示声明一个包含10个整数的数组变量a.<br>数组的长度是它类型的一部分，所以数组在初始化之后就不能再更改大小，不过<code>Go</code>提供了一种方便的方式来使用数组.</p>

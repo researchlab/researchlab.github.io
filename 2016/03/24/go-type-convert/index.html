@@ -11,16 +11,16 @@
     
 
     
-    <meta name="description" content="前言Go的数据类型很多都需要显示转换才能使用,比如string转float64指定精度等。转换中常用到的第三方包为strconv和math包。">
+    <meta name="description" content="Go的数据类型很多都需要显示转换才能使用,比如string转float64指定精度等。转换中常用到的第三方包为strconv和math包。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="golang类型转换(指定精度/四舍五入)">
 <meta property="og:url" content="http://www.grdtechs.com/2016/03/24/go-type-convert/index.html">
 <meta property="og:site_name" content="一线攻城狮">
-<meta property="og:description" content="前言Go的数据类型很多都需要显示转换才能使用,比如string转float64指定精度等。转换中常用到的第三方包为strconv和math包。">
-<meta property="og:updated_time" content="2017-09-16T14:24:24.234Z">
+<meta property="og:description" content="Go的数据类型很多都需要显示转换才能使用,比如string转float64指定精度等。转换中常用到的第三方包为strconv和math包。">
+<meta property="og:updated_time" content="2017-09-16T14:32:56.907Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="golang类型转换(指定精度/四舍五入)">
-<meta name="twitter:description" content="前言Go的数据类型很多都需要显示转换才能使用,比如string转float64指定精度等。转换中常用到的第三方包为strconv和math包。">
+<meta name="twitter:description" content="Go的数据类型很多都需要显示转换才能使用,比如string转float64指定精度等。转换中常用到的第三方包为strconv和math包。">
 
     
     <link rel="alternative" href="/atom.xml" title="一线攻城狮" type="application/atom+xml">
@@ -89,11 +89,11 @@
 		<div id="toc" class="toc-article">
 			<strong class="toc-title">文章目录</strong>
 		
-			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#u524D_u8A00"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u6574_u578B_u8F6C_u5B57_u7B26_u4E32"><span class="toc-number">2.</span> <span class="toc-text">整型转字符串</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u5B57_u7B26_u4E32_u8F6C_u6574_u578B"><span class="toc-number">3.</span> <span class="toc-text">字符串转整型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#bytes_u8F6Cfloat64"><span class="toc-number">4.</span> <span class="toc-text">bytes转float64</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#float64_u8F6Cbytes"><span class="toc-number">5.</span> <span class="toc-text">float64转bytes</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#float64_u8F6Cstring"><span class="toc-number">6.</span> <span class="toc-text">float64转string</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#string_u8F6Cfloat64"><span class="toc-number">7.</span> <span class="toc-text">string转float64</span></a></li></ol>
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#u6574_u578B_u8F6C_u5B57_u7B26_u4E32"><span class="toc-number">1.</span> <span class="toc-text">整型转字符串</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u5B57_u7B26_u4E32_u8F6C_u6574_u578B"><span class="toc-number">2.</span> <span class="toc-text">字符串转整型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#bytes_u8F6Cfloat64"><span class="toc-number">3.</span> <span class="toc-text">bytes转float64</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#float64_u8F6Cbytes"><span class="toc-number">4.</span> <span class="toc-text">float64转bytes</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#float64_u8F6Cstring"><span class="toc-number">5.</span> <span class="toc-text">float64转string</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#string_u8F6Cfloat64"><span class="toc-number">6.</span> <span class="toc-text">string转float64</span></a></li></ol>
 		
 		</div>
 		
-		<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p><code>Go</code>的数据类型很多都需要显示转换才能使用,比如<code>string</code>转<code>float64</code>指定精度等。转换中常用到的第三方包为<code>strconv</code>和<code>math</code>包。<br><a id="more"></a></p>
+		<p><code>Go</code>的数据类型很多都需要显示转换才能使用,比如<code>string</code>转<code>float64</code>指定精度等。转换中常用到的第三方包为<code>strconv</code>和<code>math</code>包。<br><a id="more"></a></p>
 <h2 id="u6574_u578B_u8F6C_u5B57_u7B26_u4E32"><a href="#u6574_u578B_u8F6C_u5B57_u7B26_u4E32" class="headerlink" title="整型转字符串"></a>整型转字符串</h2><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">strconv.Itoa(i) <span class="comment">//方法1</span></span><br><span class="line">strconv.FormatInt(<span class="typename">int64</span>(i),<span class="number">10</span>) <span class="comment">//方法2</span></span><br></pre></td></tr></table></figure>
 <h2 id="u5B57_u7B26_u4E32_u8F6C_u6574_u578B"><a href="#u5B57_u7B26_u4E32_u8F6C_u6574_u578B" class="headerlink" title="字符串转整型"></a>字符串转整型</h2><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">strconv.Atoi(s) <span class="comment">//方法1</span></span><br><span class="line">strconv.ParseInt(s,<span class="number">10</span>,<span class="number">0</span>) <span class="comment">//方法2</span></span><br></pre></td></tr></table></figure>
 <h2 id="bytes_u8F6Cfloat64"><a href="#bytes_u8F6Cfloat64" class="headerlink" title="bytes转float64"></a>bytes转float64</h2><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">func</span> bytesToFloat64(bytes []<span class="typename">byte</span>) <span class="typename">float64</span> &#123;</span><br><span class="line">	bits := binary.LittleEndian.Uint64(bytes)</span><br><span class="line">	<span class="keyword">return</span> math.Float64frombits(bits)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>

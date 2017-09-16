@@ -11,16 +11,16 @@
     
 
     
-    <meta name="description" content="前言golang是强类型语言，在赋值和解析过程中需要先定义好数据类型，否在会报类型错误，下面总结在处理数据库表时遇到字段为空或零值的情况">
+    <meta name="description" content="golang是强类型语言，在赋值和解析过程中需要先定义好数据类型，否在会报类型错误，下面总结在处理数据库表时遇到字段为空或零值的情况">
 <meta property="og:type" content="article">
 <meta property="og:title" content="golang处理数据表中字段为空或NULL的情况">
 <meta property="og:url" content="http://www.grdtechs.com/2016/11/23/go-dealwith-database-nullvalue/index.html">
 <meta property="og:site_name" content="一线攻城狮">
-<meta property="og:description" content="前言golang是强类型语言，在赋值和解析过程中需要先定义好数据类型，否在会报类型错误，下面总结在处理数据库表时遇到字段为空或零值的情况">
-<meta property="og:updated_time" content="2017-09-16T14:24:24.234Z">
+<meta property="og:description" content="golang是强类型语言，在赋值和解析过程中需要先定义好数据类型，否在会报类型错误，下面总结在处理数据库表时遇到字段为空或零值的情况">
+<meta property="og:updated_time" content="2017-09-16T14:32:56.903Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="golang处理数据表中字段为空或NULL的情况">
-<meta name="twitter:description" content="前言golang是强类型语言，在赋值和解析过程中需要先定义好数据类型，否在会报类型错误，下面总结在处理数据库表时遇到字段为空或零值的情况">
+<meta name="twitter:description" content="golang是强类型语言，在赋值和解析过程中需要先定义好数据类型，否在会报类型错误，下面总结在处理数据库表时遇到字段为空或零值的情况">
 
     
     <link rel="alternative" href="/atom.xml" title="一线攻城狮" type="application/atom+xml">
@@ -89,11 +89,11 @@
 		<div id="toc" class="toc-article">
 			<strong class="toc-title">文章目录</strong>
 		
-			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#u524D_u8A00"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u573A_u666F"><span class="toc-number">2.</span> <span class="toc-text">场景</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u5982_u4F55_u4F7F_u7528"><span class="toc-number">3.</span> <span class="toc-text">如何使用</span></a></li></ol>
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#u573A_u666F"><span class="toc-number">1.</span> <span class="toc-text">场景</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u5982_u4F55_u4F7F_u7528"><span class="toc-number">2.</span> <span class="toc-text">如何使用</span></a></li></ol>
 		
 		</div>
 		
-		<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>golang是强类型语言，在赋值和解析过程中需要先定义好数据类型，否在会报类型错误，下面总结在处理数据库表时遇到字段为空或零值的情况<br><a id="more"></a></p>
+		<p>golang是强类型语言，在赋值和解析过程中需要先定义好数据类型，否在会报类型错误，下面总结在处理数据库表时遇到字段为空或零值的情况<br><a id="more"></a></p>
 <h2 id="u573A_u666F"><a href="#u573A_u666F" class="headerlink" title="场景"></a>场景</h2><p>假如存在如下没有指定<code>not null</code>的场合<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="operator"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> <span class="string">"users"</span> (</span><br><span class="line">    <span class="string">"id"</span> <span class="built_in">serial</span> <span class="keyword">not</span> <span class="literal">null</span> primary <span class="keyword">key</span>,</span><br><span class="line">    <span class="string">"name"</span> <span class="built_in">text</span>,</span><br><span class="line">    <span class="string">"age"</span> <span class="built_in">integer</span></span><br><span class="line">)</span></span><br></pre></td></tr></table></figure></p>
 <p>在<a href="https://github.com/researchlab/gorp" target="_blank" rel="external">gorp</a>中<code>insert</code>插入场合，可以直接赋零值即可，很方便.<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">dbmap.Insert(</span><br><span class="line"> &amp;User&#123;Name: <span class="string">"John"</span>, Age: <span class="number">0</span>&#125;,　<span class="comment">// insert into "users" ("id","name","age") values (default,$1,$2) returning Id; [1:"John" 2:0]</span></span><br><span class="line"> &amp;User&#123;Name: <span class="string">"John"</span>&#125;, <span class="comment">// insert into "users" ("id","name","age") values (default,$1,$2) returning Id; [1:"John" 2:0]</span></span><br><span class="line"> &amp;User&#123;Name: <span class="string">""</span>, Age: <span class="number">8</span>&#125;, <span class="comment">// insert into "users" ("id","name","age") values (default,$1,$2) returning Id; [1:"" 2:8]</span></span><br><span class="line"> &amp;User&#123;Age: <span class="number">30</span>&#125;, <span class="comment">// insert into "users" ("id","name","age") values (default,$1,$2) returning Id; [1:"" 2:30]</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure></p>
 <p>在使用golang中零值与空值和NULL是不同的数据类型和值，需要加以判断，在数据库表中的NULL值字段可以用<code>database/sql</code>数据包中提供的<code>sql.NullString</code>，<code>sql.NullBool</code>等值类型进行判断后加以使用.</p>

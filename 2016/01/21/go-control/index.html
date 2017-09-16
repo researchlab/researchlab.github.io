@@ -11,16 +11,16 @@
     
 
     
-    <meta name="description" content="前言Go语言中主要有三种控制流程if,for循环,switch case语句。">
+    <meta name="description" content="Go语言中主要有三种控制流程if,for循环,switch case语句。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="[译]GO BOOTCAMP 第五章：控制流程">
 <meta property="og:url" content="http://www.grdtechs.com/2016/01/21/go-control/index.html">
 <meta property="og:site_name" content="一线攻城狮">
-<meta property="og:description" content="前言Go语言中主要有三种控制流程if,for循环,switch case语句。">
-<meta property="og:updated_time" content="2017-09-16T14:24:24.234Z">
+<meta property="og:description" content="Go语言中主要有三种控制流程if,for循环,switch case语句。">
+<meta property="og:updated_time" content="2017-09-16T14:32:56.903Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="[译]GO BOOTCAMP 第五章：控制流程">
-<meta name="twitter:description" content="前言Go语言中主要有三种控制流程if,for循环,switch case语句。">
+<meta name="twitter:description" content="Go语言中主要有三种控制流程if,for循环,switch case语句。">
 
     
     <link rel="alternative" href="/atom.xml" title="一线攻城狮" type="application/atom+xml">
@@ -89,11 +89,11 @@
 		<div id="toc" class="toc-article">
 			<strong class="toc-title">文章目录</strong>
 		
-			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#u524D_u8A00"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#if__u58F0_u660E"><span class="toc-number">2.</span> <span class="toc-text">if 声明</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#for_u5FAA_u73AF"><span class="toc-number">3.</span> <span class="toc-text">for循环</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Switch_case__u58F0_u660E"><span class="toc-number">4.</span> <span class="toc-text">Switch case 声明</span></a></li></ol>
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#if__u58F0_u660E"><span class="toc-number">1.</span> <span class="toc-text">if 声明</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#for_u5FAA_u73AF"><span class="toc-number">2.</span> <span class="toc-text">for循环</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Switch_case__u58F0_u660E"><span class="toc-number">3.</span> <span class="toc-text">Switch case 声明</span></a></li></ol>
 		
 		</div>
 		
-		<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p><code>Go</code>语言中主要有三种控制流程<code>if</code>,<code>for</code>循环,<code>switch case</code>语句。<br><a id="more"></a></p>
+		<p><code>Go</code>语言中主要有三种控制流程<code>if</code>,<code>for</code>循环,<code>switch case</code>语句。<br><a id="more"></a></p>
 <h2 id="if__u58F0_u660E"><a href="#if__u58F0_u660E" class="headerlink" title="if 声明"></a>if 声明</h2><p><code>Go</code>中的<code>if</code>声明，除了不需要<code>()</code>和必需<code>{}</code>之外，其它跟<code>C</code>或<code>Java</code>类似的。 像<code>for</code>语句一样,<code>if</code>语句可以在条件执行语句前有一个简短的声明,在<code>if</code>声明中声明的参数，其作用仅限于<code>if</code>语句体。在<code>if</code>语句体中声明的变量，有效作用域也仅限于本语句体.</p>
 <p><code>if</code>声明示例<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> answer != <span class="number">42</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="string">"Wrong answer"</span></span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure></p>
 <p><code>if</code>简短初始化声明示例<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> err := foo(); err != <span class="constant">nil</span> &#123;</span><br><span class="line">    <span class="built_in">panic</span>(err)</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure></p>
