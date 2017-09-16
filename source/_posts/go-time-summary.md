@@ -6,7 +6,6 @@ tags: [golang, time]
 description:
 ---
 
-## 前言
 `golang` 中经常需要格式化时间和日期来满足不同的业务需求,下面总结格式化时间日期中遇到的问题。
 <!--more-->
 

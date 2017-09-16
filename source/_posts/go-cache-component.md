@@ -6,7 +6,6 @@ tags: [cache]
 description:
 ---
 
-## 前言
 总结用golang从分析，设计到实现一个可用的缓存组件。
 <!--more-->
 

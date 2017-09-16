@@ -6,7 +6,6 @@ tags: [submodule]
 description:
 ---
 
-## 前言
 现在golang已经可以通过`vendor`来管理第三方依赖包了，但是之前的一个老项目用的是`git submodule`来管理的，但是`.gitsubmodule`文件中只记录管理了项目的部分依赖包， 需要把还没有被管理的第三包也加上，下面总结使用`git submodule`的过程。
 <!--more-->
 

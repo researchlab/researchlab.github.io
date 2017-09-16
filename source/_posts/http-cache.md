@@ -6,8 +6,6 @@ tags: [cache]
 description:
 ---
 
-## 前言
-
 Http缓存机制作为web性能优化的重要手段, 本文对网络中，工作中使用的http缓存知识进行归纳总结。
 <!--more-->
 

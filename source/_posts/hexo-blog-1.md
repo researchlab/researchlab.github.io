@@ -6,7 +6,6 @@ tags: [Hexo,Blog]
 description: 
 ---
 
-## 前言
 [Hexo](https://hexo.io)是一个基于`Node.js`免费开源的静态博客框架，方便将生成的静态网页托管在`github`和`Heroku`上，可快速部署，并支持`Markdown`写作，这也是选择`Hexo`部署本站的理由。无特殊说明，本站所有操作均在`Mac OS`下完成。
 <!--more-->
 ## 搭建Hexo博客

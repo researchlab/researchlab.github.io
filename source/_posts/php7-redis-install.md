@@ -6,7 +6,6 @@ tags: [php_redis, phpize]
 description:
 ---
 
-## 前言
 在`Ubuntu16.04`上， 安装`php7`的`redis`扩展, 记录安装过程。
 <!--more-->
 

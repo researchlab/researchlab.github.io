@@ -6,8 +6,6 @@ tags: [vim8.0]
 description:
 ---
 
-## 前言
-
 将mac自带的vim7.3 升级到vim8.0
 <!--more-->
 

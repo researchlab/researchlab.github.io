@@ -6,7 +6,6 @@ tags: [json, html]
 description:
 ---
 
-## 前言 
 `json`字符串在html用js美化输出使用总结。
 <!--more-->
 

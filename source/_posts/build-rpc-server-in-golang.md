@@ -6,7 +6,6 @@ tags: [golang, rpc]
 description:
 ---
 
-## 前言
 [远程程序调用(Remote procedure call, RPC)](https://en.wikipedia.org/wiki/Remote_procedure_call)是进程间通信的一种基本形式， 并且广泛用于分布式计算中。下面就通过一步一步构建一个简单的RPC服务器来总结加深对RPC应用的理解。
 
 <!--more-->

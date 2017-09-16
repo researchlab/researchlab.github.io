@@ -6,7 +6,6 @@ tags: ticker
 description:
 ---
 
-## 前言 
 在`ticker`和`goroutine`组合使用中当调用`ticker.Stop()`关闭`ticker`之后，相应的`goroutine`中的`ticker.C`并没有停掉，下面总结一种优雅的方式关闭`ticker`.
 <!--more-->
 

@@ -6,7 +6,6 @@ tags: [docker]
 description:
 ---
 
-## 前言
 上篇文件总结了如何编写`Dockerfile`及如何通过`Dockerfile`构建镜像并运行相应的应用需求, 本文将通过编写`Dockerfile`来创建MongoDB和Redis应用进一步学习实践`Docker`的运行机制。
 <!--more-->
 

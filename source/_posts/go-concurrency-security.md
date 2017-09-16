@@ -6,7 +6,6 @@ tags: [golang,concurrency]
 description:
 ---
 
-## 前言
 `golang` 在1.5版本之前默认只使用一个核心来跑所有的`goroutines`,即`GOMAXPROCS`默认设置为1, ,即是串行执行`goroutines`,在1.5版本后，`GOMAXPROCS`默认设置为当前计算机真实的核心线程数，即是在并行执行`goroutines`。
 <!--more-->
 

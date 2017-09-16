@@ -6,7 +6,6 @@ tags: [golang,reflect]
 description:
 ---
 
-## 前言
 反射是一种检查存储在接口变量中的`<值,类型>`对的机制，借助go反射包提供的`reflect.TypeOf`和`reflect.ValueOf`可以方便的访问到一个接口值的`reflect.Type`和`reflect.Value`部分，从而可进一步得到这个接口的结构类型和对其进行值的修改操作。 
 <!--more-->
 ## 反射的使用

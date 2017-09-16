@@ -6,7 +6,6 @@ tags: [golang]
 description:
 ---
 
-## 前言
 `Go`集合类型包含`Array`,`Slice`,`Range`,`Map`等议题的分析和讨论。
 <!--more-->
 

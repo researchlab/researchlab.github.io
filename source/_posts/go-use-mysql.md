@@ -6,7 +6,6 @@ tags: [golang, mysql]
 description:
 ---
 
-## 前言
 Golang 提供了`database/sql`包用于对`SQL数据库`的访问, 作为操作数据库的入口对象`sql.DB`, 主要为我们提供了两个重要的功能:
 <!--more-->
 -  sql.DB 通过数据库驱动为我们提供管理底层数据库连接的打开和关闭操作.

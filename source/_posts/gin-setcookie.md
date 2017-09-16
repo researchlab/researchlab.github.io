@@ -6,7 +6,6 @@ tags: [golang,gin,setcookie]
 description:
 ---
 
-## 前言
 可以操作`Cookie`的`Http`头有两个:`Set-Cookie`和`Cookie`。`Set-Cookie`由服务器发送，它包含在响应请求的头部中。它用于在客户端创建一个`Cookie`。`Cookie`头由客户端发送，包含在`HTTP`请求的头部中。
 <!--more-->
 <font color=red>**注意：

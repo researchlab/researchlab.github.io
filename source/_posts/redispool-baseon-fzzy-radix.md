@@ -6,7 +6,6 @@ tags: [golang, redispool]
 description:
 ---
 
-## 前言
 之前的老项目的redis client sdk 直接大名鼎鼎的`github.com/fzzy/radix`提供的`redis client` 和`redis pool`, 当访问峰值达到一定的值后会出现`too many open files`等tcp连接错误，同时也没有直接提供authorization 密钥认证的接口，为满足这些新需求基于`fzzy/radix`封装出的新的`redispool`, 已投入生产使用半年来暂无问题，本文总结如下,
 <!--more-->
 

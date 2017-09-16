@@ -5,7 +5,7 @@ categories: golang
 tags: [golang, concurrency]
 description:
 ---
-## 前言
+
 go能处理高并发的根本原因在于执行go协程只需极少的栈内存(大概4~5KB),并且能根据需要动态增长和缩减占用的资源。
 <!--more-->
 ## 高并发的本质goroutine

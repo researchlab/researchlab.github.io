@@ -6,7 +6,6 @@ tags: [golang]
 description:
 ---
 
-## 前言
 `Go`语言中主要有三种控制流程`if`,`for`循环,`switch case`语句。 
 <!--more-->
 

@@ -6,7 +6,6 @@ tags: [docker]
 description:
 ---
 
-## 前言
 docker容器是在指定的镜像上运行的, 创建docker镜像的方法也有很多中比如直接到`docker Hub`上通过`docker pull`创建一个镜像, 也可以通过修改其它镜像然后提交修改`docker commit` 来创建新的镜像, 还有如导入某个现有的镜像, 但是在实际中难觅要定制化改进出符合特定场景的镜像, 虽然用上述方式也是可以创建新的镜像的, 但是缺点也很多, 主要缺点是不便于维护, 其实创建docker 镜像还有一种最好的办法就是手工打造`Dockerfile`, 然后通过`docker build`编译生成新的镜像, 下面本文就来实践怎么编写符合规范的Dockerfile, 然后又是怎么样通过Dockerfile来创建合适的镜像的。
 
 <!--more-->

@@ -6,7 +6,6 @@ tags: [golang]
 description: 
 ---
 
-## 前言
 `Go`的数据类型很多都需要显示转换才能使用,比如`string`转`float64`指定精度等。转换中常用到的第三方包为`strconv`和`math`包。
 <!--more-->
 

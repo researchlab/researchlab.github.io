@@ -6,7 +6,6 @@ tags: [golang,singleton]
 description:
 ---
 
-## 前言
 `golang` 1.5版本之后默认设置`GOMAXPROCS`值为当前计算机真实核心数，使得`goroutines`从默认的`单线程内并发执行`变成了默认的（真实核心数支持的）的`多线程内并行`执行。多线程并行执行`goroutines`需要考虑并行执行过程中引入的`线程安全问题`。
 <!--more-->
 

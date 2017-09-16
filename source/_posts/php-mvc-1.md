@@ -6,7 +6,6 @@ tags: [php, mvc]
 description:
 ---
 
-## 前言
 尽管MVC(model view controller pattern)模式在`PHP`web开发中很受欢迎，但是网上很难找到一套代码简单又能清楚阐述`PHP MVC`模式的案例，本文希望通过理论和代码实践简单阐述`PHP MVC`模式。
 
 <!--more-->

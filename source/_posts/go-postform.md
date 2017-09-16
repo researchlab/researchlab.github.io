@@ -6,7 +6,6 @@ tags: [form, post]
 description:
 ---
 
-##  前言   
 golang这边将`map`结构序列化通常采用`json.Marshal`和`json.Unmarshal`来做，但是在php server端还需要做`json`反序列化解析才能用， 用golang模拟表单提交, php server端则非常方便提取相应的数据字段. 
 <!--more-->
 

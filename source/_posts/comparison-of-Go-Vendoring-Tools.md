@@ -6,7 +6,6 @@ tags: [vendoring, godep, govendor, glide]
 description:
 ---
 
-## 前言
 golang1.5版本开始支持第三方包到依赖管理,当多个项目在同一个`GOPATH`下，每个项目包含到第三方包通过`go get`命令都会`get`到`GOPATH`下到`src`目录中，而不是各个项目的文件夹中，这就导致第三方包的不同版本不能同时被`GOPATH`下到多个项目使用，从`golang`需要设置`GOPATH`来看,`golang`其实把每个项目当作一个个独立的第三包来看待。
 <!--more-->
 关于`golang`包管理工具的topic, 在`golang`的官方wiki要有一篇总结对比的文章:[PackageManagementTools](https://github.com/golang/go/wiki/PackageManagementTools)。下面主要就项目中用过的`godep`,`govendor`,`glide`做一个简要的对比分析。

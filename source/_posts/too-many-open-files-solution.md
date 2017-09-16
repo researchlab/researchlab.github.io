@@ -6,7 +6,6 @@ tags: [linux]
 description:
 ---
 
-## 前言
 运行在Linux系统上的网络程序可能会出现"Too many open files"的异常情况，且常见于高并发访问文件系统，多线程网络连接等场景。 
 <!--more-->
 

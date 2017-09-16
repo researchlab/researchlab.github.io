@@ -6,7 +6,6 @@ tags: [setcookie, getcookie]
 description:
 ---
 
-## 前言
 html页面中的input框如果在浏览器刷新前有值，怎么在刷新后依然保留这个值不被清空呢？下面用`setCookie`的方案来解决这个问题.
 <!--more-->
 首选判断input框中有值时,`setcookie`, 每次刷新浏览器时，读取`Cookie`值,如果存在`Cookie`值，则用此值初始化input值。

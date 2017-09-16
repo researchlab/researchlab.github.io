@@ -7,8 +7,6 @@ tags: [docker]
 description:
 ---
 
-## 前言
-
 Docker中的数据可以存储在类似于虚拟机磁盘的介质中，在Docker中称为`数据卷`(Data Volume)。数据卷可以用来存储Docker应用的数据，也可以用来在Docker容器间进行数据共享。数据卷呈现给Docker容器的形式就是一个目录，支持多个容器间共享，修改也不会影响镜像。使用Docker的数据卷，类似在系统中使用`mount` 挂载一个文件系统。
 <!--more-->
 
