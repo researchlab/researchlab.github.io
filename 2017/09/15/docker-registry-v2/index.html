@@ -4,24 +4,27 @@
 <head>
   <meta charset="UTF-8">
   
-    <title>docker-registry-v2 | 一线攻城狮</title>
+    <title>搭建私有镜像管理Docker Registry容器服务 | 一线攻城狮</title>
     <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
     
     <meta name="author" content="Lee Hong">
     
 
     
-    <meta name="description" content="前言Docker Registry 是一个用来管理Docker镜像的服务，本身也是一个Docker容器。搭建一个私有的Docker Registry的使用场景主要有下面几个:1.当需要对容器镜像存储进行完全控制,就不能依赖官方提供的Docker Hub进行管理;2.当内部使用存在网络问题或安全问题等情况都适合搭建私有的Docker Registry对镜像进行管理;下面处于需要频繁pull镜像到某内">
+    <meta name="description" content="前言Docker Registry 是一个用来管理Docker镜像的服务，本身也是一个Docker容器。搭建一个私有的Docker Registry的使用场景主要有下面几个:1.当需要对容器镜像存储进行完全控制,就不能依赖官方提供的Docker Hub进行管理;2.当内部使用存在网络问题或安全问题等情况都适合搭建私有的Docker Registry对镜像进行管理;
+下面从需频繁pull镜像到某内部">
 <meta property="og:type" content="article">
-<meta property="og:title" content="docker-registry-v2">
+<meta property="og:title" content="搭建私有镜像管理Docker Registry容器服务">
 <meta property="og:url" content="http://www.grdtechs.com/2017/09/15/docker-registry-v2/index.html">
 <meta property="og:site_name" content="一线攻城狮">
-<meta property="og:description" content="前言Docker Registry 是一个用来管理Docker镜像的服务，本身也是一个Docker容器。搭建一个私有的Docker Registry的使用场景主要有下面几个:1.当需要对容器镜像存储进行完全控制,就不能依赖官方提供的Docker Hub进行管理;2.当内部使用存在网络问题或安全问题等情况都适合搭建私有的Docker Registry对镜像进行管理;下面处于需要频繁pull镜像到某内">
+<meta property="og:description" content="前言Docker Registry 是一个用来管理Docker镜像的服务，本身也是一个Docker容器。搭建一个私有的Docker Registry的使用场景主要有下面几个:1.当需要对容器镜像存储进行完全控制,就不能依赖官方提供的Docker Hub进行管理;2.当内部使用存在网络问题或安全问题等情况都适合搭建私有的Docker Registry对镜像进行管理;
+下面从需频繁pull镜像到某内部">
 <meta property="og:image" content="http://www.grdtechs.com/imgs/set_insecure_registries.png">
-<meta property="og:updated_time" content="2017-09-16T04:30:55.808Z">
+<meta property="og:updated_time" content="2017-09-16T04:50:09.457Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="docker-registry-v2">
-<meta name="twitter:description" content="前言Docker Registry 是一个用来管理Docker镜像的服务，本身也是一个Docker容器。搭建一个私有的Docker Registry的使用场景主要有下面几个:1.当需要对容器镜像存储进行完全控制,就不能依赖官方提供的Docker Hub进行管理;2.当内部使用存在网络问题或安全问题等情况都适合搭建私有的Docker Registry对镜像进行管理;下面处于需要频繁pull镜像到某内">
+<meta name="twitter:title" content="搭建私有镜像管理Docker Registry容器服务">
+<meta name="twitter:description" content="前言Docker Registry 是一个用来管理Docker镜像的服务，本身也是一个Docker容器。搭建一个私有的Docker Registry的使用场景主要有下面几个:1.当需要对容器镜像存储进行完全控制,就不能依赖官方提供的Docker Hub进行管理;2.当内部使用存在网络问题或安全问题等情况都适合搭建私有的Docker Registry对镜像进行管理;
+下面从需频繁pull镜像到某内部">
 
     
     <link rel="alternative" href="/atom.xml" title="一线攻城狮" type="application/atom+xml">
@@ -74,7 +77,7 @@
 		<header class="article-info clearfix">
   <h1 itemprop="name">
     
-      <a href="/2017/09/15/docker-registry-v2/" title="docker-registry-v2" itemprop="url">docker-registry-v2</a>
+      <a href="/2017/09/15/docker-registry-v2/" title="搭建私有镜像管理Docker Registry容器服务" itemprop="url">搭建私有镜像管理Docker Registry容器服务</a>
   </h1>
   <p class="article-author">By
        
@@ -94,9 +97,10 @@
 		
 		</div>
 		
-		<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>Docker Registry 是一个用来管理Docker镜像的服务，本身也是一个Docker容器。搭建一个私有的Docker Registry的使用场景主要有下面几个:<br>1.当需要对容器镜像存储进行完全控制,就不能依赖官方提供的Docker Hub进行管理;<br>2.当内部使用存在网络问题或安全问题等情况都适合搭建私有的Docker Registry对镜像进行管理;<br>下面处于需要频繁pull镜像到某内部机器上新建容器的需求来搭建需要认证访问的Docker Registry,这样同时可以解决网络依赖问题及安全问题, 下面是搭建Docker Registry过程的记录和总结;</p>
-<h2 id="u642D_u5EFADocker_Registry"><a href="#u642D_u5EFADocker_Registry" class="headerlink" title="搭建Docker Registry"></a>搭建Docker Registry</h2><p>1.要搭建本地私有Registry, 首先需要一个Docker Registry基础镜像,这个官方已经制作好了直接通过下面的命令pull即可,<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker pull registry</span><br></pre></td></tr></table></figure></p>
-<p>2.通过下面的命令运行一个基于上面pull到的Registry服务,<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run <span class="operator">-d</span> -p <span class="number">5000</span>:<span class="number">5000</span> --restart=always -v /opt/registry-var/:/var/lib/registry/ registry:latest</span><br></pre></td></tr></table></figure></p>
+		<h2 id="u524D_u8A00"><a href="#u524D_u8A00" class="headerlink" title="前言"></a>前言</h2><p>Docker Registry 是一个用来管理Docker镜像的服务，本身也是一个Docker容器。搭建一个私有的Docker Registry的使用场景主要有下面几个:<br>1.当需要对容器镜像存储进行完全控制,就不能依赖官方提供的Docker Hub进行管理;<br>2.当内部使用存在网络问题或安全问题等情况都适合搭建私有的Docker Registry对镜像进行管理;</p>
+<p>下面从需频繁pull镜像到某内部机器上新建容器的需求来搭建需要认证访问的Docker Registry,这样同时可以解决网络依赖问题及安全问题, 下面是搭建Docker Registry过程的记录和总结;<br><a id="more"></a></p>
+<h2 id="u642D_u5EFADocker_Registry"><a href="#u642D_u5EFADocker_Registry" class="headerlink" title="搭建Docker Registry"></a>搭建Docker Registry</h2><p>1.要搭建本地私有Registry, 首先需要一个Docker Registry基础镜像,直接pull官方镜像即可,<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker pull registry</span><br></pre></td></tr></table></figure></p>
+<p>2.通过下面的命令运行一个基于上面pull的Registry容器服务,<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run <span class="operator">-d</span> -p <span class="number">5000</span>:<span class="number">5000</span> --restart=always -v /opt/registry-var/:/var/lib/registry/ registry:latest</span><br></pre></td></tr></table></figure></p>
 <p><strong>注:</strong> </p>
 <ul>
 <li>上面需要注意的是新registry仓库数据目录的位置。容器内部新registry的仓库目录是在/var/lib/registry, 所以运行时挂载目录需要注意,因为挂着到别的目录是运行不的;</li>
@@ -104,7 +108,7 @@
 </ul>
 <p>当上面Registry服务启动之后可通过curl <a href="http://100.73.41.17:5000/v2/_catalog" target="_blank" rel="external">http://100.73.41.17:5000/v2/_catalog</a> (假设上面启动Registry服务的的机器ip为:100.73.41.17)能看到json格式的返回值时，说明registry已经运行起来了。</p>
 <p>但上面运行的Registry服务是没有设置认证权限的,即未授权用户也是可以访问上述Registry服务的，为了安全起见一般都会设置认证权限用于访问,</p>
-<p>3.配置带用户权限的registry<br>到上面为止，registry已经可以使用了。如果想要控制registry的使用权限，使其只有在登录用户名和密码之后才能使用的话，还需要做额外的设置。<br>registry的用户名密码文件可以通过htpasswd来生成,<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mkdir /opt/registry-var/auth/</span><br><span class="line">docker run --entrypoint htpasswd registry:latest -Bbn felix felix  &gt;&gt; /opt/registry-var/auth/htpasswd</span><br></pre></td></tr></table></figure></p>
+<p>3.配置带用户权限的registry<br>现在registry已经可以使用了。如果想要控制registry的使用权限，使其只有在登录用户名和密码之后才能使用的话，还需要做额外的设置。<br>registry的用户名密码文件可以通过htpasswd来生成,<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mkdir /opt/registry-var/auth/</span><br><span class="line">docker run --entrypoint htpasswd registry:latest -Bbn felix felix  &gt;&gt; /opt/registry-var/auth/htpasswd</span><br></pre></td></tr></table></figure></p>
 <p>上面这条命令是为felix用户名生成密码为felix的一条用户信息，存在/opt/registry-var/auth/htpasswd文件里面，文件中存的密码是被加密过的。<br>启动带权限配置的docker Registry服务就需要多加几个配置参数了, 启动命令如下:</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">docker run <span class="operator">-d</span> -p <span class="number">5000</span>:<span class="number">5000</span> --restart=always \</span><br><span class="line">  -v /opt/registry-var/auth/:/auth/ \</span><br><span class="line">  <span class="operator">-e</span> <span class="string">"REGISTRY_AUTH=htpasswd"</span> \</span><br><span class="line">  <span class="operator">-e</span> <span class="string">"REGISTRY_AUTH_HTPASSWD_REALM=Registry Realm"</span> \</span><br><span class="line">  <span class="operator">-e</span> REGISTRY_AUTH_HTPASSWD_PATH=/auth/htpasswd \</span><br><span class="line">  -v /opt/registry-var/:/var/lib/registry/ \</span><br><span class="line">  registry:latest</span><br></pre></td></tr></table></figure>
 <p><strong>注:</strong></p>
@@ -120,7 +124,9 @@
 <h2 id="u7BA1_u7406_u955C_u50CF"><a href="#u7BA1_u7406_u955C_u50CF" class="headerlink" title="管理镜像"></a>管理镜像</h2><p>上面认证Docker Registry 服务准备好之后，就可以用来管理镜像了，管理镜像一般分下面三步,<br>1.认证登录Docker Registry<br>因为需要认证所以在管理镜像时首选需要通过下面的命令认证登录,<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker login <span class="number">100.73</span>.<span class="number">41.17</span>:<span class="number">5000</span></span><br></pre></td></tr></table></figure></p>
 <p>通过上述命令按照提示输入登录名和密码即可登录，但是有可能会遇到下面的提示,而登录失败,<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">➜  docker login <span class="number">100.73</span>.<span class="number">41.17</span>:<span class="number">5000</span></span><br><span class="line">Username (xxx): xxx </span><br><span class="line">Password:</span><br><span class="line">Error response from daemon: Get https://<span class="number">100.73</span>.<span class="number">41.17</span>:<span class="number">5000</span>/v2/: http: server gave HTTP response to HTTPS client</span><br></pre></td></tr></table></figure></p>
 <p>这个提示已经很明显告诉你是因为client(https)请求与server(http)接收端协议对不上导致,那如何解决？ 网上千篇一律的告诉你要做如下设置:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">➜  cat /etc/docker/daemon.json</span><br><span class="line">&#123;</span><br><span class="line"><span class="string">"insecure-registries"</span>:[<span class="string">"100.73.41.17:5000"</span>]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>是的没错, 是通过上述设置即可解决问题,但是这个设置不是设置在Docker Registry启动的那台机器上(上面是:100.73.41.17), 这个是要设置在你在那台机器上进行登录上传下载镜像操作的机器上，<br>如上面所设置，我的Docker Registry是搭建在100.73.41.17这台远程机器上,而我需要在本地的Mac 机器上登录远程得这个私有的Docker Registry 进行上传下载操作，那么上面的设置就要设置在我的Mac机器的Docker配置中;<br>但是我在Mac机器上好像没有发现/etc/docker/daemon.json这个文件，后来我通过docker client的图形界面进行设置的，如下，设置之后需要重启docker server,如我需要重启Mac机器上的docker server;</p>
+<p>是的没错, 是通过上述设置即可解决问题,但是这个设置不是设置在Docker Registry启动的那台机器上(上面是:100.73.41.17), 这个是要设置在你在那台机器上进行登录上传下载镜像操作的机器上，</p>
+<p>如上面所设置，我的Docker Registry是搭建在100.73.41.17这台远程机器上,而我需要在本地的Mac 机器上登录远程得这个私有的Docker Registry 进行上传下载操作，那么上面的设置就要设置在我的Mac机器的Docker配置中;</p>
+<p>但是在Mac机器上好像没有发现/etc/docker/daemon.json这个文件，后来通过docker client的图形界面进行设置的，如下，设置之后需要重启docker server,如我需要重启Mac机器上的docker server;</p>
 <center><img src="/imgs/set_insecure_registries.png" alt="set insecure-registries">图1 设置insecure-registries</center>
 
 <p>不过设置<code>insecure-registries</code>是非常不安全的，官方文档中也不推荐而是给出自己生成证书的方式进行认证，<a href="https://docs.docker.com/registry/insecure/#troubleshoot-insecure-registry" target="_blank" rel="external">官方链接</a><br>而生产环境中一般需要配置两道认证，第一道认证即证书认证就是将启动Docker Registry 服务的认证证书copy一份到操作Docker Registry机器上（如我的Mac机器）， 第二道认证即上面的用户名密码认证; 具体<a href="https://docs.docker.com/registry/deploying/#native-basic-auth" target="_blank" rel="external">官方链接</a></p>
@@ -139,8 +145,8 @@
 </div>
 <div>
  <p style="margin-top:0px;">作者署名：<b><a target="_blank" href="http://www.grdtechs.com/">朴实的一线攻城狮</a></b>
-<br />本文标题：<b><a href="/2017/09/15/docker-registry-v2/" target="_blank" title="docker-registry-v2">docker-registry-v2</a></b> 
-<br />本文出处：<b><a href="/2017/09/15/docker-registry-v2/" target="_blank" title="docker-registry-v2">http://www.grdtechs.com/2017/09/15/docker-registry-v2/</a></b>
+<br />本文标题：<b><a href="/2017/09/15/docker-registry-v2/" target="_blank" title="搭建私有镜像管理Docker Registry容器服务">搭建私有镜像管理Docker Registry容器服务</a></b> 
+<br />本文出处：<b><a href="/2017/09/15/docker-registry-v2/" target="_blank" title="搭建私有镜像管理Docker Registry容器服务">http://www.grdtechs.com/2017/09/15/docker-registry-v2/</a></b>
 <br />版权声明：本文由<b><a href="/about" target="_blank" title="Lee Hong">Lee Hong</a></b>创作和发表,采用<b>署名(BY)</b>-<b>非商业性使用(NC)</b>-<b>相同方式共享(SA)</b>国际许可协议进行许可,转载请注明作者及出处, 否则保留追究法律责任的权利。 </p>
 </div>
 </div>
@@ -216,7 +222,7 @@
 
 	
 <section id="comments" class="comment">
-	<div class="ds-thread" data-thread-key="2017/09/15/docker-registry-v2/" data-title="docker-registry-v2" data-url="http://www.grdtechs.com/2017/09/15/docker-registry-v2/"></div>
+	<div class="ds-thread" data-thread-key="2017/09/15/docker-registry-v2/" data-title="搭建私有镜像管理Docker Registry容器服务" data-url="http://www.grdtechs.com/2017/09/15/docker-registry-v2/"></div>
 </section>
 
 
