@@ -1,5 +1,5 @@
 ---
-title: "搭建私有镜像管理Docker Registry容器服务"
+title: "搭建Docker Registry容器服务"
 date: 2017-09-15 14:32:05
 categories: [docker-practice]
 tags: [docker]
