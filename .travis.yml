@@ -21,8 +21,8 @@ before_install:
 - git clone -b master git@github.com:researchlab/researchlab.github.io.git .deploy_git
 
 install:
-- npm install hexo-cli -g
 - npm install
+- npm install hexo-cli -g
 - npm install hexo-generator-feed --save
 - npm install hexo-deployer-git --save
 
