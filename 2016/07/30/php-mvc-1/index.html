@@ -12,18 +12,21 @@
 
     
     <meta name="description" content="尽管MVC(model view controller pattern)模式在PHPweb开发中很受欢迎，但是网上很难找到一套代码简单又能清楚阐述PHP MVC模式的案例，本文希望通过理论和代码实践简单阐述PHP MVC模式。">
+<meta name="keywords" content="php,mvc">
 <meta property="og:type" content="article">
 <meta property="og:title" content="php中mvc模式使用总结(一)">
 <meta property="og:url" content="http://www.grdtechs.com/2016/07/30/php-mvc-1/index.html">
 <meta property="og:site_name" content="一线攻城狮">
 <meta property="og:description" content="尽管MVC(model view controller pattern)模式在PHPweb开发中很受欢迎，但是网上很难找到一套代码简单又能清楚阐述PHP MVC模式的案例，本文希望通过理论和代码实践简单阐述PHP MVC模式。">
+<meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="http://www.grdtechs.com/imgs/mvc-collaboration.png">
 <meta property="og:image" content="http://www.grdtechs.com/imgs/mvc-structure.png">
 <meta property="og:image" content="http://www.grdtechs.com/imgs/mvc-sequence1.png">
-<meta property="og:updated_time" content="2017-09-16T14:32:56.907Z">
+<meta property="og:updated_time" content="2017-09-18T16:29:02.061Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="php中mvc模式使用总结(一)">
 <meta name="twitter:description" content="尽管MVC(model view controller pattern)模式在PHPweb开发中很受欢迎，但是网上很难找到一套代码简单又能清楚阐述PHP MVC模式的案例，本文希望通过理论和代码实践简单阐述PHP MVC模式。">
+<meta name="twitter:image" content="http://www.grdtechs.com/imgs/mvc-collaboration.png">
 
     
     <link rel="alternative" href="/atom.xml" title="一线攻城狮" type="application/atom+xml">
@@ -32,7 +35,7 @@
     <link rel="icon" href="/img/favicon.ico">
     
     
-    <link rel="stylesheet" href="/css/style.css" type="text/css">
+    <link rel="stylesheet" href="/css/style.css">
 </head>
 
   <body>
@@ -92,7 +95,7 @@
 		<div id="toc" class="toc-article">
 			<strong class="toc-title">文章目录</strong>
 		
-			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Controller__u5C42"><span class="toc-number">1.</span> <span class="toc-text">Controller 层</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Model__u548C_Entity__u7C7B"><span class="toc-number">2.</span> <span class="toc-text">Model 和 Entity 类</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#View_u5C42"><span class="toc-number">3.</span> <span class="toc-text">View层</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#viewbook-php"><span class="toc-number">3.1.</span> <span class="toc-text">viewbook.php</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#booklist-php"><span class="toc-number">3.2.</span> <span class="toc-text">booklist.php</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u603B_u7ED3"><span class="toc-number">4.</span> <span class="toc-text">总结</span></a></li></ol>
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Controller-层"><span class="toc-number">1.</span> <span class="toc-text">Controller 层</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Model-和-Entity-类"><span class="toc-number">2.</span> <span class="toc-text">Model 和 Entity 类</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#View层"><span class="toc-number">3.</span> <span class="toc-text">View层</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#viewbook-php"><span class="toc-number">3.1.</span> <span class="toc-text">viewbook.php</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#booklist-php"><span class="toc-number">3.2.</span> <span class="toc-text">booklist.php</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#总结"><span class="toc-number">4.</span> <span class="toc-text">总结</span></a></li></ol>
 		
 		</div>
 		
@@ -108,14 +111,14 @@
 <p>本文设计的<code>MVC</code>demo目录如下</p>
 <center><br><img src="/imgs/mvc-structure.png" alt="mvc structure"><br></center>
 
-<h2 id="Controller__u5C42"><a href="#Controller__u5C42" class="headerlink" title="Controller 层"></a>Controller 层</h2><p><code>Controller</code>层可是<code>MVC</code>的入口，接收一个用户请求，解析请求发送给<code>Model</code>层，调用<code>Model</code>层处理业务，接收<code>Model</code>层返回的数据结果，并将数据发送给展示层。<code>Controller</code>层是<code>Model</code>层和<code>View</code>层之间的连接纽带;小的框架中<code>Model</code>层和<code>View</code>层是包含在<code>Controller</code>层中。应用程序中一般会以<code>index.php</code>作为程序的入口，<code>index.php</code>会将用户的所有请求直接转发到<code>Controller</code>层,由<code>Controller</code>层进行相应的处理。</p>
-<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//index.php file </span></span><br><span class="line"><span class="keyword">include_once</span>(<span class="string">"controller/Controller.php"</span>);</span><br><span class="line"></span><br><span class="line"><span class="variable">$controller</span> = <span class="keyword">new</span> Controller();</span><br><span class="line"><span class="variable">$controller</span>-&gt;invoke();</span><br></pre></td></tr></table></figure>
+<h2 id="Controller-层"><a href="#Controller-层" class="headerlink" title="Controller 层"></a>Controller 层</h2><p><code>Controller</code>层可是<code>MVC</code>的入口，接收一个用户请求，解析请求发送给<code>Model</code>层，调用<code>Model</code>层处理业务，接收<code>Model</code>层返回的数据结果，并将数据发送给展示层。<code>Controller</code>层是<code>Model</code>层和<code>View</code>层之间的连接纽带;小的框架中<code>Model</code>层和<code>View</code>层是包含在<code>Controller</code>层中。应用程序中一般会以<code>index.php</code>作为程序的入口，<code>index.php</code>会将用户的所有请求直接转发到<code>Controller</code>层,由<code>Controller</code>层进行相应的处理。</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="comment">//index.php file </span></div><div class="line"><span class="keyword">include_once</span>(<span class="string">"controller/Controller.php"</span>);</div><div class="line"></div><div class="line">$controller = <span class="keyword">new</span> Controller();</div><div class="line">$controller-&gt;invoke();</div></pre></td></tr></table></figure>
 <p>在本例中<code>Controller</code>层只有一个函数和一个构造函数。构造函数示例化一个<code>Model</code>类的实例;当<code>Controller</code>对接收的<code>req</code>解析之后，需要决定调用<code>Model</code>层相应的业务逻辑进行处理，然后将<code>Model</code>层返回的处理数据分发给<code>view</code>层展示。需要知道的是<code>Controller</code>层不是知道<code>data</code>如何处理的，也不知道页面是如何生成的。</p>
-<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//controller/Controller.php file</span></span><br><span class="line"><span class="keyword">include_once</span>(<span class="string">"model/Model.php"</span>)</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Controller</span> </span>&#123;</span><br><span class="line">	<span class="keyword">public</span> <span class="variable">$model</span>;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__construct</span><span class="params">()</span></span>&#123;</span><br><span class="line">		<span class="variable">$this</span>-&gt;model = <span class="keyword">new</span> Model();	</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">invoke</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">if</span>(!<span class="keyword">isset</span>(!_GET[<span class="string">'book'</span>]))&#123;</span><br><span class="line">			<span class="variable">$books</span> = <span class="variable">$this</span>-&gt;model-&gt;getBookList();</span><br><span class="line">			<span class="keyword">include</span> <span class="string">'view/booklist.php'</span>;</span><br><span class="line">		&#125;<span class="keyword">else</span> &#123;</span><br><span class="line">			<span class="comment">// show the requested book</span></span><br><span class="line">			<span class="variable">$book</span> = <span class="variable">$this</span>-&gt;model-&gt;getBook(<span class="variable">$_GET</span>[<span class="string">'book'</span>]);</span><br><span class="line">			<span class="keyword">include</span> <span class="string">'view/viewbook.php'</span>;</span><br><span class="line">		&#125;	</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line"><span class="comment">//controller/Controller.php file</span></div><div class="line"><span class="keyword">include_once</span>(<span class="string">"model/Model.php"</span>)</div><div class="line"></div><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">Controller</span> </span>&#123;</div><div class="line">	<span class="keyword">public</span> $model;</div><div class="line"></div><div class="line">	<span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__construct</span><span class="params">()</span></span>&#123;</div><div class="line">		<span class="keyword">$this</span>-&gt;model = <span class="keyword">new</span> Model();	</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	<span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">invoke</span><span class="params">()</span> </span>&#123;</div><div class="line">		<span class="keyword">if</span>(!<span class="keyword">isset</span>(!_GET[<span class="string">'book'</span>]))&#123;</div><div class="line">			$books = <span class="keyword">$this</span>-&gt;model-&gt;getBookList();</div><div class="line">			<span class="keyword">include</span> <span class="string">'view/booklist.php'</span>;</div><div class="line">		&#125;<span class="keyword">else</span> &#123;</div><div class="line">			<span class="comment">// show the requested book</span></div><div class="line">			$book = <span class="keyword">$this</span>-&gt;model-&gt;getBook($_GET[<span class="string">'book'</span>]);</div><div class="line">			<span class="keyword">include</span> <span class="string">'view/viewbook.php'</span>;</div><div class="line">		&#125;	</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <p><code>MVC</code>时序图</p>
 <center><br><img src="/imgs/mvc-sequence1.png" alt="MVC Sequence Diagram"><br></center>
 
-<h2 id="Model__u548C_Entity__u7C7B"><a href="#Model__u548C_Entity__u7C7B" class="headerlink" title="Model 和 Entity 类"></a>Model 和 Entity 类</h2><p><code>Model</code>层表示应用程序中的数据和逻辑，通常称之为业务逻辑; 通常表示为如下:</p>
+<h2 id="Model-和-Entity-类"><a href="#Model-和-Entity-类" class="headerlink" title="Model 和 Entity 类"></a>Model 和 Entity 类</h2><p><code>Model</code>层表示应用程序中的数据和逻辑，通常称之为业务逻辑; 通常表示为如下:</p>
 <ul>
 <li><p>存储，删除， 更新应用程序的数据。通常包括数据库方面的操作, 也可以按照一定的协议格式封装数据然后再通过调用第三方web服务或APIs进行相应的数据处理。</p>
 </li>
@@ -123,16 +126,16 @@
 </li>
 </ul>
 <p>本例中，<code>Model</code>层主要由<code>Model</code>类和<code>Book</code>类组成。<code>Book</code>类是一个实体类，应该暴露给<code>View</code>层。在一个好的<code>MVC</code>模式设计中，<code>Model</code>层中只有<code>Entity</code>类应该暴露接口供<code>View</code>层调用。这样做的唯一目的就是保持数据,因为<code>Entity</code>类中的对象可以通过<code>xml</code>或<code>json</code>数据块替换。在上述的示例中，<code>Model</code>层返回了一个具体的<code>book</code>实例信息，或者一个<code>books</code>list:</p>
-<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//model/Model.php file</span></span><br><span class="line"><span class="keyword">include_once</span>(<span class="string">"model/Book.php"</span>);</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Model</span></span>&#123;</span><br><span class="line">	<span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">getBookList</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="comment">//here goes some hardcoded values to simulate the database</span></span><br><span class="line">		<span class="keyword">return</span> <span class="keyword">array</span>(</span><br><span class="line">			<span class="string">"Jungle Book"</span>=&gt; <span class="keyword">new</span> Book(<span class="string">"Jungle Book"</span>, <span class="string">"R.Kipling"</span>, <span class="string">"A classic book."</span>),</span><br><span class="line">			<span class="string">"Moonwalker"</span>=&gt; <span class="keyword">new</span> Book(<span class="string">"Moonwalker"</span>, <span class="string">"J.Walker"</span>,<span class="string">""</span>),</span><br><span class="line">			<span class="string">"PHP for Dummies"</span>=&gt; <span class="keyword">new</span> Book(<span class="string">"PHP for Dummies"</span>, <span class="string">"Some Smart Guy"</span>,<span class="string">""</span>)</span><br><span class="line">		);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">getBook</span><span class="params">(<span class="variable">$title</span>)</span> </span>&#123;</span><br><span class="line">		<span class="comment">// we use the previous function to get all the books and then we return the requested one.</span></span><br><span class="line">		<span class="comment">// in a real life scenario this will be done through a db select command.</span></span><br><span class="line">		<span class="variable">$allBooks</span> = <span class="variable">$this</span>-&gt;getBookList();</span><br><span class="line">		<span class="keyword">return</span> <span class="variable">$allBooks</span>[<span class="variable">$title</span>];</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line"><span class="comment">//model/Model.php file</span></div><div class="line"><span class="keyword">include_once</span>(<span class="string">"model/Book.php"</span>);</div><div class="line"></div><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">Model</span></span>&#123;</div><div class="line">	<span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">getBookList</span><span class="params">()</span> </span>&#123;</div><div class="line">		<span class="comment">//here goes some hardcoded values to simulate the database</span></div><div class="line">		<span class="keyword">return</span> <span class="keyword">array</span>(</div><div class="line">			<span class="string">"Jungle Book"</span>=&gt; <span class="keyword">new</span> Book(<span class="string">"Jungle Book"</span>, <span class="string">"R.Kipling"</span>, <span class="string">"A classic book."</span>),</div><div class="line">			<span class="string">"Moonwalker"</span>=&gt; <span class="keyword">new</span> Book(<span class="string">"Moonwalker"</span>, <span class="string">"J.Walker"</span>,<span class="string">""</span>),</div><div class="line">			<span class="string">"PHP for Dummies"</span>=&gt; <span class="keyword">new</span> Book(<span class="string">"PHP for Dummies"</span>, <span class="string">"Some Smart Guy"</span>,<span class="string">""</span>)</div><div class="line">		);</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	<span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">getBook</span><span class="params">($title)</span> </span>&#123;</div><div class="line">		<span class="comment">// we use the previous function to get all the books and then we return the requested one.</span></div><div class="line">		<span class="comment">// in a real life scenario this will be done through a db select command.</span></div><div class="line">		$allBooks = <span class="keyword">$this</span>-&gt;getBookList();</div><div class="line">		<span class="keyword">return</span> $allBooks[$title];</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <p>在真实场景中，<code>Model</code>层负责将所有的实体和类中的数据持久化到数据库，<code>Model</code>层中的类封装所有的业务逻辑。</p>
-<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//model/Book.php file</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Book</span> </span>&#123;</span><br><span class="line">	<span class="keyword">public</span> <span class="variable">$title</span>;</span><br><span class="line">	<span class="keyword">public</span> <span class="variable">$author</span>;</span><br><span class="line">	<span class="keyword">public</span> <span class="variable">$description</span>;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__construct</span><span class="params">(<span class="variable">$title</span>, <span class="variable">$author</span>, <span class="variable">$description</span>)</span></span>&#123;</span><br><span class="line">		<span class="variable">$this</span>-&gt;title = <span class="variable">$title</span>;</span><br><span class="line">		<span class="variable">$this</span>-&gt;author = <span class="variable">$author</span>;</span><br><span class="line">		<span class="variable">$this</span>-&gt;description = <span class="variable">$description</span>;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h2 id="View_u5C42"><a href="#View_u5C42" class="headerlink" title="View层"></a>View层</h2><p><code>View</code>层负责将<code>Model</code>层返回的数据按照一定样式格式化呈现给用户。<code>Model</code>层返回的数据可以是简单的对象类型，也可以是xml, json等复杂的数据类型。</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="comment">//model/Book.php file</span></div><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">Book</span> </span>&#123;</div><div class="line">	<span class="keyword">public</span> $title;</div><div class="line">	<span class="keyword">public</span> $author;</div><div class="line">	<span class="keyword">public</span> $description;</div><div class="line"></div><div class="line">	<span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__construct</span><span class="params">($title, $author, $description)</span></span>&#123;</div><div class="line">		<span class="keyword">$this</span>-&gt;title = $title;</div><div class="line">		<span class="keyword">$this</span>-&gt;author = $author;</div><div class="line">		<span class="keyword">$this</span>-&gt;description = $description;</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2 id="View层"><a href="#View层" class="headerlink" title="View层"></a>View层</h2><p><code>View</code>层负责将<code>Model</code>层返回的数据按照一定样式格式化呈现给用户。<code>Model</code>层返回的数据可以是简单的对象类型，也可以是xml, json等复杂的数据类型。</p>
 <p><code>View</code>层对于类似的展示逻辑应提取为模板，便于复用<code>View</code>层代码的同时有利于维护 。<code>Controller</code>层通常通过<code>Entity</code>类中的主<code>Entity</code>实例对象将<code>Model</code>层返回的数据转发给<code>View</code>层中特定的展示元素。</p>
 <p>在本例中<code>View</code>层包含展示单个<code>book</code>信息和展示所有<code>book</code>信息两个文件</p>
-<h3 id="viewbook-php"><a href="#viewbook-php" class="headerlink" title="viewbook.php"></a>viewbook.php</h3><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="title">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="title">head</span>&gt;</span><span class="tag">&lt;/<span class="title">head</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="title">body</span>&gt;</span></span><br><span class="line">	<span class="php"><span class="preprocessor">&lt;?php</span></span><br><span class="line">		<span class="keyword">echo</span> <span class="string">'Title:'</span> . <span class="variable">$book</span>-&gt;title . <span class="string">'&lt;br/&gt;'</span>;</span><br><span class="line">		<span class="keyword">echo</span> <span class="string">'Author:'</span> . <span class="variable">$book</span>-&gt;author . <span class="string">'&lt;br/&gt;'</span>;</span><br><span class="line">		<span class="keyword">echo</span> <span class="string">'Description:'</span> . <span class="variable">$book</span>-&gt;description . <span class="string">'&lt;br/&gt;'</span>;</span><br><span class="line">	<span class="preprocessor">?&gt;</span></span></span><br><span class="line"><span class="tag">&lt;/<span class="title">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="title">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
-<h3 id="booklist-php"><a href="#booklist-php" class="headerlink" title="booklist.php"></a>booklist.php</h3><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="title">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="title">head</span>&gt;</span><span class="tag">&lt;/<span class="title">head</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="title">body</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="title">table</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="title">tbody</span>&gt;</span><span class="tag">&lt;<span class="title">tr</span>&gt;</span><span class="tag">&lt;<span class="title">td</span>&gt;</span>Title<span class="tag">&lt;/<span class="title">td</span>&gt;</span><span class="tag">&lt;<span class="title">td</span>&gt;</span>Author<span class="tag">&lt;/<span class="title">td</span>&gt;</span><span class="tag">&lt;<span class="title">td</span>&gt;</span>Description<span class="tag">&lt;/<span class="title">td</span>&gt;</span><span class="tag">&lt;/<span class="title">tr</span>&gt;</span><span class="tag">&lt;/<span class="title">tbody</span>&gt;</span>	</span><br><span class="line">		<span class="php"><span class="preprocessor">&lt;?php</span></span><br><span class="line"></span><br><span class="line">		<span class="keyword">foreach</span>(<span class="variable">$books</span> <span class="keyword">as</span> <span class="variable">$title</span> =&gt; <span class="variable">$book</span>)&#123;</span><br><span class="line">		<span class="keyword">echo</span> <span class="string">'&lt;tr&gt;&lt;td&gt;&lt;a href="index.php?book="'</span> . <span class="variable">$book</span>-&gt;title .<span class="string">'"&gt;'</span>.<span class="variable">$book</span>-&gt;title .<span class="string">'&lt;/a&gt;&lt;/td&gt;&lt;td&gt;'</span>.<span class="variable">$book</span>-&gt;author.<span class="string">'&lt;/td&gt;&lt;td&gt;'</span>.<span class="variable">$book</span>-&gt;description.<span class="string">'&lt;/td&gt;&lt;/tr&gt;'</span>;	</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="preprocessor">?&gt;</span></span></span><br><span class="line">	<span class="tag">&lt;/<span class="title">table</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="title">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="title">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h3 id="viewbook-php"><a href="#viewbook-php" class="headerlink" title="viewbook.php"></a>viewbook.php</h3><figure class="highlight html"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span><span class="tag">&lt;/<span class="name">head</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></div><div class="line">	<span class="php"><span class="meta">&lt;?php</span></span></div><div class="line"><span class="php">		<span class="keyword">echo</span> <span class="string">'Title:'</span> . $book-&gt;title . <span class="string">'&lt;br/&gt;'</span>;</span></div><div class="line"><span class="php">		<span class="keyword">echo</span> <span class="string">'Author:'</span> . $book-&gt;author . <span class="string">'&lt;br/&gt;'</span>;</span></div><div class="line"><span class="php">		<span class="keyword">echo</span> <span class="string">'Description:'</span> . $book-&gt;description . <span class="string">'&lt;br/&gt;'</span>;</span></div><div class="line"><span class="php">	<span class="meta">?&gt;</span></span></div><div class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></div><div class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></div></pre></td></tr></table></figure>
+<h3 id="booklist-php"><a href="#booklist-php" class="headerlink" title="booklist.php"></a>booklist.php</h3><figure class="highlight html"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span><span class="tag">&lt;/<span class="name">head</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></div><div class="line">	<span class="tag">&lt;<span class="name">table</span>&gt;</span></div><div class="line">		<span class="tag">&lt;<span class="name">tbody</span>&gt;</span><span class="tag">&lt;<span class="name">tr</span>&gt;</span><span class="tag">&lt;<span class="name">td</span>&gt;</span>Title<span class="tag">&lt;/<span class="name">td</span>&gt;</span><span class="tag">&lt;<span class="name">td</span>&gt;</span>Author<span class="tag">&lt;/<span class="name">td</span>&gt;</span><span class="tag">&lt;<span class="name">td</span>&gt;</span>Description<span class="tag">&lt;/<span class="name">td</span>&gt;</span><span class="tag">&lt;/<span class="name">tr</span>&gt;</span><span class="tag">&lt;/<span class="name">tbody</span>&gt;</span>	</div><div class="line">		<span class="php"><span class="meta">&lt;?php</span></span></div><div class="line"><span class="php"></span></div><div class="line"><span class="php">		<span class="keyword">foreach</span>($books <span class="keyword">as</span> $title =&gt; $book)&#123;</span></div><div class="line"><span class="php">		<span class="keyword">echo</span> <span class="string">'&lt;tr&gt;&lt;td&gt;&lt;a href="index.php?book="'</span> . $book-&gt;title .<span class="string">'"&gt;'</span>.$book-&gt;title .<span class="string">'&lt;/a&gt;&lt;/td&gt;&lt;td&gt;'</span>.$book-&gt;author.<span class="string">'&lt;/td&gt;&lt;td&gt;'</span>.$book-&gt;description.<span class="string">'&lt;/td&gt;&lt;/tr&gt;'</span>;	</span></div><div class="line"><span class="php">		&#125;</span></div><div class="line"><span class="php">		<span class="meta">?&gt;</span></span></div><div class="line">	<span class="tag">&lt;/<span class="name">table</span>&gt;</span></div><div class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></div><div class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></div></pre></td></tr></table></figure>
 <p>至此本demo分析实现完毕，<a href="https://github.com/researchlab/CodeSnippets/tree/master/php_wrk/simple_mvc" target="_blank" rel="external">github示例代码</a></p>
-<h2 id="u603B_u7ED3"><a href="#u603B_u7ED3" class="headerlink" title="总结"></a>总结</h2><ul>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ul>
 <li><code>Model</code>层和<code>View</code>层分开使得构建应用程序更加容易</li>
 <li><code>Model</code>层和<code>View</code>层可以根据项目需要其中一层构成<code>MV</code>或<code>CV</code>模式</li>
 <li>可以对<code>MVC</code>模式中每个层进行单独的测试和调试</li>
@@ -165,7 +168,7 @@
 
   <div class="article-tags">
   
-  <span></span> <a href="/tags/mvc/">mvc</a><a href="/tags/php/">php</a>
+  <span></span> <a href="/tags/php/">php</a><a href="/tags/mvc/">mvc</a>
   </div>
 
 </div>
@@ -241,13 +244,13 @@
 <div id="asidepart">
 
   <div class="widget tag">
-<p margin="0" style="text-align:center">
-<a class="ahref" href="http://researchlab.github.io/about/">
-<img id="aboutpic"  src="/img/weixin.jpg" alt="加我微信" height="200" width="200" style="box-shadow: 0px 0px 2px 2px #9edeff;border-radius: 8px;" >
-</a></p>
 <!--<hr noshade color="#ccc">-->
 <!-- <p style="text-align:center">Mike.Lee</p> -->
-<p style="text-align:center"><font size="2" color="grey">扫一扫上面的二维码 加我微信</font></p>
+<p margin="0" style="text-align:center">
+<a class="ahref" href="http://researchlab.github.io/about/">
+<img id="aboutpic"  src="/img/qzly.png" alt="@全栈炼狱之路" height="200" width="200" style="box-shadow: 0px 0px 2px 2px #9edeff;border-radius: 8px;" >
+</a></p>
+<p style="text-align:center"><font size="2" color="grey">关注微信公众号 @全栈炼狱之路</font></p>
 <div style="display:block; margin-top:10px; padding: 0px 4px 4px 0; border-top: dashed 1px #ccc; text-align:left;"></div>
 <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 <div style="float:left;position:absolute;"><font size="2" >总访问:<span id="busuanzi_value_site_pv"></span>次</font></div>
@@ -322,6 +325,18 @@
 			
 		
 			
+				<li><a href="/tags/cache/" title="cache">cache<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/concurrency/" title="concurrency">concurrency<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mysql/" title="mysql">mysql<sup>2</sup></a></li>
+			
+		
+			
 				<li><a href="/tags/Hexo/" title="Hexo">Hexo<sup>2</sup></a></li>
 			
 		
@@ -330,15 +345,39 @@
 			
 		
 			
-				<li><a href="/tags/concurrency/" title="concurrency">concurrency<sup>2</sup></a></li>
+				<li><a href="/tags/ticker/" title="ticker">ticker<sup>1</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/cache/" title="cache">cache<sup>2</sup></a></li>
+				<li><a href="/tags/rpc/" title="rpc">rpc<sup>1</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/mysql/" title="mysql">mysql<sup>2</sup></a></li>
+				<li><a href="/tags/gin/" title="gin">gin<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/submodule/" title="submodule">submodule<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/vendoring/" title="vendoring">vendoring<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/godep/" title="godep">godep<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/form/" title="form">form<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/post/" title="post">post<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/reflect/" title="reflect">reflect<sup>1</sup></a></li>
 			
 		
 			
@@ -346,47 +385,11 @@
 			
 		
 			
-				<li><a href="/tags/php-redis/" title="php_redis">php_redis<sup>1</sup></a></li>
+				<li><a href="/tags/getcookie/" title="getcookie">getcookie<sup>1</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/php/" title="php">php<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/mvc/" title="mvc">mvc<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/observer/" title="observer">observer<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/redispool/" title="redispool">redispool<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/vim8-0/" title="vim8.0">vim8.0<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/signal/" title="signal">signal<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/json/" title="json">json<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/html/" title="html">html<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/beego-orm/" title="beego/orm">beego/orm<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/xorm/" title="xorm">xorm<sup>1</sup></a></li>
+				<li><a href="/tags/govendor/" title="govendor">govendor<sup>1</sup></a></li>
 			
 		
 		</ul>

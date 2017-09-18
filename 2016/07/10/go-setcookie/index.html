@@ -12,14 +12,16 @@
 
     
     <meta name="description" content="Goweb开发中，经常需要设置获取cookies, 不管是从client端设置获取还是server设置获取，其实都差不多，下面就总结一下常用的方法。">
+<meta name="keywords" content="setcookie,golang,net&#x2F;http">
 <meta property="og:type" content="article">
-<meta property="og:title" content="go http client/server 设置cookie小结">
+<meta property="og:title" content="go http client&#x2F;server 设置cookie小结">
 <meta property="og:url" content="http://www.grdtechs.com/2016/07/10/go-setcookie/index.html">
 <meta property="og:site_name" content="一线攻城狮">
 <meta property="og:description" content="Goweb开发中，经常需要设置获取cookies, 不管是从client端设置获取还是server设置获取，其实都差不多，下面就总结一下常用的方法。">
-<meta property="og:updated_time" content="2017-09-16T14:32:56.907Z">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2017-09-18T16:29:02.057Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="go http client/server 设置cookie小结">
+<meta name="twitter:title" content="go http client&#x2F;server 设置cookie小结">
 <meta name="twitter:description" content="Goweb开发中，经常需要设置获取cookies, 不管是从client端设置获取还是server设置获取，其实都差不多，下面就总结一下常用的方法。">
 
     
@@ -29,7 +31,7 @@
     <link rel="icon" href="/img/favicon.ico">
     
     
-    <link rel="stylesheet" href="/css/style.css" type="text/css">
+    <link rel="stylesheet" href="/css/style.css">
 </head>
 
   <body>
@@ -89,12 +91,12 @@
 		<div id="toc" class="toc-article">
 			<strong class="toc-title">文章目录</strong>
 		
-			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#golang_u4E2Dcookie__u8BE6_u7EC6_u5B9A_u4E49"><span class="toc-number">1.</span> <span class="toc-text">golang中cookie 详细定义</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#client__u7AEF_u8BBE_u7F6Ecookie"><span class="toc-number">2.</span> <span class="toc-text">client 端设置cookie</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#server_u7AEF_u63A5_u6536cookie"><span class="toc-number">3.</span> <span class="toc-text">server端接收cookie</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#server_u7AEF_u8BBE_u7F6Ecookie"><span class="toc-number">4.</span> <span class="toc-text">server端设置cookie</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#client__u7AEF_u63A5_u6536cookie"><span class="toc-number">5.</span> <span class="toc-text">client 端接收cookie</span></a></li></ol>
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#golang中cookie-详细定义"><span class="toc-number">1.</span> <span class="toc-text">golang中cookie 详细定义</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#client-端设置cookie"><span class="toc-number">2.</span> <span class="toc-text">client 端设置cookie</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#server端接收cookie"><span class="toc-number">3.</span> <span class="toc-text">server端接收cookie</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#server端设置cookie"><span class="toc-number">4.</span> <span class="toc-text">server端设置cookie</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#client-端接收cookie"><span class="toc-number">5.</span> <span class="toc-text">client 端接收cookie</span></a></li></ol>
 		
 		</div>
 		
 		<p><code>Go</code>web开发中，经常需要设置获取cookies, 不管是从client端设置获取还是server设置获取，其实都差不多，下面就总结一下常用的方法。<br><a id="more"></a></p>
-<h2 id="golang_u4E2Dcookie__u8BE6_u7EC6_u5B9A_u4E49"><a href="#golang_u4E2Dcookie__u8BE6_u7EC6_u5B9A_u4E49" class="headerlink" title="golang中cookie 详细定义"></a>golang中cookie 详细定义</h2><p>golang 官方文档中对<code>Cookie</code>结构的定义<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> Cookie <span class="keyword">struct</span> &#123;</span><br><span class="line">    Name       <span class="typename">string</span></span><br><span class="line">    Value      <span class="typename">string</span></span><br><span class="line">    Path       <span class="typename">string</span></span><br><span class="line">    Domain     <span class="typename">string</span></span><br><span class="line">    Expires    time.Time</span><br><span class="line">    RawExpires <span class="typename">string</span></span><br><span class="line">    <span class="comment">// MaxAge=0表示未设置Max-Age属性</span></span><br><span class="line">    <span class="comment">// MaxAge&lt;0表示立刻删除该cookie，等价于"Max-Age: 0"</span></span><br><span class="line">    <span class="comment">// MaxAge&gt;0表示存在Max-Age属性，单位是秒</span></span><br><span class="line">    MaxAge   <span class="typename">int</span></span><br><span class="line">    Secure   <span class="typename">bool</span></span><br><span class="line">    HttpOnly <span class="typename">bool</span></span><br><span class="line">    Raw      <span class="typename">string</span></span><br><span class="line">    Unparsed []<span class="typename">string</span> <span class="comment">// 未解析的“属性-值”对的原始文本</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="golang中cookie-详细定义"><a href="#golang中cookie-详细定义" class="headerlink" title="golang中cookie 详细定义"></a>golang中cookie 详细定义</h2><p>golang 官方文档中对<code>Cookie</code>结构的定义<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">type</span> Cookie <span class="keyword">struct</span> &#123;</div><div class="line">    Name       <span class="keyword">string</span></div><div class="line">    Value      <span class="keyword">string</span></div><div class="line">    Path       <span class="keyword">string</span></div><div class="line">    Domain     <span class="keyword">string</span></div><div class="line">    Expires    time.Time</div><div class="line">    RawExpires <span class="keyword">string</span></div><div class="line">    <span class="comment">// MaxAge=0表示未设置Max-Age属性</span></div><div class="line">    <span class="comment">// MaxAge&lt;0表示立刻删除该cookie，等价于"Max-Age: 0"</span></div><div class="line">    <span class="comment">// MaxAge&gt;0表示存在Max-Age属性，单位是秒</span></div><div class="line">    MaxAge   <span class="keyword">int</span></div><div class="line">    Secure   <span class="keyword">bool</span></div><div class="line">    HttpOnly <span class="keyword">bool</span></div><div class="line">    Raw      <span class="keyword">string</span></div><div class="line">    Unparsed []<span class="keyword">string</span> <span class="comment">// 未解析的“属性-值”对的原始文本</span></div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
 <p><code>Cookie</code>代表一个出现在<code>HTTP回复的头域</code>中<code>Set-Cookie头的值里</code>或者<code>HTTP请求的头域</code>中Cookie头的值里的HTTP cookie。</p>
 <ul>
 <li><p><code>Expires</code> – 过期时间。指定cookie的生命期。具体是值是过期日期。如果想让cookie的存在期限超过当前浏览器会话时间，就必须使用这个属性。当过了到期日期时，浏览器就可以删除cookie文件，没有任何影响。</p>
@@ -115,12 +117,12 @@
 <li><a href="https://zh.wikipedia.org/wiki/Cookie" target="_blank" rel="external">中文维基 - Cookie</a></li>
 <li><a href="https://en.wikipedia.org/wiki/HTTP_cookie#Session_management" target="_blank" rel="external">英文维基 - Http-Cookie</a></li>
 </ul>
-<h2 id="client__u7AEF_u8BBE_u7F6Ecookie"><a href="#client__u7AEF_u8BBE_u7F6Ecookie" class="headerlink" title="client 端设置cookie"></a>client 端设置cookie</h2><p>客户端设置cookie,很简单<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// client  set cookie</span></span><br><span class="line">cookie := http.Cookie&#123;Name: <span class="string">"clientcookieid"</span>, Value: <span class="string">"121"</span>, Expires: time.Now().Add(<span class="number">111</span> * time.Second)&#125;</span><br><span class="line">req.AddCookie(&amp;cookie)</span><br></pre></td></tr></table></figure></p>
-<p>或者<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">req.AddCookie(&amp;http.Cookie&#123;</span><br><span class="line">	Name:    <span class="string">"clientcookieid2"</span>,</span><br><span class="line">	Value:   <span class="string">"id2"</span>,</span><br><span class="line">	Expires: time.Now().Add(<span class="number">111</span> * time.Second),</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure></p>
-<h2 id="server_u7AEF_u63A5_u6536cookie"><a href="#server_u7AEF_u63A5_u6536cookie" class="headerlink" title="server端接收cookie"></a>server端接收cookie</h2><p>后端接收cookie有两种方式,如果是指定cookie的名字，只要取得1个或少数几个cookie, 可以用如下方式获取<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">client_cookie, _ := r.Cookie(<span class="string">"clientcookieid"</span>)</span><br><span class="line"></span><br><span class="line">fmt.Printf(<span class="string">"%+v\n"</span>, client_cookie)</span><br><span class="line">fmt.Println(client_cookie.Name, clinet_cookie.Value) <span class="comment">// 通过点运算符获取client_cookie的属性</span></span><br></pre></td></tr></table></figure></p>
-<p>如果指定了多个cookie值对，则可以通过迭代的方式访问<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> _, v := <span class="keyword">range</span> r.Cookies() &#123;</span><br><span class="line">	fmt.Printf(<span class="string">"%+v\n"</span>, v)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<h2 id="server_u7AEF_u8BBE_u7F6Ecookie"><a href="#server_u7AEF_u8BBE_u7F6Ecookie" class="headerlink" title="server端设置cookie"></a>server端设置cookie</h2><p>server端设置cookie 和client端设置cookie类似，不同的是 server端用的是<code>http.SetCookie</code>, 而client端用的是<code>req.AddCookie</code><br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">http.SetCookie(w, &amp;http.Cookie&#123;</span><br><span class="line">	Name:    <span class="string">"servercookie"</span>,</span><br><span class="line">	Value:   <span class="string">"servercookievalue"</span>,</span><br><span class="line">	Expires: time.Now().Add(<span class="number">111</span> * time.Second),</span><br><span class="line">&#125;)</span><br><span class="line">http.SetCookie(w, &amp;http.Cookie&#123;</span><br><span class="line">	Name:    <span class="string">"servercookie2"</span>,</span><br><span class="line">	Value:   <span class="string">"servercookievalue2"</span>,</span><br><span class="line">	Expires: time.Now().Add(<span class="number">111</span> * time.Second),</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure></p>
-<h2 id="client__u7AEF_u63A5_u6536cookie"><a href="#client__u7AEF_u63A5_u6536cookie" class="headerlink" title="client 端接收cookie"></a>client 端接收cookie</h2><p>golang client端接收cookie 只能通过迭代的方式获取<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> _, v := <span class="keyword">range</span> resp.Cookies() &#123;</span><br><span class="line">	fmt.Printf(<span class="string">"%+v\n"</span>, v)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="client-端设置cookie"><a href="#client-端设置cookie" class="headerlink" title="client 端设置cookie"></a>client 端设置cookie</h2><p>客户端设置cookie,很简单<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// client  set cookie</span></div><div class="line">cookie := http.Cookie&#123;Name: <span class="string">"clientcookieid"</span>, Value: <span class="string">"121"</span>, Expires: time.Now().Add(<span class="number">111</span> * time.Second)&#125;</div><div class="line">req.AddCookie(&amp;cookie)</div></pre></td></tr></table></figure></p>
+<p>或者<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">req.AddCookie(&amp;http.Cookie&#123;</div><div class="line">	Name:    <span class="string">"clientcookieid2"</span>,</div><div class="line">	Value:   <span class="string">"id2"</span>,</div><div class="line">	Expires: time.Now().Add(<span class="number">111</span> * time.Second),</div><div class="line">&#125;)</div></pre></td></tr></table></figure></p>
+<h2 id="server端接收cookie"><a href="#server端接收cookie" class="headerlink" title="server端接收cookie"></a>server端接收cookie</h2><p>后端接收cookie有两种方式,如果是指定cookie的名字，只要取得1个或少数几个cookie, 可以用如下方式获取<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">client_cookie, _ := r.Cookie(<span class="string">"clientcookieid"</span>)</div><div class="line"></div><div class="line">fmt.Printf(<span class="string">"%+v\n"</span>, client_cookie)</div><div class="line">fmt.Println(client_cookie.Name, clinet_cookie.Value) <span class="comment">// 通过点运算符获取client_cookie的属性</span></div></pre></td></tr></table></figure></p>
+<p>如果指定了多个cookie值对，则可以通过迭代的方式访问<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">for</span> _, v := <span class="keyword">range</span> r.Cookies() &#123;</div><div class="line">	fmt.Printf(<span class="string">"%+v\n"</span>, v)</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<h2 id="server端设置cookie"><a href="#server端设置cookie" class="headerlink" title="server端设置cookie"></a>server端设置cookie</h2><p>server端设置cookie 和client端设置cookie类似，不同的是 server端用的是<code>http.SetCookie</code>, 而client端用的是<code>req.AddCookie</code><br><figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">http.SetCookie(w, &amp;http.Cookie&#123;</div><div class="line">	Name:    <span class="string">"servercookie"</span>,</div><div class="line">	Value:   <span class="string">"servercookievalue"</span>,</div><div class="line">	Expires: time.Now().Add(<span class="number">111</span> * time.Second),</div><div class="line">&#125;)</div><div class="line">http.SetCookie(w, &amp;http.Cookie&#123;</div><div class="line">	Name:    <span class="string">"servercookie2"</span>,</div><div class="line">	Value:   <span class="string">"servercookievalue2"</span>,</div><div class="line">	Expires: time.Now().Add(<span class="number">111</span> * time.Second),</div><div class="line">&#125;)</div></pre></td></tr></table></figure></p>
+<h2 id="client-端接收cookie"><a href="#client-端接收cookie" class="headerlink" title="client 端接收cookie"></a>client 端接收cookie</h2><p>golang client端接收cookie 只能通过迭代的方式获取<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">for</span> _, v := <span class="keyword">range</span> resp.Cookies() &#123;</div><div class="line">	fmt.Printf(<span class="string">"%+v\n"</span>, v)</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
 <p><a href="https://github.com/researchlab/golearning/tree/master/setcookie" target="_blank" rel="external">完整示例代码</a></p>
   
 	</div>
@@ -150,7 +152,7 @@
 
   <div class="article-tags">
   
-  <span></span> <a href="/tags/golang/">golang</a><a href="/tags/net-http/">net/http</a><a href="/tags/setcookie/">setcookie</a>
+  <span></span> <a href="/tags/setcookie/">setcookie</a><a href="/tags/golang/">golang</a><a href="/tags/net-http/">net/http</a>
   </div>
 
 </div>
@@ -226,13 +228,13 @@
 <div id="asidepart">
 
   <div class="widget tag">
-<p margin="0" style="text-align:center">
-<a class="ahref" href="http://researchlab.github.io/about/">
-<img id="aboutpic"  src="/img/weixin.jpg" alt="加我微信" height="200" width="200" style="box-shadow: 0px 0px 2px 2px #9edeff;border-radius: 8px;" >
-</a></p>
 <!--<hr noshade color="#ccc">-->
 <!-- <p style="text-align:center">Mike.Lee</p> -->
-<p style="text-align:center"><font size="2" color="grey">扫一扫上面的二维码 加我微信</font></p>
+<p margin="0" style="text-align:center">
+<a class="ahref" href="http://researchlab.github.io/about/">
+<img id="aboutpic"  src="/img/qzly.png" alt="@全栈炼狱之路" height="200" width="200" style="box-shadow: 0px 0px 2px 2px #9edeff;border-radius: 8px;" >
+</a></p>
+<p style="text-align:center"><font size="2" color="grey">关注微信公众号 @全栈炼狱之路</font></p>
 <div style="display:block; margin-top:10px; padding: 0px 4px 4px 0; border-top: dashed 1px #ccc; text-align:left;"></div>
 <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 <div style="float:left;position:absolute;"><font size="2" >总访问:<span id="busuanzi_value_site_pv"></span>次</font></div>
@@ -307,6 +309,18 @@
 			
 		
 			
+				<li><a href="/tags/cache/" title="cache">cache<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/concurrency/" title="concurrency">concurrency<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mysql/" title="mysql">mysql<sup>2</sup></a></li>
+			
+		
+			
 				<li><a href="/tags/Hexo/" title="Hexo">Hexo<sup>2</sup></a></li>
 			
 		
@@ -315,15 +329,39 @@
 			
 		
 			
-				<li><a href="/tags/concurrency/" title="concurrency">concurrency<sup>2</sup></a></li>
+				<li><a href="/tags/ticker/" title="ticker">ticker<sup>1</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/cache/" title="cache">cache<sup>2</sup></a></li>
+				<li><a href="/tags/rpc/" title="rpc">rpc<sup>1</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/mysql/" title="mysql">mysql<sup>2</sup></a></li>
+				<li><a href="/tags/gin/" title="gin">gin<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/submodule/" title="submodule">submodule<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/vendoring/" title="vendoring">vendoring<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/godep/" title="godep">godep<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/form/" title="form">form<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/post/" title="post">post<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/reflect/" title="reflect">reflect<sup>1</sup></a></li>
 			
 		
 			
@@ -331,47 +369,11 @@
 			
 		
 			
-				<li><a href="/tags/php-redis/" title="php_redis">php_redis<sup>1</sup></a></li>
+				<li><a href="/tags/getcookie/" title="getcookie">getcookie<sup>1</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/php/" title="php">php<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/mvc/" title="mvc">mvc<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/observer/" title="observer">observer<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/redispool/" title="redispool">redispool<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/vim8-0/" title="vim8.0">vim8.0<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/signal/" title="signal">signal<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/json/" title="json">json<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/html/" title="html">html<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/beego-orm/" title="beego/orm">beego/orm<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/xorm/" title="xorm">xorm<sup>1</sup></a></li>
+				<li><a href="/tags/govendor/" title="govendor">govendor<sup>1</sup></a></li>
 			
 		
 		</ul>

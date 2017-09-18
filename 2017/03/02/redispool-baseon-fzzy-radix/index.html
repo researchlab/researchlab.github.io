@@ -12,14 +12,16 @@
 
     
     <meta name="description" content="之前的老项目的redis client sdk 直接大名鼎鼎的github.com/fzzy/radix提供的redis client 和redis pool, 当访问峰值达到一定的值后会出现too many open files等tcp连接错误，同时也没有直接提供authorization 密钥认证的接口，为满足这些新需求基于fzzy/radix封装出的新的redispool, 已投入生产使用半">
+<meta name="keywords" content="golang,redispool">
 <meta property="og:type" content="article">
-<meta property="og:title" content="基于fzzy/radix/redis封装新的redispool">
+<meta property="og:title" content="基于fzzy&#x2F;radix&#x2F;redis封装新的redispool">
 <meta property="og:url" content="http://www.grdtechs.com/2017/03/02/redispool-baseon-fzzy-radix/index.html">
 <meta property="og:site_name" content="一线攻城狮">
 <meta property="og:description" content="之前的老项目的redis client sdk 直接大名鼎鼎的github.com/fzzy/radix提供的redis client 和redis pool, 当访问峰值达到一定的值后会出现too many open files等tcp连接错误，同时也没有直接提供authorization 密钥认证的接口，为满足这些新需求基于fzzy/radix封装出的新的redispool, 已投入生产使用半">
-<meta property="og:updated_time" content="2017-09-16T14:32:56.907Z">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2017-09-18T16:29:02.061Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="基于fzzy/radix/redis封装新的redispool">
+<meta name="twitter:title" content="基于fzzy&#x2F;radix&#x2F;redis封装新的redispool">
 <meta name="twitter:description" content="之前的老项目的redis client sdk 直接大名鼎鼎的github.com/fzzy/radix提供的redis client 和redis pool, 当访问峰值达到一定的值后会出现too many open files等tcp连接错误，同时也没有直接提供authorization 密钥认证的接口，为满足这些新需求基于fzzy/radix封装出的新的redispool, 已投入生产使用半">
 
     
@@ -29,7 +31,7 @@
     <link rel="icon" href="/img/favicon.ico">
     
     
-    <link rel="stylesheet" href="/css/style.css" type="text/css">
+    <link rel="stylesheet" href="/css/style.css">
 </head>
 
   <body>
@@ -89,16 +91,16 @@
 		<div id="toc" class="toc-article">
 			<strong class="toc-title">文章目录</strong>
 		
-			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#auth_u8BA4_u8BC1"><span class="toc-number">1.</span> <span class="toc-text">auth认证</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#qps_u9650_u5236"><span class="toc-number">2.</span> <span class="toc-text">qps限制</span></a></li></ol>
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#auth认证"><span class="toc-number">1.</span> <span class="toc-text">auth认证</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#qps限制"><span class="toc-number">2.</span> <span class="toc-text">qps限制</span></a></li></ol>
 		
 		</div>
 		
 		<p>之前的老项目的redis client sdk 直接大名鼎鼎的<code>github.com/fzzy/radix</code>提供的<code>redis client</code> 和<code>redis pool</code>, 当访问峰值达到一定的值后会出现<code>too many open files</code>等tcp连接错误，同时也没有直接提供authorization 密钥认证的接口，为满足这些新需求基于<code>fzzy/radix</code>封装出的新的<code>redispool</code>, 已投入生产使用半年来暂无问题，本文总结如下,<br><a id="more"></a></p>
-<h2 id="auth_u8BA4_u8BC1"><a href="#auth_u8BA4_u8BC1" class="headerlink" title="auth认证"></a>auth认证</h2><p>如果redis server 需要密钥访问的话，每新建一个client 连接后都需要先通过authorization认证之后才能被使用，如果每次都通过新建一个redis client 再oauth认证来用显然没什么问题，但对于要频繁进行redis操作的系统而言，最好采用redis pool 的办法来解决，用redis conn 池本来也很好解决， 就是在新建redis conn pool时 每新建一个redis client就auth认证一下然后再保存起来就可以使用了，并且这个连接以后都不需要在进行auth认证了。<br>如果redis pool在新建之后就固定的话， 是可以如上面这么简单的，但是采用的<code>fzzy/radix</code>包在实现的方案是可根据需要自动伸缩地新建redis client conn,之前设置的redis 连接池的大小其实是最小的空闲连接池，当业务需求需要的redis client连接数大于pool中的数目时则会通过redis.Dial()的方法新建一个redis client conn 以满足业务的需求，即在建立redis连接池的时候auth认证的redis client conn 和最后回到pool池中的redis client conn 可能就不是同一个client了，因为当新的redis client conn 塞满redis 连接池后 之前auth认证过的旧的redis client conn就会被Close关闭到而不再回到pool池中，具体实现如下:<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">func</span> (p *RedisPool) getRedisClient() (*redis.Client, error) &#123;</span><br><span class="line">	client, err := redis.Dial(p.network, p.addr)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="constant">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="constant">nil</span>, err</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> <span class="built_in">len</span>(p.pwd) != <span class="number">0</span> &#123;</span><br><span class="line">		<span class="keyword">if</span> client, err = p.redisAuth(client); err != <span class="constant">nil</span> &#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="constant">nil</span>, err</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> client, <span class="constant">nil</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> (p *RedisPool) redisAuth(client *redis.Client) (*redis.Client, error) &#123;</span><br><span class="line">	<span class="keyword">if</span> _, err := client.Cmd(<span class="string">"AUTH"</span>, p.pwd).Str(); err != <span class="constant">nil</span> &#123;</span><br><span class="line">		client.Close()</span><br><span class="line">		<span class="keyword">return</span> client, err</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> client, <span class="constant">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="auth认证"><a href="#auth认证" class="headerlink" title="auth认证"></a>auth认证</h2><p>如果redis server 需要密钥访问的话，每新建一个client 连接后都需要先通过authorization认证之后才能被使用，如果每次都通过新建一个redis client 再oauth认证来用显然没什么问题，但对于要频繁进行redis操作的系统而言，最好采用redis pool 的办法来解决，用redis conn 池本来也很好解决， 就是在新建redis conn pool时 每新建一个redis client就auth认证一下然后再保存起来就可以使用了，并且这个连接以后都不需要在进行auth认证了。<br>如果redis pool在新建之后就固定的话， 是可以如上面这么简单的，但是采用的<code>fzzy/radix</code>包在实现的方案是可根据需要自动伸缩地新建redis client conn,之前设置的redis 连接池的大小其实是最小的空闲连接池，当业务需求需要的redis client连接数大于pool中的数目时则会通过redis.Dial()的方法新建一个redis client conn 以满足业务的需求，即在建立redis连接池的时候auth认证的redis client conn 和最后回到pool池中的redis client conn 可能就不是同一个client了，因为当新的redis client conn 塞满redis 连接池后 之前auth认证过的旧的redis client conn就会被Close关闭到而不再回到pool池中，具体实现如下:<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(p *RedisPool)</span> <span class="title">getRedisClient</span><span class="params">()</span> <span class="params">(*redis.Client, error)</span></span> &#123;</div><div class="line">	client, err := redis.Dial(p.network, p.addr)</div><div class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">		<span class="keyword">return</span> <span class="literal">nil</span>, err</div><div class="line">	&#125;</div><div class="line">	<span class="keyword">if</span> <span class="built_in">len</span>(p.pwd) != <span class="number">0</span> &#123;</div><div class="line">		<span class="keyword">if</span> client, err = p.redisAuth(client); err != <span class="literal">nil</span> &#123;</div><div class="line">			<span class="keyword">return</span> <span class="literal">nil</span>, err</div><div class="line">		&#125;</div><div class="line">	&#125;</div><div class="line">	<span class="keyword">return</span> client, <span class="literal">nil</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(p *RedisPool)</span> <span class="title">redisAuth</span><span class="params">(client *redis.Client)</span> <span class="params">(*redis.Client, error)</span></span> &#123;</div><div class="line">	<span class="keyword">if</span> _, err := client.Cmd(<span class="string">"AUTH"</span>, p.pwd).Str(); err != <span class="literal">nil</span> &#123;</div><div class="line">		client.Close()</div><div class="line">		<span class="keyword">return</span> client, err</div><div class="line">	&#125;</div><div class="line">	<span class="keyword">return</span> client, <span class="literal">nil</span></div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
 <p>上述代码提供了一个redisAuth方法来提供auth认证，这样不管是通过新建redis池还是当池中redis client conn耗尽之后单独新建的redis client 都通过上述提供getRedisClient()方法来获取新建的redis client conn ,这样便可保证每次新建的redis client conn 都是通过auth认证的(当然上次实现的时候如果没有设置密码，则不进行密钥认证，只有设置了密钥才会调用auth进行认证授权)。</p>
-<h2 id="qps_u9650_u5236"><a href="#qps_u9650_u5236" class="headerlink" title="qps限制"></a>qps限制</h2><p>因为<code>fzzy/radix</code>包当初始化创建的redis 连接池中的redis client 耗尽后会通过redis.Dial()方法新建一个redis.client, 如果在某一个峰值redis连接池耗尽的同时大量新建redis.client 而不能及时Close掉这些redis.Client,则后继再redis.Dial()新建的redis client conn 就会因为受系统限制无法分配文件句柄地址而报”too many open files”错误。具体试验可以先限制redis连接池为100, 然后同时发起10w redis 连接请求， 可以通过下面的命令观察到当redis client conn最大分配的大小，超过之后程序也会崩掉。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">watch -n <span class="number">1</span> <span class="string">"redis-cli -h localhost -p 6379 -a 123456 client list | wc -l"</span> <span class="comment"># redis client 连接数</span></span><br><span class="line">watch -n <span class="number">1</span> <span class="string">"lsof -i:6379 | wc -l "</span> <span class="comment"># redis tcp 连接数</span></span><br></pre></td></tr></table></figure></p>
+<h2 id="qps限制"><a href="#qps限制" class="headerlink" title="qps限制"></a>qps限制</h2><p>因为<code>fzzy/radix</code>包当初始化创建的redis 连接池中的redis client 耗尽后会通过redis.Dial()方法新建一个redis.client, 如果在某一个峰值redis连接池耗尽的同时大量新建redis.client 而不能及时Close掉这些redis.Client,则后继再redis.Dial()新建的redis client conn 就会因为受系统限制无法分配文件句柄地址而报”too many open files”错误。具体试验可以先限制redis连接池为100, 然后同时发起10w redis 连接请求， 可以通过下面的命令观察到当redis client conn最大分配的大小，超过之后程序也会崩掉。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">watch -n 1 <span class="string">"redis-cli -h localhost -p 6379 -a 123456 client list | wc -l"</span> <span class="comment"># redis client 连接数</span></div><div class="line">watch -n 1 <span class="string">"lsof -i:6379 | wc -l "</span> <span class="comment"># redis tcp 连接数</span></div></pre></td></tr></table></figure></p>
 <p>上述命令可以动态看到每一秒内当前的redis client 连接数目 和 tcp 连接数</p>
-<p>显然程序不能仍由业务需求无限的取申请redis client 连接数， 本文设计通过每次成功Get到一个redis client时 则通过<code>sync/atomic</code>包原子的给qps新增一 进行计数，当Put到池或Empty全部清空时则进行减一 计数操作, 具体实现如下,<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Retrieves an available redis client. If there are none available it will</span></span><br><span class="line"><span class="comment">// create a new one on the fly</span></span><br><span class="line"><span class="keyword">func</span> (p *RedisPool) Get() (client *redis.Client, err error) &#123;</span><br><span class="line">	<span class="keyword">if</span> p.qpsLimit &gt; <span class="number">0</span> &#123;</span><br><span class="line">		<span class="keyword">for</span> p.qps &gt; p.qpsLimit &#123;</span><br><span class="line">			time.Sleep(time.Millisecond * time.Duration(<span class="number">10</span>))</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">3</span>; i++ &#123;</span><br><span class="line">		<span class="keyword">if</span> client, err = p.get(); err != <span class="constant">nil</span> &#123;</span><br><span class="line">			<span class="keyword">break</span></span><br><span class="line">		&#125; <span class="keyword">else</span> <span class="keyword">if</span> pstate, perr := client.Cmd(<span class="string">"PING"</span>).Str(); pstate == <span class="string">"PONG"</span> &amp;&amp; perr == <span class="constant">nil</span> &#123;</span><br><span class="line">			<span class="keyword">break</span></span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> err == <span class="constant">nil</span> &#123;</span><br><span class="line">		atomic.AddInt32(&amp;p.qps, <span class="number">1</span>)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Returns a client back to the pool. If the pool is full the client is closed</span></span><br><span class="line"><span class="comment">// instead. If the client is already closed (due to connection failure or</span></span><br><span class="line"><span class="comment">// what-have-you) it should not be put back in the pool. The pool will create</span></span><br><span class="line"><span class="comment">// more connections as needed.</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> (p *RedisPool) Put(conn *redis.Client) &#123;</span><br><span class="line">	<span class="keyword">select</span> &#123;</span><br><span class="line">	<span class="keyword">case</span> p.pool &lt;- conn:</span><br><span class="line">	<span class="keyword">default</span>:</span><br><span class="line">		conn.Close()</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> p.qps &gt; <span class="number">0</span> &#123;</span><br><span class="line">		atomic.AddInt32(&amp;p.qps, -<span class="number">1</span>)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Removes and calls Close() on all the connections currently in the pool.</span></span><br><span class="line"><span class="comment">// Assuming there are no other connections waiting to be Put back this method</span></span><br><span class="line"><span class="comment">// effectively closes and cleans up the pool.</span></span><br><span class="line"><span class="keyword">func</span> (p *RedisPool) Empty() &#123;</span><br><span class="line">	<span class="keyword">var</span> conn *redis.Client</span><br><span class="line">	<span class="keyword">for</span> &#123;</span><br><span class="line">		<span class="keyword">select</span> &#123;</span><br><span class="line">		<span class="keyword">case</span> conn = &lt;-p.pool:</span><br><span class="line">			conn.Close()</span><br><span class="line">		<span class="keyword">default</span>:</span><br><span class="line">			<span class="keyword">return</span></span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">if</span> p.qps &gt; <span class="number">0</span> &#123;</span><br><span class="line">			atomic.AddInt32(&amp;p.qps, -<span class="number">1</span>)</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>显然程序不能仍由业务需求无限的取申请redis client 连接数， 本文设计通过每次成功Get到一个redis client时 则通过<code>sync/atomic</code>包原子的给qps新增一 进行计数，当Put到池或Empty全部清空时则进行减一 计数操作, 具体实现如下,<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// Retrieves an available redis client. If there are none available it will</span></div><div class="line"><span class="comment">// create a new one on the fly</span></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(p *RedisPool)</span> <span class="title">Get</span><span class="params">()</span> <span class="params">(client *redis.Client, err error)</span></span> &#123;</div><div class="line">	<span class="keyword">if</span> p.qpsLimit &gt; <span class="number">0</span> &#123;</div><div class="line">		<span class="keyword">for</span> p.qps &gt; p.qpsLimit &#123;</div><div class="line">			time.Sleep(time.Millisecond * time.Duration(<span class="number">10</span>))</div><div class="line">		&#125;</div><div class="line">	&#125;</div><div class="line">	<span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">3</span>; i++ &#123;</div><div class="line">		<span class="keyword">if</span> client, err = p.get(); err != <span class="literal">nil</span> &#123;</div><div class="line">			<span class="keyword">break</span></div><div class="line">		&#125; <span class="keyword">else</span> <span class="keyword">if</span> pstate, perr := client.Cmd(<span class="string">"PING"</span>).Str(); pstate == <span class="string">"PONG"</span> &amp;&amp; perr == <span class="literal">nil</span> &#123;</div><div class="line">			<span class="keyword">break</span></div><div class="line">		&#125;</div><div class="line">	&#125;</div><div class="line">	<span class="keyword">if</span> err == <span class="literal">nil</span> &#123;</div><div class="line">		atomic.AddInt32(&amp;p.qps, <span class="number">1</span>)</div><div class="line">	&#125;</div><div class="line">	<span class="keyword">return</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">// Returns a client back to the pool. If the pool is full the client is closed</span></div><div class="line"><span class="comment">// instead. If the client is already closed (due to connection failure or</span></div><div class="line"><span class="comment">// what-have-you) it should not be put back in the pool. The pool will create</span></div><div class="line"><span class="comment">// more connections as needed.</span></div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(p *RedisPool)</span> <span class="title">Put</span><span class="params">(conn *redis.Client)</span></span> &#123;</div><div class="line">	<span class="keyword">select</span> &#123;</div><div class="line">	<span class="keyword">case</span> p.pool &lt;- conn:</div><div class="line">	<span class="keyword">default</span>:</div><div class="line">		conn.Close()</div><div class="line">	&#125;</div><div class="line">	<span class="keyword">if</span> p.qps &gt; <span class="number">0</span> &#123;</div><div class="line">		atomic.AddInt32(&amp;p.qps, <span class="number">-1</span>)</div><div class="line">	&#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">// Removes and calls Close() on all the connections currently in the pool.</span></div><div class="line"><span class="comment">// Assuming there are no other connections waiting to be Put back this method</span></div><div class="line"><span class="comment">// effectively closes and cleans up the pool.</span></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(p *RedisPool)</span> <span class="title">Empty</span><span class="params">()</span></span> &#123;</div><div class="line">	<span class="keyword">var</span> conn *redis.Client</div><div class="line">	<span class="keyword">for</span> &#123;</div><div class="line">		<span class="keyword">select</span> &#123;</div><div class="line">		<span class="keyword">case</span> conn = &lt;-p.pool:</div><div class="line">			conn.Close()</div><div class="line">		<span class="keyword">default</span>:</div><div class="line">			<span class="keyword">return</span></div><div class="line">		&#125;</div><div class="line">		<span class="keyword">if</span> p.qps &gt; <span class="number">0</span> &#123;</div><div class="line">			atomic.AddInt32(&amp;p.qps, <span class="number">-1</span>)</div><div class="line">		&#125;</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
 <p>完整的代码设计及测试代码请参见: <a href="https://github.com/researchlab/experiments/tree/master/redispool" target="_blank" rel="external">https://github.com/researchlab/experiments/tree/master/redispool</a></p>
   
 	</div>
@@ -204,13 +206,13 @@
 <div id="asidepart">
 
   <div class="widget tag">
-<p margin="0" style="text-align:center">
-<a class="ahref" href="http://researchlab.github.io/about/">
-<img id="aboutpic"  src="/img/weixin.jpg" alt="加我微信" height="200" width="200" style="box-shadow: 0px 0px 2px 2px #9edeff;border-radius: 8px;" >
-</a></p>
 <!--<hr noshade color="#ccc">-->
 <!-- <p style="text-align:center">Mike.Lee</p> -->
-<p style="text-align:center"><font size="2" color="grey">扫一扫上面的二维码 加我微信</font></p>
+<p margin="0" style="text-align:center">
+<a class="ahref" href="http://researchlab.github.io/about/">
+<img id="aboutpic"  src="/img/qzly.png" alt="@全栈炼狱之路" height="200" width="200" style="box-shadow: 0px 0px 2px 2px #9edeff;border-radius: 8px;" >
+</a></p>
+<p style="text-align:center"><font size="2" color="grey">关注微信公众号 @全栈炼狱之路</font></p>
 <div style="display:block; margin-top:10px; padding: 0px 4px 4px 0; border-top: dashed 1px #ccc; text-align:left;"></div>
 <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 <div style="float:left;position:absolute;"><font size="2" >总访问:<span id="busuanzi_value_site_pv"></span>次</font></div>
@@ -285,6 +287,18 @@
 			
 		
 			
+				<li><a href="/tags/cache/" title="cache">cache<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/concurrency/" title="concurrency">concurrency<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mysql/" title="mysql">mysql<sup>2</sup></a></li>
+			
+		
+			
 				<li><a href="/tags/Hexo/" title="Hexo">Hexo<sup>2</sup></a></li>
 			
 		
@@ -293,15 +307,39 @@
 			
 		
 			
-				<li><a href="/tags/concurrency/" title="concurrency">concurrency<sup>2</sup></a></li>
+				<li><a href="/tags/ticker/" title="ticker">ticker<sup>1</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/cache/" title="cache">cache<sup>2</sup></a></li>
+				<li><a href="/tags/rpc/" title="rpc">rpc<sup>1</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/mysql/" title="mysql">mysql<sup>2</sup></a></li>
+				<li><a href="/tags/gin/" title="gin">gin<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/submodule/" title="submodule">submodule<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/vendoring/" title="vendoring">vendoring<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/godep/" title="godep">godep<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/form/" title="form">form<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/post/" title="post">post<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/reflect/" title="reflect">reflect<sup>1</sup></a></li>
 			
 		
 			
@@ -309,47 +347,11 @@
 			
 		
 			
-				<li><a href="/tags/php-redis/" title="php_redis">php_redis<sup>1</sup></a></li>
+				<li><a href="/tags/getcookie/" title="getcookie">getcookie<sup>1</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/php/" title="php">php<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/mvc/" title="mvc">mvc<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/observer/" title="observer">observer<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/redispool/" title="redispool">redispool<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/vim8-0/" title="vim8.0">vim8.0<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/signal/" title="signal">signal<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/json/" title="json">json<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/html/" title="html">html<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/beego-orm/" title="beego/orm">beego/orm<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/xorm/" title="xorm">xorm<sup>1</sup></a></li>
+				<li><a href="/tags/govendor/" title="govendor">govendor<sup>1</sup></a></li>
 			
 		
 		</ul>

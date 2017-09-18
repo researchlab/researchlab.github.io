@@ -12,16 +12,19 @@
 
     
     <meta name="description" content="json字符串在html用js美化输出使用总结。">
+<meta name="keywords" content="json,html">
 <meta property="og:type" content="article">
 <meta property="og:title" content="html 美化输出 json 字符串">
 <meta property="og:url" content="http://www.grdtechs.com/2016/06/17/jsonfmt/index.html">
 <meta property="og:site_name" content="一线攻城狮">
 <meta property="og:description" content="json字符串在html用js美化输出使用总结。">
+<meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="http://www.grdtechs.com/imgs/jsonfmt.png">
-<meta property="og:updated_time" content="2017-09-16T14:32:56.907Z">
+<meta property="og:updated_time" content="2017-09-18T16:29:02.057Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="html 美化输出 json 字符串">
 <meta name="twitter:description" content="json字符串在html用js美化输出使用总结。">
+<meta name="twitter:image" content="http://www.grdtechs.com/imgs/jsonfmt.png">
 
     
     <link rel="alternative" href="/atom.xml" title="一线攻城狮" type="application/atom+xml">
@@ -30,7 +33,7 @@
     <link rel="icon" href="/img/favicon.ico">
     
     
-    <link rel="stylesheet" href="/css/style.css" type="text/css">
+    <link rel="stylesheet" href="/css/style.css">
 </head>
 
   <body>
@@ -90,16 +93,16 @@
 		<div id="toc" class="toc-article">
 			<strong class="toc-title">文章目录</strong>
 		
-			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#JSON-stringify_28_29_u51FD_u6570_u539F_u578B"><span class="toc-number">1.</span> <span class="toc-text">JSON.stringify()函数原型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#JSON-stringify_28_29__u5B9E_u4F8B"><span class="toc-number">2.</span> <span class="toc-text">JSON.stringify() 实例</span></a></li></ol>
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#JSON-stringify-函数原型"><span class="toc-number">1.</span> <span class="toc-text">JSON.stringify()函数原型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#JSON-stringify-实例"><span class="toc-number">2.</span> <span class="toc-text">JSON.stringify() 实例</span></a></li></ol>
 		
 		</div>
 		
 		<p><code>json</code>字符串在html用js美化输出使用总结。<br><a id="more"></a></p>
-<h2 id="JSON-stringify_28_29_u51FD_u6570_u539F_u578B"><a href="#JSON-stringify_28_29_u51FD_u6570_u539F_u578B" class="headerlink" title="JSON.stringify()函数原型"></a>JSON.stringify()函数原型</h2><p><strong>语法：</strong><br>　　<code>JSON.stringify(value [, replacer] [, space])</code></p>
+<h2 id="JSON-stringify-函数原型"><a href="#JSON-stringify-函数原型" class="headerlink" title="JSON.stringify()函数原型"></a>JSON.stringify()函数原型</h2><p><strong>语法：</strong><br>　　<code>JSON.stringify(value [, replacer] [, space])</code></p>
 <p><code>value</code>：是必选字段。就是你输入的对象，比如数组，类等。<br><code>replacer</code>：这个是可选的。它又分为2种方式，一种是数组，第二种是方法。<br>　　情况一：<code>replacer</code>为数组时，通过后面的实验可以知道，它是和第一个参数<code>value</code>有关系的。一般来说，系列化后的结果是通过键值对来进行表示的。 所以，如果此时第二个参数的值在第一个存在，那么就以第二个参数的值做<code>key</code>，第一个参数的值为<code>value</code>进行表示，如果不存在，就忽略。</p>
 <p>　　情况二：<code>replacer</code>为方法时，那很简单，就是说把系列化后的每一个对象（记住是每一个）传进方法里面进行处理。 </p>
 <p><code>space</code>：就是用什么来做分隔符的。<br>　　1）如果省略的话，那么显示出来的值就没有分隔符，直接输出来 。<br>　　2）如果是一个数字的话，那么它就定义缩进几个字符，当然如果大于10 ，则默认为10，因为最大值为10。<br>　　3）如果是一些转义字符，比如<code>\t</code>，表示回车，那么它每行一个回车。<br>　　4）如果仅仅是字符串，就在每行输出值的时候把这些字符串附加上去。当然，最大长度也是10个字符。 </p>
-<h2 id="JSON-stringify_28_29__u5B9E_u4F8B"><a href="#JSON-stringify_28_29__u5B9E_u4F8B" class="headerlink" title="JSON.stringify() 实例"></a>JSON.stringify() 实例</h2><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br></pre></td><td class="code"><pre><span class="line"><span class="doctype">&lt;!DOCTYPE html&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="title">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="title">head</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="title">title</span>&gt;</span>html美化输出json字符串<span class="tag">&lt;/<span class="title">title</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="title">style</span> <span class="attribute">type</span>=<span class="value">'text/css'</span>&gt;</span><span class="css"></span><br><span class="line"><span class="tag">pre</span> <span class="rules">&#123;<span class="rule"><span class="attribute">outline</span>:<span class="value"> <span class="number">1px</span> solid <span class="hexcolor">#ccc</span></span></span>; <span class="rule"><span class="attribute">padding</span>:<span class="value"> <span class="number">5px</span></span></span>; <span class="rule"><span class="attribute">margin</span>:<span class="value"> <span class="number">5px</span></span></span>; &#125;</span></span><br><span class="line"><span class="class">.string</span> <span class="rules">&#123; <span class="rule"><span class="attribute">color</span>:<span class="value"> green</span></span>; &#125;</span></span><br><span class="line"><span class="class">.number</span> <span class="rules">&#123; <span class="rule"><span class="attribute">color</span>:<span class="value"> darkorange</span></span>; &#125;</span></span><br><span class="line"><span class="class">.boolean</span> <span class="rules">&#123; <span class="rule"><span class="attribute">color</span>:<span class="value"> blue</span></span>; &#125;</span></span><br><span class="line"><span class="class">.null</span> <span class="rules">&#123; <span class="rule"><span class="attribute">color</span>:<span class="value"> magenta</span></span>; &#125;</span></span><br><span class="line"><span class="class">.key</span> <span class="rules">&#123; <span class="rule"><span class="attribute">color</span>:<span class="value"> red</span></span>; &#125;</span></span><br><span class="line"></span><span class="tag">&lt;/<span class="title">style</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="title">head</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="title">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="title">pre</span> <span class="attribute">id</span>=<span class="value">"output"</span>&gt;</span><span class="tag">&lt;/<span class="title">pre</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="title">pre</span> <span class="attribute">id</span>=<span class="value">"output2"</span>&gt;</span><span class="tag">&lt;/<span class="title">pre</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="title">script</span> <span class="attribute">type</span>=<span class="value">"text/javascript"</span>&gt;</span><span class="javascript"></span><br><span class="line"><span class="keyword">var</span> obj = &#123;a:<span class="number">1</span>, <span class="string">'b'</span>:<span class="string">'foo'</span>, c:[<span class="literal">false</span>,<span class="literal">null</span>, &#123;d:&#123;e:<span class="number">1.3e5</span>&#125;&#125;]&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 1. 最简单的输出</span></span><br><span class="line"><span class="keyword">var</span> str = <span class="built_in">JSON</span>.stringify(obj, <span class="literal">undefined</span>, <span class="number">2</span>);</span><br><span class="line"><span class="built_in">document</span>.getElementById(<span class="string">'output'</span>).innerHTML = str;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 2. 带高亮的输出</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">highLight</span>(<span class="params">json</span>)</span>&#123;</span><br><span class="line">			 json = json.replace(<span class="regexp">/&amp;/g</span>, <span class="string">'&amp;amp;'</span>).replace(<span class="regexp">/&lt;/g</span>, <span class="string">'&amp;lt;'</span>).replace(<span class="regexp">/&gt;/g</span>, <span class="string">'&amp;gt;'</span>);</span><br><span class="line">			  <span class="keyword">return</span> json.replace(<span class="regexp">/("(\\u[a-zA-Z0-9]&#123;4&#125;|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g</span>, <span class="function"><span class="keyword">function</span> (<span class="params">match</span>) </span>&#123;</span><br><span class="line">				     <span class="keyword">var</span> cls = <span class="string">'number'</span>;</span><br><span class="line">				     <span class="keyword">if</span> (<span class="regexp">/^"/</span>.test(match)) &#123;</span><br><span class="line">				         <span class="keyword">if</span> (<span class="regexp">/:$/</span>.test(match)) &#123;</span><br><span class="line">				             cls = <span class="string">'key'</span>;</span><br><span class="line">				         &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">				             cls = <span class="string">'string'</span>;</span><br><span class="line">				         &#125;</span><br><span class="line">				     &#125; <span class="keyword">else</span> <span class="keyword">if</span> (<span class="regexp">/true|false/</span>.test(match)) &#123;</span><br><span class="line">				         cls = <span class="string">'boolean'</span>;</span><br><span class="line">				     &#125; <span class="keyword">else</span> <span class="keyword">if</span> (<span class="regexp">/null/</span>.test(match)) &#123;</span><br><span class="line">				         cls = <span class="string">'null'</span>;</span><br><span class="line">				     &#125;</span><br><span class="line">				     <span class="keyword">return</span> <span class="string">'&lt;span class="'</span> + cls + <span class="string">'"&gt;'</span> + match + <span class="string">'&lt;/span&gt;'</span>;</span><br><span class="line">				 &#125;);</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">var</span> person = &#123;</span><br><span class="line">			 name: <span class="string">"Hello Kitty"</span>,</span><br><span class="line">			 sex: <span class="string">"男"</span>,</span><br><span class="line">			 age: <span class="number">20</span>,</span><br><span class="line">			 child: [</span><br><span class="line">			 	&#123;</span><br><span class="line">			 		name: <span class="string">"Hello"</span>,</span><br><span class="line">					sex: <span class="string">"男"</span>,</span><br><span class="line">					age: <span class="number">10</span>,</span><br><span class="line">					toy:[<span class="string">'a'</span>,<span class="string">'b'</span>]</span><br><span class="line">			 	&#125;,</span><br><span class="line">			 	&#123;</span><br><span class="line">			 		name: <span class="string">"Kitty"</span>,</span><br><span class="line">					sex: <span class="string">"女"</span>,</span><br><span class="line">					age: <span class="number">8</span>,</span><br><span class="line">					toy:[<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>]</span><br><span class="line">			 	&#125;</span><br><span class="line">			 ]</span><br><span class="line">		&#125;;</span><br><span class="line"></span><br><span class="line">		<span class="keyword">var</span> str = <span class="built_in">JSON</span>.stringify(person, <span class="literal">undefined</span>, <span class="number">3</span>);</span><br><span class="line"></span><br><span class="line">	</span><br><span class="line"></span><br><span class="line"><span class="comment">//document.getElementById('output2').innerHTML = syntaxHighlight(str);</span></span><br><span class="line"><span class="built_in">document</span>.getElementById(<span class="string">'output2'</span>).innerHTML = highLight(str);</span><br><span class="line"></span><span class="tag">&lt;/<span class="title">script</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="title">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="title">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h2 id="JSON-stringify-实例"><a href="#JSON-stringify-实例" class="headerlink" title="JSON.stringify() 实例"></a>JSON.stringify() 实例</h2><figure class="highlight html"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div></pre></td><td class="code"><pre><div class="line"><span class="meta">&lt;!DOCTYPE html&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">title</span>&gt;</span>html美化输出json字符串<span class="tag">&lt;/<span class="name">title</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">style</span> <span class="attr">type</span>=<span class="string">'text/css'</span>&gt;</span><span class="undefined"></span></div><div class="line"><span class="undefined">pre &#123;outline: 1px solid #ccc; padding: 5px; margin: 5px; &#125;</span></div><div class="line"><span class="undefined">.string &#123; color: green; &#125;</span></div><div class="line"><span class="undefined">.number &#123; color: darkorange; &#125;</span></div><div class="line"><span class="undefined">.boolean &#123; color: blue; &#125;</span></div><div class="line"><span class="undefined">.null &#123; color: magenta; &#125;</span></div><div class="line"><span class="undefined">.key &#123; color: red; &#125;</span></div><div class="line"><span class="undefined"></span><span class="tag">&lt;/<span class="name">style</span>&gt;</span></div><div class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">pre</span> <span class="attr">id</span>=<span class="string">"output"</span>&gt;</span><span class="tag">&lt;/<span class="name">pre</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">pre</span> <span class="attr">id</span>=<span class="string">"output2"</span>&gt;</span><span class="tag">&lt;/<span class="name">pre</span>&gt;</span></div><div class="line"></div><div class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">type</span>=<span class="string">"text/javascript"</span>&gt;</span><span class="undefined"></span></div><div class="line"><span class="javascript"><span class="keyword">var</span> obj = &#123;<span class="attr">a</span>:<span class="number">1</span>, <span class="string">'b'</span>:<span class="string">'foo'</span>, <span class="attr">c</span>:[<span class="literal">false</span>,<span class="literal">null</span>, &#123;<span class="attr">d</span>:&#123;<span class="attr">e</span>:<span class="number">1.3e5</span>&#125;&#125;]&#125;;</span></div><div class="line"><span class="undefined"></span></div><div class="line"><span class="javascript"><span class="comment">// 1. 最简单的输出</span></span></div><div class="line"><span class="javascript"><span class="keyword">var</span> str = <span class="built_in">JSON</span>.stringify(obj, <span class="literal">undefined</span>, <span class="number">2</span>);</span></div><div class="line"><span class="javascript"><span class="built_in">document</span>.getElementById(<span class="string">'output'</span>).innerHTML = str;</span></div><div class="line"><span class="undefined"></span></div><div class="line"><span class="javascript"><span class="comment">// 2. 带高亮的输出</span></span></div><div class="line"><span class="javascript"><span class="function"><span class="keyword">function</span> <span class="title">highLight</span>(<span class="params">json</span>)</span>&#123;</span></div><div class="line"><span class="javascript">			 json = json.replace(<span class="regexp">/&amp;/g</span>, <span class="string">'&amp;amp;'</span>).replace(<span class="regexp">/&lt;/g</span>, <span class="string">'&amp;lt;'</span>).replace(<span class="regexp">/&gt;/g</span>, <span class="string">'&amp;gt;'</span>);</span></div><div class="line"><span class="javascript">			  <span class="keyword">return</span> json.replace(<span class="regexp">/("(\\u[a-zA-Z0-9]&#123;4&#125;|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g</span>, <span class="function"><span class="keyword">function</span> (<span class="params">match</span>) </span>&#123;</span></div><div class="line"><span class="javascript">				     <span class="keyword">var</span> cls = <span class="string">'number'</span>;</span></div><div class="line"><span class="javascript">				     <span class="keyword">if</span> (<span class="regexp">/^"/</span>.test(match)) &#123;</span></div><div class="line"><span class="javascript">				         <span class="keyword">if</span> (<span class="regexp">/:$/</span>.test(match)) &#123;</span></div><div class="line"><span class="javascript">				             cls = <span class="string">'key'</span>;</span></div><div class="line"><span class="javascript">				         &#125; <span class="keyword">else</span> &#123;</span></div><div class="line"><span class="javascript">				             cls = <span class="string">'string'</span>;</span></div><div class="line"><span class="undefined">				         &#125;</span></div><div class="line"><span class="javascript">				     &#125; <span class="keyword">else</span> <span class="keyword">if</span> (<span class="regexp">/true|false/</span>.test(match)) &#123;</span></div><div class="line"><span class="javascript">				         cls = <span class="string">'boolean'</span>;</span></div><div class="line"><span class="javascript">				     &#125; <span class="keyword">else</span> <span class="keyword">if</span> (<span class="regexp">/null/</span>.test(match)) &#123;</span></div><div class="line"><span class="javascript">				         cls = <span class="string">'null'</span>;</span></div><div class="line"><span class="undefined">				     &#125;</span></div><div class="line"><span class="javascript">				     <span class="keyword">return</span> <span class="string">'&lt;span class="'</span> + cls + <span class="string">'"&gt;'</span> + match + <span class="string">'&lt;/span&gt;'</span>;</span></div><div class="line"><span class="undefined">				 &#125;);</span></div><div class="line"><span class="undefined">		&#125;</span></div><div class="line"><span class="javascript">		<span class="keyword">var</span> person = &#123;</span></div><div class="line"><span class="javascript">			 name: <span class="string">"Hello Kitty"</span>,</span></div><div class="line"><span class="javascript">			 sex: <span class="string">"男"</span>,</span></div><div class="line"><span class="undefined">			 age: 20,</span></div><div class="line"><span class="undefined">			 child: [</span></div><div class="line"><span class="undefined">			 	&#123;</span></div><div class="line"><span class="javascript">			 		name: <span class="string">"Hello"</span>,</span></div><div class="line"><span class="javascript">					sex: <span class="string">"男"</span>,</span></div><div class="line"><span class="undefined">					age: 10,</span></div><div class="line"><span class="javascript">					toy:[<span class="string">'a'</span>,<span class="string">'b'</span>]</span></div><div class="line"><span class="undefined">			 	&#125;,</span></div><div class="line"><span class="undefined">			 	&#123;</span></div><div class="line"><span class="javascript">			 		name: <span class="string">"Kitty"</span>,</span></div><div class="line"><span class="javascript">					sex: <span class="string">"女"</span>,</span></div><div class="line"><span class="undefined">					age: 8,</span></div><div class="line"><span class="undefined">					toy:[1,2,3]</span></div><div class="line"><span class="undefined">			 	&#125;</span></div><div class="line"><span class="undefined">			 ]</span></div><div class="line"><span class="undefined">		&#125;;</span></div><div class="line"><span class="undefined"></span></div><div class="line"><span class="javascript">		<span class="keyword">var</span> str = <span class="built_in">JSON</span>.stringify(person, <span class="literal">undefined</span>, <span class="number">3</span>);</span></div><div class="line"><span class="undefined"></span></div><div class="line"><span class="undefined">	</span></div><div class="line"><span class="undefined"></span></div><div class="line"><span class="javascript"><span class="comment">//document.getElementById('output2').innerHTML = syntaxHighlight(str);</span></span></div><div class="line"><span class="javascript"><span class="built_in">document</span>.getElementById(<span class="string">'output2'</span>).innerHTML = highLight(str);</span></div><div class="line"><span class="undefined"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></div><div class="line"></div><div class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></div><div class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></div></pre></td></tr></table></figure>
 <p>上述示例的效果如图:</p>
 <center><img src="/imgs/jsonfmt.png" alt="jsonformat"></center>
 
@@ -132,7 +135,7 @@
 
   <div class="article-tags">
   
-  <span></span> <a href="/tags/html/">html</a><a href="/tags/json/">json</a>
+  <span></span> <a href="/tags/json/">json</a><a href="/tags/html/">html</a>
   </div>
 
 </div>
@@ -208,13 +211,13 @@
 <div id="asidepart">
 
   <div class="widget tag">
-<p margin="0" style="text-align:center">
-<a class="ahref" href="http://researchlab.github.io/about/">
-<img id="aboutpic"  src="/img/weixin.jpg" alt="加我微信" height="200" width="200" style="box-shadow: 0px 0px 2px 2px #9edeff;border-radius: 8px;" >
-</a></p>
 <!--<hr noshade color="#ccc">-->
 <!-- <p style="text-align:center">Mike.Lee</p> -->
-<p style="text-align:center"><font size="2" color="grey">扫一扫上面的二维码 加我微信</font></p>
+<p margin="0" style="text-align:center">
+<a class="ahref" href="http://researchlab.github.io/about/">
+<img id="aboutpic"  src="/img/qzly.png" alt="@全栈炼狱之路" height="200" width="200" style="box-shadow: 0px 0px 2px 2px #9edeff;border-radius: 8px;" >
+</a></p>
+<p style="text-align:center"><font size="2" color="grey">关注微信公众号 @全栈炼狱之路</font></p>
 <div style="display:block; margin-top:10px; padding: 0px 4px 4px 0; border-top: dashed 1px #ccc; text-align:left;"></div>
 <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 <div style="float:left;position:absolute;"><font size="2" >总访问:<span id="busuanzi_value_site_pv"></span>次</font></div>
@@ -289,6 +292,18 @@
 			
 		
 			
+				<li><a href="/tags/cache/" title="cache">cache<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/concurrency/" title="concurrency">concurrency<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mysql/" title="mysql">mysql<sup>2</sup></a></li>
+			
+		
+			
 				<li><a href="/tags/Hexo/" title="Hexo">Hexo<sup>2</sup></a></li>
 			
 		
@@ -297,15 +312,39 @@
 			
 		
 			
-				<li><a href="/tags/concurrency/" title="concurrency">concurrency<sup>2</sup></a></li>
+				<li><a href="/tags/ticker/" title="ticker">ticker<sup>1</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/cache/" title="cache">cache<sup>2</sup></a></li>
+				<li><a href="/tags/rpc/" title="rpc">rpc<sup>1</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/mysql/" title="mysql">mysql<sup>2</sup></a></li>
+				<li><a href="/tags/gin/" title="gin">gin<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/submodule/" title="submodule">submodule<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/vendoring/" title="vendoring">vendoring<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/godep/" title="godep">godep<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/form/" title="form">form<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/post/" title="post">post<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/reflect/" title="reflect">reflect<sup>1</sup></a></li>
 			
 		
 			
@@ -313,47 +352,11 @@
 			
 		
 			
-				<li><a href="/tags/php-redis/" title="php_redis">php_redis<sup>1</sup></a></li>
+				<li><a href="/tags/getcookie/" title="getcookie">getcookie<sup>1</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/php/" title="php">php<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/mvc/" title="mvc">mvc<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/observer/" title="observer">observer<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/redispool/" title="redispool">redispool<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/vim8-0/" title="vim8.0">vim8.0<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/signal/" title="signal">signal<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/json/" title="json">json<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/html/" title="html">html<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/beego-orm/" title="beego/orm">beego/orm<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/xorm/" title="xorm">xorm<sup>1</sup></a></li>
+				<li><a href="/tags/govendor/" title="govendor">govendor<sup>1</sup></a></li>
 			
 		
 		</ul>

@@ -12,12 +12,14 @@
 
     
     <meta name="description" content="可以操作Cookie的Http头有两个:Set-Cookie和Cookie。Set-Cookie由服务器发送，它包含在响应请求的头部中。它用于在客户端创建一个Cookie。Cookie头由客户端发送，包含在HTTP请求的头部中。">
+<meta name="keywords" content="setcookie,golang,gin">
 <meta property="og:type" content="article">
 <meta property="og:title" content="gin中使用设置cookie过期时间总结">
 <meta property="og:url" content="http://www.grdtechs.com/2016/03/29/gin-setcookie/index.html">
 <meta property="og:site_name" content="一线攻城狮">
 <meta property="og:description" content="可以操作Cookie的Http头有两个:Set-Cookie和Cookie。Set-Cookie由服务器发送，它包含在响应请求的头部中。它用于在客户端创建一个Cookie。Cookie头由客户端发送，包含在HTTP请求的头部中。">
-<meta property="og:updated_time" content="2017-09-16T14:32:56.903Z">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2017-09-18T16:29:02.057Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="gin中使用设置cookie过期时间总结">
 <meta name="twitter:description" content="可以操作Cookie的Http头有两个:Set-Cookie和Cookie。Set-Cookie由服务器发送，它包含在响应请求的头部中。它用于在客户端创建一个Cookie。Cookie头由客户端发送，包含在HTTP请求的头部中。">
@@ -29,7 +31,7 @@
     <link rel="icon" href="/img/favicon.ico">
     
     
-    <link rel="stylesheet" href="/css/style.css" type="text/css">
+    <link rel="stylesheet" href="/css/style.css">
 </head>
 
   <body>
@@ -89,18 +91,18 @@
 		<div id="toc" class="toc-article">
 			<strong class="toc-title">文章目录</strong>
 		
-			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#u8BD5_u9A8C_u9700_u6C42"><span class="toc-number">1.</span> <span class="toc-text">试验需求</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u8BD5_u9A8C_u4EE3_u7801"><span class="toc-number">2.</span> <span class="toc-text">试验代码</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u4EE3_u7801_u5206_u6790"><span class="toc-number">3.</span> <span class="toc-text">代码分析</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u603B_u7ED3"><span class="toc-number">4.</span> <span class="toc-text">总结</span></a></li></ol>
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#试验需求"><span class="toc-number">1.</span> <span class="toc-text">试验需求</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#试验代码"><span class="toc-number">2.</span> <span class="toc-text">试验代码</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#代码分析"><span class="toc-number">3.</span> <span class="toc-text">代码分析</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#总结"><span class="toc-number">4.</span> <span class="toc-text">总结</span></a></li></ol>
 		
 		</div>
 		
 		<p>可以操作<code>Cookie</code>的<code>Http</code>头有两个:<code>Set-Cookie</code>和<code>Cookie</code>。<code>Set-Cookie</code>由服务器发送，它包含在响应请求的头部中。它用于在客户端创建一个<code>Cookie</code>。<code>Cookie</code>头由客户端发送，包含在<code>HTTP</code>请求的头部中。<br><a id="more"></a></p>
 <font color="red"><strong>注意：<br>1.只有cookie的domain和path与请求的URL匹配才会发送这个cookie;<br>2.客户端发送cookie信息给服务器只发送键-值对到服务器，cookie的属性是不会发送给服务器的。</strong></font>
 
-<h2 id="u8BD5_u9A8C_u9700_u6C42"><a href="#u8BD5_u9A8C_u9700_u6C42" class="headerlink" title="试验需求"></a>试验需求</h2><p>1.服务器给客户端设置cookie，并设置过期时间，客户端每次请求服务器时如果cookie没有过期，则服务器将cookie相应的value 加1并重设cookie, 如果cookie 过期，则重新设置cookie让value 从0开始计数。</p>
-<h2 id="u8BD5_u9A8C_u4EE3_u7801"><a href="#u8BD5_u9A8C_u4EE3_u7801" class="headerlink" title="试验代码"></a>试验代码</h2><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">"fmt"</span></span><br><span class="line">	<span class="string">"github.com/gin-gonic/gin"</span></span><br><span class="line">	<span class="string">"net/http"</span></span><br><span class="line">	<span class="string">"strconv"</span></span><br><span class="line">	<span class="string">"time"</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> main() &#123;</span><br><span class="line">	r := gin.Default()</span><br><span class="line">	r.Use(Counter()) <span class="comment">//这个是每个请求都会执行Counter()这个方法，</span></span><br><span class="line"></span><br><span class="line">	r.GET(<span class="string">"/counter"</span>, <span class="keyword">func</span>(c *gin.Context) &#123;</span><br><span class="line">		<span class="keyword">if</span> cookie, err := c.Request.Cookie(<span class="string">"counter"</span>); err == <span class="constant">nil</span> &#123;</span><br><span class="line">			c.String(http.StatusOK, cookie.Expires.String())</span><br><span class="line">		&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">			http.SetCookie(c.Writer, &amp;http.Cookie&#123;</span><br><span class="line">				Name:    <span class="string">"counter"</span>,</span><br><span class="line">				Value:   <span class="string">""</span>,</span><br><span class="line">				Expires: time.Now().Add(<span class="number">10</span> * time.Second),</span><br><span class="line">			&#125;)</span><br><span class="line">			c.String(http.StatusOK, <span class="string">"SetCookie ok"</span>)</span><br><span class="line"></span><br><span class="line">		&#125;</span><br><span class="line">	&#125;)</span><br><span class="line">	fmt.Println(<span class="string">"server start from 8010"</span>)</span><br><span class="line">	r.Run(<span class="string">":8010"</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> Counter() gin.HandlerFunc &#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="keyword">func</span>(c *gin.Context) &#123;</span><br><span class="line">		<span class="keyword">if</span> cookie, err := c.Request.Cookie(<span class="string">"counter"</span>); err == <span class="constant">nil</span> &#123;</span><br><span class="line">			value := cookie.Value</span><br><span class="line">			<span class="keyword">if</span> <span class="built_in">len</span>(value) == <span class="number">0</span> &#123;</span><br><span class="line">				cookie.Value = <span class="string">"0"</span></span><br><span class="line">			&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">				<span class="keyword">if</span> v, err := strconv.Atoi(value); err == <span class="constant">nil</span> &#123;</span><br><span class="line">					i := v + <span class="number">1</span></span><br><span class="line">					cookie.Value = fmt.Sprintf(<span class="string">"%d"</span>, i)</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">			http.SetCookie(c.Writer, cookie)</span><br><span class="line">			<span class="comment">//before request</span></span><br><span class="line">			c.Next()</span><br><span class="line">			<span class="comment">//after request</span></span><br><span class="line">			c.String(http.StatusOK, <span class="string">" counter:"</span>+cookie.Value)</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h2 id="u4EE3_u7801_u5206_u6790"><a href="#u4EE3_u7801_u5206_u6790" class="headerlink" title="代码分析"></a>代码分析</h2><p>上述代码中<code>r.Use(Counter())</code>表示客户端每次发送一个请求给服务器，都会执行<code>Counter()</code>这个函数。比如客户端发送一个<code>http://localhost:8010/counter</code>的请求给服务器，则具体的处理流程为：先执行<code>Counter()</code>函数中的<code>c.Next()</code>前面的代码，当执行到<code>c.Next()</code>时， 先去执行<code>r.GET(&quot;/counter&quot;,func(c *gin.Context) {xxx}</code>中<code>xxx</code>程序体，当<code>xxx</code>程序体执行完之后，再执行<code>Counter()</code>函数中<code>c.Next()</code>之后的程序体，然后整个请求执行完毕。</p>
+<h2 id="试验需求"><a href="#试验需求" class="headerlink" title="试验需求"></a>试验需求</h2><p>1.服务器给客户端设置cookie，并设置过期时间，客户端每次请求服务器时如果cookie没有过期，则服务器将cookie相应的value 加1并重设cookie, 如果cookie 过期，则重新设置cookie让value 从0开始计数。</p>
+<h2 id="试验代码"><a href="#试验代码" class="headerlink" title="试验代码"></a>试验代码</h2><figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">package</span> main</div><div class="line"></div><div class="line"><span class="keyword">import</span> (</div><div class="line">	<span class="string">"fmt"</span></div><div class="line">	<span class="string">"github.com/gin-gonic/gin"</span></div><div class="line">	<span class="string">"net/http"</span></div><div class="line">	<span class="string">"strconv"</span></div><div class="line">	<span class="string">"time"</span></div><div class="line">)</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</div><div class="line">	r := gin.Default()</div><div class="line">	r.Use(Counter()) <span class="comment">//这个是每个请求都会执行Counter()这个方法，</span></div><div class="line"></div><div class="line">	r.GET(<span class="string">"/counter"</span>, <span class="function"><span class="keyword">func</span><span class="params">(c *gin.Context)</span></span> &#123;</div><div class="line">		<span class="keyword">if</span> cookie, err := c.Request.Cookie(<span class="string">"counter"</span>); err == <span class="literal">nil</span> &#123;</div><div class="line">			c.String(http.StatusOK, cookie.Expires.String())</div><div class="line">		&#125; <span class="keyword">else</span> &#123;</div><div class="line">			http.SetCookie(c.Writer, &amp;http.Cookie&#123;</div><div class="line">				Name:    <span class="string">"counter"</span>,</div><div class="line">				Value:   <span class="string">""</span>,</div><div class="line">				Expires: time.Now().Add(<span class="number">10</span> * time.Second),</div><div class="line">			&#125;)</div><div class="line">			c.String(http.StatusOK, <span class="string">"SetCookie ok"</span>)</div><div class="line"></div><div class="line">		&#125;</div><div class="line">	&#125;)</div><div class="line">	fmt.Println(<span class="string">"server start from 8010"</span>)</div><div class="line">	r.Run(<span class="string">":8010"</span>)</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">Counter</span><span class="params">()</span> <span class="title">gin</span>.<span class="title">HandlerFunc</span></span> &#123;</div><div class="line">	<span class="keyword">return</span> <span class="function"><span class="keyword">func</span><span class="params">(c *gin.Context)</span></span> &#123;</div><div class="line">		<span class="keyword">if</span> cookie, err := c.Request.Cookie(<span class="string">"counter"</span>); err == <span class="literal">nil</span> &#123;</div><div class="line">			value := cookie.Value</div><div class="line">			<span class="keyword">if</span> <span class="built_in">len</span>(value) == <span class="number">0</span> &#123;</div><div class="line">				cookie.Value = <span class="string">"0"</span></div><div class="line">			&#125; <span class="keyword">else</span> &#123;</div><div class="line">				<span class="keyword">if</span> v, err := strconv.Atoi(value); err == <span class="literal">nil</span> &#123;</div><div class="line">					i := v + <span class="number">1</span></div><div class="line">					cookie.Value = fmt.Sprintf(<span class="string">"%d"</span>, i)</div><div class="line">				&#125;</div><div class="line">			&#125;</div><div class="line">			http.SetCookie(c.Writer, cookie)</div><div class="line">			<span class="comment">//before request</span></div><div class="line">			c.Next()</div><div class="line">			<span class="comment">//after request</span></div><div class="line">			c.String(http.StatusOK, <span class="string">" counter:"</span>+cookie.Value)</div><div class="line">		&#125;</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2 id="代码分析"><a href="#代码分析" class="headerlink" title="代码分析"></a>代码分析</h2><p>上述代码中<code>r.Use(Counter())</code>表示客户端每次发送一个请求给服务器，都会执行<code>Counter()</code>这个函数。比如客户端发送一个<code>http://localhost:8010/counter</code>的请求给服务器，则具体的处理流程为：先执行<code>Counter()</code>函数中的<code>c.Next()</code>前面的代码，当执行到<code>c.Next()</code>时， 先去执行<code>r.GET(&quot;/counter&quot;,func(c *gin.Context) {xxx}</code>中<code>xxx</code>程序体，当<code>xxx</code>程序体执行完之后，再执行<code>Counter()</code>函数中<code>c.Next()</code>之后的程序体，然后整个请求执行完毕。</p>
 <p>回到上面的试验需求，第一次请求时没有cookie，此时服务器设置cookie并设置过期时间，第二次请求时如果还没有过期则在Counter中就能查到cookie,此时通过<code>Counter()</code>重新设置cookie, 但是注意：这里设置的cookie，因为Name与之前的cookie是一样的，所以此次设置的cookie的属性会覆盖之前的cookie的属性，因为此次只是改变cookie的value，而没有设置cookie的属性，所以此次设置cookie没有过期时间可言了。所以上述的试验需求是不合理的。或者说可以通过<code>redis</code>的操作去实现，但是不能仅靠设置<code>cookie</code>来实现这个需求。</p>
-<h2 id="u603B_u7ED3"><a href="#u603B_u7ED3" class="headerlink" title="总结"></a>总结</h2><p><strong>服务器发送cookie给客户端</strong><br> 从服务器端，发送cookie给客户端，是对应的Set-Cookie。包括了对应的cookie的名称，值，以及各个属性。<br> 例如：<br>Set-Cookie: lu=Rg3vHJZnehYLjVg7qi3bZjzg; Expires=Tue, 15 Jan 2013 21:47:38 GMT; Path=/; Domain=.169it.com; HttpOnly<br>Set-Cookie: made_write_conn=1295214458; Path=/; Domain=.169it.com<br>Set-Cookie: reg_fb_gate=deleted; Expires=Thu, 01 Jan 1970 00:00:01 GMT; Path=/; Domain=.169it.com; HttpOnly</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p><strong>服务器发送cookie给客户端</strong><br> 从服务器端，发送cookie给客户端，是对应的Set-Cookie。包括了对应的cookie的名称，值，以及各个属性。<br> 例如：<br>Set-Cookie: lu=Rg3vHJZnehYLjVg7qi3bZjzg; Expires=Tue, 15 Jan 2013 21:47:38 GMT; Path=/; Domain=.169it.com; HttpOnly<br>Set-Cookie: made_write_conn=1295214458; Path=/; Domain=.169it.com<br>Set-Cookie: reg_fb_gate=deleted; Expires=Thu, 01 Jan 1970 00:00:01 GMT; Path=/; Domain=.169it.com; HttpOnly</p>
 <p><strong>从客户端把cookie发送到服务器</strong><br> 从客户端发送cookie给服务器的时候，是不发送cookie的各个属性的，而只是发送对应的名称和值。<br> 例如：<br>GET /spec.html HTTP/1.1<br>Host: www.example.org<br>Cookie: name=value; name2=value2<br>Accept: <em>/</em>  </p>
 <font color="red">除了name=value对以外，我们还可以设置Cookie其他属性以支持更丰富的Cookie需求，<strong>这些属性通常是浏览器用来判断如何对待cookie，何时删除、屏蔽或者如何发送name-value对给Server。也就是说无论我们设置了某个cookie的多少属性，这些Cookie属性是不会被浏览器发送回给Server的。包括设置的过期时间也不会发送到服务器端</strong></font>
   
@@ -131,7 +133,7 @@
 
   <div class="article-tags">
   
-  <span></span> <a href="/tags/gin/">gin</a><a href="/tags/golang/">golang</a><a href="/tags/setcookie/">setcookie</a>
+  <span></span> <a href="/tags/setcookie/">setcookie</a><a href="/tags/golang/">golang</a><a href="/tags/gin/">gin</a>
   </div>
 
 </div>
@@ -207,13 +209,13 @@
 <div id="asidepart">
 
   <div class="widget tag">
-<p margin="0" style="text-align:center">
-<a class="ahref" href="http://researchlab.github.io/about/">
-<img id="aboutpic"  src="/img/weixin.jpg" alt="加我微信" height="200" width="200" style="box-shadow: 0px 0px 2px 2px #9edeff;border-radius: 8px;" >
-</a></p>
 <!--<hr noshade color="#ccc">-->
 <!-- <p style="text-align:center">Mike.Lee</p> -->
-<p style="text-align:center"><font size="2" color="grey">扫一扫上面的二维码 加我微信</font></p>
+<p margin="0" style="text-align:center">
+<a class="ahref" href="http://researchlab.github.io/about/">
+<img id="aboutpic"  src="/img/qzly.png" alt="@全栈炼狱之路" height="200" width="200" style="box-shadow: 0px 0px 2px 2px #9edeff;border-radius: 8px;" >
+</a></p>
+<p style="text-align:center"><font size="2" color="grey">关注微信公众号 @全栈炼狱之路</font></p>
 <div style="display:block; margin-top:10px; padding: 0px 4px 4px 0; border-top: dashed 1px #ccc; text-align:left;"></div>
 <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 <div style="float:left;position:absolute;"><font size="2" >总访问:<span id="busuanzi_value_site_pv"></span>次</font></div>
@@ -288,6 +290,18 @@
 			
 		
 			
+				<li><a href="/tags/cache/" title="cache">cache<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/concurrency/" title="concurrency">concurrency<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mysql/" title="mysql">mysql<sup>2</sup></a></li>
+			
+		
+			
 				<li><a href="/tags/Hexo/" title="Hexo">Hexo<sup>2</sup></a></li>
 			
 		
@@ -296,15 +310,39 @@
 			
 		
 			
-				<li><a href="/tags/concurrency/" title="concurrency">concurrency<sup>2</sup></a></li>
+				<li><a href="/tags/ticker/" title="ticker">ticker<sup>1</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/cache/" title="cache">cache<sup>2</sup></a></li>
+				<li><a href="/tags/rpc/" title="rpc">rpc<sup>1</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/mysql/" title="mysql">mysql<sup>2</sup></a></li>
+				<li><a href="/tags/gin/" title="gin">gin<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/submodule/" title="submodule">submodule<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/vendoring/" title="vendoring">vendoring<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/godep/" title="godep">godep<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/form/" title="form">form<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/post/" title="post">post<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/reflect/" title="reflect">reflect<sup>1</sup></a></li>
 			
 		
 			
@@ -312,47 +350,11 @@
 			
 		
 			
-				<li><a href="/tags/php-redis/" title="php_redis">php_redis<sup>1</sup></a></li>
+				<li><a href="/tags/getcookie/" title="getcookie">getcookie<sup>1</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/php/" title="php">php<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/mvc/" title="mvc">mvc<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/observer/" title="observer">observer<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/redispool/" title="redispool">redispool<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/vim8-0/" title="vim8.0">vim8.0<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/signal/" title="signal">signal<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/json/" title="json">json<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/html/" title="html">html<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/beego-orm/" title="beego/orm">beego/orm<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/xorm/" title="xorm">xorm<sup>1</sup></a></li>
+				<li><a href="/tags/govendor/" title="govendor">govendor<sup>1</sup></a></li>
 			
 		
 		</ul>

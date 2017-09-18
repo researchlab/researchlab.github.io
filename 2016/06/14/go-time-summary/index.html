@@ -12,12 +12,14 @@
 
     
     <meta name="description" content="golang 中经常需要格式化时间和日期来满足不同的业务需求,下面总结格式化时间日期中遇到的问题。">
+<meta name="keywords" content="golang,time">
 <meta property="og:type" content="article">
 <meta property="og:title" content="golang 格式化时间总结">
 <meta property="og:url" content="http://www.grdtechs.com/2016/06/14/go-time-summary/index.html">
 <meta property="og:site_name" content="一线攻城狮">
 <meta property="og:description" content="golang 中经常需要格式化时间和日期来满足不同的业务需求,下面总结格式化时间日期中遇到的问题。">
-<meta property="og:updated_time" content="2017-09-16T14:32:56.907Z">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2017-09-18T16:29:02.057Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="golang 格式化时间总结">
 <meta name="twitter:description" content="golang 中经常需要格式化时间和日期来满足不同的业务需求,下面总结格式化时间日期中遇到的问题。">
@@ -29,7 +31,7 @@
     <link rel="icon" href="/img/favicon.ico">
     
     
-    <link rel="stylesheet" href="/css/style.css" type="text/css">
+    <link rel="stylesheet" href="/css/style.css">
 </head>
 
   <body>
@@ -89,12 +91,12 @@
 		<div id="toc" class="toc-article">
 			<strong class="toc-title">文章目录</strong>
 		
-			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#golang_time_u5305__u65F6_u95F4_u65E5_u671F_u683C_u5F0F_u5316_u5B9A_u4E49"><span class="toc-number">1.</span> <span class="toc-text">golang time包 时间日期格式化定义</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u65F6_u95F4_u65E5_u671F_u683C_u5F0F_u5316"><span class="toc-number">2.</span> <span class="toc-text">时间日期格式化</span></a></li></ol>
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#golang-time包-时间日期格式化定义"><span class="toc-number">1.</span> <span class="toc-text">golang time包 时间日期格式化定义</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#时间日期格式化"><span class="toc-number">2.</span> <span class="toc-text">时间日期格式化</span></a></li></ol>
 		
 		</div>
 		
 		<p><code>golang</code> 中经常需要格式化时间和日期来满足不同的业务需求,下面总结格式化时间日期中遇到的问题。<br><a id="more"></a></p>
-<h2 id="golang_time_u5305__u65F6_u95F4_u65E5_u671F_u683C_u5F0F_u5316_u5B9A_u4E49"><a href="#golang_time_u5305__u65F6_u95F4_u65E5_u671F_u683C_u5F0F_u5316_u5B9A_u4E49" class="headerlink" title="golang time包 时间日期格式化定义"></a>golang time包 时间日期格式化定义</h2><p>go 的time package 提供了time.Format函数，用来对时间进行格式化输出;类似的还有time.Parse用来解析字符串类型的时间到time.Time。这是两个互逆的函数。</p>
+<h2 id="golang-time包-时间日期格式化定义"><a href="#golang-time包-时间日期格式化定义" class="headerlink" title="golang time包 时间日期格式化定义"></a>golang time包 时间日期格式化定义</h2><p>go 的time package 提供了time.Format函数，用来对时间进行格式化输出;类似的还有time.Parse用来解析字符串类型的时间到time.Time。这是两个互逆的函数。</p>
 <p><strong> 下面看<code>golang</code>中<code>time</code>包对于时间的详细定义 </strong></p>
 <ul>
 <li>月份 1,01,Jan,January</li>
@@ -121,34 +123,34 @@
 <li>Jan 缩写单词表示月份</li>
 <li>January 全单词表示月份</li>
 </ul>
-<h2 id="u65F6_u95F4_u65E5_u671F_u683C_u5F0F_u5316"><a href="#u65F6_u95F4_u65E5_u671F_u683C_u5F0F_u5316" class="headerlink" title="时间日期格式化"></a>时间日期格式化</h2><ul>
+<h2 id="时间日期格式化"><a href="#时间日期格式化" class="headerlink" title="时间日期格式化"></a>时间日期格式化</h2><ul>
 <li>本地当期时间</li>
 </ul>
-<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">fmt.Println(time.Now()) <span class="comment">//2016-07-14 14:27:28.214512532 +0800 CST</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">fmt.Println(time.Now()) <span class="comment">//2016-07-14 14:27:28.214512532 +0800 CST</span></div></pre></td></tr></table></figure>
 <ul>
 <li>时间格式化</li>
 </ul>
-<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">fmt.Println(time.Now().Format(<span class="string">"3:04:05.000 PM Mon Jan"</span>))            <span class="comment">// 2:27:05.702 PM Thu Jul</span></span><br><span class="line">fmt.Println(time.Now().Format(<span class="string">"2006-01-_2 3:04:05.000 PM Mon Jan"</span>)) <span class="comment">// 2016-07-14 2:54:11.442 PM Thu Jul</span></span><br><span class="line">fmt.Println(time.Now().Format(<span class="string">"2006-01-02 15:04:05"</span>))  <span class="comment">// 2016-07-14 14:54:11.442239513 +0800 CST</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">fmt.Println(time.Now().Format(<span class="string">"3:04:05.000 PM Mon Jan"</span>))            <span class="comment">// 2:27:05.702 PM Thu Jul</span></div><div class="line">fmt.Println(time.Now().Format(<span class="string">"2006-01-_2 3:04:05.000 PM Mon Jan"</span>)) <span class="comment">// 2016-07-14 2:54:11.442 PM Thu Jul</span></div><div class="line">fmt.Println(time.Now().Format(<span class="string">"2006-01-02 15:04:05"</span>))  <span class="comment">// 2016-07-14 14:54:11.442239513 +0800 CST</span></div></pre></td></tr></table></figure>
 <ul>
 <li>本地当前时间戳(10位)</li>
 </ul>
-<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">fmt.Println(time.Now().Unix()) <span class="comment">//1468479251</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">fmt.Println(time.Now().Unix()) <span class="comment">//1468479251</span></div></pre></td></tr></table></figure>
 <ul>
 <li>本地当前时间戳(19位)</li>
 </ul>
-<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">fmt.Println(time.Now().UnixNano()) <span class="comment">//1468480006774460462</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">fmt.Println(time.Now().UnixNano()) <span class="comment">//1468480006774460462</span></div></pre></td></tr></table></figure>
 <ul>
 <li>时间戳转时间 </li>
 </ul>
-<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">fmt.Println(time.Unix(<span class="number">1389058332</span>, <span class="number">0</span>).Format(<span class="string">"2006-01-02 15:04:05"</span>)) <span class="comment">//2014-01-07 09:32:12</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">fmt.Println(time.Unix(<span class="number">1389058332</span>, <span class="number">0</span>).Format(<span class="string">"2006-01-02 15:04:05"</span>)) <span class="comment">//2014-01-07 09:32:12</span></div></pre></td></tr></table></figure>
 <ul>
 <li>时间转时间戳</li>
 </ul>
-<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">fmt.Println(time.Date(<span class="number">2014</span>, <span class="number">1</span>, <span class="number">7</span>, <span class="number">5</span>, <span class="number">50</span>, <span class="number">4</span>, <span class="number">0</span>, time.Local).Unix())</span><br></pre></td></tr></table></figure>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">fmt.Println(time.Date(<span class="number">2014</span>, <span class="number">1</span>, <span class="number">7</span>, <span class="number">5</span>, <span class="number">50</span>, <span class="number">4</span>, <span class="number">0</span>, time.Local).Unix())</div></pre></td></tr></table></figure>
 <ul>
 <li>时间转换为UTC时间和本地时间( UTC:零时区 +0000， China: 东八区 +0800)</li>
 </ul>
-<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">dateStr := <span class="string">"2016-07-14 14:24:51"</span> </span><br><span class="line">timestamp1, _ := time.Parse(<span class="string">"2006-01-02 15:04:05"</span>, dateStr)</span><br><span class="line">timestamp2, _ := time.ParseInLocation(<span class="string">"2006-01-02 15:04:05"</span>, dateStr, time.Local)</span><br><span class="line">fmt.Println(timestamp1, timestamp2)               <span class="comment">//2016-07-14 14:24:51 +0000 UTC 2016-07-14 14:24:51 +0800 CST </span></span><br><span class="line">fmt.Println(timestamp1.Unix(), timestamp2.Unix()) <span class="comment">//1468506291 1468477491 </span></span><br><span class="line"></span><br><span class="line">now := time.Now()                </span><br><span class="line">year, mon, day := now.UTC().Date()</span><br><span class="line">hour, min, sec := now.UTC().Clock()</span><br><span class="line">zone, _ := now.UTC().Zone()     </span><br><span class="line">fmt.Printf(<span class="string">"UTC 时间是 %d-%d-%d %02d:%02d:%02d %s\n"</span>,         </span><br><span class="line">    year, mon, day, hour, min, sec, zone) <span class="comment">// UTC 时间是 2016-7-14 07:06:46 UTC</span></span><br><span class="line">                                                           </span><br><span class="line">year, mon, day = now.Date()</span><br><span class="line">hour, min, sec = now.Clock()</span><br><span class="line">zone, _ = now.Zone()</span><br><span class="line">fmt.Printf(<span class="string">"本地时间是 %d-%d-%d %02d:%02d:%02d %s\n"</span>,</span><br><span class="line">    year, mon, day, hour, min, sec, zone) <span class="comment">// 本地时间是 2016-7-14 15:06:46 CST</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">dateStr := <span class="string">"2016-07-14 14:24:51"</span> </div><div class="line">timestamp1, _ := time.Parse(<span class="string">"2006-01-02 15:04:05"</span>, dateStr)</div><div class="line">timestamp2, _ := time.ParseInLocation(<span class="string">"2006-01-02 15:04:05"</span>, dateStr, time.Local)</div><div class="line">fmt.Println(timestamp1, timestamp2)               <span class="comment">//2016-07-14 14:24:51 +0000 UTC 2016-07-14 14:24:51 +0800 CST </span></div><div class="line">fmt.Println(timestamp1.Unix(), timestamp2.Unix()) <span class="comment">//1468506291 1468477491 </span></div><div class="line"></div><div class="line">now := time.Now()                </div><div class="line">year, mon, day := now.UTC().Date()</div><div class="line">hour, min, sec := now.UTC().Clock()</div><div class="line">zone, _ := now.UTC().Zone()     </div><div class="line">fmt.Printf(<span class="string">"UTC 时间是 %d-%d-%d %02d:%02d:%02d %s\n"</span>,         </div><div class="line">    year, mon, day, hour, min, sec, zone) <span class="comment">// UTC 时间是 2016-7-14 07:06:46 UTC</span></div><div class="line">                                                           </div><div class="line">year, mon, day = now.Date()</div><div class="line">hour, min, sec = now.Clock()</div><div class="line">zone, _ = now.Zone()</div><div class="line">fmt.Printf(<span class="string">"本地时间是 %d-%d-%d %02d:%02d:%02d %s\n"</span>,</div><div class="line">    year, mon, day, hour, min, sec, zone) <span class="comment">// 本地时间是 2016-7-14 15:06:46 CST</span></div></pre></td></tr></table></figure>
   
 	</div>
 		<div style="padding: 10px 44px 30px 44px;" >
@@ -253,13 +255,13 @@
 <div id="asidepart">
 
   <div class="widget tag">
-<p margin="0" style="text-align:center">
-<a class="ahref" href="http://researchlab.github.io/about/">
-<img id="aboutpic"  src="/img/weixin.jpg" alt="加我微信" height="200" width="200" style="box-shadow: 0px 0px 2px 2px #9edeff;border-radius: 8px;" >
-</a></p>
 <!--<hr noshade color="#ccc">-->
 <!-- <p style="text-align:center">Mike.Lee</p> -->
-<p style="text-align:center"><font size="2" color="grey">扫一扫上面的二维码 加我微信</font></p>
+<p margin="0" style="text-align:center">
+<a class="ahref" href="http://researchlab.github.io/about/">
+<img id="aboutpic"  src="/img/qzly.png" alt="@全栈炼狱之路" height="200" width="200" style="box-shadow: 0px 0px 2px 2px #9edeff;border-radius: 8px;" >
+</a></p>
+<p style="text-align:center"><font size="2" color="grey">关注微信公众号 @全栈炼狱之路</font></p>
 <div style="display:block; margin-top:10px; padding: 0px 4px 4px 0; border-top: dashed 1px #ccc; text-align:left;"></div>
 <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 <div style="float:left;position:absolute;"><font size="2" >总访问:<span id="busuanzi_value_site_pv"></span>次</font></div>
@@ -334,6 +336,18 @@
 			
 		
 			
+				<li><a href="/tags/cache/" title="cache">cache<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/concurrency/" title="concurrency">concurrency<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mysql/" title="mysql">mysql<sup>2</sup></a></li>
+			
+		
+			
 				<li><a href="/tags/Hexo/" title="Hexo">Hexo<sup>2</sup></a></li>
 			
 		
@@ -342,15 +356,39 @@
 			
 		
 			
-				<li><a href="/tags/concurrency/" title="concurrency">concurrency<sup>2</sup></a></li>
+				<li><a href="/tags/ticker/" title="ticker">ticker<sup>1</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/cache/" title="cache">cache<sup>2</sup></a></li>
+				<li><a href="/tags/rpc/" title="rpc">rpc<sup>1</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/mysql/" title="mysql">mysql<sup>2</sup></a></li>
+				<li><a href="/tags/gin/" title="gin">gin<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/submodule/" title="submodule">submodule<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/vendoring/" title="vendoring">vendoring<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/godep/" title="godep">godep<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/form/" title="form">form<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/post/" title="post">post<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/reflect/" title="reflect">reflect<sup>1</sup></a></li>
 			
 		
 			
@@ -358,47 +396,11 @@
 			
 		
 			
-				<li><a href="/tags/php-redis/" title="php_redis">php_redis<sup>1</sup></a></li>
+				<li><a href="/tags/getcookie/" title="getcookie">getcookie<sup>1</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/php/" title="php">php<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/mvc/" title="mvc">mvc<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/observer/" title="observer">observer<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/redispool/" title="redispool">redispool<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/vim8-0/" title="vim8.0">vim8.0<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/signal/" title="signal">signal<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/json/" title="json">json<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/html/" title="html">html<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/beego-orm/" title="beego/orm">beego/orm<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/xorm/" title="xorm">xorm<sup>1</sup></a></li>
+				<li><a href="/tags/govendor/" title="govendor">govendor<sup>1</sup></a></li>
 			
 		
 		</ul>

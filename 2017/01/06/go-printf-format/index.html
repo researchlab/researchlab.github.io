@@ -17,7 +17,8 @@
 <meta property="og:url" content="http://www.grdtechs.com/2017/01/06/go-printf-format/index.html">
 <meta property="og:site_name" content="一线攻城狮">
 <meta property="og:description" content="项目中总是时不时的要使用fmt.Printf或fmt.Sprintf来处理某些数据类型,总结一下常用的标识符用途及场景.">
-<meta property="og:updated_time" content="2017-09-16T14:32:56.903Z">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2017-09-18T16:29:02.057Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="总结printf 格式化标识">
 <meta name="twitter:description" content="项目中总是时不时的要使用fmt.Printf或fmt.Sprintf来处理某些数据类型,总结一下常用的标识符用途及场景.">
@@ -29,7 +30,7 @@
     <link rel="icon" href="/img/favicon.ico">
     
     
-    <link rel="stylesheet" href="/css/style.css" type="text/css">
+    <link rel="stylesheet" href="/css/style.css">
 </head>
 
   <body>
@@ -89,13 +90,13 @@
 		<div id="toc" class="toc-article">
 			<strong class="toc-title">文章目录</strong>
 		
-			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#u6807_u8BC6_u7B26_u7528_u9014_u53CA_u573A_u666F"><span class="toc-number">1.</span> <span class="toc-text">标识符用途及场景</span></a></li></ol>
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#标识符用途及场景"><span class="toc-number">1.</span> <span class="toc-text">标识符用途及场景</span></a></li></ol>
 		
 		</div>
 		
 		<p>项目中总是时不时的要使用<code>fmt.Printf</code>或<code>fmt.Sprintf</code>来处理某些数据类型,总结一下常用的标识符用途及场景.</p>
 <a id="more"></a>
-<h2 id="u6807_u8BC6_u7B26_u7528_u9014_u53CA_u573A_u666F"><a href="#u6807_u8BC6_u7B26_u7528_u9014_u53CA_u573A_u666F" class="headerlink" title="标识符用途及场景"></a>标识符用途及场景</h2><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"><span class="keyword">import</span> <span class="string">"fmt"</span></span><br><span class="line"><span class="keyword">import</span> <span class="string">"os"</span></span><br><span class="line"><span class="keyword">type</span> point <span class="keyword">struct</span> &#123;</span><br><span class="line">    x, y <span class="typename">int</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">func</span> main() &#123;</span><br><span class="line"><span class="comment">//Go 为常规 Go 值的格式化设计提供了多种打印方式。例如，这里打印了 point 结构体的一个实例。</span></span><br><span class="line">    p := point&#123;<span class="number">1</span>, <span class="number">2</span>&#125;</span><br><span class="line">    fmt.Printf(<span class="string">"%v\n"</span>, p) <span class="comment">// &#123;1 2&#125;</span></span><br><span class="line"><span class="comment">//如果值是一个结构体，%+v 的格式化输出内容将包括结构体的字段名。</span></span><br><span class="line">    fmt.Printf(<span class="string">"%+v\n"</span>, p) <span class="comment">// &#123;x:1 y:2&#125;</span></span><br><span class="line"><span class="comment">//%#v 形式则输出这个值的 Go 语法表示。例如，值的运行源代码片段。</span></span><br><span class="line">    fmt.Printf(<span class="string">"%#v\n"</span>, p) <span class="comment">// main.point&#123;x:1, y:2&#125;</span></span><br><span class="line"><span class="comment">//需要打印值的类型，使用 %T。</span></span><br><span class="line">    fmt.Printf(<span class="string">"%T\n"</span>, p) <span class="comment">// main.point</span></span><br><span class="line"><span class="comment">//格式化布尔值是简单的。</span></span><br><span class="line">    fmt.Printf(<span class="string">"%t\n"</span>, <span class="constant">true</span>)</span><br><span class="line"><span class="comment">//格式化整形数有多种方式，使用 %d进行标准的十进制格式化。</span></span><br><span class="line">    fmt.Printf(<span class="string">"%d\n"</span>, <span class="number">123</span>)</span><br><span class="line"><span class="comment">//这个输出二进制表示形式。</span></span><br><span class="line">    fmt.Printf(<span class="string">"%b\n"</span>, <span class="number">14</span>)</span><br><span class="line">这个输出给定整数的对应字符。</span><br><span class="line">    fmt.Printf(<span class="string">"%c\n"</span>, <span class="number">33</span>)</span><br><span class="line">%x 提供十六进制编码。</span><br><span class="line">    fmt.Printf(<span class="string">"%x\n"</span>, <span class="number">456</span>)</span><br><span class="line"><span class="comment">//对于浮点型同样有很多的格式化选项。使用 %f 进行最基本的十进制格式化。</span></span><br><span class="line">    fmt.Printf(<span class="string">"%f\n"</span>, <span class="number">78.9</span>)</span><br><span class="line"><span class="comment">//%e 和 %E 将浮点型格式化为（稍微有一点不同的）科学技科学记数法表示形式。</span></span><br><span class="line">    fmt.Printf(<span class="string">"%e\n"</span>, <span class="number">123400000.0</span>)</span><br><span class="line">    fmt.Printf(<span class="string">"%E\n"</span>, <span class="number">123400000.0</span>)</span><br><span class="line"><span class="comment">//使用 %s 进行基本的字符串输出。</span></span><br><span class="line">    fmt.Printf(<span class="string">"%s\n"</span>, <span class="string">"\"string\""</span>)</span><br><span class="line"><span class="comment">//像 Go 源代码中那样带有双引号的输出，使用 %q。</span></span><br><span class="line">    fmt.Printf(<span class="string">"%q\n"</span>, <span class="string">"\"string\""</span>)</span><br><span class="line"><span class="comment">//和上面的整形数一样，%x 输出使用 base-16 编码的字符串，每个字节使用 2 个字符表示。</span></span><br><span class="line">    fmt.Printf(<span class="string">"%x\n"</span>, <span class="string">"hex this"</span>)</span><br><span class="line"><span class="comment">//要输出一个指针的值，使用 %p。</span></span><br><span class="line">    fmt.Printf(<span class="string">"%p\n"</span>, &amp;p)</span><br><span class="line"><span class="comment">//当输出数字的时候，你将经常想要控制输出结果的宽度和精度，可以使用在 % 后面使用数字来控制输出宽度。默认结果使用右对齐并且通过空格来填充空白部分。</span></span><br><span class="line">    fmt.Printf(<span class="string">"|%6d|%6d|\n"</span>, <span class="number">12</span>, <span class="number">345</span>)</span><br><span class="line"><span class="comment">//你也可以指定浮点型的输出宽度，同时也可以通过 宽度.精度 的语法来指定输出的精度。</span></span><br><span class="line">    fmt.Printf(<span class="string">"|%6.2f|%6.2f|\n"</span>, <span class="number">1.2</span>, <span class="number">3.45</span>)</span><br><span class="line"><span class="comment">//要最对齐，使用 - 标志。</span></span><br><span class="line">    fmt.Printf(<span class="string">"|%-6.2f|%-6.2f|\n"</span>, <span class="number">1.2</span>, <span class="number">3.45</span>)</span><br><span class="line"><span class="comment">//你也许也想控制字符串输出时的宽度，特别是要确保他们在类表格输出时的对齐。这是基本的右对齐宽度表示。</span></span><br><span class="line">    fmt.Printf(<span class="string">"|%6s|%6s|\n"</span>, <span class="string">"foo"</span>, <span class="string">"b"</span>)</span><br><span class="line"><span class="comment">//要左对齐，和数字一样，使用 - 标志。</span></span><br><span class="line">    fmt.Printf(<span class="string">"|%-6s|%-6s|\n"</span>, <span class="string">"foo"</span>, <span class="string">"b"</span>)</span><br><span class="line"><span class="comment">//到目前为止，我们已经看过 Printf了，它通过 os.Stdout输出格式化的字符串。Sprintf 则格式化并返回一个字符串而不带任何输出。</span></span><br><span class="line">    s := fmt.Sprintf(<span class="string">"a %s"</span>, <span class="string">"string"</span>)</span><br><span class="line">    fmt.Println(s)</span><br><span class="line"><span class="comment">//你可以使用 Fprintf 来格式化并输出到 io.Writers而不是 os.Stdout。</span></span><br><span class="line">    fmt.Fprintf(os.Stderr, <span class="string">"an %s\n"</span>, <span class="string">"error"</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="标识符用途及场景"><a href="#标识符用途及场景" class="headerlink" title="标识符用途及场景"></a>标识符用途及场景</h2><figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">package</span> main</div><div class="line"><span class="keyword">import</span> <span class="string">"fmt"</span></div><div class="line"><span class="keyword">import</span> <span class="string">"os"</span></div><div class="line"><span class="keyword">type</span> point <span class="keyword">struct</span> &#123;</div><div class="line">    x, y <span class="keyword">int</span></div><div class="line">&#125;</div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</div><div class="line"><span class="comment">//Go 为常规 Go 值的格式化设计提供了多种打印方式。例如，这里打印了 point 结构体的一个实例。</span></div><div class="line">    p := point&#123;<span class="number">1</span>, <span class="number">2</span>&#125;</div><div class="line">    fmt.Printf(<span class="string">"%v\n"</span>, p) <span class="comment">// &#123;1 2&#125;</span></div><div class="line"><span class="comment">//如果值是一个结构体，%+v 的格式化输出内容将包括结构体的字段名。</span></div><div class="line">    fmt.Printf(<span class="string">"%+v\n"</span>, p) <span class="comment">// &#123;x:1 y:2&#125;</span></div><div class="line"><span class="comment">//%#v 形式则输出这个值的 Go 语法表示。例如，值的运行源代码片段。</span></div><div class="line">    fmt.Printf(<span class="string">"%#v\n"</span>, p) <span class="comment">// main.point&#123;x:1, y:2&#125;</span></div><div class="line"><span class="comment">//需要打印值的类型，使用 %T。</span></div><div class="line">    fmt.Printf(<span class="string">"%T\n"</span>, p) <span class="comment">// main.point</span></div><div class="line"><span class="comment">//格式化布尔值是简单的。</span></div><div class="line">    fmt.Printf(<span class="string">"%t\n"</span>, <span class="literal">true</span>)</div><div class="line"><span class="comment">//格式化整形数有多种方式，使用 %d进行标准的十进制格式化。</span></div><div class="line">    fmt.Printf(<span class="string">"%d\n"</span>, <span class="number">123</span>)</div><div class="line"><span class="comment">//这个输出二进制表示形式。</span></div><div class="line">    fmt.Printf(<span class="string">"%b\n"</span>, <span class="number">14</span>)</div><div class="line">这个输出给定整数的对应字符。</div><div class="line">    fmt.Printf(<span class="string">"%c\n"</span>, <span class="number">33</span>)</div><div class="line">%x 提供十六进制编码。</div><div class="line">    fmt.Printf(<span class="string">"%x\n"</span>, <span class="number">456</span>)</div><div class="line"><span class="comment">//对于浮点型同样有很多的格式化选项。使用 %f 进行最基本的十进制格式化。</span></div><div class="line">    fmt.Printf(<span class="string">"%f\n"</span>, <span class="number">78.9</span>)</div><div class="line"><span class="comment">//%e 和 %E 将浮点型格式化为（稍微有一点不同的）科学技科学记数法表示形式。</span></div><div class="line">    fmt.Printf(<span class="string">"%e\n"</span>, <span class="number">123400000.0</span>)</div><div class="line">    fmt.Printf(<span class="string">"%E\n"</span>, <span class="number">123400000.0</span>)</div><div class="line"><span class="comment">//使用 %s 进行基本的字符串输出。</span></div><div class="line">    fmt.Printf(<span class="string">"%s\n"</span>, <span class="string">"\"string\""</span>)</div><div class="line"><span class="comment">//像 Go 源代码中那样带有双引号的输出，使用 %q。</span></div><div class="line">    fmt.Printf(<span class="string">"%q\n"</span>, <span class="string">"\"string\""</span>)</div><div class="line"><span class="comment">//和上面的整形数一样，%x 输出使用 base-16 编码的字符串，每个字节使用 2 个字符表示。</span></div><div class="line">    fmt.Printf(<span class="string">"%x\n"</span>, <span class="string">"hex this"</span>)</div><div class="line"><span class="comment">//要输出一个指针的值，使用 %p。</span></div><div class="line">    fmt.Printf(<span class="string">"%p\n"</span>, &amp;p)</div><div class="line"><span class="comment">//当输出数字的时候，你将经常想要控制输出结果的宽度和精度，可以使用在 % 后面使用数字来控制输出宽度。默认结果使用右对齐并且通过空格来填充空白部分。</span></div><div class="line">    fmt.Printf(<span class="string">"|%6d|%6d|\n"</span>, <span class="number">12</span>, <span class="number">345</span>)</div><div class="line"><span class="comment">//你也可以指定浮点型的输出宽度，同时也可以通过 宽度.精度 的语法来指定输出的精度。</span></div><div class="line">    fmt.Printf(<span class="string">"|%6.2f|%6.2f|\n"</span>, <span class="number">1.2</span>, <span class="number">3.45</span>)</div><div class="line"><span class="comment">//要最对齐，使用 - 标志。</span></div><div class="line">    fmt.Printf(<span class="string">"|%-6.2f|%-6.2f|\n"</span>, <span class="number">1.2</span>, <span class="number">3.45</span>)</div><div class="line"><span class="comment">//你也许也想控制字符串输出时的宽度，特别是要确保他们在类表格输出时的对齐。这是基本的右对齐宽度表示。</span></div><div class="line">    fmt.Printf(<span class="string">"|%6s|%6s|\n"</span>, <span class="string">"foo"</span>, <span class="string">"b"</span>)</div><div class="line"><span class="comment">//要左对齐，和数字一样，使用 - 标志。</span></div><div class="line">    fmt.Printf(<span class="string">"|%-6s|%-6s|\n"</span>, <span class="string">"foo"</span>, <span class="string">"b"</span>)</div><div class="line"><span class="comment">//到目前为止，我们已经看过 Printf了，它通过 os.Stdout输出格式化的字符串。Sprintf 则格式化并返回一个字符串而不带任何输出。</span></div><div class="line">    s := fmt.Sprintf(<span class="string">"a %s"</span>, <span class="string">"string"</span>)</div><div class="line">    fmt.Println(s)</div><div class="line"><span class="comment">//你可以使用 Fprintf 来格式化并输出到 io.Writers而不是 os.Stdout。</span></div><div class="line">    fmt.Fprintf(os.Stderr, <span class="string">"an %s\n"</span>, <span class="string">"error"</span>)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
   
 	</div>
 		<div style="padding: 10px 44px 30px 44px;" >
@@ -195,13 +196,13 @@
 <div id="asidepart">
 
   <div class="widget tag">
-<p margin="0" style="text-align:center">
-<a class="ahref" href="http://researchlab.github.io/about/">
-<img id="aboutpic"  src="/img/weixin.jpg" alt="加我微信" height="200" width="200" style="box-shadow: 0px 0px 2px 2px #9edeff;border-radius: 8px;" >
-</a></p>
 <!--<hr noshade color="#ccc">-->
 <!-- <p style="text-align:center">Mike.Lee</p> -->
-<p style="text-align:center"><font size="2" color="grey">扫一扫上面的二维码 加我微信</font></p>
+<p margin="0" style="text-align:center">
+<a class="ahref" href="http://researchlab.github.io/about/">
+<img id="aboutpic"  src="/img/qzly.png" alt="@全栈炼狱之路" height="200" width="200" style="box-shadow: 0px 0px 2px 2px #9edeff;border-radius: 8px;" >
+</a></p>
+<p style="text-align:center"><font size="2" color="grey">关注微信公众号 @全栈炼狱之路</font></p>
 <div style="display:block; margin-top:10px; padding: 0px 4px 4px 0; border-top: dashed 1px #ccc; text-align:left;"></div>
 <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 <div style="float:left;position:absolute;"><font size="2" >总访问:<span id="busuanzi_value_site_pv"></span>次</font></div>
@@ -276,6 +277,18 @@
 			
 		
 			
+				<li><a href="/tags/cache/" title="cache">cache<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/concurrency/" title="concurrency">concurrency<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mysql/" title="mysql">mysql<sup>2</sup></a></li>
+			
+		
+			
 				<li><a href="/tags/Hexo/" title="Hexo">Hexo<sup>2</sup></a></li>
 			
 		
@@ -284,15 +297,39 @@
 			
 		
 			
-				<li><a href="/tags/concurrency/" title="concurrency">concurrency<sup>2</sup></a></li>
+				<li><a href="/tags/ticker/" title="ticker">ticker<sup>1</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/cache/" title="cache">cache<sup>2</sup></a></li>
+				<li><a href="/tags/rpc/" title="rpc">rpc<sup>1</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/mysql/" title="mysql">mysql<sup>2</sup></a></li>
+				<li><a href="/tags/gin/" title="gin">gin<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/submodule/" title="submodule">submodule<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/vendoring/" title="vendoring">vendoring<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/godep/" title="godep">godep<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/form/" title="form">form<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/post/" title="post">post<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/reflect/" title="reflect">reflect<sup>1</sup></a></li>
 			
 		
 			
@@ -300,47 +337,11 @@
 			
 		
 			
-				<li><a href="/tags/php-redis/" title="php_redis">php_redis<sup>1</sup></a></li>
+				<li><a href="/tags/getcookie/" title="getcookie">getcookie<sup>1</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/php/" title="php">php<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/mvc/" title="mvc">mvc<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/observer/" title="observer">observer<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/redispool/" title="redispool">redispool<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/vim8-0/" title="vim8.0">vim8.0<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/signal/" title="signal">signal<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/json/" title="json">json<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/html/" title="html">html<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/beego-orm/" title="beego/orm">beego/orm<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/xorm/" title="xorm">xorm<sup>1</sup></a></li>
+				<li><a href="/tags/govendor/" title="govendor">govendor<sup>1</sup></a></li>
 			
 		
 		</ul>

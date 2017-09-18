@@ -12,12 +12,14 @@
 
     
     <meta name="description" content="golang这边将map结构序列化通常采用json.Marshal和json.Unmarshal来做，但是在php server端还需要做json反序列化解析才能用， 用golang模拟表单提交, php server端则非常方便提取相应的数据字段.">
+<meta name="keywords" content="form,post">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Golang发送post表单请求">
 <meta property="og:url" content="http://www.grdtechs.com/2016/09/07/go-postform/index.html">
 <meta property="og:site_name" content="一线攻城狮">
 <meta property="og:description" content="golang这边将map结构序列化通常采用json.Marshal和json.Unmarshal来做，但是在php server端还需要做json反序列化解析才能用， 用golang模拟表单提交, php server端则非常方便提取相应的数据字段.">
-<meta property="og:updated_time" content="2017-09-16T14:32:56.903Z">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2017-09-18T16:29:02.057Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Golang发送post表单请求">
 <meta name="twitter:description" content="golang这边将map结构序列化通常采用json.Marshal和json.Unmarshal来做，但是在php server端还需要做json反序列化解析才能用， 用golang模拟表单提交, php server端则非常方便提取相应的数据字段.">
@@ -29,7 +31,7 @@
     <link rel="icon" href="/img/favicon.ico">
     
     
-    <link rel="stylesheet" href="/css/style.css" type="text/css">
+    <link rel="stylesheet" href="/css/style.css">
 </head>
 
   <body>
@@ -89,17 +91,17 @@
 		<div id="toc" class="toc-article">
 			<strong class="toc-title">文章目录</strong>
 		
-			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#u65B9_u6CD5"><span class="toc-number">1.</span> <span class="toc-text">方法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#http-Client_7B_7D-PostForm"><span class="toc-number">2.</span> <span class="toc-text">http.Client{}.PostForm</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#http-PostForm"><span class="toc-number">3.</span> <span class="toc-text">http.PostForm</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u5BF9_u8868_u5355_u6570_u636E_u7684_u63D0_u53D6"><span class="toc-number">4.</span> <span class="toc-text">对表单数据的提取</span></a></li></ol>
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#方法"><span class="toc-number">1.</span> <span class="toc-text">方法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#http-Client-PostForm"><span class="toc-number">2.</span> <span class="toc-text">http.Client{}.PostForm</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#http-PostForm"><span class="toc-number">3.</span> <span class="toc-text">http.PostForm</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#对表单数据的提取"><span class="toc-number">4.</span> <span class="toc-text">对表单数据的提取</span></a></li></ol>
 		
 		</div>
 		
 		<p>golang这边将<code>map</code>结构序列化通常采用<code>json.Marshal</code>和<code>json.Unmarshal</code>来做，但是在php server端还需要做<code>json</code>反序列化解析才能用， 用golang模拟表单提交, php server端则非常方便提取相应的数据字段.<br><a id="more"></a></p>
-<h2 id="u65B9_u6CD5"><a href="#u65B9_u6CD5" class="headerlink" title="方法"></a>方法</h2><p>方法是利用golang<code>net/http</code>包提供的<code>PostForm</code>提交post表单提交。<code>ParseForm</code>解析<code>URL</code>中的查询字符串，并将解析结果更新到<code>r.Form</code>字段。对于<code>POST</code>或<code>PUT</code>请求，<code>ParseForm</code>还会将<code>body</code>当作表单解析，并将结果既更新到<code>r.PostForm</code>也更新到<code>r.Form</code>。解析结果中，<code>POST</code>或<code>PUT</code>请求主体要优先于<code>URL</code>查询字符串（同名变量，主体的值在查询字符串的值前面）。如果请求的主体的大小没有被<code>MaxBytesReader</code>函数设定限制，其大小默认限制为开头10MB。</p>
-<h2 id="http-Client_7B_7D-PostForm"><a href="#http-Client_7B_7D-PostForm" class="headerlink" title="http.Client{}.PostForm"></a>http.Client{}.PostForm</h2><p>利用<code>http.Client{}.PostForm</code>提交post表单。</p>
-<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> <span class="string">"net/http"</span></span><br><span class="line">client := &amp;http.Client&#123;&#125;</span><br><span class="line">res, err := client.PostForm(<span class="string">"http://127.0.0.1:8091/postpage"</span>, url.Values&#123;</span><br><span class="line">	<span class="string">"key"</span>:   &#123;<span class="string">"this is client key"</span>&#125;,</span><br><span class="line">	<span class="string">"value"</span>: &#123;<span class="string">"this is client value"</span>&#125;,</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+<h2 id="方法"><a href="#方法" class="headerlink" title="方法"></a>方法</h2><p>方法是利用golang<code>net/http</code>包提供的<code>PostForm</code>提交post表单提交。<code>ParseForm</code>解析<code>URL</code>中的查询字符串，并将解析结果更新到<code>r.Form</code>字段。对于<code>POST</code>或<code>PUT</code>请求，<code>ParseForm</code>还会将<code>body</code>当作表单解析，并将结果既更新到<code>r.PostForm</code>也更新到<code>r.Form</code>。解析结果中，<code>POST</code>或<code>PUT</code>请求主体要优先于<code>URL</code>查询字符串（同名变量，主体的值在查询字符串的值前面）。如果请求的主体的大小没有被<code>MaxBytesReader</code>函数设定限制，其大小默认限制为开头10MB。</p>
+<h2 id="http-Client-PostForm"><a href="#http-Client-PostForm" class="headerlink" title="http.Client{}.PostForm"></a>http.Client{}.PostForm</h2><p>利用<code>http.Client{}.PostForm</code>提交post表单。</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">import</span> <span class="string">"net/http"</span></div><div class="line">client := &amp;http.Client&#123;&#125;</div><div class="line">res, err := client.PostForm(<span class="string">"http://127.0.0.1:8091/postpage"</span>, url.Values&#123;</div><div class="line">	<span class="string">"key"</span>:   &#123;<span class="string">"this is client key"</span>&#125;,</div><div class="line">	<span class="string">"value"</span>: &#123;<span class="string">"this is client value"</span>&#125;,</div><div class="line">&#125;)</div></pre></td></tr></table></figure>
 <h2 id="http-PostForm"><a href="#http-PostForm" class="headerlink" title="http.PostForm"></a>http.PostForm</h2><p>直接用<code>http.PostForm</code>提交post表单。</p>
-<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> <span class="string">"net/http"</span></span><br><span class="line"><span class="comment">//data := make(url.Values)</span></span><br><span class="line"><span class="comment">//data["key"] = []string&#123;"this is key"&#125;</span></span><br><span class="line"><span class="comment">//data["value"] = []string&#123;"this is value"&#125;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//把post表单发送给目标服务器</span></span><br><span class="line">res, err := http.PostForm(<span class="string">"http://127.0.0.1:8091/postpage"</span>, url.Values&#123;</span><br><span class="line">	<span class="string">"key"</span>:   &#123;<span class="string">"this is url key"</span>&#125;,</span><br><span class="line">	<span class="string">"value"</span>: &#123;<span class="string">"this is url value"</span>&#125;,</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
-<h2 id="u5BF9_u8868_u5355_u6570_u636E_u7684_u63D0_u53D6"><a href="#u5BF9_u8868_u5355_u6570_u636E_u7684_u63D0_u53D6" class="headerlink" title="对表单数据的提取"></a>对表单数据的提取</h2><p>server端对表单数据的提取<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//接受post请求， 然后打印表单中key和value字段的值</span></span><br><span class="line"><span class="keyword">if</span> r.Method == <span class="string">"POST"</span> &#123;</span><br><span class="line">	<span class="keyword">var</span> (</span><br><span class="line">		key   <span class="typename">string</span> = r.PostFormValue(<span class="string">"key"</span>)</span><br><span class="line">		value <span class="typename">string</span> = r.PostFormValue(<span class="string">"value"</span>)</span><br><span class="line">	)</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">import</span> <span class="string">"net/http"</span></div><div class="line"><span class="comment">//data := make(url.Values)</span></div><div class="line"><span class="comment">//data["key"] = []string&#123;"this is key"&#125;</span></div><div class="line"><span class="comment">//data["value"] = []string&#123;"this is value"&#125;</span></div><div class="line"></div><div class="line"><span class="comment">//把post表单发送给目标服务器</span></div><div class="line">res, err := http.PostForm(<span class="string">"http://127.0.0.1:8091/postpage"</span>, url.Values&#123;</div><div class="line">	<span class="string">"key"</span>:   &#123;<span class="string">"this is url key"</span>&#125;,</div><div class="line">	<span class="string">"value"</span>: &#123;<span class="string">"this is url value"</span>&#125;,</div><div class="line">&#125;)</div></pre></td></tr></table></figure>
+<h2 id="对表单数据的提取"><a href="#对表单数据的提取" class="headerlink" title="对表单数据的提取"></a>对表单数据的提取</h2><p>server端对表单数据的提取<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="comment">//接受post请求， 然后打印表单中key和value字段的值</span></div><div class="line"><span class="keyword">if</span> r.Method == <span class="string">"POST"</span> &#123;</div><div class="line">	<span class="keyword">var</span> (</div><div class="line">		key   <span class="keyword">string</span> = r.PostFormValue(<span class="string">"key"</span>)</div><div class="line">		value <span class="keyword">string</span> = r.PostFormValue(<span class="string">"value"</span>)</div><div class="line">	)</div></pre></td></tr></table></figure></p>
 <p><a href="https://github.com/researchlab/golearning/tree/master/postform" target="_blank" rel="external">github示例代码</a></p>
   
 	</div>
@@ -205,13 +207,13 @@
 <div id="asidepart">
 
   <div class="widget tag">
-<p margin="0" style="text-align:center">
-<a class="ahref" href="http://researchlab.github.io/about/">
-<img id="aboutpic"  src="/img/weixin.jpg" alt="加我微信" height="200" width="200" style="box-shadow: 0px 0px 2px 2px #9edeff;border-radius: 8px;" >
-</a></p>
 <!--<hr noshade color="#ccc">-->
 <!-- <p style="text-align:center">Mike.Lee</p> -->
-<p style="text-align:center"><font size="2" color="grey">扫一扫上面的二维码 加我微信</font></p>
+<p margin="0" style="text-align:center">
+<a class="ahref" href="http://researchlab.github.io/about/">
+<img id="aboutpic"  src="/img/qzly.png" alt="@全栈炼狱之路" height="200" width="200" style="box-shadow: 0px 0px 2px 2px #9edeff;border-radius: 8px;" >
+</a></p>
+<p style="text-align:center"><font size="2" color="grey">关注微信公众号 @全栈炼狱之路</font></p>
 <div style="display:block; margin-top:10px; padding: 0px 4px 4px 0; border-top: dashed 1px #ccc; text-align:left;"></div>
 <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 <div style="float:left;position:absolute;"><font size="2" >总访问:<span id="busuanzi_value_site_pv"></span>次</font></div>
@@ -286,6 +288,18 @@
 			
 		
 			
+				<li><a href="/tags/cache/" title="cache">cache<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/concurrency/" title="concurrency">concurrency<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mysql/" title="mysql">mysql<sup>2</sup></a></li>
+			
+		
+			
 				<li><a href="/tags/Hexo/" title="Hexo">Hexo<sup>2</sup></a></li>
 			
 		
@@ -294,15 +308,39 @@
 			
 		
 			
-				<li><a href="/tags/concurrency/" title="concurrency">concurrency<sup>2</sup></a></li>
+				<li><a href="/tags/ticker/" title="ticker">ticker<sup>1</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/cache/" title="cache">cache<sup>2</sup></a></li>
+				<li><a href="/tags/rpc/" title="rpc">rpc<sup>1</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/mysql/" title="mysql">mysql<sup>2</sup></a></li>
+				<li><a href="/tags/gin/" title="gin">gin<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/submodule/" title="submodule">submodule<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/vendoring/" title="vendoring">vendoring<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/godep/" title="godep">godep<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/form/" title="form">form<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/post/" title="post">post<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/reflect/" title="reflect">reflect<sup>1</sup></a></li>
 			
 		
 			
@@ -310,47 +348,11 @@
 			
 		
 			
-				<li><a href="/tags/php-redis/" title="php_redis">php_redis<sup>1</sup></a></li>
+				<li><a href="/tags/getcookie/" title="getcookie">getcookie<sup>1</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/php/" title="php">php<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/mvc/" title="mvc">mvc<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/observer/" title="observer">observer<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/redispool/" title="redispool">redispool<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/vim8-0/" title="vim8.0">vim8.0<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/signal/" title="signal">signal<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/json/" title="json">json<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/html/" title="html">html<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/beego-orm/" title="beego/orm">beego/orm<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/xorm/" title="xorm">xorm<sup>1</sup></a></li>
+				<li><a href="/tags/govendor/" title="govendor">govendor<sup>1</sup></a></li>
 			
 		
 		</ul>

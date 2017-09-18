@@ -12,12 +12,14 @@
 
     
     <meta name="description" content="反射是一种检查存储在接口变量中的&amp;lt;值,类型&amp;gt;对的机制，借助go反射包提供的reflect.TypeOf和reflect.ValueOf可以方便的访问到一个接口值的reflect.Type和reflect.Value部分，从而可进一步得到这个接口的结构类型和对其进行值的修改操作。">
+<meta name="keywords" content="golang,reflect">
 <meta property="og:type" content="article">
 <meta property="og:title" content="golang reflect使用总结">
 <meta property="og:url" content="http://www.grdtechs.com/2016/02/17/go-reflect-summarize/index.html">
 <meta property="og:site_name" content="一线攻城狮">
 <meta property="og:description" content="反射是一种检查存储在接口变量中的&amp;lt;值,类型&amp;gt;对的机制，借助go反射包提供的reflect.TypeOf和reflect.ValueOf可以方便的访问到一个接口值的reflect.Type和reflect.Value部分，从而可进一步得到这个接口的结构类型和对其进行值的修改操作。">
-<meta property="og:updated_time" content="2017-09-16T14:32:56.907Z">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2017-09-18T16:29:02.057Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="golang reflect使用总结">
 <meta name="twitter:description" content="反射是一种检查存储在接口变量中的&amp;lt;值,类型&amp;gt;对的机制，借助go反射包提供的reflect.TypeOf和reflect.ValueOf可以方便的访问到一个接口值的reflect.Type和reflect.Value部分，从而可进一步得到这个接口的结构类型和对其进行值的修改操作。">
@@ -29,7 +31,7 @@
     <link rel="icon" href="/img/favicon.ico">
     
     
-    <link rel="stylesheet" href="/css/style.css" type="text/css">
+    <link rel="stylesheet" href="/css/style.css">
 </head>
 
   <body>
@@ -89,12 +91,12 @@
 		<div id="toc" class="toc-article">
 			<strong class="toc-title">文章目录</strong>
 		
-			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#u53CD_u5C04_u7684_u4F7F_u7528"><span class="toc-number">1.</span> <span class="toc-text">反射的使用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u901A_u8FC7_u53CD_u5C04_u4FEE_u6539_u5BF9_u8C61"><span class="toc-number">2.</span> <span class="toc-text">通过反射修改对象</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u901A_u8FC7_u53CD_u5C04_u201C_u52A8_u6001_u201D_u8C03_u7528_u65B9_u6CD5"><span class="toc-number">3.</span> <span class="toc-text">通过反射“动态”调用方法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u5C0F_u7ED3"><span class="toc-number">4.</span> <span class="toc-text">小结</span></a></li></ol>
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#反射的使用"><span class="toc-number">1.</span> <span class="toc-text">反射的使用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#通过反射修改对象"><span class="toc-number">2.</span> <span class="toc-text">通过反射修改对象</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#通过反射“动态”调用方法"><span class="toc-number">3.</span> <span class="toc-text">通过反射“动态”调用方法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#小结"><span class="toc-number">4.</span> <span class="toc-text">小结</span></a></li></ol>
 		
 		</div>
 		
 		<p>反射是一种检查存储在接口变量中的<code>&lt;值,类型&gt;</code>对的机制，借助go反射包提供的<code>reflect.TypeOf</code>和<code>reflect.ValueOf</code>可以方便的访问到一个接口值的<code>reflect.Type</code>和<code>reflect.Value</code>部分，从而可进一步得到这个接口的结构类型和对其进行值的修改操作。<br><a id="more"></a></p>
-<h2 id="u53CD_u5C04_u7684_u4F7F_u7528"><a href="#u53CD_u5C04_u7684_u4F7F_u7528" class="headerlink" title="反射的使用"></a>反射的使用</h2><ol>
+<h2 id="反射的使用"><a href="#反射的使用" class="headerlink" title="反射的使用"></a>反射的使用</h2><ol>
 <li><p><strong>获取接口对象的字段,类型和方法信息</strong><br>先定义个通用的结构体</p>
 <pre><code>type User struct{
     Id int
@@ -102,7 +104,7 @@
     Age int
 }
 </code></pre><p>将接口对象类型信息映射为反射类型信息</p>
-<pre><code class="golang"><span class="keyword">func</span> Info(o <span class="keyword">interface</span>{}) {
+<pre><code class="golang"><span class="function"><span class="keyword">func</span> <span class="title">Info</span><span class="params">(o <span class="keyword">interface</span>{})</span></span> {
     t := reflect.TypeOf(o)         <span class="comment">//获取接口的类型</span>
     fmt.Println(<span class="string">"Type:"</span>, t.Name()) <span class="comment">//t.Name() 获取接口的名称</span>
 
@@ -148,7 +150,7 @@ fmt.Printf(&quot;%#v\n&quot;, t.Field(0))
 </ol>
 </li>
 </ol>
-<h2 id="u901A_u8FC7_u53CD_u5C04_u4FEE_u6539_u5BF9_u8C61"><a href="#u901A_u8FC7_u53CD_u5C04_u4FEE_u6539_u5BF9_u8C61" class="headerlink" title="通过反射修改对象"></a>通过反射修改对象</h2><p>上面通过<code>reflect.TypeOf</code>和<code>reflect.ValueOf</code>已经可以得到接口对象的类型,字段和方法等属性了，怎么通过反射来修改对象的字段值？</p>
+<h2 id="通过反射修改对象"><a href="#通过反射修改对象" class="headerlink" title="通过反射修改对象"></a>通过反射修改对象</h2><p>上面通过<code>reflect.TypeOf</code>和<code>reflect.ValueOf</code>已经可以得到接口对象的类型,字段和方法等属性了，怎么通过反射来修改对象的字段值？</p>
 <pre><code>x := 100
 v := refelct.ValueOf(&amp;x) //传入地址
 v.Elem().SetInt(200) //成功修改x值为200
@@ -182,7 +184,7 @@ v.Elem().SetInt(200) //成功修改x值为200
 <li>通过<code>FieldByName</code>的返回值判断字段是否存在</li>
 <li>通过<code>Kind()</code>和<code>Set</code>来修改字段的值<br><a href="https://github.com/researchlab/golearning/blob/master/reflect/02reflect.go" target="_blank" rel="external">示例代码</a></li>
 </ol>
-<h2 id="u901A_u8FC7_u53CD_u5C04_u201C_u52A8_u6001_u201D_u8C03_u7528_u65B9_u6CD5"><a href="#u901A_u8FC7_u53CD_u5C04_u201C_u52A8_u6001_u201D_u8C03_u7528_u65B9_u6CD5" class="headerlink" title="通过反射“动态”调用方法"></a>通过反射“动态”调用方法</h2><p>现在已经可以通过反射获取并修改接口对象的字段，类型等信息了，那怎么通过反射“动态”调用接口对象等方法？<br>先为<code>User</code>结构体引入一个<code>Hello</code>方法：</p>
+<h2 id="通过反射“动态”调用方法"><a href="#通过反射“动态”调用方法" class="headerlink" title="通过反射“动态”调用方法"></a>通过反射“动态”调用方法</h2><p>现在已经可以通过反射获取并修改接口对象的字段，类型等信息了，那怎么通过反射“动态”调用接口对象等方法？<br>先为<code>User</code>结构体引入一个<code>Hello</code>方法：</p>
 <pre><code>func (u User) Hello(m User) (int, string) {
     fmt.Println(&quot;Hello&quot;, m.Name, &quot;, I&apos;m &quot;, u.Name)
     return m.Age + u.Age, u.Name
@@ -210,7 +212,7 @@ v.Elem().SetInt(200) //成功修改x值为200
 
 }
 </code></pre><p>通过<code>MethodByName</code>先获取对象的<code>Hello</code>方法,然后准备要传入的参数,这里传入的参数必须是<code>[]refelct.Value</code>类型,传入的参数值必须强制转换为反射值类型<code>refelct.Value</code>。<br>最后通过调用<code>Call</code>方法就可以实现通过反射”动态”调用对象的方法。<br><a href="https://github.com/researchlab/golearning/blob/master/reflect/03reflect.go" target="_blank" rel="external">示例代码</a></p>
-<h2 id="u5C0F_u7ED3"><a href="#u5C0F_u7ED3" class="headerlink" title="小结"></a>小结</h2><ul>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><ul>
 <li>通过反射包提供<code>refelct.TypeOf</code>和<code>refelct.ValueOf</code>方法获得接口对象的类型，值和方法等。</li>
 <li>通过反射修改字段值等时候需要传入地址类型，并且需要检查反射返回值类型是否为<code>refelct.Ptr</code>，检查字段是否<code>CanSet</code>,检查字段是存在,然后通过<code>Kind()</code>来帮助赋值相应对类型值。</li>
 <li>最后总结了通过<code>MethodByName</code>等方法如何“动态”调用对象的方法，示例代码也演示了如何传入和接收多个参数值。</li>
@@ -319,13 +321,13 @@ v.Elem().SetInt(200) //成功修改x值为200
 <div id="asidepart">
 
   <div class="widget tag">
-<p margin="0" style="text-align:center">
-<a class="ahref" href="http://researchlab.github.io/about/">
-<img id="aboutpic"  src="/img/weixin.jpg" alt="加我微信" height="200" width="200" style="box-shadow: 0px 0px 2px 2px #9edeff;border-radius: 8px;" >
-</a></p>
 <!--<hr noshade color="#ccc">-->
 <!-- <p style="text-align:center">Mike.Lee</p> -->
-<p style="text-align:center"><font size="2" color="grey">扫一扫上面的二维码 加我微信</font></p>
+<p margin="0" style="text-align:center">
+<a class="ahref" href="http://researchlab.github.io/about/">
+<img id="aboutpic"  src="/img/qzly.png" alt="@全栈炼狱之路" height="200" width="200" style="box-shadow: 0px 0px 2px 2px #9edeff;border-radius: 8px;" >
+</a></p>
+<p style="text-align:center"><font size="2" color="grey">关注微信公众号 @全栈炼狱之路</font></p>
 <div style="display:block; margin-top:10px; padding: 0px 4px 4px 0; border-top: dashed 1px #ccc; text-align:left;"></div>
 <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 <div style="float:left;position:absolute;"><font size="2" >总访问:<span id="busuanzi_value_site_pv"></span>次</font></div>
@@ -400,6 +402,18 @@ v.Elem().SetInt(200) //成功修改x值为200
 			
 		
 			
+				<li><a href="/tags/cache/" title="cache">cache<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/concurrency/" title="concurrency">concurrency<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mysql/" title="mysql">mysql<sup>2</sup></a></li>
+			
+		
+			
 				<li><a href="/tags/Hexo/" title="Hexo">Hexo<sup>2</sup></a></li>
 			
 		
@@ -408,15 +422,39 @@ v.Elem().SetInt(200) //成功修改x值为200
 			
 		
 			
-				<li><a href="/tags/concurrency/" title="concurrency">concurrency<sup>2</sup></a></li>
+				<li><a href="/tags/ticker/" title="ticker">ticker<sup>1</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/cache/" title="cache">cache<sup>2</sup></a></li>
+				<li><a href="/tags/rpc/" title="rpc">rpc<sup>1</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/mysql/" title="mysql">mysql<sup>2</sup></a></li>
+				<li><a href="/tags/gin/" title="gin">gin<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/submodule/" title="submodule">submodule<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/vendoring/" title="vendoring">vendoring<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/godep/" title="godep">godep<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/form/" title="form">form<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/post/" title="post">post<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/reflect/" title="reflect">reflect<sup>1</sup></a></li>
 			
 		
 			
@@ -424,47 +462,11 @@ v.Elem().SetInt(200) //成功修改x值为200
 			
 		
 			
-				<li><a href="/tags/php-redis/" title="php_redis">php_redis<sup>1</sup></a></li>
+				<li><a href="/tags/getcookie/" title="getcookie">getcookie<sup>1</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/php/" title="php">php<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/mvc/" title="mvc">mvc<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/observer/" title="observer">observer<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/redispool/" title="redispool">redispool<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/vim8-0/" title="vim8.0">vim8.0<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/signal/" title="signal">signal<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/json/" title="json">json<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/html/" title="html">html<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/beego-orm/" title="beego/orm">beego/orm<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/xorm/" title="xorm">xorm<sup>1</sup></a></li>
+				<li><a href="/tags/govendor/" title="govendor">govendor<sup>1</sup></a></li>
 			
 		
 		</ul>

@@ -12,25 +12,28 @@
 
     
     <meta name="description" content="Http缓存机制作为web性能优化的重要手段, 本文对网络中，工作中使用的http缓存知识进行归纳总结。">
+<meta name="keywords" content="cache">
 <meta property="og:type" content="article">
 <meta property="og:title" content="http 缓存知识总结">
 <meta property="og:url" content="http://www.grdtechs.com/2017/01/17/http-cache/index.html">
 <meta property="og:site_name" content="一线攻城狮">
 <meta property="og:description" content="Http缓存机制作为web性能优化的重要手段, 本文对网络中，工作中使用的http缓存知识进行归纳总结。">
-<meta property="og:image" content="http://www.grdtechs.com/imgs/cache_where.png">
-<meta property="og:image" content="http://www.grdtechs.com/imgs/etag.png">
-<meta property="og:image" content="http://www.grdtechs.com/imgs/if-none-match.png">
-<meta property="og:image" content="http://www.grdtechs.com/imgs/cache_control_workflow.png">
-<meta property="og:image" content="http://www.grdtechs.com/imgs/cache_304.png">
-<meta property="og:image" content="http://www.grdtechs.com/imgs/cache_200.png">
-<meta property="og:image" content="http://www.grdtechs.com/imgs/cache_workflow.png">
-<meta property="og:image" content="http://www.grdtechs.com/imgs/cache_sys.png">
-<meta property="og:image" content="http://www.grdtechs.com/imgs/cache_sys_relation.png">
-<meta property="og:image" content="http://www.grdtechs.com/imgs/cache_data1.jpg">
-<meta property="og:updated_time" content="2017-09-16T14:32:56.907Z">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://www.grdtechs.com/2017/01/17/http-cache/imgs/cache_where.png">
+<meta property="og:image" content="http://www.grdtechs.com/2017/01/17/http-cache/imgs/etag.png">
+<meta property="og:image" content="http://www.grdtechs.com/2017/01/17/http-cache/imgs/if-none-match.png">
+<meta property="og:image" content="http://www.grdtechs.com/2017/01/17/http-cache/imgs/cache_control_workflow.png">
+<meta property="og:image" content="http://www.grdtechs.com/2017/01/17/http-cache/imgs/cache_304.png">
+<meta property="og:image" content="http://www.grdtechs.com/2017/01/17/http-cache/imgs/cache_200.png">
+<meta property="og:image" content="http://www.grdtechs.com/2017/01/17/http-cache/imgs/cache_workflow.png">
+<meta property="og:image" content="http://www.grdtechs.com/2017/01/17/http-cache/imgs/cache_sys.png">
+<meta property="og:image" content="http://www.grdtechs.com/2017/01/17/http-cache/imgs/cache_sys_relation.png">
+<meta property="og:image" content="http://www.grdtechs.com/2017/01/17/http-cache/imgs/cache_data1.jpg">
+<meta property="og:updated_time" content="2017-09-18T16:29:02.057Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="http 缓存知识总结">
 <meta name="twitter:description" content="Http缓存机制作为web性能优化的重要手段, 本文对网络中，工作中使用的http缓存知识进行归纳总结。">
+<meta name="twitter:image" content="http://www.grdtechs.com/2017/01/17/http-cache/imgs/cache_where.png">
 
     
     <link rel="alternative" href="/atom.xml" title="一线攻城狮" type="application/atom+xml">
@@ -39,7 +42,7 @@
     <link rel="icon" href="/img/favicon.ico">
     
     
-    <link rel="stylesheet" href="/css/style.css" type="text/css">
+    <link rel="stylesheet" href="/css/style.css">
 </head>
 
   <body>
@@ -99,23 +102,23 @@
 		<div id="toc" class="toc-article">
 			<strong class="toc-title">文章目录</strong>
 		
-			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#u7F13_u5B58_u5206_u7C7B"><span class="toc-number">1.</span> <span class="toc-text">缓存分类</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u7F13_u5B58_u65B0_u9C9C_u5EA6"><span class="toc-number">2.</span> <span class="toc-text">缓存新鲜度</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u6848_u4F8B_u5206_u6790"><span class="toc-number">3.</span> <span class="toc-text">案例分析</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#reference"><span class="toc-number">4.</span> <span class="toc-text">reference</span></a></li></ol>
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#缓存分类"><span class="toc-number">1.</span> <span class="toc-text">缓存分类</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#缓存新鲜度"><span class="toc-number">2.</span> <span class="toc-text">缓存新鲜度</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#案例分析"><span class="toc-number">3.</span> <span class="toc-text">案例分析</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#reference"><span class="toc-number">4.</span> <span class="toc-text">reference</span></a></li></ol>
 		
 		</div>
 		
 		<p>Http缓存机制作为web性能优化的重要手段, 本文对网络中，工作中使用的http缓存知识进行归纳总结。<br><a id="more"></a></p>
-<h2 id="u7F13_u5B58_u5206_u7C7B"><a href="#u7F13_u5B58_u5206_u7C7B" class="headerlink" title="缓存分类"></a>缓存分类</h2><p>缓存分为<code>服务端缓存</code>(server side，比如Nginx、Apache)和<code>客户端缓存</code>(client side，比如 web browser)。</p>
+<h2 id="缓存分类"><a href="#缓存分类" class="headerlink" title="缓存分类"></a>缓存分类</h2><p>缓存分为<code>服务端缓存</code>(server side，比如Nginx、Apache)和<code>客户端缓存</code>(client side，比如 web browser)。</p>
 <ul>
 <li><code>服务端缓存</code>又分为<code>代理服务器缓存</code>和<code>反向代理服务器缓存</code>(也叫网关缓存，比如Nginx反向代理、Squid等)，其实广泛使用的CDN也是一种服务端缓存，目的都是让用户的请求走”捷径”(一般用CDN缓存图片、文件等静态资源)。</li>
 <li><code>客户端缓存</code>一般指的是<code>浏览器缓存</code>，目的就是加速各种静态资源的访问，想想现在的大型网站，随便一个页面都是一两百个请求，每天pv都是亿级别，如果没有缓存，用户体验会急剧下降、同时服务器压力和网络带宽都面临严重的考验。</li>
 </ul>
 <p>下文总结的http缓存主要指浏览器缓存和代理服务器缓存</p>
-<center><img src="/imgs/cache_where.png" alt="cache"></center>
+<center><img src="imgs/cache_where.png" alt="cache"></center>
 
 <p>上图中有三个角色，浏览器, Web代理和服务器，如图所示Http缓存存在于浏览器和Web代理中。<br>当然在服务器内部，也存在着各种缓存，但这已经不是本文要讨论的Http缓存了。<br>所谓的Http缓存控制，就是一种约定，通过设置不同的响应头Cache-Control来控制浏览器和Web代理对缓存的使用策略，通过设置请求头If-None-Match和响应头ETag，来对缓存的有效性进行验证。在开发Web服务时，只需要关注请求头If-None-Match、响应头ETag、响应头Cache-Control就足够了。</p>
 <p><strong> 响应头ETag </strong></p>
 <p>ETag全称Entity Tag，用来标识一个资源。在具体的实现中，ETag可以是资源的hash值，也可以是一个内部维护的版本号。但不管怎样，ETag应该能反映出资源内容的变化，这是Http缓存可以正常工作的基础。</p>
-<center><img src="/imgs/etag.png" alt="ETag"></center>
+<center><img src="imgs/etag.png" alt="ETag"></center>
 
 <p>如上例中所展示的，服务器在返回响应时，通常会在Http头中包含一些关于响应的元数据信息，其中，ETag就是其中一个，本例中返回了值为<code>x1323ddx</code>的<code>ETag</code>。当资源/file的内容发生变化时，服务器应当返回不同的ETag。</p>
 <blockquote>
@@ -126,7 +129,7 @@
 </blockquote>
 <p><strong> 请求头If-None-Match </strong></p>
 <p>对于同一个资源，比如上一例中的/file，在进行了一次请求之后，浏览器就已经有了/file的一个版本的内容，和这个版本的ETag，当下次用户再需要这个资源，浏览器再次向服务器请求的时候，可以利用请求头If-None-Match来告诉服务器自己已经有个ETag为x1323ddx的/file，这样，如果服务器上的/file没有变化，也就是说服务器上的/file的ETag也是x1323ddx的话，服务器就不会再返回/file的内容，而是返回一个304的响应，告诉浏览器该资源没有变化，缓存有效。</p>
-<center><img src="/imgs/if-none-match.png" alt="If-None-Match"></center>
+<center><img src="imgs/if-none-match.png" alt="If-None-Match"></center>
 
 <p>如上例中所示，在使用了If-None-Match之后，服务器只需要很小的响应就可以达到相同的结果，从而优化了性能。</p>
 <p><strong> 响应头Cache-Control </strong></p>
@@ -154,20 +157,20 @@
 </blockquote>
 </blockquote>
 <p>Cache-Control 有这么多字段可用来控制缓存策略， 那到底是怎么用的? ， 下面通过一张图来表述一个资源的Cache-Control策略,</p>
-<center><img src="/imgs/cache_control_workflow.png" alt="cache-control-work-flow"></center>
+<center><img src="imgs/cache_control_workflow.png" alt="cache-control-work-flow"></center>
 
-<h2 id="u7F13_u5B58_u65B0_u9C9C_u5EA6"><a href="#u7F13_u5B58_u65B0_u9C9C_u5EA6" class="headerlink" title="缓存新鲜度"></a>缓存新鲜度</h2><p>Web服务器通过2种方式来判断浏览器缓存是否是最新的。</p>
+<h2 id="缓存新鲜度"><a href="#缓存新鲜度" class="headerlink" title="缓存新鲜度"></a>缓存新鲜度</h2><p>Web服务器通过2种方式来判断浏览器缓存是否是最新的。</p>
 <p><strong> 第一种, 浏览器把缓存文件的<code>最后修改时间</code>通过header字段”If-Modified-Since”来告诉Web服务器。</strong><br><strong> 第二种, 浏览器把缓存文件的<code>ETag</code>, 通过header字段”If-None-Match”, 来告诉Web服务器。</strong></p>
 <p><strong> 第一种: </strong> 通过最后修改时间, 来判断缓存新鲜度 </p>
 <p>1.浏览器客户端想请求一个文档, 首先检查本地缓存, 发现存在这个文档的缓存, 获取缓存中文档的最后修改时间, 通过:If-Modified-Since， 发送Request给Web服务器。<br>2.Web服务器收到Request, 将服务器的文档修改时间(Last-Modified):跟request header中的, If-Modified-Since相比较, 如果时间是一样的, 说明缓存还是最新的, Web服务器将发送<code>304 Not Modified</code>给浏览器客户端, 告诉客户端直接使用缓存里的版本。如下图。</p>
-<center><img src="/imgs/cache_304.png" alt="cache 304"></center>
+<center><img src="imgs/cache_304.png" alt="cache 304"></center>
 
 <p>3.假如该文档已经被更新了。Web服务器将发送该文档的最新版本给浏览器客户端， 如下图。</p>
-<center><img src="/imgs/cache_200.png" alt="cache 200"></center>
+<center><img src="imgs/cache_200.png" alt="cache 200"></center>
 
 <p><strong> 第二种: </strong> 服务器通过比对客户端请求发来的”If-None-Match”带上的Etag值, 如果一致则表示可以使用本地缓存，如果不一致表示服务器内容有更新，此时会重新发一份新的给客户端。</p>
 <p>至此，浏览器端http cache 的大致流程可总结如图，</p>
-<center><img src="/imgs/cache_workflow.png" alt="cache workflow"></center>
+<center><img src="imgs/cache_workflow.png" alt="cache workflow"></center>
 
 <p><strong> <font color="red">Etag/If-None-Match:</font>Etag/If-None-Match要配合Cache-Control使用。</strong></p>
 <blockquote>
@@ -225,14 +228,14 @@
 </tr>
 </tbody>
 </table>
-<h2 id="u6848_u4F8B_u5206_u6790"><a href="#u6848_u4F8B_u5206_u6790" class="headerlink" title="案例分析"></a>案例分析</h2><p>案例, page.html内容如下:<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="doctype">&lt;!DOCTYPE html&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="title">html</span> <span class="attribute">xmlns</span>=<span class="value">"http://www.w3.org/1999/xhtml"</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="title">head</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="title">meta</span> <span class="attribute">http-equiv</span>=<span class="value">"Content-Type"</span> <span class="attribute">content</span>=<span class="value">"text/html; charset=utf-8"</span> /&gt;</span></span><br><span class="line">	<span class="comment">&lt;!--&lt;meta http-equiv="cache-control" content="no-cache"&gt;--&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="title">meta</span> <span class="attribute">http-equiv</span>=<span class="value">"cache-control"</span> <span class="attribute">content</span>=<span class="value">"private"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="title">title</span>&gt;</span>page页<span class="tag">&lt;/<span class="title">title</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="title">head</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="title">body</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="title">img</span> <span class="attribute">src</span>=<span class="value">"images/head.png"</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="title">a</span> <span class="attribute">href</span>=<span class="value">"page.html"</span>&gt;</span>重新访问page页<span class="tag">&lt;/<span class="title">a</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="title">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="title">html</span>&gt;</span></span><br></pre></td></tr></table></figure></p>
-<p>首次访问该页面，页面中head.png响应头信息如下:<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">HTTP/1.1 200 OK</span><br><span class="line">Cache-Control: no-cache</span><br><span class="line">Content-Type: image/png</span><br><span class="line">Last-Modified: Tue, 08 Nov 2016 06:59:00 GMT</span><br><span class="line">Accept-Ranges: bytes</span><br><span class="line">Date: Thu, 10 Nov 2016 02:48:50 GMT</span><br><span class="line">Content-Length: 3534</span><br></pre></td></tr></table></figure></p>
+<h2 id="案例分析"><a href="#案例分析" class="headerlink" title="案例分析"></a>案例分析</h2><p>案例, page.html内容如下:<br><figure class="highlight html"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line"><span class="meta">&lt;!DOCTYPE html&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">html</span> <span class="attr">xmlns</span>=<span class="string">"http://www.w3.org/1999/xhtml"</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></div><div class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">http-equiv</span>=<span class="string">"Content-Type"</span> <span class="attr">content</span>=<span class="string">"text/html; charset=utf-8"</span> /&gt;</span></div><div class="line">	<span class="comment">&lt;!--&lt;meta http-equiv="cache-control" content="no-cache"&gt;--&gt;</span></div><div class="line">	<span class="tag">&lt;<span class="name">meta</span> <span class="attr">http-equiv</span>=<span class="string">"cache-control"</span> <span class="attr">content</span>=<span class="string">"private"</span>&gt;</span></div><div class="line">    <span class="tag">&lt;<span class="name">title</span>&gt;</span>page页<span class="tag">&lt;/<span class="name">title</span>&gt;</span></div><div class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></div><div class="line">    <span class="tag">&lt;<span class="name">img</span> <span class="attr">src</span>=<span class="string">"images/head.png"</span> /&gt;</span></div><div class="line">    <span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">"page.html"</span>&gt;</span>重新访问page页<span class="tag">&lt;/<span class="name">a</span>&gt;</span></div><div class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></div><div class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></div></pre></td></tr></table></figure></p>
+<p>首次访问该页面，页面中head.png响应头信息如下:<br><figure class="highlight html"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">HTTP/1.1 200 OK</div><div class="line">Cache-Control: no-cache</div><div class="line">Content-Type: image/png</div><div class="line">Last-Modified: Tue, 08 Nov 2016 06:59:00 GMT</div><div class="line">Accept-Ranges: bytes</div><div class="line">Date: Thu, 10 Nov 2016 02:48:50 GMT</div><div class="line">Content-Length: 3534</div></pre></td></tr></table></figure></p>
 <p><strong> <font color="red"> 问题1: 请问当点击”重新访问page页”链接重新加载该页面后, head.png 如何二次加载? </font> </strong> </p>
 <p><strong> <font color="red"> 问题2: 如果将上述信息中的 Cache-Control 设置为 private，那么结果又会如何呢? </font> </strong></p>
 <p>下面从系统体系化角度来讲讲<code>Http缓存头</code>是如何协同工作的</p>
 <p><strong> HTTP缓存体系 </strong></p>
 <p>首先我将 Http 缓存体系分为以下三个部分:</p>
-<center><img src="/imgs/cache_sys.png" alt="cache"></center>
+<center><img src="imgs/cache_sys.png" alt="cache"></center>
 
 <p><strong> 1.缓存存储策略 </strong></p>
 <p>这个策略的作用只有一个, 用于确定Http响应内容是否可以被客户端缓存, 以及可以被哪些客户端缓存</p>
@@ -251,14 +254,14 @@
 <p>将缓存在客户端的数据标识发往服务端, 服务端通过标识来判断客户端缓存数据是否仍有效, 进而决定是否要重发数据。<br>客户端检测到数据过期或浏览器刷新后, 往往会重新发起一个http请求到服务器, 服务器此时并不急于返回数据, 而是看请求头有没有带标识(If-Modified-Since, If-None-Match)过来, 如果判断标识仍然有效, 则返回304告诉客户端取本地缓存数据来用即可(这里要注意的是你必须要在首次响应时输出相应的头信息(Last-Modified, ETags)到客户端)。至此我们就明白了上面所说的本地缓存数据即使被认为过期，并不等于数据从此就没用了的道理了。</p>
 <p>关于Last-Modified，这个响应头使用要注意，可能会影响到缓存过期策略，具体原因，后面我会通过解答开篇提到的2道题来作说明。</p>
 <p>以上就是我所认识的缓存策略，下面我将缓存策略三要素和常用的几个缓存头(项)结合一起，让大家更清晰的认识到它们之间的关系:</p>
-<center><img src="/imgs/cache_sys_relation.png" alt="cache sys relation"></center>
+<center><img src="imgs/cache_sys_relation.png" alt="cache sys relation"></center>
 
 <p>通过上图可以清晰的看到各缓存项分别属于哪个缓存策略范畴，这其中有部分重叠，它表明这些缓存项具有多重缓存策略，所以实际在分析缓存头的时候，除了常规的头外，我们还需要将这些具有双重缓存策略的项分解开来。<br>现在回到最开始提到的2道题目,</p>
-<p><strong> 第一道题: </strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">HTTP/<span class="number">1.1</span> <span class="number">200</span> OK</span><br><span class="line">Cache-Control: no-cache</span><br><span class="line">Content-Type: image/png</span><br><span class="line">Last-Modified: Tue, <span class="number">08</span> Nov <span class="number">2016</span> <span class="number">06</span>:<span class="number">59</span>:<span class="number">00</span> GMT</span><br><span class="line">Accept-Ranges: bytes</span><br><span class="line">Date: Thu, <span class="number">10</span> Nov <span class="number">2016</span> <span class="number">02</span>:<span class="number">48</span>:<span class="number">50</span> GMT</span><br><span class="line">Content-Length: <span class="number">3534</span></span><br></pre></td></tr></table></figure></p>
-<p>分析上述Http响应头发现有以下两项与缓存相关:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Cache-Control: no-cache </span><br><span class="line">Last-Modified: Tue, <span class="number">08</span> Nov <span class="number">2016</span> <span class="number">06</span>:<span class="number">59</span>:<span class="number">00</span> GMT</span><br></pre></td></tr></table></figure></p>
+<p><strong> 第一道题: </strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">HTTP/1.1 200 OK</div><div class="line">Cache-Control: no-cache</div><div class="line">Content-Type: image/png</div><div class="line">Last-Modified: Tue, 08 Nov 2016 06:59:00 GMT</div><div class="line">Accept-Ranges: bytes</div><div class="line">Date: Thu, 10 Nov 2016 02:48:50 GMT</div><div class="line">Content-Length: 3534</div></pre></td></tr></table></figure></p>
+<p>分析上述Http响应头发现有以下两项与缓存相关:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">Cache-Control: no-cache </div><div class="line">Last-Modified: Tue, 08 Nov 2016 06:59:00 GMT</div></pre></td></tr></table></figure></p>
 <p>我们上面讲到了Cache-Control:no-cache 相当于Cache-Control:max-age=0，且他们都是多重策略头, 我们需将其分解:</p>
 <p>Cache-Control:no-cache 等于 Cache-Control:max-age=0， </p>
-<p>接着Cache-Control:max-age=0 又可分解成:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Cache-Control: public/private （不确定是二者中的哪一个）</span><br><span class="line">Expires: 当前时间</span><br></pre></td></tr></table></figure></p>
+<p>接着Cache-Control:max-age=0 又可分解成:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">Cache-Control: public/private （不确定是二者中的哪一个）</div><div class="line">Expires: 当前时间</div></pre></td></tr></table></figure></p>
 <p><strong> 最终我们得到了以下完整的缓存策略三要素: </strong></p>
 <table>
 <thead>
@@ -291,14 +294,14 @@
 </table>
 <p>所以最终结果是:浏览器会再次请求服务端, 并携带上Last-Modified指定的时间去服务器对比:</p>
 <p>a)对比失败: 服务器返回200并重发数据, 客户端接收到数据后展示, 并刷新本地缓存。<br>b)对比成功: 服务器返回304且不重发数据, 客户端收到304状态码后从本地读取缓存数据。</p>
-<center><img src="/imgs/cache_data1.jpg" alt="cache_data"></center>
+<center><img src="imgs/cache_data1.jpg" alt="cache_data"></center>
 
 <p>这道题本身不难, 但若认为no-cache不会缓存数据到本地, 那么你理解起来就会很矛盾, 因为如果文件数据没有被本地缓存, 服务器返回304后将会无法展示出图片内容, 但实际上它是能正常展示的。这道题很好的证明了no-cache也会缓存数据到本地这一说法。</p>
-<p><strong> 第二道题: </strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">HTTP/<span class="number">1.1</span> <span class="number">200</span> OK</span><br><span class="line">Cache-Control: private</span><br><span class="line">Content-Type: image/png</span><br><span class="line">Last-Modified: Tue, <span class="number">08</span> Nov <span class="number">2016</span> <span class="number">06</span>:<span class="number">59</span>:<span class="number">00</span> GMT</span><br><span class="line">Accept-Ranges: bytes</span><br><span class="line">Date: Thu, <span class="number">10</span> Nov <span class="number">2016</span> <span class="number">02</span>:<span class="number">48</span>:<span class="number">50</span> GMT</span><br><span class="line">Content-Length: <span class="number">3534</span></span><br></pre></td></tr></table></figure></p>
-<p>解题思路和上题一样，首先先找到缓存相关项:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Cache-Control: private     </span><br><span class="line">Last-Modified: Tue, <span class="number">08</span> Nov <span class="number">2016</span> <span class="number">06</span>:<span class="number">59</span>:<span class="number">00</span> GMT</span><br></pre></td></tr></table></figure></p>
+<p><strong> 第二道题: </strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">HTTP/1.1 200 OK</div><div class="line">Cache-Control: private</div><div class="line">Content-Type: image/png</div><div class="line">Last-Modified: Tue, 08 Nov 2016 06:59:00 GMT</div><div class="line">Accept-Ranges: bytes</div><div class="line">Date: Thu, 10 Nov 2016 02:48:50 GMT</div><div class="line">Content-Length: 3534</div></pre></td></tr></table></figure></p>
+<p>解题思路和上题一样，首先先找到缓存相关项:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">Cache-Control: private     </div><div class="line">Last-Modified: Tue, 08 Nov 2016 06:59:00 GMT</div></pre></td></tr></table></figure></p>
 <p><code>private</code>: 指对于单个用户的整个或部分响应消息进行缓存，不能被共享缓存处理。这允许服务器仅仅描述当用户的部分响应消息，此响应消息对于其他用户的请求无效,这里可以看到没有提供任何缓存过期策略</p>
 <p>在没有提供任何浏览器缓存过期策略的情况下，浏览器遵循一个启发式缓存过期策略, <strong> 根据响应头中2个时间字段Date和Last-Modified之间的时间差值，取其值的10%作为缓存时间周期。</strong> 下面是官方解释,</p>
-<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">HTTP/1.1 Cache-Control Header is present: private</span><br><span class="line">HTTP Last-Modified Header is present: Tue, 08 Nov 2016 06:59:00 GMT</span><br><span class="line">No explicit HTTP Cache Lifetime information was provided.</span><br><span class="line">Heuristic expiration policies suggest defaulting to: 10% of the delta between Last-Modified and Date.</span><br><span class="line">That's '05:15:02' so this response will heuristically expire 2016/11/11 0:46:01.</span><br></pre></td></tr></table></figure>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">HTTP/1.1 Cache-Control Header is present: private</div><div class="line">HTTP Last-Modified Header is present: Tue, 08 Nov 2016 06:59:00 GMT</div><div class="line">No explicit HTTP Cache Lifetime information was provided.</div><div class="line">Heuristic expiration policies suggest defaulting to: 10% of the delta between Last-Modified and Date.</div><div class="line">That's '05:15:02' so this response will heuristically expire 2016/11/11 0:46:01.</div></pre></td></tr></table></figure>
 <p>最终我们得到了以下完整的缓存策略三要素:</p>
 <table>
 <thead>
@@ -467,13 +470,13 @@
 <div id="asidepart">
 
   <div class="widget tag">
-<p margin="0" style="text-align:center">
-<a class="ahref" href="http://researchlab.github.io/about/">
-<img id="aboutpic"  src="/img/weixin.jpg" alt="加我微信" height="200" width="200" style="box-shadow: 0px 0px 2px 2px #9edeff;border-radius: 8px;" >
-</a></p>
 <!--<hr noshade color="#ccc">-->
 <!-- <p style="text-align:center">Mike.Lee</p> -->
-<p style="text-align:center"><font size="2" color="grey">扫一扫上面的二维码 加我微信</font></p>
+<p margin="0" style="text-align:center">
+<a class="ahref" href="http://researchlab.github.io/about/">
+<img id="aboutpic"  src="/img/qzly.png" alt="@全栈炼狱之路" height="200" width="200" style="box-shadow: 0px 0px 2px 2px #9edeff;border-radius: 8px;" >
+</a></p>
+<p style="text-align:center"><font size="2" color="grey">关注微信公众号 @全栈炼狱之路</font></p>
 <div style="display:block; margin-top:10px; padding: 0px 4px 4px 0; border-top: dashed 1px #ccc; text-align:left;"></div>
 <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 <div style="float:left;position:absolute;"><font size="2" >总访问:<span id="busuanzi_value_site_pv"></span>次</font></div>
@@ -548,6 +551,18 @@
 			
 		
 			
+				<li><a href="/tags/cache/" title="cache">cache<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/concurrency/" title="concurrency">concurrency<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mysql/" title="mysql">mysql<sup>2</sup></a></li>
+			
+		
+			
 				<li><a href="/tags/Hexo/" title="Hexo">Hexo<sup>2</sup></a></li>
 			
 		
@@ -556,15 +571,39 @@
 			
 		
 			
-				<li><a href="/tags/concurrency/" title="concurrency">concurrency<sup>2</sup></a></li>
+				<li><a href="/tags/ticker/" title="ticker">ticker<sup>1</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/cache/" title="cache">cache<sup>2</sup></a></li>
+				<li><a href="/tags/rpc/" title="rpc">rpc<sup>1</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/mysql/" title="mysql">mysql<sup>2</sup></a></li>
+				<li><a href="/tags/gin/" title="gin">gin<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/submodule/" title="submodule">submodule<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/vendoring/" title="vendoring">vendoring<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/godep/" title="godep">godep<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/form/" title="form">form<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/post/" title="post">post<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/reflect/" title="reflect">reflect<sup>1</sup></a></li>
 			
 		
 			
@@ -572,47 +611,11 @@
 			
 		
 			
-				<li><a href="/tags/php-redis/" title="php_redis">php_redis<sup>1</sup></a></li>
+				<li><a href="/tags/getcookie/" title="getcookie">getcookie<sup>1</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/php/" title="php">php<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/mvc/" title="mvc">mvc<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/observer/" title="observer">observer<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/redispool/" title="redispool">redispool<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/vim8-0/" title="vim8.0">vim8.0<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/signal/" title="signal">signal<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/json/" title="json">json<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/html/" title="html">html<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/beego-orm/" title="beego/orm">beego/orm<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/xorm/" title="xorm">xorm<sup>1</sup></a></li>
+				<li><a href="/tags/govendor/" title="govendor">govendor<sup>1</sup></a></li>
 			
 		
 		</ul>
