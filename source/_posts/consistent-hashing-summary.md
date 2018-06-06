@@ -2,7 +2,7 @@
 title: "一致性哈希算法总结" 
 date: 2017-01-16 11:02:50
 categories: [algorithm]
-tags: [golang]
+tags: [golang, hash]
 description:
 ---
 
