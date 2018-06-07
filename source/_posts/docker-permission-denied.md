@@ -1,8 +1,8 @@
 ---
 title: "Docker操作提示Get Permission Denied"
 date: 2018-06-06 15:40:41
-categories: docker
-tags: docker 
+categories: [docker-practice]
+tags: [docker] 
 description:
 ---
 
