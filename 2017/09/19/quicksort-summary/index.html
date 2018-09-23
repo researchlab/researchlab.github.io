@@ -4,25 +4,25 @@
 <head>
   <meta charset="UTF-8">
   
-    <title>优雅的关闭ticker | 一线攻城狮</title>
+    <title>快速排序算法总结 | 一线攻城狮</title>
     <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
     
     <meta name="author" content="Lee Hong">
     
 
     
-    <meta name="description" content="在ticker和goroutine组合使用中当调用ticker.Stop()关闭ticker之后，相应的goroutine中的ticker.C并没有停掉，下面总结一种优雅的方式关闭ticker.">
-<meta name="keywords" content="ticker">
+    <meta name="description" content="本文首先分别详细阐述了单向扫描、双向扫描快速排序算法原理,并用golang分别设计实现了这两种经典的快速排序算法; 然后本文从性能的角度分不同场景进一步讨论了快速排序改进算法并在文中通过程序设计实现了相关算法，最后基于上述场景从上述算法总结了快速算法的特性及适用场景;">
+<meta name="keywords" content="golang,quicksort">
 <meta property="og:type" content="article">
-<meta property="og:title" content="优雅的关闭ticker">
-<meta property="og:url" content="http://researchlab.github.io/2016/10/16/close-ticker-correctly/index.html">
+<meta property="og:title" content="快速排序算法总结">
+<meta property="og:url" content="http://researchlab.github.io/2017/09/19/quicksort-summary/index.html">
 <meta property="og:site_name" content="一线攻城狮">
-<meta property="og:description" content="在ticker和goroutine组合使用中当调用ticker.Stop()关闭ticker之后，相应的goroutine中的ticker.C并没有停掉，下面总结一种优雅的方式关闭ticker.">
+<meta property="og:description" content="本文首先分别详细阐述了单向扫描、双向扫描快速排序算法原理,并用golang分别设计实现了这两种经典的快速排序算法; 然后本文从性能的角度分不同场景进一步讨论了快速排序改进算法并在文中通过程序设计实现了相关算法，最后基于上述场景从上述算法总结了快速算法的特性及适用场景;">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2018-09-23T00:40:33.144Z">
+<meta property="og:updated_time" content="2018-09-23T00:40:33.152Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="优雅的关闭ticker">
-<meta name="twitter:description" content="在ticker和goroutine组合使用中当调用ticker.Stop()关闭ticker之后，相应的goroutine中的ticker.C并没有停掉，下面总结一种优雅的方式关闭ticker.">
+<meta name="twitter:title" content="快速排序算法总结">
+<meta name="twitter:description" content="本文首先分别详细阐述了单向扫描、双向扫描快速排序算法原理,并用golang分别设计实现了这两种经典的快速排序算法; 然后本文从性能的角度分不同场景进一步讨论了快速排序改进算法并在文中通过程序设计实现了相关算法，最后基于上述场景从上述算法总结了快速算法的特性及适用场景;">
 
     
     <link rel="alternative" href="/atom.xml" title="一线攻城狮" type="application/atom+xml">
@@ -75,14 +75,14 @@
 		<header class="article-info clearfix">
   <h1 itemprop="name">
     
-      <a href="/2016/10/16/close-ticker-correctly/" title="优雅的关闭ticker" itemprop="url">优雅的关闭ticker</a>
+      <a href="/2017/09/19/quicksort-summary/" title="快速排序算法总结" itemprop="url">快速排序算法总结</a>
   </h1>
   <p class="article-author">By
        
 		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
 		
   <p class="article-time">
-    <time datetime="2016-10-16T14:27:39.000Z" itemprop="datePublished"> 发表于 2016-10-16</time>
+    <time datetime="2017-09-19T10:04:47.000Z" itemprop="datePublished"> 发表于 2017-09-19</time>
     
   </p>
 </header>
@@ -91,14 +91,17 @@
 		<div id="toc" class="toc-article">
 			<strong class="toc-title">文章目录</strong>
 		
-			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#优雅的关闭ticker"><span class="toc-number">1.</span> <span class="toc-text">优雅的关闭ticker</span></a></li></ol>
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#单向扫描"><span class="toc-number">1.</span> <span class="toc-text">单向扫描</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#双向扫描"><span class="toc-number">2.</span> <span class="toc-text">双向扫描</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#三中值扫描"><span class="toc-number">3.</span> <span class="toc-text">三中值扫描</span></a></li></ol>
 		
 		</div>
 		
-		<p>在<code>ticker</code>和<code>goroutine</code>组合使用中当调用<code>ticker.Stop()</code>关闭<code>ticker</code>之后，相应的<code>goroutine</code>中的<code>ticker.C</code>并没有停掉，下面总结一种优雅的方式关闭<code>ticker</code>.<br><a id="more"></a></p>
-<h2 id="优雅的关闭ticker"><a href="#优雅的关闭ticker" class="headerlink" title="优雅的关闭ticker"></a>优雅的关闭<code>ticker</code></h2><figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">package</span> main</div><div class="line"><span class="keyword">import</span> (</div><div class="line">	<span class="string">"fmt"</span></div><div class="line">	<span class="string">"time"</span></div><div class="line">)</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</div><div class="line">	Demo()</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">Demo</span><span class="params">()</span></span> &#123;</div><div class="line">	done := startTicker(PrintInfo)</div><div class="line">	time.Sleep(time.Duration(<span class="number">12</span>) * time.Second)</div><div class="line">	<span class="built_in">close</span>(done)</div><div class="line">	time.Sleep(time.Duration(<span class="number">1</span>) * time.Minute)</div><div class="line">	fmt.Println(<span class="string">"main finished"</span>)</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">startTicker</span><span class="params">(f <span class="keyword">func</span>()</span>) <span class="title">chan</span> <span class="title">struct</span></span>&#123;&#125; &#123;</div><div class="line">	done := <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;, <span class="number">1</span>)</div><div class="line">	<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</div><div class="line">		ticker := time.NewTicker(<span class="number">5</span> * time.Second)</div><div class="line">		<span class="comment">//	ticker := time.NewTicker(5 * time.Minute)</span></div><div class="line">		<span class="keyword">defer</span> ticker.Stop()</div><div class="line"></div><div class="line">		<span class="keyword">for</span> &#123;</div><div class="line">			<span class="keyword">select</span> &#123;</div><div class="line">			<span class="keyword">case</span> &lt;-ticker.C:</div><div class="line">				f()</div><div class="line">			<span class="keyword">case</span> &lt;-done:</div><div class="line">				<span class="keyword">return</span></div><div class="line">			&#125;</div><div class="line">		&#125;</div><div class="line">	&#125;()</div><div class="line">	<span class="keyword">return</span> done</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">PrintInfo</span><span class="params">()</span></span> &#123;</div><div class="line">	fmt.Println(<span class="string">"hello"</span>)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>上述代码通过<code>startTicker</code>创建一个<code>ticker</code>, 当想要关闭这个<code>ticker</code>并同时退出对应<code>goroutine</code>中的<code>for</code>时，可以直接<code>close()</code>，发送<code>done</code>信号直接返回退出<code>startTicker</code>即可.</p>
-  
+		<p>本文首先分别详细阐述了单向扫描、双向扫描快速排序算法原理,并用golang分别设计实现了这两种经典的快速排序算法; 然后本文从性能的角度分不同场景进一步讨论了快速排序改进算法并在文中通过程序设计实现了相关算法，最后基于上述场景从上述算法总结了快速算法的特性及适用场景;<br><a id="more"></a></p>
+<blockquote>
+<p>快速排序是对冒泡排序的一种改进, 采用分治策略, 通过一趟排序将要排序的数据分割成独立的两部分，其中一部分的所有数据都比另外一部分的所有数据都要小，然后再按此方法对这两部分数据分别进行快速排序，整个排序过程可以递归进行，以此达到整个数据变成有序序列。</p>
+</blockquote>
+<p>下面首先来阐述快排的两种经典实现方式: 单向扫描及双向扫描,</p>
+<h2 id="单向扫描"><a href="#单向扫描" class="headerlink" title="单向扫描"></a>单向扫描</h2><p><strong>算法原理:</strong> 主要由两部分组成, 一部分是递归部分QuickSort, 它将调用partition进行划分, 并取得划分元素P, 然后分别对P之前的部分和P 之后的部分递归调用QuickSort; 另一部分是partition, 选取划分元素P（随机选取数组中的一个元素, 交换到数组末尾位置）, 定义两个标记值left和right, 随着划分的进行, 这两个标记值将数组分成三部分, left之左的部分是小于划分元素P的值, left和right之间的部分是大 于等于划分元素P的值（等于p的值没有必要进行交换）, right之右的部分是未划分的部分。运行中right自左向右遍历, left指向最左的一个不小于P的值, 当right遇见小于P的元素就与left当前索引的值交换, right和left同时前进，否则right直接前进，直到数组末尾，最后将P与left当前指向的值交换, 并且返回i的值;</p>
+<h2 id="双向扫描"><a href="#双向扫描" class="headerlink" title="双向扫描"></a>双向扫描</h2><h2 id="三中值扫描"><a href="#三中值扫描" class="headerlink" title="三中值扫描"></a>三中值扫描</h2>  
 	</div>
 		<div style="padding: 10px 44px 30px 44px;" >
 <div style="border: 1px dashed #e0e0e0; padding: 10px 10px 10px 10px; background-color: #fffeee; background-repeat: no-repeat; background-attachment: scroll; background-position: 1% 50%; -moz-background-size: auto auto; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">
@@ -107,8 +110,8 @@
 </div>
 <div>
  <p style="margin-top:0px;">作者署名：<b><a target="_blank" href="http://www.grdtechs.com/">朴实的一线攻城狮</a></b>
-<br />本文标题：<b><a href="/2016/10/16/close-ticker-correctly/" target="_blank" title="优雅的关闭ticker">优雅的关闭ticker</a></b> 
-<br />本文出处：<b><a href="/2016/10/16/close-ticker-correctly/" target="_blank" title="优雅的关闭ticker">http://researchlab.github.io/2016/10/16/close-ticker-correctly/</a></b>
+<br />本文标题：<b><a href="/2017/09/19/quicksort-summary/" target="_blank" title="快速排序算法总结">快速排序算法总结</a></b> 
+<br />本文出处：<b><a href="/2017/09/19/quicksort-summary/" target="_blank" title="快速排序算法总结">http://researchlab.github.io/2017/09/19/quicksort-summary/</a></b>
 <br />版权声明：本文由<b><a href="/about" target="_blank" title="Lee Hong">Lee Hong</a></b>创作和发表,采用<b>署名(BY)</b>-<b>非商业性使用(NC)</b>-<b>相同方式共享(SA)</b>国际许可协议进行许可,转载请注明作者及出处, 否则保留追究法律责任的权利。 </p>
 </div>
 </div>
@@ -120,13 +123,13 @@
 
 <div class="article-categories">
   <span></span>
-  <a class="article-category-link" href="/categories/golang/">golang</a>
+  <a class="article-category-link" href="/categories/algorithm/">algorithm</a>
 </div>
 
 
   <div class="article-tags">
   
-  <span></span> <a href="/tags/ticker/">ticker</a>
+  <span></span> <a href="/tags/golang/">golang</a><a href="/tags/quicksort/">quicksort</a>
   </div>
 
 </div>
@@ -172,18 +175,18 @@
 <nav class="article-nav clearfix">
  
  <div class="prev" >
- <a href="/2016/10/16/mac-update-vim8-0/" title="mac vim7.3 升级到vim8.0">
+ <a href="/2018/06/06/docker-permission-denied/" title="Docker操作提示Get Permission Denied">
   <strong>上一篇：</strong><br/>
   <span>
-  mac vim7.3 升级到vim8.0</span>
+  Docker操作提示Get Permission Denied</span>
 </a>
 </div>
 
 
 <div class="next">
-<a href="/2016/09/07/go-postform/"  title="Golang发送post表单请求">
+<a href="/2017/09/15/docker-registry-v2/"  title="搭建Docker Registry容器服务">
  <strong>下一篇：</strong><br/> 
- <span>Golang发送post表单请求
+ <span>搭建Docker Registry容器服务
 </span>
 </a>
 </div>
@@ -192,7 +195,7 @@
 
 	
 <section id="comments" class="comment">
-	<div class="ds-thread" data-thread-key="2016/10/16/close-ticker-correctly/" data-title="优雅的关闭ticker" data-url="http://researchlab.github.io/2016/10/16/close-ticker-correctly/"></div>
+	<div class="ds-thread" data-thread-key="2017/09/19/quicksort-summary/" data-title="快速排序算法总结" data-url="http://researchlab.github.io/2017/09/19/quicksort-summary/"></div>
 </section>
 
 

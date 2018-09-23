@@ -15,17 +15,17 @@
 <meta name="keywords" content="docker">
 <meta property="og:type" content="article">
 <meta property="og:title" content="docker实践--05 编写Dockerfile">
-<meta property="og:url" content="http://www.grdtechs.com/2017/03/07/docker-dockerfile/index.html">
+<meta property="og:url" content="http://researchlab.github.io/2017/03/07/docker-dockerfile/index.html">
 <meta property="og:site_name" content="一线攻城狮">
 <meta property="og:description" content="docker容器是在指定的镜像上运行的, 创建docker镜像的方法也有很多中比如直接到docker Hub上通过docker pull创建一个镜像, 也可以通过修改其它镜像然后提交修改docker commit 来创建新的镜像, 还有如导入某个现有的镜像, 但是在实际中难觅要定制化改进出符合特定场景的镜像, 虽然用上述方式也是可以创建新的镜像的, 但是缺点也很多, 主要缺点是不便于维护, 其实创">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:image" content="http://www.grdtechs.com/2017/03/07/docker-dockerfile/imgs/apache.png">
-<meta property="og:image" content="http://www.grdtechs.com/2017/03/07/docker-dockerfile/imgs/simplecloudhp.png">
-<meta property="og:updated_time" content="2018-08-07T03:40:14.108Z">
+<meta property="og:image" content="http://researchlab.github.io/2017/03/07/docker-dockerfile/imgs/apache.png">
+<meta property="og:image" content="http://researchlab.github.io/2017/03/07/docker-dockerfile/imgs/simplecloudhp.png">
+<meta property="og:updated_time" content="2018-09-23T00:40:33.148Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="docker实践--05 编写Dockerfile">
 <meta name="twitter:description" content="docker容器是在指定的镜像上运行的, 创建docker镜像的方法也有很多中比如直接到docker Hub上通过docker pull创建一个镜像, 也可以通过修改其它镜像然后提交修改docker commit 来创建新的镜像, 还有如导入某个现有的镜像, 但是在实际中难觅要定制化改进出符合特定场景的镜像, 虽然用上述方式也是可以创建新的镜像的, 但是缺点也很多, 主要缺点是不便于维护, 其实创">
-<meta name="twitter:image" content="http://www.grdtechs.com/2017/03/07/docker-dockerfile/imgs/apache.png">
+<meta name="twitter:image" content="http://researchlab.github.io/2017/03/07/docker-dockerfile/imgs/apache.png">
 
     
     <link rel="alternative" href="/atom.xml" title="一线攻城狮" type="application/atom+xml">
@@ -63,7 +63,7 @@
 					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
 						<label>Search</label>
 						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
-						<input type="hidden" name="q" value="site:www.grdtechs.com">
+						<input type="hidden" name="q" value="site:researchlab.github.io">
 					</form>
 					
 					</li>
@@ -178,7 +178,7 @@
 <div>
  <p style="margin-top:0px;">作者署名：<b><a target="_blank" href="http://www.grdtechs.com/">朴实的一线攻城狮</a></b>
 <br />本文标题：<b><a href="/2017/03/07/docker-dockerfile/" target="_blank" title="docker实践--05 编写Dockerfile">docker实践--05 编写Dockerfile</a></b> 
-<br />本文出处：<b><a href="/2017/03/07/docker-dockerfile/" target="_blank" title="docker实践--05 编写Dockerfile">http://www.grdtechs.com/2017/03/07/docker-dockerfile/</a></b>
+<br />本文出处：<b><a href="/2017/03/07/docker-dockerfile/" target="_blank" title="docker实践--05 编写Dockerfile">http://researchlab.github.io/2017/03/07/docker-dockerfile/</a></b>
 <br />版权声明：本文由<b><a href="/about" target="_blank" title="Lee Hong">Lee Hong</a></b>创作和发表,采用<b>署名(BY)</b>-<b>非商业性使用(NC)</b>-<b>相同方式共享(SA)</b>国际许可协议进行许可,转载请注明作者及出处, 否则保留追究法律责任的权利。 </p>
 </div>
 </div>
@@ -262,7 +262,7 @@
 
 	
 <section id="comments" class="comment">
-	<div class="ds-thread" data-thread-key="2017/03/07/docker-dockerfile/" data-title="docker实践--05 编写Dockerfile" data-url="http://www.grdtechs.com/2017/03/07/docker-dockerfile/"></div>
+	<div class="ds-thread" data-thread-key="2017/03/07/docker-dockerfile/" data-title="docker实践--05 编写Dockerfile" data-url="http://researchlab.github.io/2017/03/07/docker-dockerfile/"></div>
 </section>
 
 
@@ -303,7 +303,7 @@
 		  
 		
 		  
-			<li><a href="/categories/algorithm/" title="algorithm">algorithm<sup>1</sup></a></li>
+			<li><a href="/categories/algorithm/" title="algorithm">algorithm<sup>2</sup></a></li>
 		  
 		
 		  
@@ -341,7 +341,7 @@
 		<ul class="clearfix">
 		
 			
-				<li><a href="/tags/golang/" title="golang">golang<sup>24</sup></a></li>
+				<li><a href="/tags/golang/" title="golang">golang<sup>25</sup></a></li>
 			
 		
 			
