@@ -16,7 +16,7 @@ Http缓存机制作为web性能优化的重要手段, 本文对网络中，工�
 
 下文总结的http缓存主要指浏览器缓存和代理服务器缓存
 
-<center>![cache](imgs/cache_where.png)</center>
+<center>![cache](cache_where.png)</center>
 
 上图中有三个角色，浏览器, Web代理和服务器，如图所示Http缓存存在于浏览器和Web代理中。
 当然在服务器内部，也存在着各种缓存，但这已经不是本文要讨论的Http缓存了。
@@ -26,7 +26,7 @@ Http缓存机制作为web性能优化的重要手段, 本文对网络中，工�
 
 ETag全称Entity Tag，用来标识一个资源。在具体的实现中，ETag可以是资源的hash值，也可以是一个内部维护的版本号。但不管怎样，ETag应该能反映出资源内容的变化，这是Http缓存可以正常工作的基础。
 
-<center>![ETag](imgs/etag.png)</center>
+<center>![ETag](/etag.png)</center>
 
 如上例中所展示的，服务器在返回响应时，通常会在Http头中包含一些关于响应的元数据信息，其中，ETag就是其中一个，本例中返回了值为`x1323ddx`的`ETag`。当资源/file的内容发生变化时，服务器应当返回不同的ETag。
 
@@ -40,7 +40,7 @@ ETag全称Entity Tag，用来标识一个资源。在具体的实现中，ETag�
 
 对于同一个资源，比如上一例中的/file，在进行了一次请求之后，浏览器就已经有了/file的一个版本的内容，和这个版本的ETag，当下次用户再需要这个资源，浏览器再次向服务器请求的时候，可以利用请求头If-None-Match来告诉服务器自己已经有个ETag为x1323ddx的/file，这样，如果服务器上的/file没有变化，也就是说服务器上的/file的ETag也是x1323ddx的话，服务器就不会再返回/file的内容，而是返回一个304的响应，告诉浏览器该资源没有变化，缓存有效。
 
-<center>![If-None-Match](imgs/if-none-match.png)</center>
+<center>![If-None-Match](/if-none-match.png)</center>
 
 如上例中所示，在使用了If-None-Match之后，服务器只需要很小的响应就可以达到相同的结果，从而优化了性能。
 
@@ -72,7 +72,7 @@ ETag全称Entity Tag，用来标识一个资源。在具体的实现中，ETag�
 
 Cache-Control 有这么多字段可用来控制缓存策略， 那到底是怎么用的? ， 下面通过一张图来表述一个资源的Cache-Control策略,
 
-<center>![cache-control-work-flow](imgs/cache_control_workflow.png)</center>
+<center>![cache-control-work-flow](/cache_control_workflow.png)</center>
 
 ## 缓存新鲜度
 
@@ -86,17 +86,17 @@ Web服务器通过2种方式来判断浏览器缓存是否是最新的。
 1.浏览器客户端想请求一个文档, 首先检查本地缓存, 发现存在这个文档的缓存, 获取缓存中文档的最后修改时间, 通过:If-Modified-Since， 发送Request给Web服务器。
 2.Web服务器收到Request, 将服务器的文档修改时间(Last-Modified):跟request header中的, If-Modified-Since相比较, 如果时间是一样的, 说明缓存还是最新的, Web服务器将发送`304 Not Modified`给浏览器客户端, 告诉客户端直接使用缓存里的版本。如下图。
 
-<center>![cache 304](imgs/cache_304.png)</center>
+<center>![cache 304](/cache_304.png)</center>
 
 3.假如该文档已经被更新了。Web服务器将发送该文档的最新版本给浏览器客户端， 如下图。
 
-<center>![cache 200](imgs/cache_200.png)</center>
+<center>![cache 200](/cache_200.png)</center>
 
 ** 第二种: ** 服务器通过比对客户端请求发来的"If-None-Match"带上的Etag值, 如果一致则表示可以使用本地缓存，如果不一致表示服务器内容有更新，此时会重新发一份新的给客户端。
 
 至此，浏览器端http cache 的大致流程可总结如图，
 
-<center>![cache workflow](imgs/cache_workflow.png)</center>
+<center>![cache workflow](/cache_workflow.png)</center>
 
 ** <font color=red>Etag/If-None-Match:</font>Etag/If-None-Match要配合Cache-Control使用。**
 
@@ -167,7 +167,7 @@ Content-Length: 3534
 
 首先我将 Http 缓存体系分为以下三个部分:
 
-<center>![cache](imgs/cache_sys.png)</center>
+<center>![cache](/cache_sys.png)</center>
 
 ** 1.缓存存储策略 **
 
@@ -204,7 +204,7 @@ Expires: 当前客户端时间 + maxAge。
 
 以上就是我所认识的缓存策略，下面我将缓存策略三要素和常用的几个缓存头(项)结合一起，让大家更清晰的认识到它们之间的关系:
 
-<center>![cache sys relation](imgs/cache_sys_relation.png)</center>
+<center>![cache sys relation](/cache_sys_relation.png)</center>
 
 通过上图可以清晰的看到各缓存项分别属于哪个缓存策略范畴，这其中有部分重叠，它表明这些缓存项具有多重缓存策略，所以实际在分析缓存头的时候，除了常规的头外，我们还需要将这些具有双重缓存策略的项分解开来。
 现在回到最开始提到的2道题目,
@@ -250,7 +250,7 @@ Expires: 当前时间
 a)对比失败: 服务器返回200并重发数据, 客户端接收到数据后展示, 并刷新本地缓存。
 b)对比成功: 服务器返回304且不重发数据, 客户端收到304状态码后从本地读取缓存数据。
 
-<center>![cache_data](imgs/cache_data1.jpg)</center>
+<center>![cache_data](cache_data1.jpg)</center>
 
 这道题本身不难, 但若认为no-cache不会缓存数据到本地, 那么你理解起来就会很矛盾, 因为如果文件数据没有被本地缓存, 服务器返回304后将会无法展示出图片内容, 但实际上它是能正常展示的。这道题很好的证明了no-cache也会缓存数据到本地这一说法。
 

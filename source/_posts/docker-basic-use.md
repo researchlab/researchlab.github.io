@@ -78,7 +78,7 @@ c1760b8f9359        nginx               "nginx -g 'daemon ..."   3 hours ago    
 
 此时就可以在浏览器中输入`http://0.0.0.0/`, 看到nginx服务器的欢迎界面咯，
 
-<center>![webserver-nginx](imgs/hi-nginx.png)</center>
+<center>![webserver-nginx](docker-basic-use/hi-nginx.png)</center>
 
 可以通过`docker stats`命令查看当前所有container的运行状态,`docker stats` 可以查看到运行状态容器的CPU，内存及网络使用率。在实际工作中，我们通常会把这个命令的输出连接到类似Logstash一类的服务用来分析。
 ```bash

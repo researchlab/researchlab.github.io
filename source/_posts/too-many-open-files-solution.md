@@ -13,7 +13,7 @@ description:
 
 程序经常访问的文件、socket等在Linux中都是指的文件file，系统需要记录每个当前访问file的name、location、access authority等相关信息，这样的一个实体被称为file entry。`open files table`存储这些file entry，以数组的形式线性管理。文件描述符(file descriptor)是作为`进程`到`open files table`的指针，也就是`open files table`的下标索引，将每个进程与它所访问的文件关联起来了。 
 
-<center>![too many open files theory](imgs/too-many-files.jpg)</center>
+<center>![too many open files theory](too-many-files.jpg)</center>
 
  每个进程中都有一个`file descriptor table`管理当前进程所访问(open or create)的所有文件file，文件描述符关联着`open files table`中文件的file entry。对于`open files table`能容纳多少file entry, 可由Linux系统配置`open files table`的文件限制，如果超过配置值，就会拒绝其它文件操作的请求，并抛出Too many open files异常。这种限制有系统级和用户级之分。 
 

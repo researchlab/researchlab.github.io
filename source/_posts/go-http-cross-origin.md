@@ -17,7 +17,7 @@ server提供api服务直接对接前端js, 但是存在跨域问题，本文使�
 
 一般的，发起跨域请求而没有被设置许可跨域时，则会返回类型下面的说明
 
-<center>![cross-website](/imgs/cross-website.png)</center>
+<center>![](cross_website.png)</center>
 
 上面返回提示说明: 跨域请求并非是浏览器限制了发起跨站请求，而是请求可以正常发起，到达服务器端，但是服务器返回的结果会被浏览器拦截。
 

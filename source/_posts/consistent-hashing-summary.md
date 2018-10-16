@@ -32,7 +32,7 @@ description:
 
 考虑通常的hash算法都是将value映射到一个32位的key值, 也即是0~2^32-1次方的数值空间上; 可以将这个空间想象成一个首(0)尾(2^32-1)相接的圆环, 如图1所示,
 
-<center>![hash ring](imgs/hashring.jpg)图1 环形hash空间</center>
+<center>![](consistent-hashing-summary/hashring.jpg)<br>图1 环形hash空间</center>
 
 ** 2 把对象映射到hash空间 **
 
@@ -42,7 +42,7 @@ hash(object1) = key1;
 … …
 hash(object4) = key4;
 
-<center>![hash ring](imgs/object.jpg)图2 4个对象的key值分布</center>
+<center>![hash ring](consistent-hashing-summary/object.jpg)图2 4个对象的key值分布</center>
 
 ** 3 把cache server映射到hash空间 **
 
@@ -54,7 +54,7 @@ hash(cache A) = key A;
 … …
 hash(cache C) = key C;
 
-<center>![hash ring](imgs/cache.jpg)图3 cache server 和对象的key值分布</center>
+<center>![hash ring](consistent-hashing-summary/cache.jpg)图3 cache server 和对象的key值分布</center>
 
 <font color=red>通常cache server的hash计算, 是用cache机器的IP地址或机器名作为hash输入, 后继的实现案例中利用了cache server的IP地址作为参数因子。</font>
 
@@ -74,13 +74,13 @@ hash(cache C) = key C;
 
 因此这里仅需要变动对象object4，将其重新映射到cache server C上即可; 参见图4。
 
-<center>![hash ring](imgs/remove.jpg)图4 Cache server B被移除后的cache server映射</center>
+<center>![hash ring](consistent-hashing-summary/remove.jpg)图4 Cache server B被移除后的cache server映射</center>
 
 5.2 添加cache server
 
 再考虑添加一台新的cache server D的情况，假设在这个环形hash空间中，cache server D被映射在对象object2和object3之间。这时受影响的将仅是那些沿cache server D逆时针遍历直到下一个cache server (cache server B)之间的对象(它们是也本来映射到cache server C上对象的一部分)，将这些对象重新映射到cache server D上即可。因此这里仅需要变动对象object2, 将其重新映射到cache server D上; 参见图5。
 
-<center>![hash ring](imgs/add.jpg)图5 添加cache server D后的映射关系</center>
+<center>![hash ring](consistent-hashing-summary/add.jpg)图5 添加cache server D后的映射关系</center>
 
 ** 6 虚拟节点 **
 
@@ -93,7 +93,7 @@ hash(cache C) = key C;
 
 仍以仅部署cache server A 和cache server C 的情况为例, 在图4中我们已经看到, cache server分布并不均匀。现在我们引入虚拟节点，并设置"复制个数"为2，这就意味着一共会存在4个"虚拟节点", cache server A1, cache server A2代表了cache server A; cache server C1, cache server C2代表了cache server C; 假设一种比较理想的情况，参见图6,
 
-<center>![hash ring](imgs/virtual.jpg)图6 引入"虚拟节点"后的映射关系</center>
+<center>![hash ring](consistent-hashing-summary/virtual.jpg)图6 引入"虚拟节点"后的映射关系</center>
 
 此时, 对象到"虚拟节点"的映射关系为:
 
@@ -103,7 +103,7 @@ objec1->cache A2; objec2->cache A1; objec3->cache C1; objec4->cache C2;
 
 引入"虚拟节点"后, 映射关系就从`{对象->节点}`转换到了`{对象->虚拟节点}`。查询物体所在cache server时的映射关系如图7所示,
 
-<center>![object to virtual node](imgs/map.jpg)图7 查询对象所在cache server</center>
+<center>![object to virtual node](consistent-hashing-summary/map.jpg)图7 查询对象所在cache server</center>
 
 "虚拟节点"的hash计算可以采用对应节点的IP地址加数字后缀的方式。例如假设cache server A 的IP地址为202.168.14.241。
 

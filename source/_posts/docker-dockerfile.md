@@ -114,7 +114,7 @@ lihong@dev:~/docker$ docker run -d -p 80:80 --name web1 test:0.1
 27479a43f119d213509c9af6cdfcd43330f55ed0c4fbeb08fbc3dd434744f36e
 ```
 通过firefox浏览器打开localhost进行测试，apache已运行,
-<center>![apache](imgs/apache.png)</center>
+<center>![apache](docker-dockerfile/apache.png)</center>
 
 ## 编写Dockerfile常用命令
 如果构建镜像需求变更, 则只需将其增加到Dockerfile中即可。
@@ -300,7 +300,7 @@ lihong@dev:~/docker$ docker run -d -p 80:80 --name web test:0.2
 0221f5e699201a0f2d6757289970752ec696fa8fcb25b91bff7134d78af20a7e
 ```
 在firefox输入本地地址访问127.0.0.1，看到我们克隆的琛石科技的网站,
-<center>![website](imgs/simplecloudhp.png)</center>
+<center>![website](docker-dockerfile/simplecloudhp.png)</center>
 
 ## 总结
 

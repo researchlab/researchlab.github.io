@@ -60,7 +60,7 @@ description:
 （3）静态方法的调用；
 
 下面是依赖关系的uml示意图：
-![uml-dependency](/imgs/uml_dependency.png)
+![uml-dependency](uml_dependency.png)
 
 > 1.综合上图，Class-A类的实现依赖Class-B类，即Class-A类可能要用到Class-B类的一些方法，即，要完成Class-A里的所有功能，一定要有Class-B类的某些方法协助才行.
 
@@ -69,7 +69,7 @@ description:
 在uml中，`关联`表示为`带箭头的实线`。关联可以是单向的，也可以是双向的, 还有自身关联是指拥有一个自身的引用。如果是双向关联，则可以表示为双向箭头，或者没有箭头,双向关联是指双方都拥有对方的引用, 都可以调用对方的公共属性和方法。一般来说，系统设计应表现为单向关联，这样利于维护。一个关联可以附加`多重性`的修饰符，表示两个类之间的数量关系。关联可以理解为：`一个类（A）持有另一个类或对象（B）`。具体表现为：
 
 下面是关联关系的uml示例图：
-![uml-association](/imgs/uml_association.png)
+![uml-association](uml_association.png)
 
 > 1.上面的关联表示，一个Employee持有(has)0个或多个TimeCard，从而可以调用其中的属性或方法，但Employee与TimeCard之间没有生命期的依赖。
 
@@ -79,7 +79,7 @@ description:
 
 下面是聚合关系的uml示意图：
 
-![uml-aggregation](/imgs/uml_aggregation.png)
+![uml-aggregation](uml_aggregation.png)
 
 > 从代码上看，聚合和关联没有任何区别。这里仅仅体现一种概念上的含义。在创建ClassA的时候，不一定需要同时创建ClassB的实例。 表示ClassA由ClassB聚合而成，但ClassB可以独立存在。
 
@@ -89,7 +89,7 @@ description:
 
 下面是组合关系的uml示例图：
 
-![uml-composition](/imgs/uml_composition.png) 
+![uml-composition](uml_composition.png) 
 
 ## 泛化（`Generalization`）
 
@@ -97,7 +97,7 @@ description:
 
 下面是泛化关系的uml图：
 
-![uml-generalization](/imgs/uml_generalization.png)
+![uml-generalization](uml_generalization.png)
 
 ## 实现（`Realization`）
 
@@ -105,11 +105,11 @@ description:
 
 下面的实现的uml图：
 
-![uml-realization](/imgs/uml_realization.png)
+![uml-realization](uml_realization.png)
 
 下面通过一副类图包含上述六类常用关系,
 
-![uml-all-class](/imgs/uml_all_class.png)
+![uml-all-class](uml_all_class.png)
 
 > 1. 依赖: 动物依赖氧气，水.
 > 2. 关联: 当一个类知道另一个类时，可以用关联关系。现在企鹅需要知道气候的变化，了解气候的变化规律. 

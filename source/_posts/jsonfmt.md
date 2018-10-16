@@ -106,6 +106,6 @@ document.getElementById('output2').innerHTML = highLight(str);
 ```
 
 上述示例的效果如图:
-<center>![jsonformat](/imgs/jsonfmt.png)</center>
+<center>![](jsonfmt.png)</center>
 
 [详见github示例代码](https://github.com/researchlab/CodeSnippets/blob/master/json.html)

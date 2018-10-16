@@ -71,14 +71,14 @@ mysql > source ./crm_adapter_db.sql;
 
 ** mysqldump vs source **
 mysqldump虽然好用, 但它实际上也是运用先登录在运行脚本的策略, 只是其中的细节我们无需关心, 但是, 因为其中有很多远程连接细节, 我们有可能遭遇中文乱码问题。
-<center>![mysqldump 乱码](imgs/mysqldump_error.png)</center>
+<center>![mysqldump 乱码](mysqldump_error.png)</center>
 
 关于为何在使用mysqldump做导入时会出现中文乱码问题, 我们先用mysql命令登入, 然后输入下面的命令:
 ```bash 
 mysql > show variables like 'character%';
 ```
 
-<center>![mysqldump character error](imgs/mysqldump_ret.png)</center>
+<center>![mysqldump character error](mysqldump_ret.png)</center>
 
 是否注意到红圈部分的编码是latin1? latin1是MySQL的默认字符集, 可能由于某种原因你没有指定默认编码, 它就会默认为latin1了, 这就是你中文乱码出现的原因。
 

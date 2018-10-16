@@ -46,7 +46,7 @@ $ npm install
 
 Travis CI本身已经是很好的自动构建的工具，而这里使用的原因，本质上是因为Hexo本身并不能进行多人合作。Hexo的hexo generate和hexo deploy会自动渲染并提交到GitHub上，所以当你从别的电脑上clone的时候，clone下来的是渲染好的html的文章。就算我在两个电脑上同时搭建了环境，但是每次渲染的时候只会渲染本地的markdown文章，依然不能进行同步。有些人选择了使用百度云进行同步，每次写之前下载下来并覆盖，就能进行同步。不否认，这个方法对于一个人写博客，在工作和家的电脑还算是比较方便的，因为始终是一个人进行操作。而我们的博客是多人共同写的，所以说会存在各种冲突问题，于是想到了用Travis CI。
 
-<center>![travis-hexo-flowing](/imgs/travis-hexo-flowing.png)</center>
+<center>![travis-hexo-flowing](travis-hexo-flowing.png)</center>
 
 从上述流程中分析下思路：
 前提：我们在之前博客搭建的repo下面，新建一个blog的分支，这个分支用来进行环境代码的备份，并且配置出`.travis.yml`进行自动化构建。
@@ -75,7 +75,7 @@ Dev repo - sync -> Travis CI
 
 即将`id_rsa.pub`秘钥添加到当前项目`researchlab.github.io`下`Settings`下的`Deploy keys`中，如图:
 
-<center>![deploy_keys](/imgs/deploy_keys.png)</center>
+<center>![deploy_keys](deploy_keys.png)</center>
 
 > 记得要将 `Allow write access` 的选项选上，这样 Travis CI 才能获得 push 代码的权限。 
 

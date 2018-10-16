@@ -21,12 +21,12 @@ description:
 `MVC`三者之间的关系如图所示:
 
 <center>
-![MVC pattern Diagram](/imgs/mvc-collaboration.png)
+![MVC pattern Diagram](mvc-collaboration.png)
 </center>
 
 本文设计的`MVC`demo目录如下
 <center>
-![mvc structure](/imgs/mvc-structure.png)
+![mvc structure](mvc-structure.png)
 </center>
 
 ## Controller 层 
@@ -68,7 +68,7 @@ class Controller {
 
 `MVC`时序图
 <center>
-![MVC Sequence Diagram](/imgs/mvc-sequence1.png)   
+![MVC Sequence Diagram](mvc-sequence1.png)   
 </center>
 
 ## Model 和 Entity 类

@@ -11,7 +11,7 @@ description:
 
 ## 实现观察者模式 
 观察者模式有很多实现方式，从根本上说，该模式必须包含两个角色：观察者(Observer)和被观察对象(Subject)。
-<center>![observer_pattern](/imgs/observer_pattern.jpg)</center>
+<center>![observer_pattern](observer_pattern.jpg)</center>
 - 观察者
 观察者（`Observer`）将自己注册到被观察对象（`Subject`）中，被观察对象将观察者存放在一个容器（`Container`）里。
 
