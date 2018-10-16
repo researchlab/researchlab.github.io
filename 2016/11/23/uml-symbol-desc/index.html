@@ -19,18 +19,18 @@
 <meta property="og:site_name" content="一线攻城狮">
 <meta property="og:description" content="在UML的定义中，描述类和对象之间的关系，包括以下几种方式：依赖（Dependency）、关联（Association）、聚合（Aggregation）、组合（Composition）、泛化（Generalization）和实现（Realization）。现分别说明如下：">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:image" content="http://researchlab.github.io/2016/11/23/uml-symbol-desc/imgs/uml_dependency.png">
-<meta property="og:image" content="http://researchlab.github.io/2016/11/23/uml-symbol-desc/imgs/uml_association.png">
-<meta property="og:image" content="http://researchlab.github.io/2016/11/23/uml-symbol-desc/imgs/uml_aggregation.png">
-<meta property="og:image" content="http://researchlab.github.io/2016/11/23/uml-symbol-desc/imgs/uml_composition.png">
-<meta property="og:image" content="http://researchlab.github.io/2016/11/23/uml-symbol-desc/imgs/uml_generalization.png">
-<meta property="og:image" content="http://researchlab.github.io/2016/11/23/uml-symbol-desc/imgs/uml_realization.png">
-<meta property="og:image" content="http://researchlab.github.io/2016/11/23/uml-symbol-desc/imgs/uml_all_class.png">
-<meta property="og:updated_time" content="2018-10-16T09:40:11.122Z">
+<meta property="og:image" content="http://researchlab.github.io/imgs/uml_dependency.png">
+<meta property="og:image" content="http://researchlab.github.io/imgs/uml_association.png">
+<meta property="og:image" content="http://researchlab.github.io/imgs/uml_aggregation.png">
+<meta property="og:image" content="http://researchlab.github.io/imgs/uml_composition.png">
+<meta property="og:image" content="http://researchlab.github.io/imgs/uml_generalization.png">
+<meta property="og:image" content="http://researchlab.github.io/imgs/uml_realization.png">
+<meta property="og:image" content="http://researchlab.github.io/imgs/uml_all_class.png">
+<meta property="og:updated_time" content="2018-10-16T11:36:24.594Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="UML类图中符号定义,作用及区别总结">
 <meta name="twitter:description" content="在UML的定义中，描述类和对象之间的关系，包括以下几种方式：依赖（Dependency）、关联（Association）、聚合（Aggregation）、组合（Composition）、泛化（Generalization）和实现（Realization）。现分别说明如下：">
-<meta name="twitter:image" content="http://researchlab.github.io/2016/11/23/uml-symbol-desc/imgs/uml_dependency.png">
+<meta name="twitter:image" content="http://researchlab.github.io/imgs/uml_dependency.png">
 
     
     <link rel="alternative" href="/atom.xml" title="一线攻城狮" type="application/atom+xml">
@@ -156,32 +156,32 @@
 </ul>
 <p>下面详细阐述类图中六类常用关系,</p>
 <h2 id="依赖（Dependency）"><a href="#依赖（Dependency）" class="headerlink" title="依赖（Dependency）"></a>依赖（<code>Dependency</code>）</h2><p>在uml中，<code>依赖</code>表示为<code>带箭头的虚线</code>，<code>箭头指向被依赖的元素</code>。是类与类之间的连接，表示为一个类依赖于另一个类的定义，其中一个类的变化将影响另一个类。依赖总是单向的，不应该存在双向依赖，这一点要特别注意。更具体的说，依赖可以理解为：<code>一个类（A）对不在其实例作用域内的另一个类或对象（B）的任何类型的引用</code>。大致包含以下几种情况：<br>（1）局部变量；<br>（2）方法的参数；<br>（3）静态方法的调用；</p>
-<p>下面是依赖关系的uml示意图：<br><img src="/2016/11/23/uml-symbol-desc/imgs/uml_dependency.png" alt="uml-dependency"></p>
+<p>下面是依赖关系的uml示意图：<br><img src="/imgs/uml_dependency.png" alt="uml-dependency"></p>
 <blockquote>
 <p>1.综合上图，Class-A类的实现依赖Class-B类，即Class-A类可能要用到Class-B类的一些方法，即，要完成Class-A里的所有功能，一定要有Class-B类的某些方法协助才行.</p>
 </blockquote>
 <h2 id="关联（Association）"><a href="#关联（Association）" class="headerlink" title="关联（Association）"></a>关联（<code>Association</code>）</h2><p>在uml中，<code>关联</code>表示为<code>带箭头的实线</code>。关联可以是单向的，也可以是双向的, 还有自身关联是指拥有一个自身的引用。如果是双向关联，则可以表示为双向箭头，或者没有箭头,双向关联是指双方都拥有对方的引用, 都可以调用对方的公共属性和方法。一般来说，系统设计应表现为单向关联，这样利于维护。一个关联可以附加<code>多重性</code>的修饰符，表示两个类之间的数量关系。关联可以理解为：<code>一个类（A）持有另一个类或对象（B）</code>。具体表现为：</p>
-<p>下面是关联关系的uml示例图：<br><img src="/2016/11/23/uml-symbol-desc/imgs/uml_association.png" alt="uml-association"></p>
+<p>下面是关联关系的uml示例图：<br><img src="/imgs/uml_association.png" alt="uml-association"></p>
 <blockquote>
 <p>1.上面的关联表示，一个Employee持有(has)0个或多个TimeCard，从而可以调用其中的属性或方法，但Employee与TimeCard之间没有生命期的依赖。</p>
 </blockquote>
 <h2 id="聚合（Aggregation）"><a href="#聚合（Aggregation）" class="headerlink" title="聚合（Aggregation）"></a>聚合（<code>Aggregation</code>）</h2><p>在uml中，<code>聚合</code>表示为<code>空心的菱形箭头线</code>。<code>聚合关系</code>是关联关系的一种，表示一种<code>强</code>关联关系。对比<code>关联关系</code>，两个类是处于同一个层次的。而聚合关系，两个类处于不同的层次，强调了一个整体/局部的关系。例如一辆汽车有一个引擎，4个轮胎。在聚合关系中，体现了一种<code>弱拥有</code>的概念。也就是说，对象A拥有对象B，但B并不是A的组成部分。更具体的表现为，如果A由B聚合而成，则A包含B的全局对象，但B对象可以不在A对象创建时创建。回到前面的例子，汽车对象由轮胎对象聚合而成，但是轮胎对象的生命期并不受汽车对象的左右。当汽车对象销毁时，轮胎对象也可以单独存在！</p>
 <p>下面是聚合关系的uml示意图：</p>
-<p><img src="/2016/11/23/uml-symbol-desc/imgs/uml_aggregation.png" alt="uml-aggregation"></p>
+<p><img src="/imgs/uml_aggregation.png" alt="uml-aggregation"></p>
 <blockquote>
 <p>从代码上看，聚合和关联没有任何区别。这里仅仅体现一种概念上的含义。在创建ClassA的时候，不一定需要同时创建ClassB的实例。 表示ClassA由ClassB聚合而成，但ClassB可以独立存在。</p>
 </blockquote>
 <h2 id="组合（Composition）"><a href="#组合（Composition）" class="headerlink" title="组合（Composition）"></a>组合（<code>Composition</code>）</h2><p>在uml中，<code>组合</code>表示为<code>实心菱形箭头线</code>。组合也叫合成。合成关系强调了比聚合关系更加强的整体/部分的关联，例如人和四肢。和聚合关系所不同的是，在组合关系中，虽然局部不一定随着整体的销毁而销毁，但整体要么负责保持局部的存活状态，要么负责将其销毁。也就是说，组合关系中，局部的存活期一定是小于，最多是等于整体的存活期的。</p>
 <p>下面是组合关系的uml示例图：</p>
-<p><img src="/2016/11/23/uml-symbol-desc/imgs/uml_composition.png" alt="uml-composition"> </p>
+<p><img src="/imgs/uml_composition.png" alt="uml-composition"> </p>
 <h2 id="泛化（Generalization）"><a href="#泛化（Generalization）" class="headerlink" title="泛化（Generalization）"></a>泛化（<code>Generalization</code>）</h2><p><code>泛化也就是通常所谓的继承关系</code>，在uml中表示为一个<code>带空心三角的实线</code>。表示为is-a的关系，是对象间耦合度最大的一种关系，子类继承父类的所有细节，并可以在此基础上添加自己的特性。</p>
 <p>下面是泛化关系的uml图：</p>
-<p><img src="/2016/11/23/uml-symbol-desc/imgs/uml_generalization.png" alt="uml-generalization"></p>
+<p><img src="/imgs/uml_generalization.png" alt="uml-generalization"></p>
 <h2 id="实现（Realization）"><a href="#实现（Realization）" class="headerlink" title="实现（Realization）"></a>实现（<code>Realization</code>）</h2><p>所谓<code>实现</code>就是<code>类对接口的定义实现</code>，表示类是接口所有特征和行为的实现。表现为<code>带箭头的虚线</code>。</p>
 <p>下面的实现的uml图：</p>
-<p><img src="/2016/11/23/uml-symbol-desc/imgs/uml_realization.png" alt="uml-realization"></p>
+<p><img src="/imgs/uml_realization.png" alt="uml-realization"></p>
 <p>下面通过一副类图包含上述六类常用关系,</p>
-<p><img src="/2016/11/23/uml-symbol-desc/imgs/uml_all_class.png" alt="uml-all-class"></p>
+<p><img src="/imgs/uml_all_class.png" alt="uml-all-class"></p>
 <blockquote>
 <ol>
 <li>依赖: 动物依赖氧气，水.</li>

@@ -20,7 +20,7 @@
 <meta property="og:description" content="很早就使用docker了，只是工作上一直没用起来， 加之工作多/杂，就只是断断续续自己瞎折腾，现在打算系统的整理总结一下docker使用经历，这个第一篇主要总结一下几个方面，">
 <meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="http://researchlab.github.io/2017/03/04/docker-basic-use/imgs/hi-nginx.png">
-<meta property="og:updated_time" content="2018-10-16T09:40:11.118Z">
+<meta property="og:updated_time" content="2018-10-16T11:36:24.590Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="docker实践--01 创建docker应用">
 <meta name="twitter:description" content="很早就使用docker了，只是工作上一直没用起来， 加之工作多/杂，就只是断断续续自己瞎折腾，现在打算系统的整理总结一下docker使用经历，这个第一篇主要总结一下几个方面，">
@@ -123,7 +123,7 @@
 <p>注: 在国内直接运行docker run -d -p 80:80 –name webserver nginx 命令多半会出现xxx Timeout 的提示，因为国内docker Hub站点被强了，所以需要先更换Docker Hub源再运行上述docker run 命令就可以成功，要更换Docker Hub源可以通过DaoCloud公司提供的Docker Hub加速器地址来解决， 具体做法可参考<a href="http://blog.daocloud.io/how-to-master-docker-image/" target="_blank" rel="noopener">how to master docker image</a>; </p>
 </blockquote>
 <p>此时就可以在浏览器中输入<code>http://0.0.0.0/</code>, 看到nginx服务器的欢迎界面咯，</p>
-<center><img src="/2017/03/04/docker-basic-use/imgs/hi-nginx.png" alt="webserver-nginx"></center>
+<center><img src="imgs/hi-nginx.png" alt="webserver-nginx"></center>
 
 <p>可以通过<code>docker stats</code>命令查看当前所有container的运行状态,<code>docker stats</code> 可以查看到运行状态容器的CPU，内存及网络使用率。在实际工作中，我们通常会把这个命令的输出连接到类似Logstash一类的服务用来分析。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">➜  ~ docker stats</span><br><span class="line">CONTAINER           CPU %               MEM USAGE / LIMIT       MEM %               NET I/O             BLOCK I/O           PIDS</span><br><span class="line">c1760b8f9359        0.00%               1.859 MiB / 1.952 GiB   0.09%               16.1 kB / 4.58 kB   0 B / 0 B           2</span><br><span class="line">CONTAINER           CPU %               MEM USAGE / LIMIT       MEM %               NET I/O             BLOCK I/O           PIDS</span><br><span class="line">c1760b8f9359        0.00%               1.859 MiB / 1.952 GiB   0.09%               16.1 kB / 4.58 kB   0 B / 0 B           2</span><br></pre></td></tr></table></figure></p>
 <p>这个命令的输出是实时刷新的(类似Linux上的top命令），如果需要退出可以使用<code>Ctrl-C</code>组合键。</p>
