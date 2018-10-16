@@ -101,7 +101,7 @@ Error response from daemon: Get https://100.73.41.17:5000/v2/: http: server gave
 如上面所设置，我的Docker Registry是搭建在100.73.41.17这台远程机器上,而我需要在本地的Mac 机器上登录远程得这个私有的Docker Registry 进行上传下载操作，那么上面的设置就要设置在我的Mac机器的Docker配置中;
 
 但是在Mac机器上好像没有发现/etc/docker/daemon.json这个文件，后来通过docker client的图形界面进行设置的，如下，设置之后需要重启docker server,如我需要重启Mac机器上的docker server;
-<center>![](set_insecure_registries.png)<br>图1 设置insecure-registries</center>
+<center>![](docker-registry-v2/set_insecure_registries.png)<br>图1 设置insecure-registries</center>
 不过设置`insecure-registries`是非常不安全的，官方文档中也不推荐而是给出自己生成证书的方式进行认证，[官方链接](https://docs.docker.com/registry/insecure/#troubleshoot-insecure-registry)
 而生产环境中一般需要配置两道认证，第一道认证即证书认证就是将启动Docker Registry 服务的认证证书copy一份到操作Docker Registry机器上（如我的Mac机器）， 第二道认证即上面的用户名密码认证; 具体[官方链接](https://docs.docker.com/registry/deploying/#native-basic-auth)
 1.写入本地镜像到私有Docker Registry,
