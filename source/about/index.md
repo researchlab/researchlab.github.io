@@ -4,7 +4,7 @@ date: 2016-02-15 21:28:40
 ---
 <br>
 > <font color=#A1A1A1>I'm a software developer under Linux/MacOS</font> 
-> <font size=2 color=#C9C9C9>E-mail: leehongitrd@163.com </font>
+> <font size=2 color=#C9C9C9>Email: leehongitrd@163.com </font>
 
 <!-- <div style="height:0px;border-top:1px #C9C9C9 dashed;" /> -->
 <br>
