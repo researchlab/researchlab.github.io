@@ -19,12 +19,12 @@
 <meta property="og:site_name" content="一线攻城狮">
 <meta property="og:description" content="server提供api服务直接对接前端js, 但是存在跨域问题，本文使用先查询请求过来的host 然后判断主域名是否存在，存在,则在返回头部设置这个请求域名充许跨域访问。">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:image" content="http://researchlab.github.io/2017/01/20/go-http-cross-origin/imgs/cross-website.png">
-<meta property="og:updated_time" content="2018-10-16T13:10:32.396Z">
+<meta property="og:image" content="http://researchlab.github.io/2017/01/20/go-http-cross-origin/cross_website.png">
+<meta property="og:updated_time" content="2018-10-16T14:19:08.218Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="golang server 跨域解决总结">
 <meta name="twitter:description" content="server提供api服务直接对接前端js, 但是存在跨域问题，本文使用先查询请求过来的host 然后判断主域名是否存在，存在,则在返回头部设置这个请求域名充许跨域访问。">
-<meta name="twitter:image" content="http://researchlab.github.io/2017/01/20/go-http-cross-origin/imgs/cross-website.png">
+<meta name="twitter:image" content="http://researchlab.github.io/2017/01/20/go-http-cross-origin/cross_website.png">
 
     
     <link rel="alternative" href="/atom.xml" title="一线攻城狮" type="application/atom+xml">
@@ -101,7 +101,7 @@
 <h2 id="跨域概念"><a href="#跨域概念" class="headerlink" title="跨域概念"></a>跨域概念</h2><p>浏览器的同源策略，出于防范跨站脚本的攻击，禁止客户端脚本（如 JavaScript）对不同域的服务进行跨站调用。</p>
 <p>一般的，只要网站的 协议名protocol 、 主机host 、 端口号port 这三个中的任意一个不同，网站间的数据请求与传输便构成了跨域调用。</p>
 <p>一般的，发起跨域请求而没有被设置许可跨域时，则会返回类型下面的说明</p>
-<center><img src="/2017/01/20/go-http-cross-origin/imgs/cross-website.png" alt="cross-website"></center>
+<center><img src="/2017/01/20/go-http-cross-origin/cross_website.png" alt=""></center>
 
 <p>上面返回提示说明: 跨域请求并非是浏览器限制了发起跨站请求，而是请求可以正常发起，到达服务器端，但是服务器返回的结果会被浏览器拦截。</p>
 <blockquote>

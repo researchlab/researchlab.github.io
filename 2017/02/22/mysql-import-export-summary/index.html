@@ -19,13 +19,13 @@
 <meta property="og:site_name" content="一线攻城狮">
 <meta property="og:description" content="由于公司的MySQL是搭建在服务器上，为了避免对服务器进行直接改动，想远程导出和导入MySQL的数据库表结构及数据进行操作, 刚好Mysql本身提供了命令行导出工具Mysqldump和Mysql Source导入命令进行SQL数据导入导出工作，通过Mysql命令行导出工具Mysqldump命令能够将Mysql数据导出为文本格式(txt)的SQL文件，通过Mysql Source命令能够将SQL文件">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:image" content="http://researchlab.github.io/2017/02/22/mysql-import-export-summary/imgs/mysqldump_error.png">
-<meta property="og:image" content="http://researchlab.github.io/2017/02/22/mysql-import-export-summary/imgs/mysqldump_ret.png">
-<meta property="og:updated_time" content="2018-10-16T13:10:32.400Z">
+<meta property="og:image" content="http://researchlab.github.io/2017/02/22/mysql-import-export-summary/mysqldump_error.png">
+<meta property="og:image" content="http://researchlab.github.io/2017/02/22/mysql-import-export-summary/mysqldump_ret.png">
+<meta property="og:updated_time" content="2018-10-16T14:19:08.222Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="mysql 数据库表及数据导入导出方法总结">
 <meta name="twitter:description" content="由于公司的MySQL是搭建在服务器上，为了避免对服务器进行直接改动，想远程导出和导入MySQL的数据库表结构及数据进行操作, 刚好Mysql本身提供了命令行导出工具Mysqldump和Mysql Source导入命令进行SQL数据导入导出工作，通过Mysql命令行导出工具Mysqldump命令能够将Mysql数据导出为文本格式(txt)的SQL文件，通过Mysql Source命令能够将SQL文件">
-<meta name="twitter:image" content="http://researchlab.github.io/2017/02/22/mysql-import-export-summary/imgs/mysqldump_error.png">
+<meta name="twitter:image" content="http://researchlab.github.io/2017/02/22/mysql-import-export-summary/mysqldump_error.png">
 
     
     <link rel="alternative" href="/atom.xml" title="一线攻城狮" type="application/atom+xml">
@@ -124,10 +124,10 @@
 <p>然后我们可以使用source命令来运行前面导出的sql脚本实现数据的导入,</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysql &gt; <span class="built_in">source</span> ./crm_adapter_db.sql;</span><br></pre></td></tr></table></figure>
 <p><strong> mysqldump vs source </strong><br>mysqldump虽然好用, 但它实际上也是运用先登录在运行脚本的策略, 只是其中的细节我们无需关心, 但是, 因为其中有很多远程连接细节, 我们有可能遭遇中文乱码问题。</p>
-<center><img src="/2017/02/22/mysql-import-export-summary/imgs/mysqldump_error.png" alt="mysqldump 乱码"></center>
+<center><img src="/2017/02/22/mysql-import-export-summary/mysqldump_error.png" alt="mysqldump 乱码"></center>
 
 <p>关于为何在使用mysqldump做导入时会出现中文乱码问题, 我们先用mysql命令登入, 然后输入下面的命令:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysql &gt; show variables like <span class="string">'character%'</span>;</span><br></pre></td></tr></table></figure></p>
-<center><img src="/2017/02/22/mysql-import-export-summary/imgs/mysqldump_ret.png" alt="mysqldump character error"></center>
+<center><img src="/2017/02/22/mysql-import-export-summary/mysqldump_ret.png" alt="mysqldump character error"></center>
 
 <p>是否注意到红圈部分的编码是latin1? latin1是MySQL的默认字符集, 可能由于某种原因你没有指定默认编码, 它就会默认为latin1了, 这就是你中文乱码出现的原因。</p>
 <p><strong> <font color="red"> 所以建议优先使用source 命令来导入数据 </font> </strong> </p>

@@ -19,21 +19,21 @@
 <meta property="og:site_name" content="一线攻城狮">
 <meta property="og:description" content="Http缓存机制作为web性能优化的重要手段, 本文对网络中，工作中使用的http缓存知识进行归纳总结。">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:image" content="http://researchlab.github.io/2017/01/17/http-cache/imgs/cache_where.png">
-<meta property="og:image" content="http://researchlab.github.io/2017/01/17/http-cache/imgs/etag.png">
-<meta property="og:image" content="http://researchlab.github.io/2017/01/17/http-cache/imgs/if-none-match.png">
-<meta property="og:image" content="http://researchlab.github.io/2017/01/17/http-cache/imgs/cache_control_workflow.png">
-<meta property="og:image" content="http://researchlab.github.io/2017/01/17/http-cache/imgs/cache_304.png">
-<meta property="og:image" content="http://researchlab.github.io/2017/01/17/http-cache/imgs/cache_200.png">
-<meta property="og:image" content="http://researchlab.github.io/2017/01/17/http-cache/imgs/cache_workflow.png">
-<meta property="og:image" content="http://researchlab.github.io/2017/01/17/http-cache/imgs/cache_sys.png">
-<meta property="og:image" content="http://researchlab.github.io/2017/01/17/http-cache/imgs/cache_sys_relation.png">
-<meta property="og:image" content="http://researchlab.github.io/2017/01/17/http-cache/imgs/cache_data1.jpg">
-<meta property="og:updated_time" content="2018-10-16T13:10:32.400Z">
+<meta property="og:image" content="http://researchlab.github.io/2017/01/17/http-cache/cache_where.png">
+<meta property="og:image" content="http://researchlab.github.io/2017/01/17/http-cache/etag.png">
+<meta property="og:image" content="http://researchlab.github.io/2017/01/17/http-cache/if-none-match.png">
+<meta property="og:image" content="http://researchlab.github.io/2017/01/17/http-cache/cache_control_workflow.png">
+<meta property="og:image" content="http://researchlab.github.io/2017/01/17/http-cache/cache_304.png">
+<meta property="og:image" content="http://researchlab.github.io/2017/01/17/http-cache/cache_200.png">
+<meta property="og:image" content="http://researchlab.github.io/2017/01/17/http-cache/cache_workflow.png">
+<meta property="og:image" content="http://researchlab.github.io/2017/01/17/http-cache/cache_sys.png">
+<meta property="og:image" content="http://researchlab.github.io/2017/01/17/http-cache/cache_sys_relation.png">
+<meta property="og:image" content="http://researchlab.github.io/2017/01/17/http-cache/cache_data1.jpg">
+<meta property="og:updated_time" content="2018-10-16T14:19:08.218Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="http 缓存知识总结">
 <meta name="twitter:description" content="Http缓存机制作为web性能优化的重要手段, 本文对网络中，工作中使用的http缓存知识进行归纳总结。">
-<meta name="twitter:image" content="http://researchlab.github.io/2017/01/17/http-cache/imgs/cache_where.png">
+<meta name="twitter:image" content="http://researchlab.github.io/2017/01/17/http-cache/cache_where.png">
 
     
     <link rel="alternative" href="/atom.xml" title="一线攻城狮" type="application/atom+xml">
@@ -113,12 +113,12 @@
 <li><code>客户端缓存</code>一般指的是<code>浏览器缓存</code>，目的就是加速各种静态资源的访问，想想现在的大型网站，随便一个页面都是一两百个请求，每天pv都是亿级别，如果没有缓存，用户体验会急剧下降、同时服务器压力和网络带宽都面临严重的考验。</li>
 </ul>
 <p>下文总结的http缓存主要指浏览器缓存和代理服务器缓存</p>
-<center><img src="/2017/01/17/http-cache/imgs/cache_where.png" alt="cache"></center>
+<center><img src="/2017/01/17/http-cache/cache_where.png" alt="cache"></center>
 
 <p>上图中有三个角色，浏览器, Web代理和服务器，如图所示Http缓存存在于浏览器和Web代理中。<br>当然在服务器内部，也存在着各种缓存，但这已经不是本文要讨论的Http缓存了。<br>所谓的Http缓存控制，就是一种约定，通过设置不同的响应头Cache-Control来控制浏览器和Web代理对缓存的使用策略，通过设置请求头If-None-Match和响应头ETag，来对缓存的有效性进行验证。在开发Web服务时，只需要关注请求头If-None-Match、响应头ETag、响应头Cache-Control就足够了。</p>
 <p><strong> 响应头ETag </strong></p>
 <p>ETag全称Entity Tag，用来标识一个资源。在具体的实现中，ETag可以是资源的hash值，也可以是一个内部维护的版本号。但不管怎样，ETag应该能反映出资源内容的变化，这是Http缓存可以正常工作的基础。</p>
-<center><img src="/2017/01/17/http-cache/imgs/etag.png" alt="ETag"></center>
+<center><img src="/2017/01/17/http-cache/etag.png" alt="ETag"></center>
 
 <p>如上例中所展示的，服务器在返回响应时，通常会在Http头中包含一些关于响应的元数据信息，其中，ETag就是其中一个，本例中返回了值为<code>x1323ddx</code>的<code>ETag</code>。当资源/file的内容发生变化时，服务器应当返回不同的ETag。</p>
 <blockquote>
@@ -131,7 +131,7 @@
 </blockquote>
 <p><strong> 请求头If-None-Match </strong></p>
 <p>对于同一个资源，比如上一例中的/file，在进行了一次请求之后，浏览器就已经有了/file的一个版本的内容，和这个版本的ETag，当下次用户再需要这个资源，浏览器再次向服务器请求的时候，可以利用请求头If-None-Match来告诉服务器自己已经有个ETag为x1323ddx的/file，这样，如果服务器上的/file没有变化，也就是说服务器上的/file的ETag也是x1323ddx的话，服务器就不会再返回/file的内容，而是返回一个304的响应，告诉浏览器该资源没有变化，缓存有效。</p>
-<center><img src="/2017/01/17/http-cache/imgs/if-none-match.png" alt="If-None-Match"></center>
+<center><img src="/2017/01/17/http-cache/if-none-match.png" alt="If-None-Match"></center>
 
 <p>如上例中所示，在使用了If-None-Match之后，服务器只需要很小的响应就可以达到相同的结果，从而优化了性能。</p>
 <p><strong> 响应头Cache-Control </strong></p>
@@ -163,20 +163,20 @@
 </blockquote>
 </blockquote>
 <p>Cache-Control 有这么多字段可用来控制缓存策略， 那到底是怎么用的? ， 下面通过一张图来表述一个资源的Cache-Control策略,</p>
-<center><img src="/2017/01/17/http-cache/imgs/cache_control_workflow.png" alt="cache-control-work-flow"></center>
+<center><img src="/2017/01/17/http-cache/cache_control_workflow.png" alt="cache-control-work-flow"></center>
 
 <h2 id="缓存新鲜度"><a href="#缓存新鲜度" class="headerlink" title="缓存新鲜度"></a>缓存新鲜度</h2><p>Web服务器通过2种方式来判断浏览器缓存是否是最新的。</p>
 <p><strong> 第一种, 浏览器把缓存文件的<code>最后修改时间</code>通过header字段”If-Modified-Since”来告诉Web服务器。</strong><br><strong> 第二种, 浏览器把缓存文件的<code>ETag</code>, 通过header字段”If-None-Match”, 来告诉Web服务器。</strong></p>
 <p><strong> 第一种: </strong> 通过最后修改时间, 来判断缓存新鲜度 </p>
 <p>1.浏览器客户端想请求一个文档, 首先检查本地缓存, 发现存在这个文档的缓存, 获取缓存中文档的最后修改时间, 通过:If-Modified-Since， 发送Request给Web服务器。<br>2.Web服务器收到Request, 将服务器的文档修改时间(Last-Modified):跟request header中的, If-Modified-Since相比较, 如果时间是一样的, 说明缓存还是最新的, Web服务器将发送<code>304 Not Modified</code>给浏览器客户端, 告诉客户端直接使用缓存里的版本。如下图。</p>
-<center><img src="/2017/01/17/http-cache/imgs/cache_304.png" alt="cache 304"></center>
+<center><img src="/2017/01/17/http-cache/cache_304.png" alt="cache 304"></center>
 
 <p>3.假如该文档已经被更新了。Web服务器将发送该文档的最新版本给浏览器客户端， 如下图。</p>
-<center><img src="/2017/01/17/http-cache/imgs/cache_200.png" alt="cache 200"></center>
+<center><img src="/2017/01/17/http-cache/cache_200.png" alt="cache 200"></center>
 
 <p><strong> 第二种: </strong> 服务器通过比对客户端请求发来的”If-None-Match”带上的Etag值, 如果一致则表示可以使用本地缓存，如果不一致表示服务器内容有更新，此时会重新发一份新的给客户端。</p>
 <p>至此，浏览器端http cache 的大致流程可总结如图，</p>
-<center><img src="/2017/01/17/http-cache/imgs/cache_workflow.png" alt="cache workflow"></center>
+<center><img src="/2017/01/17/http-cache/cache_workflow.png" alt="cache workflow"></center>
 
 <p><strong> <font color="red">Etag/If-None-Match:</font>Etag/If-None-Match要配合Cache-Control使用。</strong></p>
 <blockquote>
@@ -243,7 +243,7 @@
 <p>下面从系统体系化角度来讲讲<code>Http缓存头</code>是如何协同工作的</p>
 <p><strong> HTTP缓存体系 </strong></p>
 <p>首先我将 Http 缓存体系分为以下三个部分:</p>
-<center><img src="/2017/01/17/http-cache/imgs/cache_sys.png" alt="cache"></center>
+<center><img src="/2017/01/17/http-cache/cache_sys.png" alt="cache"></center>
 
 <p><strong> 1.缓存存储策略 </strong></p>
 <p>这个策略的作用只有一个, 用于确定Http响应内容是否可以被客户端缓存, 以及可以被哪些客户端缓存</p>
@@ -262,7 +262,7 @@
 <p>将缓存在客户端的数据标识发往服务端, 服务端通过标识来判断客户端缓存数据是否仍有效, 进而决定是否要重发数据。<br>客户端检测到数据过期或浏览器刷新后, 往往会重新发起一个http请求到服务器, 服务器此时并不急于返回数据, 而是看请求头有没有带标识(If-Modified-Since, If-None-Match)过来, 如果判断标识仍然有效, 则返回304告诉客户端取本地缓存数据来用即可(这里要注意的是你必须要在首次响应时输出相应的头信息(Last-Modified, ETags)到客户端)。至此我们就明白了上面所说的本地缓存数据即使被认为过期，并不等于数据从此就没用了的道理了。</p>
 <p>关于Last-Modified，这个响应头使用要注意，可能会影响到缓存过期策略，具体原因，后面我会通过解答开篇提到的2道题来作说明。</p>
 <p>以上就是我所认识的缓存策略，下面我将缓存策略三要素和常用的几个缓存头(项)结合一起，让大家更清晰的认识到它们之间的关系:</p>
-<center><img src="/2017/01/17/http-cache/imgs/cache_sys_relation.png" alt="cache sys relation"></center>
+<center><img src="/2017/01/17/http-cache/cache_sys_relation.png" alt="cache sys relation"></center>
 
 <p>通过上图可以清晰的看到各缓存项分别属于哪个缓存策略范畴，这其中有部分重叠，它表明这些缓存项具有多重缓存策略，所以实际在分析缓存头的时候，除了常规的头外，我们还需要将这些具有双重缓存策略的项分解开来。<br>现在回到最开始提到的2道题目,</p>
 <p><strong> 第一道题: </strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">HTTP/1.1 200 OK</span><br><span class="line">Cache-Control: no-cache</span><br><span class="line">Content-Type: image/png</span><br><span class="line">Last-Modified: Tue, 08 Nov 2016 06:59:00 GMT</span><br><span class="line">Accept-Ranges: bytes</span><br><span class="line">Date: Thu, 10 Nov 2016 02:48:50 GMT</span><br><span class="line">Content-Length: 3534</span><br></pre></td></tr></table></figure></p>
@@ -302,7 +302,7 @@
 </table>
 <p>所以最终结果是:浏览器会再次请求服务端, 并携带上Last-Modified指定的时间去服务器对比:</p>
 <p>a)对比失败: 服务器返回200并重发数据, 客户端接收到数据后展示, 并刷新本地缓存。<br>b)对比成功: 服务器返回304且不重发数据, 客户端收到304状态码后从本地读取缓存数据。</p>
-<center><img src="/2017/01/17/http-cache/imgs/cache_data1.jpg" alt="cache_data"></center>
+<center><img src="/2017/01/17/http-cache/cache_data1.jpg" alt="cache_data"></center>
 
 <p>这道题本身不难, 但若认为no-cache不会缓存数据到本地, 那么你理解起来就会很矛盾, 因为如果文件数据没有被本地缓存, 服务器返回304后将会无法展示出图片内容, 但实际上它是能正常展示的。这道题很好的证明了no-cache也会缓存数据到本地这一说法。</p>
 <p><strong> 第二道题: </strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">HTTP/1.1 200 OK</span><br><span class="line">Cache-Control: private</span><br><span class="line">Content-Type: image/png</span><br><span class="line">Last-Modified: Tue, 08 Nov 2016 06:59:00 GMT</span><br><span class="line">Accept-Ranges: bytes</span><br><span class="line">Date: Thu, 10 Nov 2016 02:48:50 GMT</span><br><span class="line">Content-Length: 3534</span><br></pre></td></tr></table></figure></p>

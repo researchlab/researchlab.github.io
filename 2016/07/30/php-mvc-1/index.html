@@ -19,14 +19,14 @@
 <meta property="og:site_name" content="一线攻城狮">
 <meta property="og:description" content="尽管MVC(model view controller pattern)模式在PHPweb开发中很受欢迎，但是网上很难找到一套代码简单又能清楚阐述PHP MVC模式的案例，本文希望通过理论和代码实践简单阐述PHP MVC模式。">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:image" content="http://researchlab.github.io/2016/07/30/php-mvc-1/imgs/mvc-collaboration.png">
-<meta property="og:image" content="http://researchlab.github.io/2016/07/30/php-mvc-1/imgs/mvc-structure.png">
-<meta property="og:image" content="http://researchlab.github.io/2016/07/30/php-mvc-1/imgs/mvc-sequence1.png">
-<meta property="og:updated_time" content="2018-10-16T13:10:32.400Z">
+<meta property="og:image" content="http://researchlab.github.io/2016/07/30/php-mvc-1/mvc-collaboration.png">
+<meta property="og:image" content="http://researchlab.github.io/2016/07/30/php-mvc-1/mvc-structure.png">
+<meta property="og:image" content="http://researchlab.github.io/2016/07/30/php-mvc-1/mvc-sequence1.png">
+<meta property="og:updated_time" content="2018-10-16T14:19:08.222Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="php中mvc模式使用总结(一)">
 <meta name="twitter:description" content="尽管MVC(model view controller pattern)模式在PHPweb开发中很受欢迎，但是网上很难找到一套代码简单又能清楚阐述PHP MVC模式的案例，本文希望通过理论和代码实践简单阐述PHP MVC模式。">
-<meta name="twitter:image" content="http://researchlab.github.io/2016/07/30/php-mvc-1/imgs/mvc-collaboration.png">
+<meta name="twitter:image" content="http://researchlab.github.io/2016/07/30/php-mvc-1/mvc-collaboration.png">
 
     
     <link rel="alternative" href="/atom.xml" title="一线攻城狮" type="application/atom+xml">
@@ -106,17 +106,17 @@
 <p><code>View</code>负责将<code>Model</code>层的数据按一定的格式样式展现给用户。</p>
 <p><code>Controller</code>负责将<code>Model</code>层和<code>View</code>层联系起来，<code>Controller</code>层响应用户的请求，并将请求业务分发给<code>Model</code>层相应的业务逻辑处理，然后将处理数据再返回给<code>View</code>层展示。 </p>
 <p><code>MVC</code>三者之间的关系如图所示:</p>
-<center><br><img src="/2016/07/30/php-mvc-1/imgs/mvc-collaboration.png" alt="MVC pattern Diagram"><br></center>
+<center><br><img src="/2016/07/30/php-mvc-1/mvc-collaboration.png" alt="MVC pattern Diagram"><br></center>
 
 <p>本文设计的<code>MVC</code>demo目录如下</p>
-<center><br><img src="/2016/07/30/php-mvc-1/imgs/mvc-structure.png" alt="mvc structure"><br></center>
+<center><br><img src="/2016/07/30/php-mvc-1/mvc-structure.png" alt="mvc structure"><br></center>
 
 <h2 id="Controller-层"><a href="#Controller-层" class="headerlink" title="Controller 层"></a>Controller 层</h2><p><code>Controller</code>层可是<code>MVC</code>的入口，接收一个用户请求，解析请求发送给<code>Model</code>层，调用<code>Model</code>层处理业务，接收<code>Model</code>层返回的数据结果，并将数据发送给展示层。<code>Controller</code>层是<code>Model</code>层和<code>View</code>层之间的连接纽带;小的框架中<code>Model</code>层和<code>View</code>层是包含在<code>Controller</code>层中。应用程序中一般会以<code>index.php</code>作为程序的入口，<code>index.php</code>会将用户的所有请求直接转发到<code>Controller</code>层,由<code>Controller</code>层进行相应的处理。</p>
 <figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//index.php file </span></span><br><span class="line"><span class="keyword">include_once</span>(<span class="string">"controller/Controller.php"</span>);</span><br><span class="line"></span><br><span class="line">$controller = <span class="keyword">new</span> Controller();</span><br><span class="line">$controller-&gt;invoke();</span><br></pre></td></tr></table></figure>
 <p>在本例中<code>Controller</code>层只有一个函数和一个构造函数。构造函数示例化一个<code>Model</code>类的实例;当<code>Controller</code>对接收的<code>req</code>解析之后，需要决定调用<code>Model</code>层相应的业务逻辑进行处理，然后将<code>Model</code>层返回的处理数据分发给<code>view</code>层展示。需要知道的是<code>Controller</code>层不是知道<code>data</code>如何处理的，也不知道页面是如何生成的。</p>
 <figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//controller/Controller.php file</span></span><br><span class="line"><span class="keyword">include_once</span>(<span class="string">"model/Model.php"</span>)</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Controller</span> </span>&#123;</span><br><span class="line">	<span class="keyword">public</span> $model;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__construct</span><span class="params">()</span></span>&#123;</span><br><span class="line">		<span class="keyword">$this</span>-&gt;model = <span class="keyword">new</span> Model();	</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">invoke</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">if</span>(!<span class="keyword">isset</span>(!_GET[<span class="string">'book'</span>]))&#123;</span><br><span class="line">			$books = <span class="keyword">$this</span>-&gt;model-&gt;getBookList();</span><br><span class="line">			<span class="keyword">include</span> <span class="string">'view/booklist.php'</span>;</span><br><span class="line">		&#125;<span class="keyword">else</span> &#123;</span><br><span class="line">			<span class="comment">// show the requested book</span></span><br><span class="line">			$book = <span class="keyword">$this</span>-&gt;model-&gt;getBook($_GET[<span class="string">'book'</span>]);</span><br><span class="line">			<span class="keyword">include</span> <span class="string">'view/viewbook.php'</span>;</span><br><span class="line">		&#125;	</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p><code>MVC</code>时序图</p>
-<center><br><img src="/2016/07/30/php-mvc-1/imgs/mvc-sequence1.png" alt="MVC Sequence Diagram"><br></center>
+<center><br><img src="/2016/07/30/php-mvc-1/mvc-sequence1.png" alt="MVC Sequence Diagram"><br></center>
 
 <h2 id="Model-和-Entity-类"><a href="#Model-和-Entity-类" class="headerlink" title="Model 和 Entity 类"></a>Model 和 Entity 类</h2><p><code>Model</code>层表示应用程序中的数据和逻辑，通常称之为业务逻辑; 通常表示为如下:</p>
 <ul>
