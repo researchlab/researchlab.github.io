@@ -101,11 +101,9 @@ Error response from daemon: Get https://100.73.41.17:5000/v2/: http: server gave
 如上面所设置，我的Docker Registry是搭建在100.73.41.17这台远程机器上,而我需要在本地的Mac 机器上登录远程得这个私有的Docker Registry 进行上传下载操作，那么上面的设置就要设置在我的Mac机器的Docker配置中;
 
 但是在Mac机器上好像没有发现/etc/docker/daemon.json这个文件，后来通过docker client的图形界面进行设置的，如下，设置之后需要重启docker server,如我需要重启Mac机器上的docker server;
-<center>![set insecure-registries](imgs/set_insecure_registries.png)图1 设置insecure-registries</center>
-
+<center>![](docker-registry-v2/set_insecure_registries.png)图1 设置insecure-registries</center>
 不过设置`insecure-registries`是非常不安全的，官方文档中也不推荐而是给出自己生成证书的方式进行认证，[官方链接](https://docs.docker.com/registry/insecure/#troubleshoot-insecure-registry)
 而生产环境中一般需要配置两道认证，第一道认证即证书认证就是将启动Docker Registry 服务的认证证书copy一份到操作Docker Registry机器上（如我的Mac机器）， 第二道认证即上面的用户名密码认证; 具体[官方链接](https://docs.docker.com/registry/deploying/#native-basic-auth)
-
 1.写入本地镜像到私有Docker Registry,
 上面登录成功后，接着就可以把本地的镜像推送到远程私有Docker Registry上去了,不过这里需要注意的是待推送到远程Registry上去的本地镜像其名字前缀必须设置为`100.73.41.17:5000/`, 因为下面要去取镜像时,按照docker读取镜像的规则是`镜像地址/镜像名称`, 通过镜像地址读取镜像名称, 如果在读取镜像是只给出镜像名称, 则Docker会到官方的Docker Hub上去下载相应的镜像而非本地私有Registry库;下面假设已经制作了一个jenkins镜像但是其前缀不是上面的Registry服务地址,可通过docker tag命令给镜像重新命名然后上传到私有Registry即可，具体命令如下,
 ```bash 
