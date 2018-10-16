@@ -72,6 +72,70 @@
         <header class="article-info clearfix">
   <h1 itemprop="name">
     
+      <a href="/2016/02/26/observer-pattern-in-go-md/" title="golang 设计模式之observer使用总结" itemprop="url">golang 设计模式之observer使用总结</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
+		
+  <p class="article-time">
+    <time datetime="2016-02-26T00:40:11.000Z" itemprop="datePublished"> 发表于 2016-02-26</time>
+    
+  </p>
+</header>
+    <div class="article-content">
+        
+        <p>观察者(<code>Observer</code>)设计模式定义了对象间的一种一对多的依赖关系，以便一个对象的状态发生变化时，所有依赖于它的对象都得到通知并自动刷新。观察者模式将观察者和被观察的对象分离开,体现了面向对象设计中一个对象只做一件事情的原则，提高了应用程序的可维护性和重用性。<br></p>
+        
+        
+        <p class="article-more-link">
+          
+            <a href="/2016/02/26/observer-pattern-in-go-md/#more">Read More</a>
+          
+       </p>
+    </div>
+    <footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/go-pattern/">go-pattern</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/golang/">golang</a><a href="/tags/observer/">observer</a>
+  </div>
+
+</div>
+
+
+
+
+<div class="comments-count">
+	
+	  	<span></span>
+		<a href="/2016/02/26/observer-pattern-in-go-md/#comments" class="ds-thread-count comments-count-link" data-thread-key="2016/02/26/observer-pattern-in-go-md/" data-count-type="comments">&nbsp;</a>
+	
+</div>
+
+</footer>
+
+
+    </article>
+
+
+
+
+
+
+   
+    
+    <article class="post-expand post" itemprop="articleBody"> 
+        <header class="article-info clearfix">
+  <h1 itemprop="name">
+    
       <a href="/2016/02/25/singleton-pattern-in-go/" title="golang 设计模式之singleton使用总结" itemprop="url">golang 设计模式之singleton使用总结</a>
   </h1>
   <p class="article-author">By
@@ -85,7 +149,7 @@
 </header>
     <div class="article-content">
         
-        <p><code>golang</code> 1.5版本之后默认设置<code>GOMAXPROCS</code>值为当前计算机真实核心数，使得<code>goroutines</code>从默认的<code>单线程内并发执行</code>变成了默认的（真实核心数支持的）的<code>多线程内并行</code>执行。多线程并行执行<code>goroutines</code>需要考虑并行执行过程中引入的<code>线程安全问题</code>。<br>
+        <p><code>golang</code> 1.5版本之后默认设置<code>GOMAXPROCS</code>值为当前计算机真实核心数，使得<code>goroutines</code>从默认的<code>单线程内并发执行</code>变成了默认的（真实核心数支持的）的<code>多线程内并行</code>执行。多线程并行执行<code>goroutines</code>需要考虑并行执行过程中引入的<code>线程安全问题</code>。<br></p>
         
         
         <p class="article-more-link">
@@ -149,7 +213,7 @@
 </header>
     <div class="article-content">
         
-        <p><code>golang</code> 在1.5版本之前默认只使用一个核心来跑所有的<code>goroutines</code>,即<code>GOMAXPROCS</code>默认设置为1, ,即是串行执行<code>goroutines</code>,在1.5版本后，<code>GOMAXPROCS</code>默认设置为当前计算机真实的核心线程数，即是在并行执行<code>goroutines</code>。<br>
+        <p><code>golang</code> 在1.5版本之前默认只使用一个核心来跑所有的<code>goroutines</code>,即<code>GOMAXPROCS</code>默认设置为1, ,即是串行执行<code>goroutines</code>,在1.5版本后，<code>GOMAXPROCS</code>默认设置为当前计算机真实的核心线程数，即是在并行执行<code>goroutines</code>。<br></p>
         
         
         <p class="article-more-link">
@@ -213,7 +277,7 @@
 </header>
     <div class="article-content">
         
-        <p>go能处理高并发的根本原因在于执行go协程只需极少的栈内存(大概4~5KB),并且能根据需要动态增长和缩减占用的资源。<br>
+        <p>go能处理高并发的根本原因在于执行go协程只需极少的栈内存(大概4~5KB),并且能根据需要动态增长和缩减占用的资源。<br></p>
         
         
         <p class="article-more-link">
@@ -277,7 +341,7 @@
 </header>
     <div class="article-content">
         
-        <p>反射是一种检查存储在接口变量中的<code>&lt;值,类型&gt;</code>对的机制，借助go反射包提供的<code>reflect.TypeOf</code>和<code>reflect.ValueOf</code>可以方便的访问到一个接口值的<code>reflect.Type</code>和<code>reflect.Value</code>部分，从而可进一步得到这个接口的结构类型和对其进行值的修改操作。<br>
+        <p>反射是一种检查存储在接口变量中的<code>&lt;值,类型&gt;</code>对的机制，借助go反射包提供的<code>reflect.TypeOf</code>和<code>reflect.ValueOf</code>可以方便的访问到一个接口值的<code>reflect.Type</code>和<code>reflect.Value</code>部分，从而可进一步得到这个接口的结构类型和对其进行值的修改操作。<br></p>
         
         
         <p class="article-more-link">
@@ -341,7 +405,7 @@
 </header>
     <div class="article-content">
         
-        <p>接口被定义为一组方法的集合, 接口可以接收任何其实现的方法的值.<br>
+        <p>接口被定义为一组方法的集合, 接口可以接收任何其实现的方法的值.<br></p>
         
         
         <p class="article-more-link">
@@ -405,7 +469,7 @@
 </header>
     <div class="article-content">
         
-        <p>从技术上来将，<code>Go</code>并不是一门面向对象的编程语言,所以与充许将类型和方法以面向对象的方式编程有些差别,最大的差异在于<code>Go</code>不支持类型继承,但是提供一个<code>接口</code>的概念. 在本章中，我们主要来讨论在<code>Go</code>编程中使用方法和接口.<br>
+        <p>从技术上来将，<code>Go</code>并不是一门面向对象的编程语言,所以与充许将类型和方法以面向对象的方式编程有些差别,最大的差异在于<code>Go</code>不支持类型继承,但是提供一个<code>接口</code>的概念. 在本章中，我们主要来讨论在<code>Go</code>编程中使用方法和接口.<br></p>
         
         
         <p class="article-more-link">
@@ -469,7 +533,7 @@
 </header>
     <div class="article-content">
         
-        <p><a href="https://github.com/go-xorm/xorm" target="_blank" rel="external">XORM</a>是一个简单而强大的Go语言<code>ORM(Object Relational Mapping)</code>库,通过调用<code>XORM</code>提供简单丰富的API接口,可以简化便捷的完成对数据库的各类操作。<code>XORM</code>目前已经支持所有主流关系型数据库,如Mysql,SQLite,Oracle,Postgres等。<br>
+        <p><a href="https://github.com/go-xorm/xorm" target="_blank" rel="noopener">XORM</a>是一个简单而强大的Go语言<code>ORM(Object Relational Mapping)</code>库,通过调用<code>XORM</code>提供简单丰富的API接口,可以简化便捷的完成对数据库的各类操作。<code>XORM</code>目前已经支持所有主流关系型数据库,如Mysql,SQLite,Oracle,Postgres等。<br></p>
         
         
         <p class="article-more-link">
@@ -533,7 +597,7 @@
 </header>
     <div class="article-content">
         
-        <p><code>Go</code>语言中主要有三种控制流程<code>if</code>,<code>for</code>循环,<code>switch case</code>语句。<br>
+        <p><code>Go</code>语言中主要有三种控制流程<code>if</code>,<code>for</code>循环,<code>switch case</code>语句。<br></p>
         
         
         <p class="article-more-link">
@@ -597,7 +661,7 @@
 </header>
     <div class="article-content">
         
-        <p><code>Go</code>集合类型包含<code>Array</code>,<code>Slice</code>,<code>Range</code>,<code>Map</code>等议题的分析和讨论。<br>
+        <p><code>Go</code>集合类型包含<code>Array</code>,<code>Slice</code>,<code>Range</code>,<code>Map</code>等议题的分析和讨论。<br></p>
         
         
         <p class="article-more-link">
@@ -629,70 +693,6 @@
 	
 	  	<span></span>
 		<a href="/2016/01/19/go-collection-types/#comments" class="ds-thread-count comments-count-link" data-thread-key="2016/01/19/go-collection-types/" data-count-type="comments">&nbsp;</a>
-	
-</div>
-
-</footer>
-
-
-    </article>
-
-
-
-
-
-
-   
-    
-    <article class="post-expand post" itemprop="articleBody"> 
-        <header class="article-info clearfix">
-  <h1 itemprop="name">
-    
-      <a href="/2016/01/17/go-types/" title="[译]GO BOOTCAMP 第三章：内置类型实战" itemprop="url">[译]GO BOOTCAMP 第三章：内置类型实战</a>
-  </h1>
-  <p class="article-author">By
-       
-		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
-		
-  <p class="article-time">
-    <time datetime="2016-01-17T21:36:28.000Z" itemprop="datePublished"> 发表于 2016-01-17</time>
-    
-  </p>
-</header>
-    <div class="article-content">
-        
-        <p><code>Go</code>内置类型实战，包括类型转换，类型断言，结构类型，结构继承等内容。<br>
-        
-        
-        <p class="article-more-link">
-          
-            <a href="/2016/01/17/go-types/#more">Read More</a>
-          
-       </p>
-    </div>
-    <footer class="article-footer clearfix">
-<div class="article-catetags">
-
-<div class="article-categories">
-  <span></span>
-  <a class="article-category-link" href="/categories/go-bootcamp/">go-bootcamp</a>
-</div>
-
-
-  <div class="article-tags">
-  
-  <span></span> <a href="/tags/golang/">golang</a>
-  </div>
-
-</div>
-
-
-
-
-<div class="comments-count">
-	
-	  	<span></span>
-		<a href="/2016/01/17/go-types/#comments" class="ds-thread-count comments-count-link" data-thread-key="2016/01/17/go-types/" data-count-type="comments">&nbsp;</a>
 	
 </div>
 
@@ -772,6 +772,10 @@
 		
 		  
 			<li><a href="/categories/php/" title="php">php<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/redis专题/" title="redis专题">redis专题<sup>1</sup></a></li>
 		  
 		
 		</ul>
@@ -861,7 +865,7 @@
 			
 		
 			
-				<li><a href="/tags/getcookie/" title="getcookie">getcookie<sup>1</sup></a></li>
+				<li><a href="/tags/php/" title="php">php<sup>1</sup></a></li>
 			
 		
 		</ul>

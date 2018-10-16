@@ -19,7 +19,7 @@
 <meta property="og:site_name" content="一线攻城狮">
 <meta property="og:description" content="现在golang已经可以通过vendor来管理第三方依赖包了，但是之前的一个老项目用的是git submodule来管理的，但是.gitsubmodule文件中只记录管理了项目的部分依赖包， 需要把还没有被管理的第三包也加上，下面总结使用git submodule的过程。">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2018-10-16T08:37:01.834Z">
+<meta property="og:updated_time" content="2018-10-16T09:40:11.122Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="git submodule使用总结">
 <meta name="twitter:description" content="现在golang已经可以通过vendor来管理第三方依赖包了，但是之前的一个老项目用的是git submodule来管理的，但是.gitsubmodule文件中只记录管理了项目的部分依赖包， 需要把还没有被管理的第三包也加上，下面总结使用git submodule的过程。">
@@ -97,22 +97,22 @@
 		
 		<p>现在golang已经可以通过<code>vendor</code>来管理第三方依赖包了，但是之前的一个老项目用的是<code>git submodule</code>来管理的，但是<code>.gitsubmodule</code>文件中只记录管理了项目的部分依赖包， 需要把还没有被管理的第三包也加上，下面总结使用<code>git submodule</code>的过程。<br><a id="more"></a></p>
 <h2 id="添加第三方包"><a href="#添加第三方包" class="headerlink" title="添加第三方包"></a>添加第三方包</h2><p>为当前工程添加submodule，命令如下：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">git submodule add 仓库地址 保存路经路径</div></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git submodule add 仓库地址 保存路经路径</span><br></pre></td></tr></table></figure>
 <p>例如要为gomail包添加<code>submodule</code>管理，<br>gomail包 仓库地址: <code>https://github.com/go-gomail/gomail.git</code><br>gomail包要保存在项目里的路经为: <code>src/github.com/go-gomail/gomail</code>, 则命令为:</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">git submodule add https://github.com/go-gomail/gomail   src/github.com/go-gomail/gomail</div></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git submodule add https://github.com/go-gomail/gomail   src/github.com/go-gomail/gomail</span><br></pre></td></tr></table></figure>
 <p>但是老项目遇到的情况是在保存路经<code>src/github.com/go-gomail/gomail</code>中已经存在<code>gomail</code>, 这里只是需要把这个第三包用<code>git submodule</code>记录下来编译管理， 所以需要加一个强制参数， 则命令为如下:</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">git submodule add -f https://github.com/go-gomail/gomail   src/github.com/go-gomail/gomail</div></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git submodule add -f https://github.com/go-gomail/gomail   src/github.com/go-gomail/gomail</span><br></pre></td></tr></table></figure>
 <blockquote>
 <p>其中，仓库地址是指子模块仓库地址，路径指将子模块放置在当前工程下的路径。<br>注意：路径不能以 / 结尾（会造成修改不生效）、不能是现有工程已有的目录（不能順利 Clone）</p>
 </blockquote>
 <p>命令执行完成，会在当前工程根路径下生成一个名为<code>.gitmodules</code>的文件，其中记录了子模块的信息。添加完成以后，再将子模块所在的文件夹添加到工程中即可。</p>
 <h2 id="删除第三方包"><a href="#删除第三方包" class="headerlink" title="删除第三方包"></a>删除第三方包</h2><p>submodule的删除稍微麻烦点:首先，要在“.gitmodules”文件中删除相应配置信息。然后，执行“git rm –cached ”命令将子模块所在的文件从git中删除。</p>
-<h2 id="下载的工程带有submodule"><a href="#下载的工程带有submodule" class="headerlink" title="下载的工程带有submodule"></a>下载的工程带有submodule</h2><p>当使用git clone下来的工程中带有submodule时，初始的时候，submodule的内容并不会自动下载下来的，此时，只需执行如下命令：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">git submodule update --init --recursive</div></pre></td></tr></table></figure></p>
+<h2 id="下载的工程带有submodule"><a href="#下载的工程带有submodule" class="headerlink" title="下载的工程带有submodule"></a>下载的工程带有submodule</h2><p>当使用git clone下来的工程中带有submodule时，初始的时候，submodule的内容并不会自动下载下来的，此时，只需执行如下命令：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git submodule update --init --recursive</span><br></pre></td></tr></table></figure></p>
 <p>即可将子模块内容下载下来后工程才不会缺少相应的文件。</p>
-<h2 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h2><p>当第三包被<code>git submodule</code>记录之后，<code>git status</code>命令会出现下面的情况,<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">$ git status vendor | grep modified:</div><div class="line"><span class="comment">#       modified:   vendor/rails (modified content)</span></div></pre></td></tr></table></figure></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">$ git diff vendor/</div><div class="line">diff --git a/vendor/rails b/vendor/rails</div><div class="line">--- a/vendor/rails</div><div class="line">+++ b/vendor/rails</div><div class="line">@@ -1 +1 @@</div><div class="line">-Subproject commit 046c900df27994d454b7f906caa0e4226bb42b6f</div><div class="line">+Subproject commit 046c900df27994d454b7f906caa0e4226bb42b6f-dirty</div></pre></td></tr></table></figure>
-<p>如何让<code>git status</code>不显示那个<code>modified content</code>呢？<br>修改<code>.gitmodule</code>文件， 在显示<code>modified content</code>的第三包管理下添加一个<code>ignore = dirty</code>， 如下:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">[submodule <span class="string">"bundle/fugitive"</span>]</div><div class="line">    path = bundle/fugitive</div><div class="line">    url = git://github.com/tpope/vim-fugitive.git</div><div class="line">    ignore = dirty</div></pre></td></tr></table></figure></p>
-<p>上述三个步骤一般就能解决问题了， 如果想深入理解<code>git submodule</code>,可进一步参考<a href="http://www.kafeitu.me/git/2012/03/27/git-submodule.html" target="_blank" rel="external">git submodule使用完整教程</a></p>
+<h2 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h2><p>当第三包被<code>git submodule</code>记录之后，<code>git status</code>命令会出现下面的情况,<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ git status vendor | grep modified:</span><br><span class="line"><span class="comment">#       modified:   vendor/rails (modified content)</span></span><br></pre></td></tr></table></figure></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">$ git diff vendor/</span><br><span class="line">diff --git a/vendor/rails b/vendor/rails</span><br><span class="line">--- a/vendor/rails</span><br><span class="line">+++ b/vendor/rails</span><br><span class="line">@@ -1 +1 @@</span><br><span class="line">-Subproject commit 046c900df27994d454b7f906caa0e4226bb42b6f</span><br><span class="line">+Subproject commit 046c900df27994d454b7f906caa0e4226bb42b6f-dirty</span><br></pre></td></tr></table></figure>
+<p>如何让<code>git status</code>不显示那个<code>modified content</code>呢？<br>修改<code>.gitmodule</code>文件， 在显示<code>modified content</code>的第三包管理下添加一个<code>ignore = dirty</code>， 如下:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[submodule <span class="string">"bundle/fugitive"</span>]</span><br><span class="line">    path = bundle/fugitive</span><br><span class="line">    url = git://github.com/tpope/vim-fugitive.git</span><br><span class="line">    ignore = dirty</span><br></pre></td></tr></table></figure></p>
+<p>上述三个步骤一般就能解决问题了， 如果想深入理解<code>git submodule</code>,可进一步参考<a href="http://www.kafeitu.me/git/2012/03/27/git-submodule.html" target="_blank" rel="noopener">git submodule使用完整教程</a></p>
   
 	</div>
 		<div style="padding: 10px 44px 30px 44px;" >
@@ -275,6 +275,10 @@
 			<li><a href="/categories/php/" title="php">php<sup>2</sup></a></li>
 		  
 		
+		  
+			<li><a href="/categories/redis专题/" title="redis专题">redis专题<sup>1</sup></a></li>
+		  
+		
 		</ul>
 </div>
 
@@ -362,7 +366,7 @@
 			
 		
 			
-				<li><a href="/tags/getcookie/" title="getcookie">getcookie<sup>1</sup></a></li>
+				<li><a href="/tags/php/" title="php">php<sup>1</sup></a></li>
 			
 		
 		</ul>

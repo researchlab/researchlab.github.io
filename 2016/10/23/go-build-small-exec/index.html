@@ -19,7 +19,7 @@
 <meta property="og:site_name" content="一线攻城狮">
 <meta property="og:description" content="尽管go1.7.3编译生成的可执行程序已经很小了,但是通过编译参数控制还能编译出更小的可执行文件，总结如下,">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2018-10-16T08:37:01.834Z">
+<meta property="og:updated_time" content="2018-10-16T09:40:11.122Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="go编译生成更小的执行程序">
 <meta name="twitter:description" content="尽管go1.7.3编译生成的可执行程序已经很小了,但是通过编译参数控制还能编译出更小的可执行文件，总结如下,">
@@ -103,14 +103,14 @@
 <li><code>-w</code> 去掉DWARF调试信息，得到的程序就不能用gdb调试了</li>
 </ul>
 <p>如执行如下命令可得到优化编译过的<code>test</code>可执行程序:4.8M</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ go build -ldflags -w test.go</div></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ go build -ldflags -w test.go</span><br></pre></td></tr></table></figure>
 <blockquote>
 <p>不建议s和w同时使用。</p>
 </blockquote>
-<h2 id="使用upx"><a href="#使用upx" class="headerlink" title="使用upx"></a>使用upx</h2><p>上面golang build 时加上<code>-ldflags</code>参数得到了比较小的可执行程序， 但是还可以通过<code>upx</code>这个开源，绿色，好用的压缩工具进行进一步压缩，首先其下载地址:<a href="http://upx.sourceforge.net/#downloadupx" target="_blank" rel="external">http://upx.sourceforge.net/#downloadupx</a></p>
-<p>linux 系统选择下载:<code>upx-3.91-amd64_linux.tar.bz2</code> 即可, 然后 <code>tar -xvf upx-3.91-amd64_linux.tar.bz2</code> 进入到解压文件夹中将可执行文件<code>upx</code> 拷贝到<code>/usr/bin</code>就可以全局执行了<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">$ sudo mv upx /usr/bin</div><div class="line">➜  <span class="built_in">test</span> git:(master) ✗ upx -9 -k <span class="built_in">test</span> </div><div class="line">                       Ultimate Packer <span class="keyword">for</span> eXecutables</div><div class="line">                          Copyright (C) 1996 - 2013</div><div class="line">UPX 3.91        Markus Oberhumer, Laszlo Molnar &amp; John Reiser   Sep 30th 2013</div><div class="line"></div><div class="line">        File size         Ratio      Format      Name</div><div class="line">   --------------------   ------   -----------   -----------</div><div class="line">   5024059 -&gt;   1552060   30.89%  linux/ElfAMD   <span class="built_in">test</span> </div><div class="line"></div><div class="line">Packed 1 file.</div></pre></td></tr></table></figure></p>
+<h2 id="使用upx"><a href="#使用upx" class="headerlink" title="使用upx"></a>使用upx</h2><p>上面golang build 时加上<code>-ldflags</code>参数得到了比较小的可执行程序， 但是还可以通过<code>upx</code>这个开源，绿色，好用的压缩工具进行进一步压缩，首先其下载地址:<a href="http://upx.sourceforge.net/#downloadupx" target="_blank" rel="noopener">http://upx.sourceforge.net/#downloadupx</a></p>
+<p>linux 系统选择下载:<code>upx-3.91-amd64_linux.tar.bz2</code> 即可, 然后 <code>tar -xvf upx-3.91-amd64_linux.tar.bz2</code> 进入到解压文件夹中将可执行文件<code>upx</code> 拷贝到<code>/usr/bin</code>就可以全局执行了<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">$ sudo mv upx /usr/bin</span><br><span class="line">➜  <span class="built_in">test</span> git:(master) ✗ upx -9 -k <span class="built_in">test</span> </span><br><span class="line">                       Ultimate Packer <span class="keyword">for</span> eXecutables</span><br><span class="line">                          Copyright (C) 1996 - 2013</span><br><span class="line">UPX 3.91        Markus Oberhumer, Laszlo Molnar &amp; John Reiser   Sep 30th 2013</span><br><span class="line"></span><br><span class="line">        File size         Ratio      Format      Name</span><br><span class="line">   --------------------   ------   -----------   -----------</span><br><span class="line">   5024059 -&gt;   1552060   30.89%  linux/ElfAMD   <span class="built_in">test</span> </span><br><span class="line"></span><br><span class="line">Packed 1 file.</span><br></pre></td></tr></table></figure></p>
 <p>可以看到通过<code>upx</code>进一步压缩之后得到的程序大约只有1.5M了， 压缩比率达到了<code>30.89%</code>.<br>其中<code>-k</code>参数表示保留备份文件， <code>-9</code>代表最优压缩，<code>upx</code>总共有9档压缩,从<code>1</code>到<code>9</code> 其中 <code>-1</code>压缩速度最快.</p>
-<p>再来看看下面编译之后的效果<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">$ go build test.go ---&gt; 得到的 <span class="built_in">test</span>  大约6.5MB </div><div class="line">$ go build -ldflags -w ---&gt; 得到的 <span class="built_in">test</span> 大约4.8MB</div><div class="line">$ upx -9 <span class="built_in">test</span>  ---&gt; 得到的 <span class="built_in">test</span> 大约 1.5MB</div></pre></td></tr></table></figure></p>
+<p>再来看看下面编译之后的效果<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ go build test.go ---&gt; 得到的 <span class="built_in">test</span>  大约6.5MB </span><br><span class="line">$ go build -ldflags -w ---&gt; 得到的 <span class="built_in">test</span> 大约4.8MB</span><br><span class="line">$ upx -9 <span class="built_in">test</span>  ---&gt; 得到的 <span class="built_in">test</span> 大约 1.5MB</span><br></pre></td></tr></table></figure></p>
   
 	</div>
 		<div style="padding: 10px 44px 30px 44px;" >
@@ -273,6 +273,10 @@
 			<li><a href="/categories/php/" title="php">php<sup>2</sup></a></li>
 		  
 		
+		  
+			<li><a href="/categories/redis专题/" title="redis专题">redis专题<sup>1</sup></a></li>
+		  
+		
 		</ul>
 </div>
 
@@ -360,7 +364,7 @@
 			
 		
 			
-				<li><a href="/tags/getcookie/" title="getcookie">getcookie<sup>1</sup></a></li>
+				<li><a href="/tags/php/" title="php">php<sup>1</sup></a></li>
 			
 		
 		</ul>

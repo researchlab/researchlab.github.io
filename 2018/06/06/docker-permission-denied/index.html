@@ -19,7 +19,7 @@
 <meta property="og:site_name" content="一线攻城狮">
 <meta property="og:description" content="在ubuntu16.04上重新安装docker后，执行docker相关命令，出现”Got permission denied”提示,如下,">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2018-10-16T08:37:01.834Z">
+<meta property="og:updated_time" content="2018-10-16T09:40:11.122Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Docker操作提示Get Permission Denied">
 <meta name="twitter:description" content="在ubuntu16.04上重新安装docker后，执行docker相关命令，出现”Got permission denied”提示,如下,">
@@ -95,10 +95,10 @@
 		
 		</div>
 		
-		<p>在ubuntu16.04上重新安装docker后，执行docker相关命令，出现”Got permission denied”提示,如下,<br><a id="more"></a><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">~ » docker ps </div><div class="line">Got permission denied while trying to connect to the Docker daemon socket at unix:///var/run/docker.sock: Get http://%2Fvar%2Frun%2Fdocker.sock/v1.37/containers/json: dial unix /var/run/docker.sock: connect: permission denied</div></pre></td></tr></table></figure></p>
-<h2 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h2><p>摘自docker mannual上的一段话<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">Manage Docker as a non-root user</div><div class="line"></div><div class="line">The docker daemon binds to a Unix socket instead of a TCP port. By default that Unix socket is owned by the user root and other users can only access it using sudo. The docker daemon always runs as the root user.</div><div class="line"></div><div class="line">If you don’t want to use sudo when you use the docker command, create a Unix group called docker and add users to it. When the docker daemon starts, it makes the ownership of the Unix socket read/writable by the docker group.</div></pre></td></tr></table></figure></p>
+		<p>在ubuntu16.04上重新安装docker后，执行docker相关命令，出现”Got permission denied”提示,如下,<br><a id="more"></a><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">~ » docker ps </span><br><span class="line">Got permission denied while trying to connect to the Docker daemon socket at unix:///var/run/docker.sock: Get http://%2Fvar%2Frun%2Fdocker.sock/v1.37/containers/json: dial unix /var/run/docker.sock: connect: permission denied</span><br></pre></td></tr></table></figure></p>
+<h2 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h2><p>摘自docker mannual上的一段话<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Manage Docker as a non-root user</span><br><span class="line"></span><br><span class="line">The docker daemon binds to a Unix socket instead of a TCP port. By default that Unix socket is owned by the user root and other users can only access it using sudo. The docker daemon always runs as the root user.</span><br><span class="line"></span><br><span class="line">If you don’t want to use sudo when you use the docker command, create a Unix group called docker and add users to it. When the docker daemon starts, it makes the ownership of the Unix socket read/writable by the docker group.</span><br></pre></td></tr></table></figure></p>
 <p>大概的意思就是：docker进程使用Unix Socket而不是TCP端口。而默认情况下，Unix socket属于root用户，需要root权限才能访问。</p>
-<h2 id="解决方法"><a href="#解决方法" class="headerlink" title="解决方法"></a>解决方法</h2><p>docker守护进程启动的时候，会默认赋予名字为docker的用户组读写Unix socket的权限，因此只要创建docker用户组，并将当前用户加入到docker用户组中，那么当前用户就有权限访问Unix socket了，进而也就可以执行docker相关命令;<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">sudo groupadd docker	#添加docker用户组</div><div class="line">sudo gpasswd -a $USER docker #将登陆用户加入到docker用户组中</div><div class="line">newgrp docker	#更新用户组</div><div class="line">docker ps			#测试docker命令是否可以使用sudo正常使用</div></pre></td></tr></table></figure></p>
+<h2 id="解决方法"><a href="#解决方法" class="headerlink" title="解决方法"></a>解决方法</h2><p>docker守护进程启动的时候，会默认赋予名字为docker的用户组读写Unix socket的权限，因此只要创建docker用户组，并将当前用户加入到docker用户组中，那么当前用户就有权限访问Unix socket了，进而也就可以执行docker相关命令;<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">sudo groupadd docker	#添加docker用户组</span><br><span class="line">sudo gpasswd -a $USER docker #将登陆用户加入到docker用户组中</span><br><span class="line">newgrp docker	#更新用户组</span><br><span class="line">docker ps			#测试docker命令是否可以使用sudo正常使用</span><br></pre></td></tr></table></figure></p>
   
 	</div>
 		<div style="padding: 10px 44px 30px 44px;" >
@@ -174,9 +174,9 @@
  
 
 <div class="next">
-<a href="/2017/09/19/quicksort-summary/"  title="快速排序算法总结">
+<a href="/2018/01/16/redis-01-基础数据结构/"  title="redis专题01 基础数据结构">
  <strong>下一篇：</strong><br/> 
- <span>快速排序算法总结
+ <span>redis专题01 基础数据结构
 </span>
 </a>
 </div>
@@ -251,6 +251,10 @@
 		
 		  
 			<li><a href="/categories/php/" title="php">php<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/redis专题/" title="redis专题">redis专题<sup>1</sup></a></li>
 		  
 		
 		</ul>
@@ -340,7 +344,7 @@
 			
 		
 			
-				<li><a href="/tags/getcookie/" title="getcookie">getcookie<sup>1</sup></a></li>
+				<li><a href="/tags/php/" title="php">php<sup>1</sup></a></li>
 			
 		
 		</ul>

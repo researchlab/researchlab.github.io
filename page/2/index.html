@@ -72,6 +72,70 @@
         <header class="article-info clearfix">
   <h1 itemprop="name">
     
+      <a href="/2017/03/04/docker-basic-use/" title="docker实践--01 创建docker应用" itemprop="url">docker实践--01 创建docker应用</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
+		
+  <p class="article-time">
+    <time datetime="2017-03-04T09:05:58.000Z" itemprop="datePublished"> 发表于 2017-03-04</time>
+    
+  </p>
+</header>
+    <div class="article-content">
+        
+        <p>很早就使用docker了，只是工作上一直没用起来， 加之工作多/杂，就只是断断续续自己瞎折腾，现在打算系统的整理总结一下docker使用经历，这个第一篇主要总结一下几个方面，<br></p>
+        
+        
+        <p class="article-more-link">
+          
+            <a href="/2017/03/04/docker-basic-use/#more">Read More</a>
+          
+       </p>
+    </div>
+    <footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/docker-practice/">docker-practice</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/docker/">docker</a>
+  </div>
+
+</div>
+
+
+
+
+<div class="comments-count">
+	
+	  	<span></span>
+		<a href="/2017/03/04/docker-basic-use/#comments" class="ds-thread-count comments-count-link" data-thread-key="2017/03/04/docker-basic-use/" data-count-type="comments">&nbsp;</a>
+	
+</div>
+
+</footer>
+
+
+    </article>
+
+
+
+
+
+
+   
+    
+    <article class="post-expand post" itemprop="articleBody"> 
+        <header class="article-info clearfix">
+  <h1 itemprop="name">
+    
       <a href="/2017/03/02/redispool-baseon-fzzy-radix/" title="基于fzzy/radix/redis封装新的redispool" itemprop="url">基于fzzy/radix/redis封装新的redispool</a>
   </h1>
   <p class="article-author">By
@@ -85,7 +149,7 @@
 </header>
     <div class="article-content">
         
-        <p>之前的老项目的redis client sdk 直接大名鼎鼎的<code>github.com/fzzy/radix</code>提供的<code>redis client</code> 和<code>redis pool</code>, 当访问峰值达到一定的值后会出现<code>too many open files</code>等tcp连接错误，同时也没有直接提供authorization 密钥认证的接口，为满足这些新需求基于<code>fzzy/radix</code>封装出的新的<code>redispool</code>, 已投入生产使用半年来暂无问题，本文总结如下,<br>
+        <p>之前的老项目的redis client sdk 直接大名鼎鼎的<code>github.com/fzzy/radix</code>提供的<code>redis client</code> 和<code>redis pool</code>, 当访问峰值达到一定的值后会出现<code>too many open files</code>等tcp连接错误，同时也没有直接提供authorization 密钥认证的接口，为满足这些新需求基于<code>fzzy/radix</code>封装出的新的<code>redispool</code>, 已投入生产使用半年来暂无问题，本文总结如下,<br></p>
         
         
         <p class="article-more-link">
@@ -149,7 +213,7 @@
 </header>
     <div class="article-content">
         
-        <p>很早之前的一个老项目就使用过ORM，当时使用的是<code>xorm</code>，后来新的项目设计说考虑性能什么的又用写原生sql来做了，在项目中使用一直没什么问题， 但是代码中到处写着原生的sql语句,并且有很多重复的语句，很不好维护，于是最近又重新考虑采用orm的方式来操作数据库，最近看中<code>beego/orm</code>这个包， 它的官方文档也写了很详细的使用说明，下面还是简要总结一下自己在项目中的使用经历,<br>
+        <p>很早之前的一个老项目就使用过ORM，当时使用的是<code>xorm</code>，后来新的项目设计说考虑性能什么的又用写原生sql来做了，在项目中使用一直没什么问题， 但是代码中到处写着原生的sql语句,并且有很多重复的语句，很不好维护，于是最近又重新考虑采用orm的方式来操作数据库，最近看中<code>beego/orm</code>这个包， 它的官方文档也写了很详细的使用说明，下面还是简要总结一下自己在项目中的使用经历,<br></p>
         
         
         <p class="article-more-link">
@@ -341,7 +405,7 @@
 </header>
     <div class="article-content">
         
-        <p>server提供api服务直接对接前端js, 但是存在跨域问题，本文使用先查询请求过来的host 然后判断主域名是否存在，存在,则在返回头部设置这个请求域名充许跨域访问。<br>
+        <p>server提供api服务直接对接前端js, 但是存在跨域问题，本文使用先查询请求过来的host 然后判断主域名是否存在，存在,则在返回头部设置这个请求域名充许跨域访问。<br></p>
         
         
         <p class="article-more-link">
@@ -405,7 +469,7 @@
 </header>
     <div class="article-content">
         
-        <p>现在golang已经可以通过<code>vendor</code>来管理第三方依赖包了，但是之前的一个老项目用的是<code>git submodule</code>来管理的，但是<code>.gitsubmodule</code>文件中只记录管理了项目的部分依赖包， 需要把还没有被管理的第三包也加上，下面总结使用<code>git submodule</code>的过程。<br>
+        <p>现在golang已经可以通过<code>vendor</code>来管理第三方依赖包了，但是之前的一个老项目用的是<code>git submodule</code>来管理的，但是<code>.gitsubmodule</code>文件中只记录管理了项目的部分依赖包， 需要把还没有被管理的第三包也加上，下面总结使用<code>git submodule</code>的过程。<br></p>
         
         
         <p class="article-more-link">
@@ -469,7 +533,7 @@
 </header>
     <div class="article-content">
         
-        <p>Http缓存机制作为web性能优化的重要手段, 本文对网络中，工作中使用的http缓存知识进行归纳总结。<br>
+        <p>Http缓存机制作为web性能优化的重要手段, 本文对网络中，工作中使用的http缓存知识进行归纳总结。<br></p>
         
         
         <p class="article-more-link">
@@ -597,7 +661,7 @@
 </header>
     <div class="article-content">
         
-        <p>运行在Linux系统上的网络程序可能会出现”Too many open files”的异常情况，且常见于高并发访问文件系统，多线程网络连接等场景。<br>
+        <p>运行在Linux系统上的网络程序可能会出现”Too many open files”的异常情况，且常见于高并发访问文件系统，多线程网络连接等场景。<br></p>
         
         
         <p class="article-more-link">
@@ -629,65 +693,6 @@
 	
 	  	<span></span>
 		<a href="/2017/01/14/too-many-open-files-solution/#comments" class="ds-thread-count comments-count-link" data-thread-key="2017/01/14/too-many-open-files-solution/" data-count-type="comments">&nbsp;</a>
-	
-</div>
-
-</footer>
-
-
-    </article>
-
-
-
-
-
-
-   
-    
-    <article class="post-expand post" itemprop="articleBody"> 
-        <header class="article-info clearfix">
-  <h1 itemprop="name">
-    
-      <a href="/2017/01/06/go-printf-format/" title="总结printf 格式化标识" itemprop="url">总结printf 格式化标识</a>
-  </h1>
-  <p class="article-author">By
-       
-		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
-		
-  <p class="article-time">
-    <time datetime="2017-01-06T15:49:13.000Z" itemprop="datePublished"> 发表于 2017-01-06</time>
-    
-  </p>
-</header>
-    <div class="article-content">
-        
-        <p>项目中总是时不时的要使用<code>fmt.Printf</code>或<code>fmt.Sprintf</code>来处理某些数据类型,总结一下常用的标识符用途及场景.</p>
-        
-        
-        <p class="article-more-link">
-          
-            <a href="/2017/01/06/go-printf-format/#more">Read More</a>
-          
-       </p>
-    </div>
-    <footer class="article-footer clearfix">
-<div class="article-catetags">
-
-<div class="article-categories">
-  <span></span>
-  <a class="article-category-link" href="/categories/golang/">golang</a>
-</div>
-
-
-</div>
-
-
-
-
-<div class="comments-count">
-	
-	  	<span></span>
-		<a href="/2017/01/06/go-printf-format/#comments" class="ds-thread-count comments-count-link" data-thread-key="2017/01/06/go-printf-format/" data-count-type="comments">&nbsp;</a>
 	
 </div>
 
@@ -767,6 +772,10 @@
 		
 		  
 			<li><a href="/categories/php/" title="php">php<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/redis专题/" title="redis专题">redis专题<sup>1</sup></a></li>
 		  
 		
 		</ul>
@@ -856,7 +865,7 @@
 			
 		
 			
-				<li><a href="/tags/getcookie/" title="getcookie">getcookie<sup>1</sup></a></li>
+				<li><a href="/tags/php/" title="php">php<sup>1</sup></a></li>
 			
 		
 		</ul>
