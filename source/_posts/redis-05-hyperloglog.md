@@ -126,15 +126,16 @@ OK
 
 > `pfadd nums 随机数1， 随机数2， 随机数3 ... 随机数N
 
-```shell
-随机数1   1 0 0 1 0 1 0 1 1 0 0 0 0
-随机数2   1 0 0 1 0 1 0 1 0 1 0 0 0
-随机数3   1 0 0 0 0 0 0 0 0 0 0 0 0
-随机数4   1 0 0 1 0 1 0 1 1 1 1 0 0
-随机数5   1 0 0 1 0 1 0 0 0 0 0 0 0
+<figure class="highlight"><font style="color:#817c7c;font-size:90%">高位 <----------------- 低位</font>
+
+随机数1   1 0 0 1 0 1 0 1 1 <font style="color:#d14;border:1px solid #d6d6d6; border-radius:0.25em;">0 0 0 0</font>
+随机数2   1 0 0 1 0 1 0 1 0 1 <font style="color:#d14;border:1px solid #d6d6d6; border-radius:0.25em;">0 0 0</font>
+随机数3   1 <font style="color:#d14;border:1px solid #d6d6d6; border-radius:0.25em;">0 0 0 0 0 0 0 0 0 0 0 0</font>
+随机数4   1 0 0 1 0 1 0 1 1 1 1 <font style="color:#d14;border:1px solid #d6d6d6; border-radius:0.25em;">0 0</font>
+随机数5   1 0 0 1 0 1 <font style="color:#d14;border:1px solid #d6d6d6; border-radius:0.25em;">0 0 0 0 0 0 0</font>
 ......
-随机数N   1 0 0 1 0 0 0 0 0 0 0 0 0
-```
+随机数N   1 0 0 1 <font style="color:#d14;border:1px solid #d6d6d6; border-radius:0.25em;">0 0 0 0 0 0 0 0 0</font>
+</figure>
 
 如上， 给定一系列的随机整数，通过记录下低位连续零位的最大长度`k`，通过这个`k`值可以估算出随机数的数量，实验发现`K`和`N`的对数之间存在显著的线性相关性, 通过这种线性近似计算可以得到`pfcount` 指定`key`的近似估值， 详细的原理这里不在进一步阐述；
 
