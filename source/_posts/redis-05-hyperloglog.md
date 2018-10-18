@@ -141,7 +141,7 @@ OK
 
 >  可进一步参看[HyperLogLog 复杂的公式推导](https://www.slideshare.net/KaiZhang130/countdistinct-problem-88329470)
 
-> `redis`的`HyperLogLog`实现中用到的是`16384`个桶，也就是`2^14，每个桶的`maxbits`需要`6 bits`来存储，最大可以表示`maxbits=63`，于是总共占用内存就是`2^14 * 6 / 8 = 12k`字节。
+> `redis`的`HyperLogLog`实现中用到的是`16384`个桶，也就是`2^14`，每个桶的`maxbits`需要`6 bits`来存储，最大可以表示`maxbits=63`，于是总共占用内存就是`2^14 * 6 / 8 = 12k`字节。
 
 
 #### 总结
