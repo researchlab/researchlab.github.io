@@ -19,7 +19,7 @@
 <meta property="og:site_name" content="一线攻城狮">
 <meta property="og:description" content="在日常应用开发中，redis常应用于热点内容缓存，分布式锁，权限认证等场景中，此redis专题试图对redis技术在内容缓存,分布式及redis集群场景中的应用，使用特性，原理及源码进行分析总结，内容来源于个人工作经验实践及网络学习资源的融合归纳总结;">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2018-10-18T10:13:07.126Z">
+<meta property="og:updated_time" content="2018-10-18T10:51:40.254Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="redis专题01 数据结构之string&#x2F;list&#x2F;hash&#x2F;set&#x2F;zset">
 <meta name="twitter:description" content="在日常应用开发中，redis常应用于热点内容缓存，分布式锁，权限认证等场景中，此redis专题试图对redis技术在内容缓存,分布式及redis集群场景中的应用，使用特性，原理及源码进行分析总结，内容来源于个人工作经验实践及网络学习资源的融合归纳总结;">
@@ -107,6 +107,9 @@
 </ul>
 <blockquote>
 <p><a href="http://doc.redisfans.com/" target="_blank" rel="noopener">redis命令参考链接</a></p>
+</blockquote>
+<blockquote>
+<p><a href="http://www.redis.cn/" target="_blank" rel="noopener">redis学习站点</a></p>
 </blockquote>
 <h5 id="2-1-string-字符串"><a href="#2-1-string-字符串" class="headerlink" title="2.1 string(字符串)"></a>2.1 string(字符串)</h5><p>Redis中string是动态字符串，采用预分配冗余空间的方式来减少内存的频繁分配，即一个字符串的地址大小实际有两个长度表示，一个是字符串的实际长度len, 另一个是初始化时系统预分配的空间大小capacity, (capacity &gt;= len), 当字符串长度小于1M时，扩容都是加倍现有的空间，如果超过1M，扩容时一次只会多扩1M的空间。</p>
 <blockquote>
