@@ -45,6 +45,8 @@ redis有5个基础数据结构
 
 > [redis命令参考链接](http://doc.redisfans.com/)
 
+> [redis学习站点](http://www.redis.cn/)
+
 ##### 2.1 string(字符串)
 
 Redis中string是动态字符串，采用预分配冗余空间的方式来减少内存的频繁分配，即一个字符串的地址大小实际有两个长度表示，一个是字符串的实际长度len, 另一个是初始化时系统预分配的空间大小capacity, (capacity >= len), 当字符串长度小于1M时，扩容都是加倍现有的空间，如果超过1M，扩容时一次只会多扩1M的空间。
