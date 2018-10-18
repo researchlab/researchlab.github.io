@@ -136,6 +136,70 @@
         <header class="article-info clearfix">
   <h1 itemprop="name">
     
+      <a href="/2018/01/18/redis-03-delay-queue/" title="redis专题03 消息队列系列问题" itemprop="url">redis专题03 消息队列系列问题</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
+		
+  <p class="article-time">
+    <time datetime="2018-01-18T10:20:31.000Z" itemprop="datePublished"> 发表于 2018-01-18</time>
+    
+  </p>
+</header>
+    <div class="article-content">
+        
+        <p>很多业务场景中多会用到消息队列来传递消息数据问题， 常用的消息队列如<code>NSQ</code>,<code>NAS</code>, <code>Rabbitmq</code>和<code>Kafka</code>等重量级消息队列中间件，功能很强大 使用起来自然也复杂，其实在大部分场景只是需要一个消息队列来传递数据，数据量，数据之间的顺序等也没有特殊的要求， 这样的场景使用<code>redis</code>非常轻松就可以搞定，而且在使用和维护上相对而言要简单方便些,当然<code>redis</code>的消息队列不是专业的消息队列，它没有非常多的高级特性，没有<code>ack</code>保证，如果对消息的可靠性有着极致的追求，那么它就不适合使用；<br></p>
+        
+        
+        <p class="article-more-link">
+          
+            <a href="/2018/01/18/redis-03-delay-queue/#more">Read More</a>
+          
+       </p>
+    </div>
+    <footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/redis专题/">redis专题</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/redis/">redis</a>
+  </div>
+
+</div>
+
+
+
+
+<div class="comments-count">
+	
+	  	<span></span>
+		<a href="/2018/01/18/redis-03-delay-queue/#comments" class="ds-thread-count comments-count-link" data-thread-key="2018/01/18/redis-03-delay-queue/" data-count-type="comments">&nbsp;</a>
+	
+</div>
+
+</footer>
+
+
+    </article>
+
+
+
+
+
+
+   
+    
+    <article class="post-expand post" itemprop="articleBody"> 
+        <header class="article-info clearfix">
+  <h1 itemprop="name">
+    
       <a href="/2018/01/18/redis-02-distributed-lock/" title="redis专题02 分布式锁" itemprop="url">redis专题02 分布式锁</a>
   </h1>
   <p class="article-author">By
@@ -643,70 +707,6 @@
 
 
 
-   
-    
-    <article class="post-expand post" itemprop="articleBody"> 
-        <header class="article-info clearfix">
-  <h1 itemprop="name">
-    
-      <a href="/2017/03/06/docker-image-mgr/" title="docker实践--03 镜像管理" itemprop="url">docker实践--03 镜像管理</a>
-  </h1>
-  <p class="article-author">By
-       
-		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
-		
-  <p class="article-time">
-    <time datetime="2017-03-06T11:06:41.000Z" itemprop="datePublished"> 发表于 2017-03-06</time>
-    
-  </p>
-</header>
-    <div class="article-content">
-        
-        <p>在前面第一篇总结中已了解了一些镜像的概念，简单的说镜像就是一个容器的只读模板，用来创建容器。当运行容器时需要指定镜像，如果本地没有该镜像，则会从Docker Registry下载。默认查找的是<code>Docker Hub</code>。Docker的镜像是增量的修改，每次创建新的镜像都会在老的镜像上面构建一个增量的层，使用到的技术是Another Union File System(AUFS)，具体可参考 <a href="http://www.infoq.com/cn/articles/analysis-of-docker-file-system-aufs-and-devicemapper/" target="_blank" rel="noopener">剖析Docker文件系统：Aufs与Devicemapper</a>, 下面主要总结记录使用和管理docker镜像的过程。</p>
-        
-        
-        <p class="article-more-link">
-          
-            <a href="/2017/03/06/docker-image-mgr/#more">Read More</a>
-          
-       </p>
-    </div>
-    <footer class="article-footer clearfix">
-<div class="article-catetags">
-
-<div class="article-categories">
-  <span></span>
-  <a class="article-category-link" href="/categories/docker-practice/">docker-practice</a>
-</div>
-
-
-  <div class="article-tags">
-  
-  <span></span> <a href="/tags/docker/">docker</a>
-  </div>
-
-</div>
-
-
-
-
-<div class="comments-count">
-	
-	  	<span></span>
-		<a href="/2017/03/06/docker-image-mgr/#comments" class="ds-thread-count comments-count-link" data-thread-key="2017/03/06/docker-image-mgr/" data-count-type="comments">&nbsp;</a>
-	
-</div>
-
-</footer>
-
-
-    </article>
-
-
-
-
-
-
 
   <nav id="page-nav" class="clearfix">
     <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/6/">6</a><a class="extend next" rel="next" href="/page/2/">Next<span></span></a>
@@ -776,7 +776,7 @@
 		  
 		
 		  
-			<li><a href="/categories/redis专题/" title="redis专题">redis专题<sup>2</sup></a></li>
+			<li><a href="/categories/redis专题/" title="redis专题">redis专题<sup>3</sup></a></li>
 		  
 		
 		</ul>
@@ -802,11 +802,11 @@
 			
 		
 			
-				<li><a href="/tags/concurrency/" title="concurrency">concurrency<sup>2</sup></a></li>
+				<li><a href="/tags/redis/" title="redis">redis<sup>3</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/redis/" title="redis">redis<sup>2</sup></a></li>
+				<li><a href="/tags/concurrency/" title="concurrency">concurrency<sup>2</sup></a></li>
 			
 		
 			

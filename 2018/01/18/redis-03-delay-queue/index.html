@@ -4,25 +4,25 @@
 <head>
   <meta charset="UTF-8">
   
-    <title>Docker操作提示Get Permission Denied | 一线攻城狮</title>
+    <title>redis专题03 消息队列系列问题 | 一线攻城狮</title>
     <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
     
     <meta name="author" content="Lee Hong">
     
 
     
-    <meta name="description" content="在ubuntu16.04上重新安装docker后，执行docker相关命令，出现”Got permission denied”提示,如下,">
-<meta name="keywords" content="docker">
+    <meta name="description" content="很多业务场景中多会用到消息队列来传递消息数据问题， 常用的消息队列如NSQ,NAS, Rabbitmq和Kafka等重量级消息队列中间件，功能很强大 使用起来自然也复杂，其实在大部分场景只是需要一个消息队列来传递数据，数据量，数据之间的顺序等也没有特殊的要求， 这样的场景使用redis非常轻松就可以搞定，而且在使用和维护上相对而言要简单方便些,当然redis的消息队列不是专业的消息队列，它没有非常">
+<meta name="keywords" content="redis">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Docker操作提示Get Permission Denied">
-<meta property="og:url" content="http://researchlab.github.io/2018/06/06/docker-permission-denied/index.html">
+<meta property="og:title" content="redis专题03 消息队列系列问题">
+<meta property="og:url" content="http://researchlab.github.io/2018/01/18/redis-03-delay-queue/index.html">
 <meta property="og:site_name" content="一线攻城狮">
-<meta property="og:description" content="在ubuntu16.04上重新安装docker后，执行docker相关命令，出现”Got permission denied”提示,如下,">
+<meta property="og:description" content="很多业务场景中多会用到消息队列来传递消息数据问题， 常用的消息队列如NSQ,NAS, Rabbitmq和Kafka等重量级消息队列中间件，功能很强大 使用起来自然也复杂，其实在大部分场景只是需要一个消息队列来传递数据，数据量，数据之间的顺序等也没有特殊的要求， 这样的场景使用redis非常轻松就可以搞定，而且在使用和维护上相对而言要简单方便些,当然redis的消息队列不是专业的消息队列，它没有非常">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2018-10-18T03:09:20.112Z">
+<meta property="og:updated_time" content="2018-10-18T03:09:20.120Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Docker操作提示Get Permission Denied">
-<meta name="twitter:description" content="在ubuntu16.04上重新安装docker后，执行docker相关命令，出现”Got permission denied”提示,如下,">
+<meta name="twitter:title" content="redis专题03 消息队列系列问题">
+<meta name="twitter:description" content="很多业务场景中多会用到消息队列来传递消息数据问题， 常用的消息队列如NSQ,NAS, Rabbitmq和Kafka等重量级消息队列中间件，功能很强大 使用起来自然也复杂，其实在大部分场景只是需要一个消息队列来传递数据，数据量，数据之间的顺序等也没有特殊的要求， 这样的场景使用redis非常轻松就可以搞定，而且在使用和维护上相对而言要简单方便些,当然redis的消息队列不是专业的消息队列，它没有非常">
 
     
     <link rel="alternative" href="/atom.xml" title="一线攻城狮" type="application/atom+xml">
@@ -75,14 +75,14 @@
 		<header class="article-info clearfix">
   <h1 itemprop="name">
     
-      <a href="/2018/06/06/docker-permission-denied/" title="Docker操作提示Get Permission Denied" itemprop="url">Docker操作提示Get Permission Denied</a>
+      <a href="/2018/01/18/redis-03-delay-queue/" title="redis专题03 消息队列系列问题" itemprop="url">redis专题03 消息队列系列问题</a>
   </h1>
   <p class="article-author">By
        
 		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
 		
   <p class="article-time">
-    <time datetime="2018-06-06T15:40:41.000Z" itemprop="datePublished"> 发表于 2018-06-06</time>
+    <time datetime="2018-01-18T10:20:31.000Z" itemprop="datePublished"> 发表于 2018-01-18</time>
     
   </p>
 </header>
@@ -91,14 +91,47 @@
 		<div id="toc" class="toc-article">
 			<strong class="toc-title">文章目录</strong>
 		
-			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#分析"><span class="toc-number">1.</span> <span class="toc-text">分析</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#解决方法"><span class="toc-number">2.</span> <span class="toc-text">解决方法</span></a></li></ol>
+			<ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#list结构模拟队列"><span class="toc-number">1.</span> <span class="toc-text">list结构模拟队列</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#总结"><span class="toc-number">2.</span> <span class="toc-text">总结</span></a></li></ol>
 		
 		</div>
 		
-		<p>在ubuntu16.04上重新安装docker后，执行docker相关命令，出现”Got permission denied”提示,如下,<br><a id="more"></a><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">~ » docker ps </span><br><span class="line">Got permission denied while trying to connect to the Docker daemon socket at unix:///var/run/docker.sock: Get http://%2Fvar%2Frun%2Fdocker.sock/v1.37/containers/json: dial unix /var/run/docker.sock: connect: permission denied</span><br></pre></td></tr></table></figure></p>
-<h2 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h2><p>摘自docker mannual上的一段话<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Manage Docker as a non-root user</span><br><span class="line"></span><br><span class="line">The docker daemon binds to a Unix socket instead of a TCP port. By default that Unix socket is owned by the user root and other users can only access it using sudo. The docker daemon always runs as the root user.</span><br><span class="line"></span><br><span class="line">If you don’t want to use sudo when you use the docker command, create a Unix group called docker and add users to it. When the docker daemon starts, it makes the ownership of the Unix socket read/writable by the docker group.</span><br></pre></td></tr></table></figure></p>
-<p>大概的意思就是：docker进程使用Unix Socket而不是TCP端口。而默认情况下，Unix socket属于root用户，需要root权限才能访问。</p>
-<h2 id="解决方法"><a href="#解决方法" class="headerlink" title="解决方法"></a>解决方法</h2><p>docker守护进程启动的时候，会默认赋予名字为docker的用户组读写Unix socket的权限，因此只要创建docker用户组，并将当前用户加入到docker用户组中，那么当前用户就有权限访问Unix socket了，进而也就可以执行docker相关命令;<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">sudo groupadd docker	#添加docker用户组</span><br><span class="line">sudo gpasswd -a $USER docker #将登陆用户加入到docker用户组中</span><br><span class="line">newgrp docker	#更新用户组</span><br><span class="line">docker ps			#测试docker命令是否可以使用sudo正常使用</span><br></pre></td></tr></table></figure></p>
+		<p>很多业务场景中多会用到消息队列来传递消息数据问题， 常用的消息队列如<code>NSQ</code>,<code>NAS</code>, <code>Rabbitmq</code>和<code>Kafka</code>等重量级消息队列中间件，功能很强大 使用起来自然也复杂，其实在大部分场景只是需要一个消息队列来传递数据，数据量，数据之间的顺序等也没有特殊的要求， 这样的场景使用<code>redis</code>非常轻松就可以搞定，而且在使用和维护上相对而言要简单方便些,当然<code>redis</code>的消息队列不是专业的消息队列，它没有非常多的高级特性，没有<code>ack</code>保证，如果对消息的可靠性有着极致的追求，那么它就不适合使用；<br><a id="more"></a></p>
+<p>新秀<code>NQS</code>集群搭建相对简单，文档也很简介易懂，但其维护性和代码嵌入性上来讲要比用<code>redis消息队列</code>复杂的多， 此外使用过<code>Rabbitmq</code>的同学知道它使用起来有多复杂，发消息之前要创建<code>Exchange</code>，再创建<code>Queue</code>，还要将 <code>Queue</code>和<code>Exchange</code>通过某种规则绑定起来，发消息的时候要指定<code>routing-key</code>，还要控制头部信息。消费者在消费消息之前也要进行上面一系列的繁琐过程。</p>
+<h4 id="list结构模拟队列"><a href="#list结构模拟队列" class="headerlink" title="list结构模拟队列"></a>list结构模拟队列</h4><p><code>redis</code>中可以用<code>list</code>(列表）结构来模拟队列和栈，而且非常简单，也常用来作为异步消息队列使用，使用<code>rpush/lpush</code>操作入队列，使用<code>lpop/rpop</code>来出队列。</p>
+<p>客户端是通过队列的<code>pop</code>操作来获取消息，然后进行处理。处理完了再接着获取消息，再进行处理。显然客户端不停的<code>pop</code>操作，当队列空后，客户端就会陷入<code>pop</code>的死循环，此时空轮询不但拉高了客户端的<code>CPU</code>占用率,<code>redis</code>的 <code>QPS</code>也会被拉高，如果这样空轮询的客户端有几十来个，<code>redis</code>的慢查询可能会显著增多。</p>
+<p>上述问题通常可以通过<code>sleep</code>命令来解决这个问题，让线程休眠一下，如<code>sleep (1s)</code>，但是休眠会导致消息的延迟增大。如果只有1个消费者，那么这个延迟就是1s。如果有多个消费者，这个延迟会有所下降，因为每个消费者的休眠时间是岔开来的。</p>
+<p>有没有什么办法能显著降低延迟呢？</p>
+<p>当然可以，借助redis提供了一组<code>blpop/brpop</code>阻塞读命令就可以，阻塞读在队列没有数据的时候，会立即进入休眠状态，一旦数据到来，则立刻醒过来。消息的延迟几乎为零。用<code>blpop/brpop</code>替代前面的<code>lpop/rpop</code>，就完美解决了上面的问题。</p>
+<p>但是在实际使用过程中,<code>blpop/brpop</code> 可能会产生<code>假死</code>现象，就是当没有数据的时候通过<code>blpop/brpop</code>操作进入阻塞休眠状态，当再次有数据进来后，<code>blpop/brpop</code>操作并没有被唤醒继续执行<code>pop</code>, 这是为什么呢？</p>
+<p>什么问题？ —— 空闲连接的问题。</p>
+<p>如果线程一直阻塞在哪里，<code>Redis</code>的客户端连接就成了闲置连接，闲置过久，服务器一般会主动断开连接，减少闲置资源占用。这个时候blpop/brpop会抛出异常来。所以编写客户端消费者的时候要小心，注意捕获异常，还要重试。</p>
+<p><strong>应用场景一 延时队列</strong></p>
+<p>当客户端在处理请求时加锁没加成功怎么办。一般有3种策略来处理加锁失败：</p>
+<ul>
+<li><p>直接抛出异常，通知用户稍后重试；</p>
+<ul>
+<li>这种方式比较适合由用户直接发起的请求，用户看到错误对话框后，会先阅读对话框的内容，再点击重试，这样就可以起到人工延时的效果。如果考虑到用户体验，可以由前端的代码替代用户自己来进行延时重试控制。它本质上是对当前请求的放弃，由用户决定是否重新发起新的请求。</li>
+</ul>
+</li>
+<li><p><code>sleep</code>一会再重试；</p>
+<ul>
+<li><code>sleep</code> 会阻塞当前的消息处理线程，会导致队列的后续消息处理出现延迟。如果碰撞的比较频繁或者队列里消息比较多，</li>
+<li><code>sleep</code> 可能并不合适。如果因为个别死锁的 key 导致加锁不成功，线程会彻底堵死，导致后续消息永远得不到及时处理。</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li><u><strong>将请求转移至延时队列，过一会再试；</strong></u></li>
+</ul>
+<p>这种方式比较适合异步消息处理，将当前冲突的请求扔到另一个队列延后处理以避开冲突。</p>
+<p><code>延时队列</code>可以通过<code>redis</code>的<code>zset(有序列表)</code>来实现。我们将消息序列化成一个字符串作为<code>zset</code>的<code>value</code>，这个消息的到期处理时间作为<code>score</code>，然后用多个线程轮询<code>zset</code>获取到期的任务进行处理，多个线程是为了保障可用性，万一挂了一个线程还有其它线程可以继续处理。因为有多个线程，所以需要考虑并发争抢任务，确保任务不能被多次执行。在处理上可以将<code>zrangebyscore</code>和<code>zrem</code>一同挪到服务器端进行原子化操作;</p>
+<h4 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h4><hr>
+<ul>
+<li>阐述了<code>redis</code>利用<code>list</code>结构模拟消息队列的使用原理，场景;</li>
+<li>进一步分析了通过<code>list</code>结构模拟异步消息队列出现队列延迟的问题，引入<code>blpop/brpop</code>阻塞读命令操作；</li>
+<li>进一步在<code>blpop/brpop</code>阻塞读命令休眠过久时无法再次唤醒<code>pop</code>操作，是因为当前连接休眠过久被会<code>redis</code>认为是<code>空闲连接</code>而强行断开连接， 导致后继的<code>blpop/brpop</code>在数据再次到达后无法再次唤醒<code>pop</code>操作， 此情况需要在程序实现时注意捕获<code>blpop/brpop</code>阻塞读异常并进行重试reload操作;</li>
+<li>进一步分析了分布式锁加锁失败后的使用方法， 进而引入分析<code>延时队列</code>策略解决分布式锁加锁失败重试问题；</li>
+</ul>
   
 	</div>
 		<div style="padding: 10px 44px 30px 44px;" >
@@ -108,8 +141,8 @@
 </div>
 <div>
  <p style="margin-top:0px;">作者署名：<b><a target="_blank" href="http://www.grdtechs.com/">朴实的一线攻城狮</a></b>
-<br />本文标题：<b><a href="/2018/06/06/docker-permission-denied/" target="_blank" title="Docker操作提示Get Permission Denied">Docker操作提示Get Permission Denied</a></b> 
-<br />本文出处：<b><a href="/2018/06/06/docker-permission-denied/" target="_blank" title="Docker操作提示Get Permission Denied">http://researchlab.github.io/2018/06/06/docker-permission-denied/</a></b>
+<br />本文标题：<b><a href="/2018/01/18/redis-03-delay-queue/" target="_blank" title="redis专题03 消息队列系列问题">redis专题03 消息队列系列问题</a></b> 
+<br />本文出处：<b><a href="/2018/01/18/redis-03-delay-queue/" target="_blank" title="redis专题03 消息队列系列问题">http://researchlab.github.io/2018/01/18/redis-03-delay-queue/</a></b>
 <br />版权声明：本文由<b><a href="/about" target="_blank" title="Lee Hong">Lee Hong</a></b>创作和发表,采用<b>署名(BY)</b>-<b>非商业性使用(NC)</b>-<b>相同方式共享(SA)</b>国际许可协议进行许可,转载请注明作者及出处, 否则保留追究法律责任的权利。 </p>
 </div>
 </div>
@@ -121,13 +154,13 @@
 
 <div class="article-categories">
   <span></span>
-  <a class="article-category-link" href="/categories/docker-practice/">docker-practice</a>
+  <a class="article-category-link" href="/categories/redis专题/">redis专题</a>
 </div>
 
 
   <div class="article-tags">
   
-  <span></span> <a href="/tags/docker/">docker</a>
+  <span></span> <a href="/tags/redis/">redis</a>
   </div>
 
 </div>
@@ -172,11 +205,19 @@
 	
 <nav class="article-nav clearfix">
  
+ <div class="prev" >
+ <a href="/2018/06/06/docker-permission-denied/" title="Docker操作提示Get Permission Denied">
+  <strong>上一篇：</strong><br/>
+  <span>
+  Docker操作提示Get Permission Denied</span>
+</a>
+</div>
+
 
 <div class="next">
-<a href="/2018/01/18/redis-03-delay-queue/"  title="redis专题03 消息队列系列问题">
+<a href="/2018/01/18/redis-02-distributed-lock/"  title="redis专题02 分布式锁">
  <strong>下一篇：</strong><br/> 
- <span>redis专题03 消息队列系列问题
+ <span>redis专题02 分布式锁
 </span>
 </a>
 </div>
@@ -185,7 +226,7 @@
 
 	
 <section id="comments" class="comment">
-	<div class="ds-thread" data-thread-key="2018/06/06/docker-permission-denied/" data-title="Docker操作提示Get Permission Denied" data-url="http://researchlab.github.io/2018/06/06/docker-permission-denied/"></div>
+	<div class="ds-thread" data-thread-key="2018/01/18/redis-03-delay-queue/" data-title="redis专题03 消息队列系列问题" data-url="http://researchlab.github.io/2018/01/18/redis-03-delay-queue/"></div>
 </section>
 
 
