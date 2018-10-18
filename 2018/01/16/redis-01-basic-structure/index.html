@@ -1,0 +1,712 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>redis专题01 基础数据结构 | 一线攻城狮</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="Lee Hong">
+    
+
+    
+    <meta name="description" content="在日常应用开发中，redis常应用于热点内容缓存，分布式锁，权限认证等场景中，此redis专题试图对redis技术在内容缓存,分布式及redis集群场景中的应用，使用特性，原理及源码进行分析总结，内容来源于个人工作经验实践及网络学习资源的融合归纳总结;">
+<meta name="keywords" content="redis">
+<meta property="og:type" content="article">
+<meta property="og:title" content="redis专题01 基础数据结构">
+<meta property="og:url" content="http://researchlab.github.io/2018/01/16/redis-01-basic-structure/index.html">
+<meta property="og:site_name" content="一线攻城狮">
+<meta property="og:description" content="在日常应用开发中，redis常应用于热点内容缓存，分布式锁，权限认证等场景中，此redis专题试图对redis技术在内容缓存,分布式及redis集群场景中的应用，使用特性，原理及源码进行分析总结，内容来源于个人工作经验实践及网络学习资源的融合归纳总结;">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2018-10-18T01:11:38.219Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="redis专题01 基础数据结构">
+<meta name="twitter:description" content="在日常应用开发中，redis常应用于热点内容缓存，分布式锁，权限认证等场景中，此redis专题试图对redis技术在内容缓存,分布式及redis集群场景中的应用，使用特性，原理及源码进行分析总结，内容来源于个人工作经验实践及网络学习资源的融合归纳总结;">
+
+    
+    <link rel="alternative" href="/atom.xml" title="一线攻城狮" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="一线攻城狮">一线攻城狮</a></h1>
+				<h2 class="blog-motto">十年磨一剑，一步一步脚踏实地的耕种</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">首页</a></li>
+					
+						<li><a href="/archives">归档</a></li>
+					
+						<li><a href="/about">关于</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:researchlab.github.io">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2018/01/16/redis-01-basic-structure/" title="redis专题01 基础数据结构" itemprop="url">redis专题01 基础数据结构</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
+		
+  <p class="article-time">
+    <time datetime="2018-01-16T11:31:18.000Z" itemprop="datePublished"> 发表于 2018-01-16</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-redis-环境搭建"><span class="toc-number">1.</span> <span class="toc-text">1 redis 环境搭建</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-redis基础结构"><span class="toc-number">2.</span> <span class="toc-text">2 redis基础结构</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#2-1-string-字符串"><span class="toc-number">2.1.</span> <span class="toc-text">2.1 string(字符串)</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#2-2-list-列表"><span class="toc-number">2.2.</span> <span class="toc-text">2.2 list(列表)</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#2-3-hash-哈希"><span class="toc-number">2.3.</span> <span class="toc-text">2.3 hash(哈希)</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#2-4-set-集合"><span class="toc-number">2.4.</span> <span class="toc-text">2.4 set(集合)</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#2-5-sortedset-有序集合"><span class="toc-number">2.5.</span> <span class="toc-text">2.5 sortedset(有序集合)</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#总结"><span class="toc-number">3.</span> <span class="toc-text">总结</span></a></li></ol>
+		
+		</div>
+		
+		<p>在日常应用开发中，redis常应用于热点内容缓存，分布式锁，权限认证等场景中，此redis专题试图对redis技术在内容缓存,分布式及redis集群场景中的应用，使用特性，原理及源码进行分析总结，内容来源于个人工作经验实践及网络学习资源的融合归纳总结;<br><a id="more"></a></p>
+<h4 id="1-redis-环境搭建"><a href="#1-redis-环境搭建" class="headerlink" title="1 redis 环境搭建"></a>1 redis 环境搭建</h4><p>通过docker方式搭建一个redis 环境<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 拉取 redis 镜像</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> docker pull redis</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 运行 redis 容器</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> docker run --name myredis -d -p6379:6379 redis</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 执行容器中的 redis-cli，可以直接使用命令行操作 redis</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> docker <span class="built_in">exec</span> -it myredis redis-cli</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> redis 默认有从0到15共计16个数据库，默认为0号数据库</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> flushall 清空redis所有数据库数据(从0到15号数据库)</span></span><br><span class="line">127.0.0.1:6379&gt; flushall</span><br><span class="line">OK</span><br><span class="line"><span class="meta">#</span><span class="bash"> 选择0号数据库</span></span><br><span class="line">127.0.0.1:6379&gt; select 0</span><br><span class="line">OK</span><br><span class="line"><span class="meta">#</span><span class="bash"> 查询当前数据库已存数据的大小</span></span><br><span class="line">127.0.0.1:6379&gt; dbsize</span><br><span class="line">(integer) 0</span><br><span class="line"><span class="meta">#</span><span class="bash"> flushdb 清除单个数据库的数据， 如现在清空的是0号数据库的所有数据</span></span><br><span class="line">127.0.0.1:6379&gt; flushdb</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379&gt;</span><br></pre></td></tr></table></figure></p>
+<h4 id="2-redis基础结构"><a href="#2-redis基础结构" class="headerlink" title="2 redis基础结构"></a>2 redis基础结构</h4><p>redis有5个基础数据结构</p>
+<ul>
+<li><code>string</code> 字符串</li>
+<li><code>list</code> 列表</li>
+<li><code>set</code> 集合</li>
+<li><code>hash</code> 哈希</li>
+<li><code>zset</code> 有序集合</li>
+</ul>
+<blockquote>
+<p><a href="http://doc.redisfans.com/" target="_blank" rel="noopener">redis命令参考链接</a></p>
+</blockquote>
+<h5 id="2-1-string-字符串"><a href="#2-1-string-字符串" class="headerlink" title="2.1 string(字符串)"></a>2.1 string(字符串)</h5><p>Redis中string是动态字符串，采用预分配冗余空间的方式来减少内存的频繁分配，即一个字符串的地址大小实际有两个长度表示，一个是字符串的实际长度len, 另一个是初始化时系统预分配的空间大小capacity, (capacity &gt;= len), 当字符串长度小于1M时，扩容都是加倍现有的空间，如果超过1M，扩容时一次只会多扩1M的空间。</p>
+<blockquote>
+<p>redis字符串最大长度为512M;</p>
+</blockquote>
+<p>基础操作<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; set target learning.redis</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379&gt; get target</span><br><span class="line">"learning.redis"</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 计算字符串长度</span></span><br><span class="line">127.0.0.1:6379&gt; strlen target</span><br><span class="line">(integer) 14</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 在字符串尾部追加，返回最终长度</span></span><br><span class="line">127.0.0.1:6379&gt; append target .more</span><br><span class="line">(integer) 19</span><br><span class="line">127.0.0.1:6379&gt; get target</span><br><span class="line">"learning.redis.more"</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 根据变量名，及子串的开始及结束位置 获取子串</span></span><br><span class="line">127.0.0.1:6379&gt; getrange target 15 18</span><br><span class="line">"more"</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 根据变量名， 及待覆盖子串的开始位置，从开始位置覆盖变量值</span></span><br><span class="line">127.0.0.1:6379&gt; setrange target 15 advanced</span><br><span class="line">(integer) 23</span><br><span class="line">127.0.0.1:6379&gt; get target</span><br><span class="line">"learning.redis.advanced"</span><br><span class="line">127.0.0.1:6379&gt;</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 删除字符串可用del指令进行主动删除，也可用expire指令设置过期时间，到点会自动删除;</span></span><br><span class="line">127.0.0.1:6379&gt; set timeout deleteby.itself.after.10.seconds ex 10</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379&gt; get timeout</span><br><span class="line">"deleteby.itself.after.10.seconds"</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash">after 10 seconds</span></span><br><span class="line">127.0.0.1:6379&gt; get timeout</span><br><span class="line">(nil)</span><br><span class="line">127.0.0.1:6379&gt; set tmp no.timeout</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379&gt; get tmp</span><br><span class="line">"no.timeout"</span><br><span class="line">127.0.0.1:6379&gt; del tmp</span><br><span class="line">(integer) 1</span><br><span class="line">127.0.0.1:6379&gt; get tmp</span><br><span class="line">(nil)</span><br><span class="line">127.0.0.1:6379&gt;</span><br></pre></td></tr></table></figure></p>
+<ul>
+<li>使用场景一 计数器<br>如果字符串为整数时，可以将字符串当成计数器来使用<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; set nums 10</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379&gt; get nums</span><br><span class="line">"10"</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 在原变量nums值上增加(incrby)或减少（decry)步长10, 返回最终的计算值</span></span><br><span class="line">127.0.0.1:6379&gt; incrby nums 10</span><br><span class="line">(integer) 20</span><br><span class="line">127.0.0.1:6379&gt; decrby nums 10</span><br><span class="line">(integer) 10</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 在原变量nums值上增加(incr)或减少(decr)步长1， 返回最终的计算值</span></span><br><span class="line">127.0.0.1:6379&gt; incr nums</span><br><span class="line">(integer) 11</span><br><span class="line">127.0.0.1:6379&gt; decr nums</span><br><span class="line">(integer) 10</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 若变量不存在，则incr/decr会创建变量名并在零值基础上进行加(incr)或减(decr)1操作;</span></span><br><span class="line">127.0.0.1:6379&gt; incr id</span><br><span class="line">(integer) 1</span><br><span class="line">127.0.0.1:6379&gt; decr std</span><br><span class="line">(integer) -1</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 注意redis中整数值的有效范围区间，超过溢出报错</span></span><br><span class="line">127.0.0.1:6379&gt; set nums 9223372036854775807</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379&gt; incr nums</span><br><span class="line">(error) ERR increment or decrement would overflow</span><br><span class="line">127.0.0.1:6379&gt; set nums -9223372036854775808</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379&gt; decr nums</span><br><span class="line">(error) ERR increment or decrement would overflow</span><br><span class="line">127.0.0.1:6379&gt;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h5 id="2-2-list-列表"><a href="#2-2-list-列表" class="headerlink" title="2.2 list(列表)"></a>2.2 list(列表)</h5><p>Redis将列表数据结构命名为list而不是array，是因为列表的存储结构用的是链表而不是数组，而且链表还是双向链表。因为它是链表，所以随机定位性能较弱，首尾插入删除性能较优。如果list的列表长度很长，使用时我们一定要关注链表相关操作的时间复杂度。</p>
+<p><code>负下标</code> 链表元素的位置使用自然数<code>0,1,2,....n-1</code>表示，还可以使用负数<code>-1,-2,...-n</code>来表示，<code>-1</code>表示<code>「倒数第一」</code>，<code>-2</code>表示<code>「倒数第二」</code>，那么<code>-n</code>就表示<code>第一个元素，对应的下标为0</code>；</p>
+<p><code>队列／栈</code> 链表提供了可以从左边或右边分别对表头表尾进行删除和插入操作的rpush/rpop/lpush/lpop四条命令，使得在需要用到队列或栈操作中使用list列表结构非常方便；</p>
+<p><code>模拟队列</code> 先进先出操作</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 右进左出</span></span><br><span class="line">127.0.0.1:6379&gt; rpush skills go</span><br><span class="line">(integer) 1</span><br><span class="line">127.0.0.1:6379&gt; rpush skills java python</span><br><span class="line">(integer) 3</span><br><span class="line">127.0.0.1:6379&gt; lpop skills</span><br><span class="line">"go"</span><br><span class="line">127.0.0.1:6379&gt; lpop skills</span><br><span class="line">"java"</span><br><span class="line">127.0.0.1:6379&gt; lpop skills</span><br><span class="line">"python"</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 左进右出</span></span><br><span class="line">127.0.0.1:6379&gt; lpush skills go java python</span><br><span class="line">(integer) 3</span><br><span class="line">127.0.0.1:6379&gt; rpop skills</span><br><span class="line">"go"</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>在日常应用中，列表常用来作为异步队列来使用。</p>
+</blockquote>
+<p><code>模拟栈</code>  后进先出操作</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 右进右出</span></span><br><span class="line">127.0.0.1:6379&gt; rpush skills go java python</span><br><span class="line">(integer) 3</span><br><span class="line">127.0.0.1:6379&gt; rpop skills</span><br><span class="line">"python"</span><br><span class="line">...</span><br><span class="line"><span class="meta">#</span><span class="bash"> 左进左出</span></span><br><span class="line">127.0.0.1:6379&gt; lpush skills go java python</span><br><span class="line">(integer) 3</span><br><span class="line">127.0.0.1:6379&gt; lpop skills</span><br><span class="line">"python"</span><br></pre></td></tr></table></figure>
+<p><code>随机读</code> 可以使用<code>lindex</code>指令访问指定位置的元素，使用<code>lrange</code>指令来获取链表子元素列表，提供<code>start</code>和<code>end</code>下标参数</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; rpush skills go java python</span><br><span class="line">(integer) 3</span><br><span class="line">127.0.0.1:6379&gt; lindex skills 1</span><br><span class="line">"java"</span><br><span class="line">127.0.0.1:6379&gt; lrange skills 0 2</span><br><span class="line">1) "go"</span><br><span class="line">2) "java"</span><br><span class="line">3) "python"</span><br><span class="line">127.0.0.1:6379&gt; lrange skills 0 -1  # -1表示倒数第一</span><br><span class="line">1) "go"</span><br><span class="line">2) "java"</span><br><span class="line">3) "python"</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>使用<code>lrange</code>获取全部元素时，需要提供<code>end_index</code>，如果没有负下标，就需要首先通过<code>llen</code>指令获取长度，才可以得出<code>end_index</code>的值，有了负下标，使用<code>-1</code>代替<code>end_index</code>就可以达到相同的效果。</p>
+</blockquote>
+<p><code>修改元素</code> 使用<code>lset</code>指令在指定位置修改元素。<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; rpush skills go java python</span><br><span class="line">(integer) 3</span><br><span class="line">127.0.0.1:6379&gt; lset skills 1 javascript</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379&gt; lrange skills 0 -1</span><br><span class="line">1) "go"</span><br><span class="line">2) "javascript"</span><br><span class="line">3) "python"</span><br></pre></td></tr></table></figure></p>
+<p><code>插入元素</code> 使用<code>linsert</code>指令在列表的中插入新增元素，插入新元素时需要在<code>linsert</code>指令里指明方向参数<code>before</code>/<code>after</code>来显示指示前置和后置插入； 其次，<code>linsert</code>指令并不是通过指定位置来插入，而是通过指定具体的值。这是因为在分布式环境下，列表的元素总是频繁变动的，意味着上一时刻计算的元素下标在下一时刻可能就不是你所期望的下标了。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; rpush skills go python java</span><br><span class="line">(integer) 3</span><br><span class="line">127.0.0.1:6379&gt; linsert skills before python javascript</span><br><span class="line">(integer) 4</span><br><span class="line">127.0.0.1:6379&gt; lrange skills 0 -1</span><br><span class="line">1) "go"</span><br><span class="line">2) "javascript"</span><br><span class="line">3) "python"</span><br><span class="line">4) "java"</span><br><span class="line">127.0.0.1:6379&gt;</span><br></pre></td></tr></table></figure>
+<p><code>删除元素</code> 列表的删除操作也不是通过指定下标来确定元素的，你需要指定删除的最大个数以及元素的值<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; rpush skills go python go java javascript</span><br><span class="line">(integer) 5</span><br><span class="line">127.0.0.1:6379&gt; lrange skills 0 -1</span><br><span class="line">1) "go"</span><br><span class="line">2) "python"</span><br><span class="line">3) "go"</span><br><span class="line">4) "java"</span><br><span class="line">5) "javascript"</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 指定删除的最大个数及待删除的值，返回删除后的个数值</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 如果待删除的值不存在， 返回0</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 如果待删除的值的个数少于指定的最大个数值， 则返回实际删除的个数值</span></span><br><span class="line">127.0.0.1:6379&gt; lrem skills 1 go</span><br><span class="line">(integer) 1</span><br><span class="line">127.0.0.1:6379&gt; lrange skills 0 -1</span><br><span class="line">1) "python"</span><br><span class="line">2) "go"</span><br><span class="line">3) "java"</span><br><span class="line">4) "javascript"</span><br><span class="line">127.0.0.1:6379&gt; lrem skills 2 java</span><br><span class="line">(integer) 1</span><br><span class="line">127.0.0.1:6379&gt; lrange skills 0 -1</span><br><span class="line">1) "python"</span><br><span class="line">2) "go"</span><br><span class="line">3) "javascript"</span><br><span class="line">127.0.0.1:6379&gt; lrem skills 2 ruby</span><br><span class="line">(integer) 0</span><br><span class="line">127.0.0.1:6379&gt; lrange skills 0 -1</span><br><span class="line">1) "python"</span><br><span class="line">2) "go"</span><br><span class="line">3) "javascript"</span><br><span class="line">127.0.0.1:6379&gt;</span><br></pre></td></tr></table></figure></p>
+<p><code>定长列表</code> 在实际应用场景中，有时会遇到<code>「定长列表」</code> 的需求。比如要以走马灯的形式实时显示中奖用户名列表，因为中奖用户实在太多，能显示的数量一般不超过100条，那么这里就会使用到定长列表。维持定长列表的指令是<code>ltrim</code> ，需要提供两个参数start和end，表示需要保留列表的下标范围，范围之外的所有元素都将被移除。<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; rpush skills go java python javascript ruby erlang rust app php</span><br><span class="line">(integer) 9</span><br><span class="line">127.0.0.1:6379&gt; ltrim skills -3 -1</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379&gt; lrange skills 0 -1</span><br><span class="line">1) "rust"</span><br><span class="line">2) "app"</span><br><span class="line">3) "php"</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 当指定参数的end对应的真实下标小于start，其效果等价于del指令，因为这样的参数表示需要需要保留列表元素的下标范围为空。</span></span><br><span class="line">127.0.0.1:6379&gt; ltrim skills -3 -5</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379&gt; lrange skills 0 -1</span><br><span class="line">(empty list or set)</span><br><span class="line">127.0.0.1:6379&gt;</span><br></pre></td></tr></table></figure></p>
+<p><code>快速列表 quicklist</code><br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 快速列表结构</span></span><br><span class="line">ziplist &lt;---&gt; ziplist &lt;---&gt; ziplist</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p><strong>再深入一点，会发现Redis底层存储的还不是一个简单的<code>linkedlist</code>，而是称之为<code>快速链表quicklist</code>的一个结构。首先在列表元素较少的情况下会使用一块连续的内存存储，这个结构是<code>ziplist</code>，也即是<code>压缩列表</code>。它将所有的元素紧挨着一起存储，分配的是一块连续的内存。当数据量比较多的时候才会改成<code>quicklist</code>。因为普通的链表需要的附加指针空间太大，会比较浪费空间。比如这个列表里存的只是<code>int</code>类型的数据，结构上还需要两个额外的指针<code>prev</code>和<code>next</code>。所以Redis将<code>链表</code>和<code>ziplist</code>结合起来组成了<code>quicklist</code>。也就是将<u>多个<code>ziplist</code>使用<font color="red">双向指针</font>串起来(组成<code>quicklist</code>）</u>使用。这样既满足了快速的插入删除性能，又不会出现太大的空间冗余。</strong></p>
+</blockquote>
+<h5 id="2-3-hash-哈希"><a href="#2-3-hash-哈希" class="headerlink" title="2.3 hash(哈希)"></a>2.3 hash(哈希)</h5><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash">哈希结构</span></span><br><span class="line">    /key ---&gt; value</span><br><span class="line">hash-key ---&gt; value</span><br><span class="line">   \\key ---&gt; value</span><br><span class="line">    \...</span><br><span class="line"></span><br><span class="line">                   val2    val2    val2       val2</span><br><span class="line">                   val1    val1    val1       val1</span><br><span class="line">                    ^       ^      ^          ^</span><br><span class="line">                    |       |      |          |</span><br><span class="line">    hash --- array&#123;[key0], [key1], [key2], ... [key2^n]&#125;</span><br></pre></td></tr></table></figure>
+<p>哈希结构等价于Java中的<code>HashMap</code>或者是Python中的字典<code>dict</code>结构，在<u>实现结构上它使用<code>二维结构</code>，第一维是数组，第二维是链表，<code>hash</code>的内容<code>key</code>和<code>value</code>存放在链表中，数组里存放的是链表的头指针</u>。通过key查找元素时，先计算<code>key</code>的<code>hashcode</code>，然后用<code>hashcode</code>对数组的长度进行取模定位到链表的表头，再对链表进行遍历获取到相应的<code>value</code>值，链表的作用就是用来将产生了<code>「hash碰撞」</code>的元素串起来。Java语言开发者会感到非常熟悉，因为这样的结构和HashMap是没有区别的。哈希的第一维数组的长度也是2^n。</p>
+<p><code>基础操作</code><br><strong>增</strong></p>
+<ul>
+<li><code>hset</code>  一次增加一个键值对;</li>
+<li><code>hmset</code> 一次增加多个键值对;</li>
+</ul>
+<p><strong>删</strong></p>
+<ul>
+<li><code>hdel</code>  删除指定key，hdel支持同时删除多个key;</li>
+</ul>
+<p><del><strong>改</strong></del></p>
+<p><strong>查</strong></p>
+<ul>
+<li><code>hget</code>          获取具体key对应的value;</li>
+<li><code>hmget</code>         获取多个key对应的value;</li>
+<li><code>hgetall</code>       获取所有的键值对;</li>
+<li><code>hkeys</code>和<code>hvals</code> 可分别获取所有的key列表和value列表;</li>
+<li><code>hexists</code>       判断某个值是否存在于指定key中;</li>
+</ul>
+<blockquote>
+<p>判断元素是否存在 可以使用<code>hget</code>获得<code>key</code>对应的<code>value</code>是否为空来判断，若value的字符串长度特别大，通过这种方式来判断元素存在与否就略显浪费，此时建议使用hexists指令;</p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash">hset 设置单个field-value值对并返回设置成功的值对个数，但在下列实践中hset 好像也支持设置多个值队并返回了大于2的值对个数，但是不建议使用hset设置多个值对操作；</span></span><br><span class="line">127.0.0.1:6379&gt; hset auth mike true david true</span><br><span class="line">(integer) 2</span><br><span class="line">127.0.0.1:6379&gt; hget auth mike</span><br><span class="line">"true"</span><br><span class="line">127.0.0.1:6379&gt; hmset auth jack false jett true</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379&gt; hget auth jett</span><br><span class="line">"true"</span><br><span class="line"><span class="meta">#</span><span class="bash"> 当hmget 获取不存在key的field对应的value时返回nil</span></span><br><span class="line">127.0.0.1:6379&gt; hmget jack mike jett</span><br><span class="line">1) (nil)</span><br><span class="line">2) (nil)</span><br><span class="line">127.0.0.1:6379&gt; hmget auth jack mike jett</span><br><span class="line">1) "false"</span><br><span class="line">2) "true"</span><br><span class="line">3) "true"</span><br><span class="line">127.0.0.1:6379&gt; hgetall auth</span><br><span class="line">1) "mike"</span><br><span class="line">2) "true"</span><br><span class="line">3) "david"</span><br><span class="line">4) "true"</span><br><span class="line">5) "jack"</span><br><span class="line">6) "false"</span><br><span class="line">7) "jett"</span><br><span class="line">8) "true"</span><br><span class="line">127.0.0.1:6379&gt; hkeys auth</span><br><span class="line">1) "mike"</span><br><span class="line">2) "david"</span><br><span class="line">3) "jack"</span><br><span class="line">4) "jett"</span><br><span class="line">127.0.0.1:6379&gt; hvals auth</span><br><span class="line">1) "true"</span><br><span class="line">2) "true"</span><br><span class="line">3) "false"</span><br><span class="line">4) "true"</span><br><span class="line"><span class="meta">#</span><span class="bash"> hdel 可以支持删除多个field,当field不存在则忽略，最终返回删除成功的个数</span></span><br><span class="line">127.0.0.1:6379&gt; hdel auth jack jett ruby</span><br><span class="line">(integer) 2</span><br><span class="line"><span class="meta">#</span><span class="bash"> hexists 判断指定key中指定field的value值是否存在</span></span><br><span class="line">127.0.0.1:6379&gt; hexists auth jack</span><br><span class="line">(integer) 0</span><br><span class="line">127.0.0.1:6379&gt; hgetall auth</span><br><span class="line">1) "mike"</span><br><span class="line">2) "true"</span><br><span class="line">3) "david"</span><br><span class="line">4) "true"</span><br><span class="line">127.0.0.1:6379&gt;</span><br></pre></td></tr></table></figure>
+<p><code>计数器</code> 如果value为整数，那也可用<code>hash结构</code>来计数，对于内部的每一个key都可以作为独立的计数器。如果value值不是整数，调用hincrby指令会出错。<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; hset nums fish 1</span><br><span class="line">(integer) 1</span><br><span class="line">127.0.0.1:6379&gt; hincrby nums fish 5</span><br><span class="line">(integer) 6</span><br><span class="line">127.0.0.1:6379&gt; hgetall nums</span><br><span class="line">1) "fish"</span><br><span class="line">2) "6"</span><br><span class="line">127.0.0.1:6379&gt;</span><br></pre></td></tr></table></figure></p>
+<p><code>扩容</code> 当<code>hash</code>内部的元素比较拥挤时(hash碰撞比较频繁)，就需要进行扩容。扩容需要申请新的两倍大小的数组，然后将所有的键值对重新分配到新的数组下标对应的链表中(<code>rehash</code>)。如果hash结构很大，比如有上百万个键值对，那么一次完整rehash的过程就会耗时很长, 这对于单线程的Redis里来说有点压力山大。所以<u><strong>Redis采用了渐进式rehash的方案。它会同时保留两个新旧hash结构，在后续的定时任务以及hash结构的读写指令中将旧结构的元素逐渐迁移到新的结构中。这样就可以避免因扩容导致的线程卡顿现象。</strong></u></p>
+<p><code>缩容</code> hash结构缩容的原理和扩容是一致的，只不过新的数组大小要比旧数组小一倍。</p>
+<h5 id="2-4-set-集合"><a href="#2-4-set-集合" class="headerlink" title="2.4 set(集合)"></a>2.4 set(集合)</h5><p>Redis的<code>set</code>的内部结构就是<code>hash结构</code>，所有的value都指向同一个内部值。<br><strong>增</strong></p>
+<ul>
+<li><code>sadd</code> 可以一次增加多个元素;</li>
+</ul>
+<p><strong>删</strong></p>
+<ul>
+<li><code>srem</code> 删除一到多个元素;</li>
+<li><code>spop</code> 删除随机一个元素;</li>
+</ul>
+<p><del><strong>改</strong></del></p>
+<p><strong>查</strong></p>
+<ul>
+<li><code>smembers</code>  列出所有元素，</li>
+<li><code>scard</code>  获取集合长度，</li>
+<li><code>srandmember</code> 获取随机count个元素，如果不提供count参数，默认为1</li>
+<li><code>sismember</code>  判断元素是否存在(只能接收单个元素) 使用场景之一是判断是否有某种权限</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> sadd 添加集合元素， 返回成功添加元素个数</span></span><br><span class="line">127.0.0.1:6379&gt; sadd skills go python java</span><br><span class="line">(integer) 3</span><br><span class="line">127.0.0.1:6379&gt; smembers skills</span><br><span class="line">1) "java"</span><br><span class="line">2) "python"</span><br><span class="line">3) "go"</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> scard 获取集合长度</span></span><br><span class="line">127.0.0.1:6379&gt; scard skills</span><br><span class="line">(integer) 3</span><br><span class="line">127.0.0.1:6379&gt; srandmember skills 2</span><br><span class="line">1) "python"</span><br><span class="line">2) "java"</span><br><span class="line">127.0.0.1:6379&gt; srandmember skills 2</span><br><span class="line">1) "java"</span><br><span class="line">2) "go"</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> srem 删除集合某个元素， 返回成功删除个数</span></span><br><span class="line">127.0.0.1:6379&gt; srem skills python java</span><br><span class="line">(integer) 2</span><br><span class="line">127.0.0.1:6379&gt; smembers skills</span><br><span class="line">1) "go"</span><br><span class="line">127.0.0.1:6379&gt; spop skills</span><br><span class="line">"go"</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> sismember 判断给定元素是否存在某个集合中</span></span><br><span class="line">127.0.0.1:6379&gt; sismember skills go</span><br><span class="line">(integer) 0</span><br><span class="line">127.0.0.1:6379&gt;</span><br></pre></td></tr></table></figure>
+<h5 id="2-5-sortedset-有序集合"><a href="#2-5-sortedset-有序集合" class="headerlink" title="2.5 sortedset(有序集合)"></a>2.5 sortedset(有序集合)</h5><p><code>SortedSet</code>(<code>zset</code>)是Redis提供的一个非常特别的数据结构，一方面它等价于<code>Java</code>的数据结构<code>Map&lt;String, Double&gt;</code>，可以给每一个元素<code>value</code>赋予一个权重<code>score</code>，另一方面它又类似于<code>TreeSet</code>，内部的元素会按照权重<code>score</code>进行排序，可以得到每个元素的名次，还可以通过<code>score</code>的范围来获取元素的列表。<br><u><strong><code>zset</code>底层实现使用了两个数据结构，第一个是<code>hash</code>，第二个是<code>跳跃列表</code>，<code>hash</code>的作用就是关联元素<code>value</code>和权重<code>score</code>，保障元素<code>value</code>的唯一性，可以通过元素<code>value</code>找到相应的<code>score</code>值。跳跃列表的目的在于给元素<code>value</code>排序，根据<code>score</code>的范围获取元素列表。</strong></u></p>
+<p><strong>增</strong></p>
+<ul>
+<li><code>zadd</code>   增加一到多个<code>value/score</code>对，<code>score</code>放在前面</li>
+</ul>
+<p><strong>删</strong></p>
+<ul>
+<li><code>zrem</code>   可以删除<code>zset</code>中的元素，可以一次删除多个</li>
+<li><code>zremrangebyrank</code> 可以根据排名范围来删除一个或多个值</li>
+<li><code>zremrangebyscore</code> 可以根据分值返回来删除一个或多个值</li>
+</ul>
+<p><strong>改</strong></p>
+<ul>
+<li><code>zincrby</code> 以指定步长修改指定元素的value值，若value不是整数则会报错</li>
+</ul>
+<p><strong>查</strong></p>
+<ul>
+<li><code>zcard</code>可以得到<code>zset</code>的元素个数</li>
+<li><code>zscore</code> 获取指定元素的权重</li>
+<li><code>zrank</code> 获取指定元素的正向排名</li>
+<li><p><code>zrevrank</code> 获取指定元素的反向排名[倒数第一名]。</p>
+<blockquote>
+<p>正向是由小到大，负向是由大到小。</p>
+</blockquote>
+</li>
+<li><p><code>zrange</code>    指令指定排名范围参数获取对应的元素列表，携带withscores参数可以一并获取元素的权重。</p>
+</li>
+<li><code>zrevrange</code> 指令按负向排名获取元素列表[倒数]。正向是由小到大，负向是由大到小。</li>
+<li><code>zrangebyscore</code> 指定score范围获取对应的元素列表。</li>
+<li><code>zrevrangebyscore</code> 指令获取倒排元素列表。<blockquote>
+<p>正向是由小到大，负向是由大到小。参数-inf表示负无穷，+inf表示正无穷。</p>
+</blockquote>
+</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; zadd skills 10 go</span><br><span class="line">(integer) 1</span><br><span class="line">127.0.0.1:6379&gt; zadd skills 9 python 8 java 7 js</span><br><span class="line">(integer) 3</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash">zcard 获取有序集合长度</span></span><br><span class="line">127.0.0.1:6379&gt; zcard skills</span><br><span class="line">(integer) 4</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> zincrby 为指定元素value增加给定步长值, 可以用作计数器</span></span><br><span class="line">127.0.0.1:6379&gt; zincrby skills 10 go</span><br><span class="line">"20"</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> zscore 查询具体元素的score值</span></span><br><span class="line">127.0.0.1:6379&gt; zscore skills go</span><br><span class="line">"20"</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> zrank 查询给定元素的排名(从小到大)， zrevrank 反向查询给定元素的排名(从大到小)</span></span><br><span class="line">127.0.0.1:6379&gt; zrank skills go</span><br><span class="line">(integer) 1</span><br><span class="line">127.0.0.1:6379&gt; zrank skills python</span><br><span class="line">(integer) 0</span><br><span class="line">127.0.0.1:6379&gt; zrevrank skills go</span><br><span class="line">(integer) 0</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 获取有序集合的所有元素 zrange是按照正向(score值从小到大)排序返回的值列表</span></span><br><span class="line">127.0.0.1:6379&gt; zrange skills 0 -1</span><br><span class="line">1) "python"</span><br><span class="line">2) "go"</span><br><span class="line">127.0.0.1:6379&gt; zrange skills 0 -1 withscores</span><br><span class="line">1) "python"</span><br><span class="line">2) "9"</span><br><span class="line">3) "go"</span><br><span class="line">4) "20"</span><br><span class="line">127.0.0.1:6379&gt; zrevrange skills 0 -1 withscores</span><br><span class="line">1) "go"</span><br><span class="line">2) "20"</span><br><span class="line">3) "python"</span><br><span class="line">4) "9"</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 获取指定score返回的有序集合值</span></span><br><span class="line">127.0.0.1:6379&gt; zrangebyscore skills 0 20</span><br><span class="line">1) "python"</span><br><span class="line">2) "go"</span><br><span class="line">127.0.0.1:6379&gt; zrangebyscore skills -inf +inf withscores</span><br><span class="line">1) "python"</span><br><span class="line">2) "9"</span><br><span class="line">3) "go"</span><br><span class="line">4) "20"</span><br><span class="line">127.0.0.1:6379&gt; zrevrangebyscore skills +inf -inf withscores</span><br><span class="line">1) "go"</span><br><span class="line">2) "20"</span><br><span class="line">3) "python"</span><br><span class="line">4) "9"</span><br><span class="line">127.0.0.1:6379&gt; zrevrangebyscore skills +inf +inf withscores</span><br><span class="line">(empty list or set)</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> zrem 删除指定key的指定field组</span></span><br><span class="line">127.0.0.1:6379&gt; zrem skills java js</span><br><span class="line">(integer) 2</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> zremrangebyrank 删除指定排名返回内的值组</span></span><br><span class="line">127.0.0.1:6379&gt; zremrangebyrank skills 0 0</span><br><span class="line">(integer) 1</span><br><span class="line">127.0.0.1:6379&gt; zrange skills 0 1</span><br><span class="line">1) "go"</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash">zremrangebyscore 删除给定score返回的值组</span></span><br><span class="line">127.0.0.1:6379&gt; zremrangebyscore skills -inf 10</span><br><span class="line">(integer) 0</span><br><span class="line">127.0.0.1:6379&gt; zrange skills 0 1</span><br><span class="line">1) "go"</span><br><span class="line">127.0.0.1:6379&gt;</span><br></pre></td></tr></table></figure>
+<p><code>跳跃列表</code> <code>zset</code>内部的排序功能是通过<code>「跳跃列表」</code>数据结构来实现的，它的结构非常特殊，也比较复杂。<br>因为zset要支持随机的插入和删除，所以它不好使用数组来表示。先看一个普通的链表结构,<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(value,score)--&gt;(value,score)--&gt;(value,score)--&gt;(value,score)--&gt;(value,score)</span><br></pre></td></tr></table></figure></p>
+<p>需要这个链表按照score值进行排序。这意味着当有新元素需要插入时，需要定位到特定位置的插入点，这样才可以继续保证链表是有序的。通常我们会通过二分查找来找到插入点，但是二分查找的对象必须是数组，只有数组才可以支持快速位置定位，链表做不到，那该怎么办？ 引入跳跃列表<br>跳跃列表（也称跳表）是一种随机化数据结构，基于并联的链表，其效率可比拟于二叉查找树（对于大多数操作需要O(logn)平均时间）。</p>
+<p>基本上，跳跃列表是对有序的链表增加上附加的前进链接，增加是以随机化的方式进行的，所以在列表中的查找可以快速的跳过部分列表元素，因此得名。所有操作都以对数随机化的时间进行。</p>
+<p>跳跃表描述:</p>
+<ul>
+<li>一个跳跃列表由几层组成</li>
+<li>底层包含所有元素</li>
+<li>每一层都是一个有序链表</li>
+<li>在层 <code>i</code> 中的元素按某个固定的概率<code>p(通常为0.5或0.25)</code>出现在层 <code>i+1</code> 中(也就是说高层中的元素必然在低层)</li>
+<li>第<code>i</code>层的某个元素可以向下访问与它有相同值的下层节点</li>
+</ul>
+<p>如下图所示，是一个即为简单的跳跃表。传统意义的单链表是一个线性结构，向有序的链表中插入一个节点需要O(n)的时间，查找操作需要O(n)的时间。如果我们使用图中所示的跳跃表，就可以大大减少减少查找所需时间。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">L2：1-----4---6</span><br><span class="line">L1：1---3-4---6-----9</span><br><span class="line">L0：1-2-3-4-5-6-7-8-9-10</span><br></pre></td></tr></table></figure>
+<p>定位插入点时，先在顶层进行定位，然后下潜到下一级定位，一直下潜到最底层找到合适的位置，将新元素插进去。你也许会问那新插入的元素如何才有机会「身兼数职」呢？<br>跳跃列表采取一个随机策略来决定新元素可以兼职到第几层，首先<code>L0</code>层肯定是<code>100%</code>了，<code>L1</code>层只有<code>50%</code>的概率，<code>L2</code>层只有<code>25%</code>的概率，<code>L3</code>层只有<code>12.5%</code>的概率，一直随机到最顶层<code>L31</code>层。绝大多数元素都过不了几层，只有极少数元素可以深入到顶层。列表中的元素越多，能够深入的层次就越深，能进入到顶层的概率就会越大。</p>
+<h4 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h4><hr>
+<p>本文对Redis5种基础数据结构原理，内部实现,常用操作，场景等进行总结,</p>
+<ul>
+<li><code>string</code> 字符串, 内部结构未动态数组;</li>
+<li><code>list</code> 列表, 内部结构为双向链表, 这个双向链表称之为<code>快速链表(quicklist)</code>, 由<code>ziplist压缩链表</code>通过<code>双向指针</code>连接而成，因而可以提高快速插入性能，同时<code>ziplist压缩列表</code>是一块连续内存的链表;</li>
+<li><code>hash</code> 哈希， 内部结构为二维结构，一维为数组用于记录<code>key</code>键列表， 二维为链表用于记录<code>value</code>列表,通过一个<code>key</code>下挂着一个<code>value</code>链表，通过哈希函数取具体的<code>value</code>值;同时redis采用渐进式rehash可以方便对<code>hash</code>结构进行扩容和缩容;</li>
+<li><code>set</code> 集合， 内部结构为<code>hash</code>结构，适用场景之一是判断某个元素是否存在于集合中，如多权限分配场景;</li>
+<li><code>sortedset</code> 有序集合， <code>zset</code>底层实现使用了两个数据结构，第一个是<code>hash</code>，第二个是<code>跳跃列表</code>，<code>hash</code>的作用就是关联元素<code>value</code>和权重<code>score</code>，保障元素<code>value</code>的唯一性，可以通过元素<code>value</code>找到相应的<code>score</code>值。跳跃列表的目的在于给元素<code>value</code>排序，根据<code>score</code>的范围获取元素列表。</li>
+</ul>
+<p>此外，进一步分析了<code>跳跃表</code>的原理/用途，<code>跳跃表</code>也被用在<code>leveldb</code>中。在一些词典结构中中也经常用<code>跳跃表</code>来实现字典，加快查找速度；</p>
+  
+	</div>
+		<div style="padding: 10px 44px 30px 44px;" >
+<div style="border: 1px dashed #e0e0e0; padding: 10px 10px 10px 10px; background-color: #fffeee; background-repeat: no-repeat; background-attachment: scroll; background-position: 1% 50%; -moz-background-size: auto auto; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">
+<div style="float:left;margin-top:0px;">
+<img src="/img/weixin.jpg" width="125px" height="125px" style="border:1px solid #ccc; margin: 6px 5px 0px 0px"/>
+</div>
+<div>
+ <p style="margin-top:0px;">作者署名：<b><a target="_blank" href="http://www.grdtechs.com/">朴实的一线攻城狮</a></b>
+<br />本文标题：<b><a href="/2018/01/16/redis-01-basic-structure/" target="_blank" title="redis专题01 基础数据结构">redis专题01 基础数据结构</a></b> 
+<br />本文出处：<b><a href="/2018/01/16/redis-01-basic-structure/" target="_blank" title="redis专题01 基础数据结构">http://researchlab.github.io/2018/01/16/redis-01-basic-structure/</a></b>
+<br />版权声明：本文由<b><a href="/about" target="_blank" title="Lee Hong">Lee Hong</a></b>创作和发表,采用<b>署名(BY)</b>-<b>非商业性使用(NC)</b>-<b>相同方式共享(SA)</b>国际许可协议进行许可,转载请注明作者及出处, 否则保留追究法律责任的权利。 </p>
+</div>
+</div>
+</div>
+
+   	       
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/redis专题/">redis专题</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/redis/">redis</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	<div class="share-jiathis">
+	  
+<div class="jiathis_style_24x24">
+	<a class="jiathis_button_weixin"></a>
+	<a class="jiathis_button_tsina"></a>
+	<a class="jiathis_button_tqq"></a>
+	<a class="jiathis_button_qzone"></a>
+    <a class="jiathis_button_googleplus"></a>
+	<a class="jiathis_button_douban"></a>
+	<a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+    var jiathis_config={
+    data_track_clickback:true,
+    sm:"copy,renren,cqq",
+    pic:"",
+    summary:"",
+    
+  </script> 
+<script type="text/javascript" src="//v3.jiathis.com/code/jia.js?uid=
+2084050" charset="utf-8"></script>      
+
+
+	 </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2018/06/06/docker-permission-denied/" title="Docker操作提示Get Permission Denied">
+  <strong>上一篇：</strong><br/>
+  <span>
+  Docker操作提示Get Permission Denied</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2017/09/19/quicksort-summary/"  title="快速排序算法总结">
+ <strong>下一篇：</strong><br/> 
+ <span>快速排序算法总结
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+<section id="comments" class="comment">
+	<div class="ds-thread" data-thread-key="2018/01/16/redis-01-basic-structure/" data-title="redis专题01 基础数据结构" data-url="http://researchlab.github.io/2018/01/16/redis-01-basic-structure/"></div>
+</section>
+
+
+</div>  
+
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+<div id="asidepart">
+
+  <div class="widget tag">
+<!--<hr noshade color="#ccc">-->
+<!-- <p style="text-align:center">Mike.Lee</p> -->
+<p margin="0" style="text-align:center">
+<a class="ahref" href="http://researchlab.github.io/about/">
+<img id="aboutpic"  src="/img/qzly.png" alt="@全栈炼狱之路" height="200" width="200" style="box-shadow: 0px 0px 2px 2px #9edeff;border-radius: 8px;" >
+</a></p>
+<p style="text-align:center"><font size="2" color="grey">关注微信公众号 @全栈炼狱之路</font></p>
+<div style="display:block; margin-top:10px; padding: 0px 4px 4px 0; border-top: dashed 1px #ccc; text-align:left;"></div>
+<script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<div style="float:left;position:absolute;"><font size="2" >总访问:<span id="busuanzi_value_site_pv"></span>次</font></div>
+<div style="float:right;"><font size="2" >总访客:<span id="busuanzi_value_site_uv"></span>人</font></div>
+
+<div style="margin-top:30px; padding: 5px 4px 4px 0; border-top: dashed 1px #ccc; text-align:left;"></div>
+</div>
+
+
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/DevOps/" title="DevOps">DevOps<sup>5</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Hexo/" title="Hexo">Hexo<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/algorithm/" title="algorithm">algorithm<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/docker-practice/" title="docker-practice">docker-practice<sup>8</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/go-bootcamp/" title="go-bootcamp">go-bootcamp<sup>6</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/go-pattern/" title="go-pattern">go-pattern<sup>3</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/golang/" title="golang">golang<sup>22</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/javascript/" title="javascript">javascript<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/php/" title="php">php<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/redis专题/" title="redis专题">redis专题<sup>1</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/golang/" title="golang">golang<sup>25</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/docker/" title="docker">docker<sup>8</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/setcookie/" title="setcookie">setcookie<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/concurrency/" title="concurrency">concurrency<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/cache/" title="cache">cache<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mysql/" title="mysql">mysql<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Hexo/" title="Hexo">Hexo<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Blog/" title="Blog">Blog<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/rpc/" title="rpc">rpc<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/form/" title="form">form<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/post/" title="post">post<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/reflect/" title="reflect">reflect<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/net-http/" title="net/http">net/http<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/time/" title="time">time<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/xorm/" title="xorm">xorm<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/json/" title="json">json<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/html/" title="html">html<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/vim8-0/" title="vim8.0">vim8.0<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/observer/" title="observer">observer<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/php/" title="php">php<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="http://blog.csdn.net/xiaolongwang2010" target="_blank" title="小龙王2010csdn技术博客">Linux/c/c++</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  
+
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+  <iframe width="100%" height="550" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=550&fansRow=1&ptype=1&speed=0&skin=1&isTitle=1&noborder=1&isWeibo=1&isFans=1&uid=5141203275&verifier=a533edf5&dpc=1"></iframe>
+
+
+</aside>
+</div>
+
+    </div>
+    <footer><div id="footer" >
+	
+	
+	<div class="social-font" class="clearfix">
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/researchlab/lightman" target="_blank" title="lightman">lightman</a> ©2016 - 2018 
+		
+		<a href="/about" target="_blank" title="Lee Hong">Lee Hong</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+
+
+<script type="text/javascript">
+  var duoshuoQuery = {short_name:"gamedp"};
+  (function() {
+    var ds = document.createElement('script');
+    ds.type = 'text/javascript';ds.async = true;
+    ds.src = '//static.duoshuo.com/embed.js';
+    ds.charset = 'UTF-8';
+    (document.getElementsByTagName('head')[0] 
+    || document.getElementsByTagName('body')[0]).appendChild(ds);
+  })();
+</script> 
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>
