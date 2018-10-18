@@ -19,7 +19,7 @@
 <meta property="og:site_name" content="一线攻城狮">
 <meta property="og:description" content="HyperLoglog是redis新支持的两种类型中的另外一种(上一种是位图类型Bitmaps)。主要适用场景是海量数据的计算。特点是速度快, 占用空间小。">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2018-10-18T16:12:53.841Z">
+<meta property="og:updated_time" content="2018-10-18T16:16:38.868Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="redis专题05 海量数据处理之HyperLogLog">
 <meta name="twitter:description" content="HyperLoglog是redis新支持的两种类型中的另外一种(上一种是位图类型Bitmaps)。主要适用场景是海量数据的计算。特点是速度快, 占用空间小。">
@@ -180,7 +180,7 @@
 <p> 可进一步参看<a href="https://www.slideshare.net/KaiZhang130/countdistinct-problem-88329470" target="_blank" rel="noopener">HyperLogLog 复杂的公式推导</a></p>
 </blockquote>
 <blockquote>
-<p><code>redis</code>的<code>HyperLogLog</code>实现中用到的是<code>16384</code>个桶，也就是<code>2^14，每个桶的</code>maxbits<code>需要</code>6 bits<code>来存储，最大可以表示</code>maxbits=63<code>，于是总共占用内存就是</code>2^14 * 6 / 8 = 12k`字节。</p>
+<p><code>redis</code>的<code>HyperLogLog</code>实现中用到的是<code>16384</code>个桶，也就是<code>2^14</code>，每个桶的<code>maxbits</code>需要<code>6 bits</code>来存储，最大可以表示<code>maxbits=63</code>，于是总共占用内存就是<code>2^14 * 6 / 8 = 12k</code>字节。</p>
 </blockquote>
 <h4 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h4><ul>
 <li>从处理海量数据count distict问题场景入手，引入<code>redis</code>的<code>HyperLogLog</code>数据结构解决方案，总结了使用方法并进行了实例分析说明；</li>
@@ -441,7 +441,7 @@
 			
 		
 			
-				<li><a href="/tags/php-redis/" title="php_redis">php_redis<sup>1</sup></a></li>
+				<li><a href="/tags/php/" title="php">php<sup>1</sup></a></li>
 			
 		
 		</ul>
