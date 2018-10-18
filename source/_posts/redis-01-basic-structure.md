@@ -1,5 +1,5 @@
 ---
-title: "redis专题01 基础数据结构"
+title: "redis专题01 数据结构之string/list/hash/set/zset"
 date: 2018-1-16 11:31:18
 categories: "redis专题"
 tags: [redis]
