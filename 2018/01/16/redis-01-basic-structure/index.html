@@ -19,7 +19,7 @@
 <meta property="og:site_name" content="一线攻城狮">
 <meta property="og:description" content="在日常应用开发中，redis常应用于热点内容缓存，分布式锁，权限认证等场景中，此redis专题试图对redis技术在内容缓存,分布式及redis集群场景中的应用，使用特性，原理及源码进行分析总结，内容来源于个人工作经验实践及网络学习资源的融合归纳总结;">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2018-10-18T01:17:05.771Z">
+<meta property="og:updated_time" content="2018-10-18T01:25:19.405Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="redis专题01 基础数据结构">
 <meta name="twitter:description" content="在日常应用开发中，redis常应用于热点内容缓存，分布式锁，权限认证等场景中，此redis专题试图对redis技术在内容缓存,分布式及redis集群场景中的应用，使用特性，原理及源码进行分析总结，内容来源于个人工作经验实践及网络学习资源的融合归纳总结;">
@@ -246,7 +246,20 @@
 <li><code>set</code> 集合， 内部结构为<code>hash</code>结构，适用场景之一是判断某个元素是否存在于集合中，如多权限分配场景;</li>
 <li><code>sortedset</code> 有序集合， <code>zset</code>底层实现使用了两个数据结构，第一个是<code>hash</code>，第二个是<code>跳跃列表</code>，<code>hash</code>的作用就是关联元素<code>value</code>和权重<code>score</code>，保障元素<code>value</code>的唯一性，可以通过元素<code>value</code>找到相应的<code>score</code>值。跳跃列表的目的在于给元素<code>value</code>排序，根据<code>score</code>的范围获取元素列表。</li>
 </ul>
-<p>此外，进一步分析了<code>跳跃表</code>的原理/用途，<code>跳跃表</code>也被用在<code>leveldb</code>中。在一些词典结构中中也经常用<code>跳跃表</code>来实现字典，加快查找速度；</p>
+<ul>
+<li><p>此外, 进一步分析了<code>跳跃表</code>的原理/用途，<code>跳跃表</code>也被用在<code>leveldb</code>中。 在一些词典结构中也经常用<code>跳跃表</code>来实现字典，加快查找速度；</p>
+</li>
+<li><p><code>list/set/hash/zset</code> 这四种数据结构是容器型数据结构，它们共享下面两条通用规则,</p>
+<ul>
+<li>如果容器不存在，那就创建一个，再进行操作。比如 rpush 操作刚开始是没有列表的，Redis 就会自动创建一个，然后再 rpush 进去新元素。</li>
+<li>如果容器里元素没有了，那么立即删除元素，释放内存。这意味着 lpop 操作到最后一个元素，列表就消失了。</li>
+</ul>
+</li>
+<li><p>Redis 所有的数据结构都可以设置过期时间，时间到了，Redis 会自动删除相应的对象。需要注意的是过期是以对象为单位，比如一个 hash 结构的过期是整个 hash 对象的过期，而不是其中的某个子 key。</p>
+</li>
+<li><p>还有一个需要特别注意的地方是如果一个字符串已经设置了过期时间，然后你调用了 set 方法修改了它，它的过期时间会消失。</p>
+</li>
+</ul>
   
 	</div>
 		<div style="padding: 10px 44px 30px 44px;" >
