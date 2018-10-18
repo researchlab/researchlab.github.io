@@ -19,7 +19,7 @@
 <meta property="og:site_name" content="一线攻城狮">
 <meta property="og:description" content="HyperLoglog是redis新支持的两种类型中的另外一种(上一种是位图类型Bitmaps)。主要适用场景是海量数据的计算。特点是速度快, 占用空间小。">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2018-10-18T12:01:35.465Z">
+<meta property="og:updated_time" content="2018-10-18T16:12:53.841Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="redis专题05 海量数据处理之HyperLogLog">
 <meta name="twitter:description" content="HyperLoglog是redis新支持的两种类型中的另外一种(上一种是位图类型Bitmaps)。主要适用场景是海量数据的计算。特点是速度快, 占用空间小。">
@@ -173,7 +173,8 @@
 <blockquote>
 <p>`pfadd nums 随机数1， 随机数2， 随机数3 … 随机数N</p>
 </blockquote>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">随机数1   1 0 0 1 0 1 0 1 1 0 0 0 0</span><br><span class="line">随机数2   1 0 0 1 0 1 0 1 0 1 0 0 0</span><br><span class="line">随机数3   1 0 0 0 0 0 0 0 0 0 0 0 0</span><br><span class="line">随机数4   1 0 0 1 0 1 0 1 1 1 1 0 0</span><br><span class="line">随机数5   1 0 0 1 0 1 0 0 0 0 0 0 0</span><br><span class="line">......</span><br><span class="line">随机数N   1 0 0 1 0 0 0 0 0 0 0 0 0</span><br></pre></td></tr></table></figure>
+<figure class="highlight"><font style="color:#817c7c;font-size:90%">高位 &lt;—————– 低位</font><br><br>随机数1   1 0 0 1 0 1 0 1 1 <font style="color:#d14;border:1px solid #d6d6d6; border-radius:0.25em;">0 0 0 0</font><br>随机数2   1 0 0 1 0 1 0 1 0 1 <font style="color:#d14;border:1px solid #d6d6d6; border-radius:0.25em;">0 0 0</font><br>随机数3   1 <font style="color:#d14;border:1px solid #d6d6d6; border-radius:0.25em;">0 0 0 0 0 0 0 0 0 0 0 0</font><br>随机数4   1 0 0 1 0 1 0 1 1 1 1 <font style="color:#d14;border:1px solid #d6d6d6; border-radius:0.25em;">0 0</font><br>随机数5   1 0 0 1 0 1 <font style="color:#d14;border:1px solid #d6d6d6; border-radius:0.25em;">0 0 0 0 0 0 0</font><br>……<br>随机数N   1 0 0 1 <font style="color:#d14;border:1px solid #d6d6d6; border-radius:0.25em;">0 0 0 0 0 0 0 0 0</font><br></figure>
+
 <p>如上， 给定一系列的随机整数，通过记录下低位连续零位的最大长度<code>k</code>，通过这个<code>k</code>值可以估算出随机数的数量，实验发现<code>K</code>和<code>N</code>的对数之间存在显著的线性相关性, 通过这种线性近似计算可以得到<code>pfcount</code> 指定<code>key</code>的近似估值， 详细的原理这里不在进一步阐述；</p>
 <blockquote>
 <p> 可进一步参看<a href="https://www.slideshare.net/KaiZhang130/countdistinct-problem-88329470" target="_blank" rel="noopener">HyperLogLog 复杂的公式推导</a></p>
@@ -440,7 +441,7 @@
 			
 		
 			
-				<li><a href="/tags/php/" title="php">php<sup>1</sup></a></li>
+				<li><a href="/tags/php-redis/" title="php_redis">php_redis<sup>1</sup></a></li>
 			
 		
 		</ul>
