@@ -30,7 +30,7 @@ date: 2016-02-15 21:28:40
 `paas(golang/shell/python/js/lua)` `golang web` `golang/c++ game`
 
 <font color=gray>**interesting**</font>
-`web server backend/frontend` `production design` `mobile application tech` 
+`web server backend/frontend` `production design` `cloud computing tech` `machine learning tech` `devops tech` `mobile application tech` 
 
 <font color=gray>**focus on**</font>
 `paas` `scalable high-performance/high-concurrency in web dev` `distributed system tech` `continuous integration` `automated construction` `automated Testing`
