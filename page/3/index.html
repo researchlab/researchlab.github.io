@@ -72,6 +72,70 @@
         <header class="article-info clearfix">
   <h1 itemprop="name">
     
+      <a href="/2017/03/02/redispool-baseon-fzzy-radix/" title="基于fzzy/radix/redis封装新的redispool" itemprop="url">基于fzzy/radix/redis封装新的redispool</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
+		
+  <p class="article-time">
+    <time datetime="2017-03-02T14:42:42.000Z" itemprop="datePublished"> 发表于 2017-03-02</time>
+    
+  </p>
+</header>
+    <div class="article-content">
+        
+        <p>之前的老项目的redis client sdk 直接大名鼎鼎的<code>github.com/fzzy/radix</code>提供的<code>redis client</code> 和<code>redis pool</code>, 当访问峰值达到一定的值后会出现<code>too many open files</code>等tcp连接错误，同时也没有直接提供authorization 密钥认证的接口，为满足这些新需求基于<code>fzzy/radix</code>封装出的新的<code>redispool</code>, 已投入生产使用半年来暂无问题，本文总结如下,<br></p>
+        
+        
+        <p class="article-more-link">
+          
+            <a href="/2017/03/02/redispool-baseon-fzzy-radix/#more">Read More</a>
+          
+       </p>
+    </div>
+    <footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/golang/">golang</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/golang/">golang</a><a href="/tags/redispool/">redispool</a>
+  </div>
+
+</div>
+
+
+
+
+<div class="comments-count">
+	
+	  	<span></span>
+		<a href="/2017/03/02/redispool-baseon-fzzy-radix/#comments" class="ds-thread-count comments-count-link" data-thread-key="2017/03/02/redispool-baseon-fzzy-radix/" data-count-type="comments">&nbsp;</a>
+	
+</div>
+
+</footer>
+
+
+    </article>
+
+
+
+
+
+
+   
+    
+    <article class="post-expand post" itemprop="articleBody"> 
+        <header class="article-info clearfix">
+  <h1 itemprop="name">
+    
       <a href="/2017/03/01/use-beego-orm-summary/" title="beego/orm使用总结" itemprop="url">beego/orm使用总结</a>
   </h1>
   <p class="article-author">By
@@ -637,70 +701,6 @@
 
 
 
-   
-    
-    <article class="post-expand post" itemprop="articleBody"> 
-        <header class="article-info clearfix">
-  <h1 itemprop="name">
-    
-      <a href="/2016/12/17/go-cache-component/" title="go实现缓存组件" itemprop="url">go实现缓存组件</a>
-  </h1>
-  <p class="article-author">By
-       
-		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
-		
-  <p class="article-time">
-    <time datetime="2016-12-17T11:32:51.000Z" itemprop="datePublished"> 发表于 2016-12-17</time>
-    
-  </p>
-</header>
-    <div class="article-content">
-        
-        <p>总结用golang从分析，设计到实现一个可用的缓存组件。<br></p>
-        
-        
-        <p class="article-more-link">
-          
-            <a href="/2016/12/17/go-cache-component/#more">Read More</a>
-          
-       </p>
-    </div>
-    <footer class="article-footer clearfix">
-<div class="article-catetags">
-
-<div class="article-categories">
-  <span></span>
-  <a class="article-category-link" href="/categories/golang/">golang</a>
-</div>
-
-
-  <div class="article-tags">
-  
-  <span></span> <a href="/tags/cache/">cache</a>
-  </div>
-
-</div>
-
-
-
-
-<div class="comments-count">
-	
-	  	<span></span>
-		<a href="/2016/12/17/go-cache-component/#comments" class="ds-thread-count comments-count-link" data-thread-key="2016/12/17/go-cache-component/" data-count-type="comments">&nbsp;</a>
-	
-</div>
-
-</footer>
-
-
-    </article>
-
-
-
-
-
-
 
   <nav id="page-nav" class="clearfix">
     <a class="extend prev" rel="prev" href="/page/2/"><span></span>Prev</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/">4</a><a class="page-number" href="/page/5/">5</a><span class="space">&hellip;</span><a class="page-number" href="/page/7/">7</a><a class="extend next" rel="next" href="/page/4/">Next<span></span></a>
@@ -770,7 +770,7 @@
 		  
 		
 		  
-			<li><a href="/categories/redis专题/" title="redis专题">redis专题<sup>9</sup></a></li>
+			<li><a href="/categories/redis专题/" title="redis专题">redis专题<sup>10</sup></a></li>
 		  
 		
 		</ul>
@@ -788,7 +788,7 @@
 			
 		
 			
-				<li><a href="/tags/redis/" title="redis">redis<sup>9</sup></a></li>
+				<li><a href="/tags/redis/" title="redis">redis<sup>10</sup></a></li>
 			
 		
 			
