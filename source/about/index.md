@@ -10,7 +10,7 @@ date: 2016-02-15 21:28:40
 <br>
 
 <font color=gray>**dev skills**</font>
-`golang` `python` `php` `js` `c/c++` `lua` `java`
+`golang` `python` `php` `js` `c/c++` `lua` `shell` `java`
 <font color=gray>**tools**</font>
 `vim` `makefile` `startuml` `vscode` `git/gitlab` `pycharm` `xmind` `govendor` `glide` `JIRA`
 
