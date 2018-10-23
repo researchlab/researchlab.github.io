@@ -4,25 +4,25 @@
 <head>
   <meta charset="UTF-8">
   
-    <title>golang 格式化时间总结 | 一线攻城狮</title>
+    <title>redis专题08 redis分布式限流之redis-cell | 一线攻城狮</title>
     <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
     
     <meta name="author" content="Lee Hong">
     
 
     
-    <meta name="description" content="golang 中经常需要格式化时间和日期来满足不同的业务需求,下面总结格式化时间日期中遇到的问题。">
-<meta name="keywords" content="golang,time">
+    <meta name="description" content="redis4.0以后开始支持扩展模块，redis-cell是一个用rust语言编写的基于令牌桶算法的的限流模块，提供原子性的限流功能，并允许突发流量，可以很方便的应用于分布式环境中。">
+<meta name="keywords" content="redis">
 <meta property="og:type" content="article">
-<meta property="og:title" content="golang 格式化时间总结">
-<meta property="og:url" content="http://researchlab.github.io/2016/06/14/go-time-summary/index.html">
+<meta property="og:title" content="redis专题08 redis分布式限流之redis-cell">
+<meta property="og:url" content="http://researchlab.github.io/2018/10/05/redis-08-redis-cell/index.html">
 <meta property="og:site_name" content="一线攻城狮">
-<meta property="og:description" content="golang 中经常需要格式化时间和日期来满足不同的业务需求,下面总结格式化时间日期中遇到的问题。">
+<meta property="og:description" content="redis4.0以后开始支持扩展模块，redis-cell是一个用rust语言编写的基于令牌桶算法的的限流模块，提供原子性的限流功能，并允许突发流量，可以很方便的应用于分布式环境中。">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2018-10-23T09:12:05.404Z">
+<meta property="og:updated_time" content="2018-10-23T09:12:05.412Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="golang 格式化时间总结">
-<meta name="twitter:description" content="golang 中经常需要格式化时间和日期来满足不同的业务需求,下面总结格式化时间日期中遇到的问题。">
+<meta name="twitter:title" content="redis专题08 redis分布式限流之redis-cell">
+<meta name="twitter:description" content="redis4.0以后开始支持扩展模块，redis-cell是一个用rust语言编写的基于令牌桶算法的的限流模块，提供原子性的限流功能，并允许突发流量，可以很方便的应用于分布式环境中。">
 
     
     <link rel="alternative" href="/atom.xml" title="一线攻城狮" type="application/atom+xml">
@@ -75,14 +75,14 @@
 		<header class="article-info clearfix">
   <h1 itemprop="name">
     
-      <a href="/2016/06/14/go-time-summary/" title="golang 格式化时间总结" itemprop="url">golang 格式化时间总结</a>
+      <a href="/2018/10/05/redis-08-redis-cell/" title="redis专题08 redis分布式限流之redis-cell" itemprop="url">redis专题08 redis分布式限流之redis-cell</a>
   </h1>
   <p class="article-author">By
        
 		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
 		
   <p class="article-time">
-    <time datetime="2016-06-14T14:05:28.000Z" itemprop="datePublished"> 发表于 2016-06-14</time>
+    <time datetime="2018-10-05T17:05:32.000Z" itemprop="datePublished"> 发表于 2018-10-05</time>
     
   </p>
 </header>
@@ -91,66 +91,53 @@
 		<div id="toc" class="toc-article">
 			<strong class="toc-title">文章目录</strong>
 		
-			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#golang-time包-时间日期格式化定义"><span class="toc-number">1.</span> <span class="toc-text">golang time包 时间日期格式化定义</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#时间日期格式化"><span class="toc-number">2.</span> <span class="toc-text">时间日期格式化</span></a></li></ol>
+			<ol class="toc"><li class="toc-item toc-level-5"><a class="toc-link" href="#令牌桶限流算法原理"><span class="toc-number">1.</span> <span class="toc-text">令牌桶限流算法原理</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#总结"><span class="toc-number">2.</span> <span class="toc-text">总结</span></a></li></ol>
 		
 		</div>
 		
-		<p><code>golang</code> 中经常需要格式化时间和日期来满足不同的业务需求,下面总结格式化时间日期中遇到的问题。<br><a id="more"></a></p>
-<h2 id="golang-time包-时间日期格式化定义"><a href="#golang-time包-时间日期格式化定义" class="headerlink" title="golang time包 时间日期格式化定义"></a>golang time包 时间日期格式化定义</h2><p>go 的time package 提供了time.Format函数，用来对时间进行格式化输出;类似的还有time.Parse用来解析字符串类型的时间到time.Time。这是两个互逆的函数。</p>
-<p><strong> 下面看<code>golang</code>中<code>time</code>包对于时间的详细定义 </strong></p>
+		<p><code>redis4.0</code>以后开始支持扩展模块，<code>redis-cell</code>是一个用<code>rust</code>语言编写的基于<code>令牌桶算法</code>的的限流模块，提供原子性的限流功能，并允许突发流量，可以很方便的应用于分布式环境中。<br><a id="more"></a></p>
+<h5 id="令牌桶限流算法原理"><a href="#令牌桶限流算法原理" class="headerlink" title="令牌桶限流算法原理"></a>令牌桶限流算法原理</h5><p>令牌桶算法的原理是定义一个按一定速率产生<code>token</code>的桶，每次去桶中申请<code>token</code>，若桶中没有足够的<code>token</code>则申请失败，否则成功。在请求不多的情况下，桶中的<code>token</code>基本会饱和，此时若流量激增，并不会马上拒绝请求，所以这种算法允许一定的流量激增。</p>
+<p>1.定义一个令牌桶<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">令牌桶其拥有几个关键属性为，</span><br><span class="line">桶容量</span><br><span class="line">令牌产生速率</span><br><span class="line">当前桶中令牌数</span><br><span class="line">最近一次取（生成）令牌时间</span><br></pre></td></tr></table></figure></p>
+<p>2.从桶中申请令牌，这一步中有两个关键动作</p>
+<blockquote>
+<p>根据上一次生成令牌时间到现在的时间，及生成速率计算出当前令牌桶中的令牌数<br>判断令牌桶中是否有足够的令牌，并返回结果</p>
+</blockquote>
+<p>这几个步骤可以采用<code>redis</code>提供的原生命令去实现，但是高并发的时候数据会不一致，所以<code>redis-cell</code>将这个过程原子化，完美解决了分布式环境下数据的一致性问题。</p>
+<p><code>redis-cell</code>模块只提供了一个命令<code>cl.throttle</code></p>
+<p>示例<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt;cl.throttle test 100 500 20 1</span><br></pre></td></tr></table></figure></p>
+<p>参数依次说明</p>
 <ul>
-<li>月份 1,01,Jan,January</li>
-<li>日　 2,02,_2</li>
-<li>时　 3,03,15,PM,pm,AM,am</li>
-<li>分　 4,04</li>
-<li>秒　 5,05</li>
-<li>年　 06,2006</li>
-<li>时区 -07,-0700,Z0700,Z07:00,-07:00,MST</li>
-<li>周几 Mon,Monday</li>
+<li><p><code>test</code> 表示<code>redis key</code></p>
+</li>
+<li><p><code>100</code> 官方叫·max_burst·，其值为令牌桶的容量<code>-1</code>， 首次执行时令牌桶会默认填满</p>
+</li>
+<li><p><code>500</code> 与下一个参数一起，表示在指定时间窗口内允许访问的次数</p>
+</li>
+<li><p><code>20</code> 指定的时间窗口，单位：秒</p>
+</li>
+<li><p><code>1</code>  表示本次要申请的令牌数，不写则默认为<code>1</code></p>
+</li>
 </ul>
-<p><strong> 比如小时的表示(原定义是下午3时，也就是15时) </strong></p>
+<blockquote>
+<p>以上命令表示从一个初始值为100的令牌桶中取1个令牌，该令牌桶的速率限制为500次/20秒。</p>
+</blockquote>
+<p>结果示例<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; CL.THROTTLE test 100 500 20 1</span><br><span class="line">1) (integer) 0</span><br><span class="line">2) (integer) 101</span><br><span class="line">3) (integer) 98</span><br><span class="line">4) (integer) -1</span><br><span class="line">5) (integer) 0</span><br></pre></td></tr></table></figure></p>
 <ul>
-<li>3 用12小时制表示，去掉前导0</li>
-<li>03 用12小时制表示，保留前导0</li>
-<li>15 用24小时制表示，保留前导0</li>
-<li>03pm 用24小时制am/pm表示上下午表示，保留前导0</li>
-<li>3pm 用24小时制am/pm表示上下午表示，去掉前导0</li>
+<li><code>1)</code> 是否成功，0：成功，1：拒绝</li>
+<li><code>2)</code> 令牌桶的容量，大小为初始值+1</li>
+<li><code>3)</code> 当前令牌桶中可用的令牌</li>
+<li><code>4)</code> 若请求被拒绝，这个值表示多久后才令牌桶中会重新添加令牌，单位：秒，可以作为重试时间</li>
+<li><code>5)</code> 表示多久后令牌桶中的令牌会存满</li>
 </ul>
-<p><strong> 又比如月份 </strong></p>
-<ul>
-<li>1 数字表示月份，去掉前导0</li>
-<li>01 数字表示月份，保留前导0</li>
-<li>Jan 缩写单词表示月份</li>
-<li>January 全单词表示月份</li>
+<blockquote>
+<p>由于<code>redis-Cell</code>是基于Rust语言写的插件，因此在安装插件前要先安装rust, 具体可参看官方README <a href="https://github.com/brandur/redis-cell" target="_blank" rel="noopener">github</a></p>
+</blockquote>
+<h5 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h5><ul>
+<li>从限制用户行为频率场景出发，引入<code>redis-cell</code>分布式限流解决方案，阐述了其算法原理及步骤，并给出实例说明;</li>
+<li>频率限制的实现有多种方式，例如<code>Nginx</code>和<code>Haproxy</code>都有限制模块、通过Redis来实现也是常见的方式之一;</li>
+<li>除了引入<code>redis-cell</code>分布式限流模块， 也可以将上述令牌通的实现思路通过<code>Lua</code>脚本实现，然后嵌入到<code>redis</code>中执行， 实际上在<code>redis</code>还不支持<code>redis-cell</code>模块时， 实际使用场景中大多采用<code>redis+lua</code>方式来实现限流策略;</li>
+<li>将<code>redis-cell</code>限流应用于微服务接口访问频次上也灰常方便;</li>
 </ul>
-<h2 id="时间日期格式化"><a href="#时间日期格式化" class="headerlink" title="时间日期格式化"></a>时间日期格式化</h2><ul>
-<li>本地当期时间</li>
-</ul>
-<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">fmt.Println(time.Now()) <span class="comment">//2016-07-14 14:27:28.214512532 +0800 CST</span></span><br></pre></td></tr></table></figure>
-<ul>
-<li>时间格式化</li>
-</ul>
-<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">fmt.Println(time.Now().Format(<span class="string">"3:04:05.000 PM Mon Jan"</span>))            <span class="comment">// 2:27:05.702 PM Thu Jul</span></span><br><span class="line">fmt.Println(time.Now().Format(<span class="string">"2006-01-_2 3:04:05.000 PM Mon Jan"</span>)) <span class="comment">// 2016-07-14 2:54:11.442 PM Thu Jul</span></span><br><span class="line">fmt.Println(time.Now().Format(<span class="string">"2006-01-02 15:04:05"</span>))  <span class="comment">// 2016-07-14 14:54:11.442239513 +0800 CST</span></span><br></pre></td></tr></table></figure>
-<ul>
-<li>本地当前时间戳(10位)</li>
-</ul>
-<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">fmt.Println(time.Now().Unix()) <span class="comment">//1468479251</span></span><br></pre></td></tr></table></figure>
-<ul>
-<li>本地当前时间戳(19位)</li>
-</ul>
-<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">fmt.Println(time.Now().UnixNano()) <span class="comment">//1468480006774460462</span></span><br></pre></td></tr></table></figure>
-<ul>
-<li>时间戳转时间 </li>
-</ul>
-<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">fmt.Println(time.Unix(<span class="number">1389058332</span>, <span class="number">0</span>).Format(<span class="string">"2006-01-02 15:04:05"</span>)) <span class="comment">//2014-01-07 09:32:12</span></span><br></pre></td></tr></table></figure>
-<ul>
-<li>时间转时间戳</li>
-</ul>
-<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">fmt.Println(time.Date(<span class="number">2014</span>, <span class="number">1</span>, <span class="number">7</span>, <span class="number">5</span>, <span class="number">50</span>, <span class="number">4</span>, <span class="number">0</span>, time.Local).Unix())</span><br></pre></td></tr></table></figure>
-<ul>
-<li>时间转换为UTC时间和本地时间( UTC:零时区 +0000， China: 东八区 +0800)</li>
-</ul>
-<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">dateStr := <span class="string">"2016-07-14 14:24:51"</span> </span><br><span class="line">timestamp1, _ := time.Parse(<span class="string">"2006-01-02 15:04:05"</span>, dateStr)</span><br><span class="line">timestamp2, _ := time.ParseInLocation(<span class="string">"2006-01-02 15:04:05"</span>, dateStr, time.Local)</span><br><span class="line">fmt.Println(timestamp1, timestamp2)               <span class="comment">//2016-07-14 14:24:51 +0000 UTC 2016-07-14 14:24:51 +0800 CST </span></span><br><span class="line">fmt.Println(timestamp1.Unix(), timestamp2.Unix()) <span class="comment">//1468506291 1468477491 </span></span><br><span class="line"></span><br><span class="line">now := time.Now()                </span><br><span class="line">year, mon, day := now.UTC().Date()</span><br><span class="line">hour, min, sec := now.UTC().Clock()</span><br><span class="line">zone, _ := now.UTC().Zone()     </span><br><span class="line">fmt.Printf(<span class="string">"UTC 时间是 %d-%d-%d %02d:%02d:%02d %s\n"</span>,         </span><br><span class="line">    year, mon, day, hour, min, sec, zone) <span class="comment">// UTC 时间是 2016-7-14 07:06:46 UTC</span></span><br><span class="line">                                                           </span><br><span class="line">year, mon, day = now.Date()</span><br><span class="line">hour, min, sec = now.Clock()</span><br><span class="line">zone, _ = now.Zone()</span><br><span class="line">fmt.Printf(<span class="string">"本地时间是 %d-%d-%d %02d:%02d:%02d %s\n"</span>,</span><br><span class="line">    year, mon, day, hour, min, sec, zone) <span class="comment">// 本地时间是 2016-7-14 15:06:46 CST</span></span><br></pre></td></tr></table></figure>
   
 	</div>
 		<div style="padding: 10px 44px 30px 44px;" >
@@ -160,8 +147,8 @@
 </div>
 <div>
  <p style="margin-top:0px;">作者署名：<b><a target="_blank" href="http://www.grdtechs.com/">朴实的一线攻城狮</a></b>
-<br />本文标题：<b><a href="/2016/06/14/go-time-summary/" target="_blank" title="golang 格式化时间总结">golang 格式化时间总结</a></b> 
-<br />本文出处：<b><a href="/2016/06/14/go-time-summary/" target="_blank" title="golang 格式化时间总结">http://researchlab.github.io/2016/06/14/go-time-summary/</a></b>
+<br />本文标题：<b><a href="/2018/10/05/redis-08-redis-cell/" target="_blank" title="redis专题08 redis分布式限流之redis-cell">redis专题08 redis分布式限流之redis-cell</a></b> 
+<br />本文出处：<b><a href="/2018/10/05/redis-08-redis-cell/" target="_blank" title="redis专题08 redis分布式限流之redis-cell">http://researchlab.github.io/2018/10/05/redis-08-redis-cell/</a></b>
 <br />版权声明：本文由<b><a href="/about" target="_blank" title="Lee Hong">Lee Hong</a></b>创作和发表,采用<b>署名(BY)</b>-<b>非商业性使用(NC)</b>-<b>相同方式共享(SA)</b>国际许可协议进行许可,转载请注明作者及出处, 否则保留追究法律责任的权利。 </p>
 </div>
 </div>
@@ -173,13 +160,13 @@
 
 <div class="article-categories">
   <span></span>
-  <a class="article-category-link" href="/categories/golang/">golang</a>
+  <a class="article-category-link" href="/categories/redis专题/">redis专题</a>
 </div>
 
 
   <div class="article-tags">
   
-  <span></span> <a href="/tags/golang/">golang</a><a href="/tags/time/">time</a>
+  <span></span> <a href="/tags/redis/">redis</a>
   </div>
 
 </div>
@@ -224,19 +211,11 @@
 	
 <nav class="article-nav clearfix">
  
- <div class="prev" >
- <a href="/2016/06/17/jsonfmt/" title="html 美化输出 json 字符串">
-  <strong>上一篇：</strong><br/>
-  <span>
-  html 美化输出 json 字符串</span>
-</a>
-</div>
-
 
 <div class="next">
-<a href="/2016/05/24/comparison-of-Go-Vendoring-Tools/"  title="Go Vendoring Tools 使用总结">
+<a href="/2018/10/04/redis-07-limit-rate/"  title="redis专题07 redis应用之限流策略">
  <strong>下一篇：</strong><br/> 
- <span>Go Vendoring Tools 使用总结
+ <span>redis专题07 redis应用之限流策略
 </span>
 </a>
 </div>
@@ -245,7 +224,7 @@
 
 	
 <section id="comments" class="comment">
-	<div class="ds-thread" data-thread-key="2016/06/14/go-time-summary/" data-title="golang 格式化时间总结" data-url="http://researchlab.github.io/2016/06/14/go-time-summary/"></div>
+	<div class="ds-thread" data-thread-key="2018/10/05/redis-08-redis-cell/" data-title="redis专题08 redis分布式限流之redis-cell" data-url="http://researchlab.github.io/2018/10/05/redis-08-redis-cell/"></div>
 </section>
 
 
