@@ -72,6 +72,71 @@
         <header class="article-info clearfix">
   <h1 itemprop="name">
     
+      <a href="/2018/10/03/redis-06-bloom-filter/" title="redis专题06 布隆过滤器" itemprop="url">redis专题06 布隆过滤器</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
+		
+  <p class="article-time">
+    <time datetime="2018-10-03T16:57:48.000Z" itemprop="datePublished"> 发表于 2018-10-03</time>
+    
+  </p>
+</header>
+    <div class="article-content">
+        
+        <p>灰常方便用<code>redis</code>的<code>HyperLogLog</code>来<strong>进行数值估数</strong>, <u><strong>可以解决很多精确度不高的统计需求。</strong></u></p>
+<p>但是如果想知道某一个值是不是已经在<code>HyperLogLog</code>结构里面了，它就无能为力了，它只提供了<code>pfadd</code>, <code>pfcount</code>和<code>pfmerge</code>等方法，没有提供<code>pfcontains</code>这样类似的方法。<br></p>
+        
+        
+        <p class="article-more-link">
+          
+            <a href="/2018/10/03/redis-06-bloom-filter/#more">Read More</a>
+          
+       </p>
+    </div>
+    <footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/redis专题/">redis专题</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/redis/">redis</a>
+  </div>
+
+</div>
+
+
+
+
+<div class="comments-count">
+	
+	  	<span></span>
+		<a href="/2018/10/03/redis-06-bloom-filter/#comments" class="ds-thread-count comments-count-link" data-thread-key="2018/10/03/redis-06-bloom-filter/" data-count-type="comments">&nbsp;</a>
+	
+</div>
+
+</footer>
+
+
+    </article>
+
+
+
+
+
+
+   
+    
+    <article class="post-expand post" itemprop="articleBody"> 
+        <header class="article-info clearfix">
+  <h1 itemprop="name">
+    
       <a href="/2018/06/06/docker-permission-denied/" title="Docker操作提示Get Permission Denied" itemprop="url">Docker操作提示Get Permission Denied</a>
   </h1>
   <p class="article-author">By
@@ -645,70 +710,6 @@
 
 
 
-   
-    
-    <article class="post-expand post" itemprop="articleBody"> 
-        <header class="article-info clearfix">
-  <h1 itemprop="name">
-    
-      <a href="/2017/03/08/docker-run-mongodb-redis/" title="docker实践--06 运行MongoDB和Redis" itemprop="url">docker实践--06 运行MongoDB和Redis</a>
-  </h1>
-  <p class="article-author">By
-       
-		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
-		
-  <p class="article-time">
-    <time datetime="2017-03-08T20:49:20.000Z" itemprop="datePublished"> 发表于 2017-03-08</time>
-    
-  </p>
-</header>
-    <div class="article-content">
-        
-        <p>上篇文件总结了如何编写<code>Dockerfile</code>及如何通过<code>Dockerfile</code>构建镜像并运行相应的应用需求, 本文将通过编写<code>Dockerfile</code>来创建MongoDB和Redis应用进一步学习实践<code>Docker</code>的运行机制。<br></p>
-        
-        
-        <p class="article-more-link">
-          
-            <a href="/2017/03/08/docker-run-mongodb-redis/#more">Read More</a>
-          
-       </p>
-    </div>
-    <footer class="article-footer clearfix">
-<div class="article-catetags">
-
-<div class="article-categories">
-  <span></span>
-  <a class="article-category-link" href="/categories/docker-practice/">docker-practice</a>
-</div>
-
-
-  <div class="article-tags">
-  
-  <span></span> <a href="/tags/docker/">docker</a>
-  </div>
-
-</div>
-
-
-
-
-<div class="comments-count">
-	
-	  	<span></span>
-		<a href="/2017/03/08/docker-run-mongodb-redis/#comments" class="ds-thread-count comments-count-link" data-thread-key="2017/03/08/docker-run-mongodb-redis/" data-count-type="comments">&nbsp;</a>
-	
-</div>
-
-</footer>
-
-
-    </article>
-
-
-
-
-
-
 
   <nav id="page-nav" class="clearfix">
     <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/6/">6</a><a class="extend next" rel="next" href="/page/2/">Next<span></span></a>
@@ -778,7 +779,7 @@
 		  
 		
 		  
-			<li><a href="/categories/redis专题/" title="redis专题">redis专题<sup>5</sup></a></li>
+			<li><a href="/categories/redis专题/" title="redis专题">redis专题<sup>6</sup></a></li>
 		  
 		
 		</ul>
@@ -800,7 +801,7 @@
 			
 		
 			
-				<li><a href="/tags/redis/" title="redis">redis<sup>5</sup></a></li>
+				<li><a href="/tags/redis/" title="redis">redis<sup>6</sup></a></li>
 			
 		
 			
