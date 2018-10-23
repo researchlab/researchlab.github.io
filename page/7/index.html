@@ -4,25 +4,20 @@
 <head>
   <meta charset="UTF-8">
   
-    <title>快速排序算法总结 | 一线攻城狮</title>
+    <title>一线攻城狮</title>
     <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
     
     <meta name="author" content="Lee Hong">
     
 
     
-    <meta name="description" content="本文首先分别详细阐述了单向扫描、双向扫描快速排序算法原理,并用golang分别设计实现了这两种经典的快速排序算法; 然后本文从性能的角度分不同场景进一步讨论了快速排序改进算法并在文中通过程序设计实现了相关算法，最后基于上述场景从上述算法总结了快速算法的特性及适用场景;">
-<meta name="keywords" content="golang,quicksort">
-<meta property="og:type" content="article">
-<meta property="og:title" content="快速排序算法总结">
-<meta property="og:url" content="http://researchlab.github.io/2017/09/19/quicksort-summary/index.html">
+    <meta property="og:type" content="website">
+<meta property="og:title" content="一线攻城狮">
+<meta property="og:url" content="http://researchlab.github.io/page/7/index.html">
 <meta property="og:site_name" content="一线攻城狮">
-<meta property="og:description" content="本文首先分别详细阐述了单向扫描、双向扫描快速排序算法原理,并用golang分别设计实现了这两种经典的快速排序算法; 然后本文从性能的角度分不同场景进一步讨论了快速排序改进算法并在文中通过程序设计实现了相关算法，最后基于上述场景从上述算法总结了快速算法的特性及适用场景;">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2018-10-23T09:14:36.365Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="快速排序算法总结">
-<meta name="twitter:description" content="本文首先分别详细阐述了单向扫描、双向扫描快速排序算法原理,并用golang分别设计实现了这两种经典的快速排序算法; 然后本文从性能的角度分不同场景进一步讨论了快速排序改进算法并在文中通过程序设计实现了相关算法，最后基于上述场景从上述算法总结了快速算法的特性及适用场景;">
+<meta name="twitter:title" content="一线攻城狮">
 
     
     <link rel="alternative" href="/atom.xml" title="一线攻城狮" type="application/atom+xml">
@@ -69,138 +64,78 @@
 </div>
     </header>
     <div id="container">
-      <div id="main" class="post" itemscope itemprop="blogPost">
-  
-	<article itemprop="articleBody"> 
-		<header class="article-info clearfix">
+      <div id="main">
+
+   
+    
+    <article class="post-expand post" itemprop="articleBody"> 
+        <header class="article-info clearfix">
   <h1 itemprop="name">
     
-      <a href="/2017/09/19/quicksort-summary/" title="快速排序算法总结" itemprop="url">快速排序算法总结</a>
+      <a href="/2016/01/15/hexo-blog-1/" title="用Hexo+github搭建本站" itemprop="url">用Hexo+github搭建本站</a>
   </h1>
   <p class="article-author">By
        
 		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
 		
   <p class="article-time">
-    <time datetime="2017-09-19T10:04:47.000Z" itemprop="datePublished"> 发表于 2017-09-19</time>
+    <time datetime="2016-01-15T12:10:10.000Z" itemprop="datePublished"> 发表于 2016-01-15</time>
     
   </p>
 </header>
-	<div class="article-content">
-		
-		<div id="toc" class="toc-article">
-			<strong class="toc-title">文章目录</strong>
-		
-			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#单向扫描"><span class="toc-number">1.</span> <span class="toc-text">单向扫描</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#双向扫描"><span class="toc-number">2.</span> <span class="toc-text">双向扫描</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#三中值扫描"><span class="toc-number">3.</span> <span class="toc-text">三中值扫描</span></a></li></ol>
-		
-		</div>
-		
-		<p>本文首先分别详细阐述了单向扫描、双向扫描快速排序算法原理,并用golang分别设计实现了这两种经典的快速排序算法; 然后本文从性能的角度分不同场景进一步讨论了快速排序改进算法并在文中通过程序设计实现了相关算法，最后基于上述场景从上述算法总结了快速算法的特性及适用场景;<br><a id="more"></a></p>
-<blockquote>
-<p>快速排序是对冒泡排序的一种改进, 采用分治策略, 通过一趟排序将要排序的数据分割成独立的两部分，其中一部分的所有数据都比另外一部分的所有数据都要小，然后再按此方法对这两部分数据分别进行快速排序，整个排序过程可以递归进行，以此达到整个数据变成有序序列。</p>
-</blockquote>
-<p>下面首先来阐述快排的两种经典实现方式: 单向扫描及双向扫描,</p>
-<h2 id="单向扫描"><a href="#单向扫描" class="headerlink" title="单向扫描"></a>单向扫描</h2><p><strong>算法原理:</strong> 主要由两部分组成, 一部分是递归部分QuickSort, 它将调用partition进行划分, 并取得划分元素P, 然后分别对P之前的部分和P 之后的部分递归调用QuickSort; 另一部分是partition, 选取划分元素P（随机选取数组中的一个元素, 交换到数组末尾位置）, 定义两个标记值left和right, 随着划分的进行, 这两个标记值将数组分成三部分, left之左的部分是小于划分元素P的值, left和right之间的部分是大 于等于划分元素P的值（等于p的值没有必要进行交换）, right之右的部分是未划分的部分。运行中right自左向右遍历, left指向最左的一个不小于P的值, 当right遇见小于P的元素就与left当前索引的值交换, right和left同时前进，否则right直接前进，直到数组末尾，最后将P与left当前指向的值交换, 并且返回i的值;</p>
-<h2 id="双向扫描"><a href="#双向扫描" class="headerlink" title="双向扫描"></a>双向扫描</h2><h2 id="三中值扫描"><a href="#三中值扫描" class="headerlink" title="三中值扫描"></a>三中值扫描</h2>  
-	</div>
-		<div style="padding: 10px 44px 30px 44px;" >
-<div style="border: 1px dashed #e0e0e0; padding: 10px 10px 10px 10px; background-color: #fffeee; background-repeat: no-repeat; background-attachment: scroll; background-position: 1% 50%; -moz-background-size: auto auto; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">
-<div style="float:left;margin-top:0px;">
-<img src="/img/weixin.jpg" width="125px" height="125px" style="border:1px solid #ccc; margin: 6px 5px 0px 0px"/>
-</div>
-<div>
- <p style="margin-top:0px;">作者署名：<b><a target="_blank" href="http://www.grdtechs.com/">朴实的一线攻城狮</a></b>
-<br />本文标题：<b><a href="/2017/09/19/quicksort-summary/" target="_blank" title="快速排序算法总结">快速排序算法总结</a></b> 
-<br />本文出处：<b><a href="/2017/09/19/quicksort-summary/" target="_blank" title="快速排序算法总结">http://researchlab.github.io/2017/09/19/quicksort-summary/</a></b>
-<br />版权声明：本文由<b><a href="/about" target="_blank" title="Lee Hong">Lee Hong</a></b>创作和发表,采用<b>署名(BY)</b>-<b>非商业性使用(NC)</b>-<b>相同方式共享(SA)</b>国际许可协议进行许可,转载请注明作者及出处, 否则保留追究法律责任的权利。 </p>
-</div>
-</div>
-</div>
-
-   	       
-		<footer class="article-footer clearfix">
+    <div class="article-content">
+        
+        <p><a href="https://hexo.io" target="_blank" rel="noopener">Hexo</a>是一个基于<code>Node.js</code>免费开源的静态博客框架，方便将生成的静态网页托管在<code>github</code>和<code>Heroku</code>上，可快速部署，并支持<code>Markdown</code>写作，这也是选择<code>Hexo</code>部署本站的理由。无特殊说明，本站所有操作均在<code>Mac OS</code>下完成。<br></p>
+        
+        
+        <p class="article-more-link">
+          
+            <a href="/2016/01/15/hexo-blog-1/#more">Read More</a>
+          
+       </p>
+    </div>
+    <footer class="article-footer clearfix">
 <div class="article-catetags">
 
 <div class="article-categories">
   <span></span>
-  <a class="article-category-link" href="/categories/algorithm/">algorithm</a>
+  <a class="article-category-link" href="/categories/Hexo/">Hexo</a>
 </div>
 
 
   <div class="article-tags">
   
-  <span></span> <a href="/tags/golang/">golang</a><a href="/tags/quicksort/">quicksort</a>
+  <span></span> <a href="/tags/Hexo/">Hexo</a><a href="/tags/Blog/">Blog</a>
   </div>
 
 </div>
 
 
 
-	<div class="article-share" id="share">
+
+<div class="comments-count">
 	
-	<div class="share-jiathis">
-	  
-<div class="jiathis_style_24x24">
-	<a class="jiathis_button_weixin"></a>
-	<a class="jiathis_button_tsina"></a>
-	<a class="jiathis_button_tqq"></a>
-	<a class="jiathis_button_qzone"></a>
-    <a class="jiathis_button_googleplus"></a>
-	<a class="jiathis_button_douban"></a>
-	<a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
-	<a class="jiathis_counter_style"></a>
+	  	<span></span>
+		<a href="/2016/01/15/hexo-blog-1/#comments" class="ds-thread-count comments-count-link" data-thread-key="2016/01/15/hexo-blog-1/" data-count-type="comments">&nbsp;</a>
+	
 </div>
-<script type="text/javascript" >
-    var jiathis_config={
-    data_track_clickback:true,
-    sm:"copy,renren,cqq",
-    pic:"",
-    summary:"",
-    
-  </script> 
-<script type="text/javascript" src="//v3.jiathis.com/code/jia.js?uid=
-2084050" charset="utf-8"></script>      
-
-
-	 </div>
-	
-	</div>
-
 
 </footer>
 
-   	       
-	</article>
-	
-<nav class="article-nav clearfix">
- 
- <div class="prev" >
- <a href="/2018/01/16/redis-01-basic-structure/" title="redis专题01 数据结构之string/list/hash/set/zset">
-  <strong>上一篇：</strong><br/>
-  <span>
-  redis专题01 数据结构之string/list/hash/set/zset</span>
-</a>
+
+    </article>
+
+
+
+
+
+
+
+  <nav id="page-nav" class="clearfix">
+    <a class="extend prev" rel="prev" href="/page/6/"><span></span>Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/5/">5</a><a class="page-number" href="/page/6/">6</a><span class="page-number current">7</span>
+  </nav>
+
 </div>
-
-
-<div class="next">
-<a href="/2017/09/15/docker-registry-v2/"  title="搭建Docker Registry容器服务">
- <strong>下一篇：</strong><br/> 
- <span>搭建Docker Registry容器服务
-</span>
-</a>
-</div>
-
-</nav>
-
-	
-<section id="comments" class="comment">
-	<div class="ds-thread" data-thread-key="2017/09/19/quicksort-summary/" data-title="快速排序算法总结" data-url="http://researchlab.github.io/2017/09/19/quicksort-summary/"></div>
-</section>
-
-
-</div>  
-
       <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
 <div id="asidepart">
 
@@ -459,54 +394,14 @@ $(document).ready(function(){
       m.removeClass('moveMain');
       a.css('display', 'block').removeClass('fadeOut');
       o.css('display', 'none');
-      
-      $('#toc.toc-aside').css('display', 'none');
         
     }
   });
 });
 </script>
 
-<script type="text/javascript">
-$(document).ready(function(){ 
-  var ai = $('.article-content>iframe'),
-      ae = $('.article-content>embed'),
-      t  = $('#toc'),
-      ta = $('#toc.toc-aside'),
-      o  = $('.openaside'),
-      c  = $('.closeaside');
-  if(ai.length>0){
-    ai.wrap('<div class="video-container" />');
-  };
-  if(ae.length>0){
-   ae.wrap('<div class="video-container" />');
-  };
-  c.click(function(){
-    ta.css('display', 'block').addClass('fadeIn');
-  });
-  o.click(function(){
-    ta.css('display', 'none');
-  });
-  $(window).scroll(function(){
-    ta.css("top",Math.max(140,320-$(this).scrollTop()));
-  });
-});
-</script>
 
 
-
-
-<script type="text/javascript">
-  var duoshuoQuery = {short_name:"gamedp"};
-  (function() {
-    var ds = document.createElement('script');
-    ds.type = 'text/javascript';ds.async = true;
-    ds.src = '//static.duoshuo.com/embed.js';
-    ds.charset = 'UTF-8';
-    (document.getElementsByTagName('head')[0] 
-    || document.getElementsByTagName('body')[0]).appendChild(ds);
-  })();
-</script> 
 
 
 
@@ -565,4 +460,4 @@ $(document).ready(function(){
 <!-- Tiny_search End -->
 
   </body>
-</html>
+ </html>
