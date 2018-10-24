@@ -19,7 +19,7 @@
 <meta property="og:site_name" content="一线攻城狮">
 <meta property="og:description" content="redis提供两种方式进行持久化，一种是RDB快照持久化(原理是将Reids在内存中的数据库记录压缩后定时dump到磁盘上的RDB持久化,存储紧凑)，另外一种是AOF(append only file)持久化(原理是将Reids的操作日志以追加的方式写入文件), AOF 日志在长期的运行过程中会变的无比庞大，数据库重启时需要加载AOF日志进行指令重放，这个时间就会无比漫长。所以需要定期进行AOF重">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2018-10-24T07:45:49.805Z">
+<meta property="og:updated_time" content="2018-10-24T07:57:33.396Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="redis专题13 数据存储与持久化">
 <meta name="twitter:description" content="redis提供两种方式进行持久化，一种是RDB快照持久化(原理是将Reids在内存中的数据库记录压缩后定时dump到磁盘上的RDB持久化,存储紧凑)，另外一种是AOF(append only file)持久化(原理是将Reids的操作日志以追加的方式写入文件), AOF 日志在长期的运行过程中会变的无比庞大，数据库重启时需要加载AOF日志进行指令重放，这个时间就会无比漫长。所以需要定期进行AOF重">
@@ -91,7 +91,7 @@
 		<div id="toc" class="toc-article">
 			<strong class="toc-title">文章目录</strong>
 		
-			<ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#RDB快照原理"><span class="toc-number">1.</span> <span class="toc-text">RDB快照原理</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#AOF-原理"><span class="toc-number">1.1.</span> <span class="toc-text">AOF 原理</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#混合持久化"><span class="toc-number">1.2.</span> <span class="toc-text">混合持久化</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#RDB优势"><span class="toc-number">1.3.</span> <span class="toc-text">RDB优势</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#RDB劣势"><span class="toc-number">1.4.</span> <span class="toc-text">RDB劣势</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#AOF优势"><span class="toc-number">2.</span> <span class="toc-text">AOF优势</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#AOF劣势"><span class="toc-number">2.1.</span> <span class="toc-text">AOF劣势</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#常用配置"><span class="toc-number">2.2.</span> <span class="toc-text">常用配置</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#总结"><span class="toc-number">2.3.</span> <span class="toc-text">总结</span></a></li></ol></li></ol>
+			<ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#RDB快照原理"><span class="toc-number">1.</span> <span class="toc-text">RDB快照原理</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#AOF-原理"><span class="toc-number">1.1.</span> <span class="toc-text">AOF 原理</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#混合持久化"><span class="toc-number">1.2.</span> <span class="toc-text">混合持久化</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#RDB优势"><span class="toc-number">1.3.</span> <span class="toc-text">RDB优势</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#RDB劣势"><span class="toc-number">1.4.</span> <span class="toc-text">RDB劣势</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#AOF优势"><span class="toc-number">2.</span> <span class="toc-text">AOF优势</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#AOF劣势"><span class="toc-number">2.1.</span> <span class="toc-text">AOF劣势</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#常用配置"><span class="toc-number">2.2.</span> <span class="toc-text">常用配置</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#过期策略"><span class="toc-number">2.3.</span> <span class="toc-text">过期策略</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#总结"><span class="toc-number">2.4.</span> <span class="toc-text">总结</span></a></li></ol></li></ol>
 		
 		</div>
 		
@@ -149,11 +149,30 @@
 </blockquote>
 <h5 id="常用配置"><a href="#常用配置" class="headerlink" title="常用配置"></a>常用配置</h5><p><strong>RDB持久化配置</strong><br>Redis会将数据集的快照dump到dump.rdb文件中。此外，我们也可以通过配置文件来修改Redis服务器dump快照的频率，在打开6379.conf文件之后，我们搜索save，可以看到下面的配置信息:<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">save 900 1              #在900秒(15分钟)之后，如果至少有1个key发生变化，则dump内存快照。</span><br><span class="line"></span><br><span class="line">save 300 10            #在300秒(5分钟)之后，如果至少有10个key发生变化，则dump内存快照。</span><br><span class="line"></span><br><span class="line">save 60 10000        #在60秒(1分钟)之后，如果至少有10000个key发生变化，则dump内存快照。</span><br></pre></td></tr></table></figure></p>
 <p><strong>AOF持久化配置</strong><br>在Redis的配置文件中存在三种同步方式，它们分别是:<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">appendfsync always     #每次有数据修改发生时都会写入AOF文件。</span><br><span class="line"></span><br><span class="line">appendfsync everysec  #每秒钟同步一次，该策略为AOF的缺省策略。</span><br><span class="line"></span><br><span class="line">appendfsync no          #从不同步。高效但是数据不会被持久化。</span><br></pre></td></tr></table></figure></p>
+<h5 id="过期策略"><a href="#过期策略" class="headerlink" title="过期策略"></a>过期策略</h5><p><strong>RDB过期key处理策略</strong></p>
+<blockquote>
+<p>已过期的键不会被保存到新创建的RDB文件中。举个例子，如果数据库中包含三个键k1、k2、k3，并且k2已经过期，那么当执行SAVE命令或者BGSAVE命令时，程序只会将k1和k3的数据保存到RDB文件中，而k2则会被忽略。因此，数据库中包含过期键不会对生成新的RDB文件造成影响。</p>
+</blockquote>
+<p>在启动Redis服务器时，如果服务器开启了RDB功能，那么服务器将对RDB文件进行载入:</p>
+<blockquote>
+<p>如果服务器以主服务器模式运行，那么在载入RDB文件时，程序会对文件中保存的键进行检查，未过期的键会被载入到数据库中，而过期键则会被忽略，所以过期键对载入RDB文件的主服务器不会造成影响；</p>
+</blockquote>
+<blockquote>
+<p>如果服务器以从服务器模式运行，那么在载入RDB文件时，文件中保存的所有键，不论是否过期，都会被载入到数据库中。不过，因为主从服务器在进行数据同步的时候，从服务器的数据库就会被清空，所以一般来讲，过期键对载入RDB文件的从服务器也不会造成影响；</p>
+</blockquote>
+<p><strong>AOF过期key处理策略</strong></p>
+<blockquote>
+<p>当服务器以AOF持久化模式运行时，如果数据库中的某个键已经过期，但它还没有被惰性删除或者定期删除，那么AOF文件不会因为这个过期键而产生任何影响。<strong>当过期键被惰性删除或者定期删除之后，程序会向AOF文件追加（append）一条DEL命令，来显式地记录该键已被删除。</strong></p>
+</blockquote>
+<blockquote>
+<p>和生成RDB文件时类似，在执行AOF重写的过程中，程序会对数据库中的键进行检查，已过期的键不会被保存到重写后的AOF文件中。举个例子，如果数据库中包含三个键k1、k2、k3，并且k2已经过期，那么在进行重写工作时，程序只会对k1和k3进行重写，而k2则会被忽略。</p>
+</blockquote>
 <h5 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h5><ul>
 <li>在<code>redis</code>数据存储持久化机制上, 探讨了<code>RDB快照</code> 和 <code>AOF</code>两种持久化方案，对其原理,区别等进行了进一步的说明;</li>
 <li>进一步探讨了<code>redis.4.0</code>提供的混合持久化方案;</li>
 <li>归类总结了<code>RDB</code>和<code>AOF</code>两种方案的优缺点;</li>
-<li>从经验出发, 进一步总结了实际中常用的配置方案;</li>
+<li>从经验出发， 进一步总结了实际中常用的配置方案;</li>
+<li>进一步总结了<code>RDB</code>和<code>AOF</code>对过期key的处理策略;</li>
 </ul>
   
 	</div>
