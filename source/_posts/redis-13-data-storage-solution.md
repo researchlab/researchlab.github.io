@@ -1,6 +1,6 @@
 ---
 title: "redis专题13 数据存储与持久化"
-date: 2018-10-24 15:36:10
+date: 2018-10-10 12:36:10
 categories: "redis专题"
 tags: [redis]
 description:
