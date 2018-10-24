@@ -72,6 +72,326 @@
         <header class="article-info clearfix">
   <h1 itemprop="name">
     
+      <a href="/2018/10/24/redis-15-transaction/" title="redis专题15 事务系列问题" itemprop="url">redis专题15 事务系列问题</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
+		
+  <p class="article-time">
+    <time datetime="2018-10-24T15:39:41.000Z" itemprop="datePublished"> 发表于 2018-10-24</time>
+    
+  </p>
+</header>
+    <div class="article-content">
+        
+        <p>为了确保连续多个操作的原子性, 一个成熟的数据库通常都会有事务支持, <code>Redis</code> 也不例外, <code>Redis</code> 通过<code>MULTI</code>, <code>DISCARD</code>, <code>EXEC</code>, <code>WATCH</code>和<code>UNWATCH</code> 五个命令来实现事务功能;<br></p>
+        
+        
+        <p class="article-more-link">
+          
+            <a href="/2018/10/24/redis-15-transaction/#more">Read More</a>
+          
+       </p>
+    </div>
+    <footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/redis专题/">redis专题</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/redis/">redis</a>
+  </div>
+
+</div>
+
+
+
+
+<div class="comments-count">
+	
+	  	<span></span>
+		<a href="/2018/10/24/redis-15-transaction/#comments" class="ds-thread-count comments-count-link" data-thread-key="2018/10/24/redis-15-transaction/" data-count-type="comments">&nbsp;</a>
+	
+</div>
+
+</footer>
+
+
+    </article>
+
+
+
+
+
+
+   
+    
+    <article class="post-expand post" itemprop="articleBody"> 
+        <header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2018/10/24/redis-14-pipeline/" title="redis专题14 性能提升之管道技术" itemprop="url">redis专题14 性能提升之管道技术</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
+		
+  <p class="article-time">
+    <time datetime="2018-10-24T15:37:51.000Z" itemprop="datePublished"> 发表于 2018-10-24</time>
+    
+  </p>
+</header>
+    <div class="article-content">
+        
+        <p>用<code>redis管道技术</code>对执行结果没有互相依赖，对结果响应也无需立即获得的命令集批量提交到<code>redis</code>服务器的方式，能在一定程度上提升<code>redis</code>性能，性能提升的原因主要是TCP连接中减少了<code>交互往返</code>的时间。<br></p>
+        
+        
+        <p class="article-more-link">
+          
+            <a href="/2018/10/24/redis-14-pipeline/#more">Read More</a>
+          
+       </p>
+    </div>
+    <footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/redis专题/">redis专题</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/redis/">redis</a>
+  </div>
+
+</div>
+
+
+
+
+<div class="comments-count">
+	
+	  	<span></span>
+		<a href="/2018/10/24/redis-14-pipeline/#comments" class="ds-thread-count comments-count-link" data-thread-key="2018/10/24/redis-14-pipeline/" data-count-type="comments">&nbsp;</a>
+	
+</div>
+
+</footer>
+
+
+    </article>
+
+
+
+
+
+
+   
+    
+    <article class="post-expand post" itemprop="articleBody"> 
+        <header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2018/10/24/redis-13-data-storage-solution/" title="redis专题13 数据存储与持久化" itemprop="url">redis专题13 数据存储与持久化</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
+		
+  <p class="article-time">
+    <time datetime="2018-10-24T15:36:10.000Z" itemprop="datePublished"> 发表于 2018-10-24</time>
+    
+  </p>
+</header>
+    <div class="article-content">
+        
+        <p><code>redis</code>提供两种方式进行持久化，一种是<code>RDB</code>快照持久化(原理是将Reids在内存中的数据库记录压缩后定时dump到磁盘上的<code>RDB</code>持久化,存储紧凑)，另外一种是<code>AOF</code>(append only file)持久化(原理是将Reids的操作日志以追加的方式写入文件), <code>AOF</code> 日志在长期的运行过程中会变的无比庞大，数据库重启时需要加载<code>AOF</code>日志进行指令重放，这个时间就会无比漫长。所以需要定期进行<code>AOF</code>重写，给<code>AOF</code>日志进行瘦身。<br></p>
+        
+        
+        <p class="article-more-link">
+          
+            <a href="/2018/10/24/redis-13-data-storage-solution/#more">Read More</a>
+          
+       </p>
+    </div>
+    <footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/redis专题/">redis专题</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/redis/">redis</a>
+  </div>
+
+</div>
+
+
+
+
+<div class="comments-count">
+	
+	  	<span></span>
+		<a href="/2018/10/24/redis-13-data-storage-solution/#comments" class="ds-thread-count comments-count-link" data-thread-key="2018/10/24/redis-13-data-storage-solution/" data-count-type="comments">&nbsp;</a>
+	
+</div>
+
+</footer>
+
+
+    </article>
+
+
+
+
+
+
+   
+    
+    <article class="post-expand post" itemprop="articleBody"> 
+        <header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2018/10/24/redis-12-resp/" title="redis专题12 redis通信协议" itemprop="url">redis专题12 redis通信协议</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
+		
+  <p class="article-time">
+    <time datetime="2018-10-24T15:34:03.000Z" itemprop="datePublished"> 发表于 2018-10-24</time>
+    
+  </p>
+</header>
+    <div class="article-content">
+        
+        <p>Redis的客户端与服务端采用一种叫做<code>RESP(REdis Serialization Protocol)</code>的网络通信协议交换数据。 这种协议采用明文传输，易读也易解析。<code>Redis</code>客户端采用此协议格式来对服务端发送不同的命令，服务端会根据具体的操作而返回具体的答复。客户端和服务端采用的是简单的<code>请求-响应</code>模型进行通信的。<br></p>
+        
+        
+        <p class="article-more-link">
+          
+            <a href="/2018/10/24/redis-12-resp/#more">Read More</a>
+          
+       </p>
+    </div>
+    <footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/redis专题/">redis专题</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/redis/">redis</a>
+  </div>
+
+</div>
+
+
+
+
+<div class="comments-count">
+	
+	  	<span></span>
+		<a href="/2018/10/24/redis-12-resp/#comments" class="ds-thread-count comments-count-link" data-thread-key="2018/10/24/redis-12-resp/" data-count-type="comments">&nbsp;</a>
+	
+</div>
+
+</footer>
+
+
+    </article>
+
+
+
+
+
+
+   
+    
+    <article class="post-expand post" itemprop="articleBody"> 
+        <header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2018/10/08/redis-11-redisio/" title="redis专题11 线程IO模型" itemprop="url">redis专题11 线程IO模型</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
+		
+  <p class="article-time">
+    <time datetime="2018-10-08T15:31:15.000Z" itemprop="datePublished"> 发表于 2018-10-08</time>
+    
+  </p>
+</header>
+    <div class="article-content">
+        
+        <p><code>Redis</code>是单进程单线程模型的KV数据库,那为什么还常应用在高并发场景中? 其中一个重要原因是<code>Redis</code>是一个<strong>单进程单线程</strong>且采用<strong>多路I/O复用模型，非阻塞IO</strong>技术, 使之可以同时处理多个连接请求(减少网络IO耗时), 也不需要关心锁，线程切换等资源消耗问题;<br></p>
+        
+        
+        <p class="article-more-link">
+          
+            <a href="/2018/10/08/redis-11-redisio/#more">Read More</a>
+          
+       </p>
+    </div>
+    <footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/redis专题/">redis专题</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/redis/">redis</a>
+  </div>
+
+</div>
+
+
+
+
+<div class="comments-count">
+	
+	  	<span></span>
+		<a href="/2018/10/08/redis-11-redisio/#comments" class="ds-thread-count comments-count-link" data-thread-key="2018/10/08/redis-11-redisio/" data-count-type="comments">&nbsp;</a>
+	
+</div>
+
+</footer>
+
+
+    </article>
+
+
+
+
+
+
+   
+    
+    <article class="post-expand post" itemprop="articleBody"> 
+        <header class="article-info clearfix">
+  <h1 itemprop="name">
+    
       <a href="/2018/10/07/redis-10-scan/" title="redis专题10 海量数据扫描神器之scan" itemprop="url">redis专题10 海量数据扫描神器之scan</a>
   </h1>
   <p class="article-author">By
@@ -387,328 +707,6 @@
 
 
 
-   
-    
-    <article class="post-expand post" itemprop="articleBody"> 
-        <header class="article-info clearfix">
-  <h1 itemprop="name">
-    
-      <a href="/2018/06/06/docker-permission-denied/" title="Docker操作提示Get Permission Denied" itemprop="url">Docker操作提示Get Permission Denied</a>
-  </h1>
-  <p class="article-author">By
-       
-		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
-		
-  <p class="article-time">
-    <time datetime="2018-06-06T15:40:41.000Z" itemprop="datePublished"> 发表于 2018-06-06</time>
-    
-  </p>
-</header>
-    <div class="article-content">
-        
-        <p>在ubuntu16.04上重新安装docker后，执行docker相关命令，出现”Got permission denied”提示,如下,<br></p>
-        
-        
-        <p class="article-more-link">
-          
-            <a href="/2018/06/06/docker-permission-denied/#more">Read More</a>
-          
-       </p>
-    </div>
-    <footer class="article-footer clearfix">
-<div class="article-catetags">
-
-<div class="article-categories">
-  <span></span>
-  <a class="article-category-link" href="/categories/docker-practice/">docker-practice</a>
-</div>
-
-
-  <div class="article-tags">
-  
-  <span></span> <a href="/tags/docker/">docker</a>
-  </div>
-
-</div>
-
-
-
-
-<div class="comments-count">
-	
-	  	<span></span>
-		<a href="/2018/06/06/docker-permission-denied/#comments" class="ds-thread-count comments-count-link" data-thread-key="2018/06/06/docker-permission-denied/" data-count-type="comments">&nbsp;</a>
-	
-</div>
-
-</footer>
-
-
-    </article>
-
-
-
-
-
-
-   
-    
-    <article class="post-expand post" itemprop="articleBody"> 
-        <header class="article-info clearfix">
-  <h1 itemprop="name">
-    
-      <a href="/2018/02/18/redis-05-hyperloglog/" title="redis专题05 海量数据处理之HyperLogLog" itemprop="url">redis专题05 海量数据处理之HyperLogLog</a>
-  </h1>
-  <p class="article-author">By
-       
-		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
-		
-  <p class="article-time">
-    <time datetime="2018-02-18T18:48:44.000Z" itemprop="datePublished"> 发表于 2018-02-18</time>
-    
-  </p>
-</header>
-    <div class="article-content">
-        
-        <p><code>HyperLoglog</code>是<code>redis</code>新支持的两种类型中的另外一种(上一种是位图类型<code>Bitmaps</code>)。主要适用场景是海量数据的计算。特点是速度快, 占用空间小。<br></p>
-        
-        
-        <p class="article-more-link">
-          
-            <a href="/2018/02/18/redis-05-hyperloglog/#more">Read More</a>
-          
-       </p>
-    </div>
-    <footer class="article-footer clearfix">
-<div class="article-catetags">
-
-<div class="article-categories">
-  <span></span>
-  <a class="article-category-link" href="/categories/redis专题/">redis专题</a>
-</div>
-
-
-  <div class="article-tags">
-  
-  <span></span> <a href="/tags/redis/">redis</a>
-  </div>
-
-</div>
-
-
-
-
-<div class="comments-count">
-	
-	  	<span></span>
-		<a href="/2018/02/18/redis-05-hyperloglog/#comments" class="ds-thread-count comments-count-link" data-thread-key="2018/02/18/redis-05-hyperloglog/" data-count-type="comments">&nbsp;</a>
-	
-</div>
-
-</footer>
-
-
-    </article>
-
-
-
-
-
-
-   
-    
-    <article class="post-expand post" itemprop="articleBody"> 
-        <header class="article-info clearfix">
-  <h1 itemprop="name">
-    
-      <a href="/2018/01/19/redis-04-bitmap/" title="redis专题04 数据结构之redis位图系列问题" itemprop="url">redis专题04 数据结构之redis位图系列问题</a>
-  </h1>
-  <p class="article-author">By
-       
-		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
-		
-  <p class="article-time">
-    <time datetime="2018-01-19T11:17:30.000Z" itemprop="datePublished"> 发表于 2018-01-19</time>
-    
-  </p>
-</header>
-    <div class="article-content">
-        
-        <p><code>redis</code>位图数据结构<code>bitmap</code>将很多小的整数储存到一个长度较大的位图中， 又或者将一个非常庞大的键分割为多个较小的键来进行储存，从而非常高效地使用内存，使得<code>redis</code>能够应用在诸多场景中, 如用户签到、统计活跃用户、用户在线状态等</p>
-<blockquote>
-<p>此外, <code>bitfield</code>能够以指定的方式对计算溢出进行控制的能力，使得它特别适合应用于实时分析领域；<br></p></blockquote>
-        
-        
-        <p class="article-more-link">
-          
-            <a href="/2018/01/19/redis-04-bitmap/#more">Read More</a>
-          
-       </p>
-    </div>
-    <footer class="article-footer clearfix">
-<div class="article-catetags">
-
-<div class="article-categories">
-  <span></span>
-  <a class="article-category-link" href="/categories/redis专题/">redis专题</a>
-</div>
-
-
-  <div class="article-tags">
-  
-  <span></span> <a href="/tags/redis/">redis</a>
-  </div>
-
-</div>
-
-
-
-
-<div class="comments-count">
-	
-	  	<span></span>
-		<a href="/2018/01/19/redis-04-bitmap/#comments" class="ds-thread-count comments-count-link" data-thread-key="2018/01/19/redis-04-bitmap/" data-count-type="comments">&nbsp;</a>
-	
-</div>
-
-</footer>
-
-
-    </article>
-
-
-
-
-
-
-   
-    
-    <article class="post-expand post" itemprop="articleBody"> 
-        <header class="article-info clearfix">
-  <h1 itemprop="name">
-    
-      <a href="/2018/01/18/redis-03-delay-queue/" title="redis专题03 消息队列系列问题" itemprop="url">redis专题03 消息队列系列问题</a>
-  </h1>
-  <p class="article-author">By
-       
-		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
-		
-  <p class="article-time">
-    <time datetime="2018-01-18T10:20:31.000Z" itemprop="datePublished"> 发表于 2018-01-18</time>
-    
-  </p>
-</header>
-    <div class="article-content">
-        
-        <p>很多业务场景中多会用到消息队列来传递消息数据问题， 常用的消息队列如<code>NSQ</code>,<code>NAS</code>, <code>Rabbitmq</code>和<code>Kafka</code>等重量级消息队列中间件，功能很强大 使用起来自然也复杂，其实在大部分场景只是需要一个消息队列来传递数据，数据量，数据之间的顺序等也没有特殊的要求， 这样的场景使用<code>redis</code>非常轻松就可以搞定，而且在使用和维护上相对而言要简单方便些,当然<code>redis</code>的消息队列不是专业的消息队列，它没有非常多的高级特性，没有<code>ack</code>保证，如果对消息的可靠性有着极致的追求，那么它就不适合使用；<br></p>
-        
-        
-        <p class="article-more-link">
-          
-            <a href="/2018/01/18/redis-03-delay-queue/#more">Read More</a>
-          
-       </p>
-    </div>
-    <footer class="article-footer clearfix">
-<div class="article-catetags">
-
-<div class="article-categories">
-  <span></span>
-  <a class="article-category-link" href="/categories/redis专题/">redis专题</a>
-</div>
-
-
-  <div class="article-tags">
-  
-  <span></span> <a href="/tags/redis/">redis</a>
-  </div>
-
-</div>
-
-
-
-
-<div class="comments-count">
-	
-	  	<span></span>
-		<a href="/2018/01/18/redis-03-delay-queue/#comments" class="ds-thread-count comments-count-link" data-thread-key="2018/01/18/redis-03-delay-queue/" data-count-type="comments">&nbsp;</a>
-	
-</div>
-
-</footer>
-
-
-    </article>
-
-
-
-
-
-
-   
-    
-    <article class="post-expand post" itemprop="articleBody"> 
-        <header class="article-info clearfix">
-  <h1 itemprop="name">
-    
-      <a href="/2018/01/18/redis-02-distributed-lock/" title="redis专题02 分布式锁" itemprop="url">redis专题02 分布式锁</a>
-  </h1>
-  <p class="article-author">By
-       
-		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
-		
-  <p class="article-time">
-    <time datetime="2018-01-18T10:16:28.000Z" itemprop="datePublished"> 发表于 2018-01-18</time>
-    
-  </p>
-</header>
-    <div class="article-content">
-        
-        <p>分布式应用进行逻辑处理时经常会遇到并发问题。<br></p>
-        
-        
-        <p class="article-more-link">
-          
-            <a href="/2018/01/18/redis-02-distributed-lock/#more">Read More</a>
-          
-       </p>
-    </div>
-    <footer class="article-footer clearfix">
-<div class="article-catetags">
-
-<div class="article-categories">
-  <span></span>
-  <a class="article-category-link" href="/categories/redis专题/">redis专题</a>
-</div>
-
-
-  <div class="article-tags">
-  
-  <span></span> <a href="/tags/redis/">redis</a>
-  </div>
-
-</div>
-
-
-
-
-<div class="comments-count">
-	
-	  	<span></span>
-		<a href="/2018/01/18/redis-02-distributed-lock/#comments" class="ds-thread-count comments-count-link" data-thread-key="2018/01/18/redis-02-distributed-lock/" data-count-type="comments">&nbsp;</a>
-	
-</div>
-
-</footer>
-
-
-    </article>
-
-
-
-
-
-
 
   <nav id="page-nav" class="clearfix">
     <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/7/">7</a><a class="extend next" rel="next" href="/page/2/">Next<span></span></a>
@@ -778,7 +776,7 @@
 		  
 		
 		  
-			<li><a href="/categories/redis专题/" title="redis专题">redis专题<sup>10</sup></a></li>
+			<li><a href="/categories/redis专题/" title="redis专题">redis专题<sup>15</sup></a></li>
 		  
 		
 		</ul>
@@ -796,7 +794,7 @@
 			
 		
 			
-				<li><a href="/tags/redis/" title="redis">redis<sup>10</sup></a></li>
+				<li><a href="/tags/redis/" title="redis">redis<sup>15</sup></a></li>
 			
 		
 			
@@ -828,6 +826,26 @@
 			
 		
 			
+				<li><a href="/tags/getcookie/" title="getcookie">getcookie<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/rpc/" title="rpc">rpc<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/ticker/" title="ticker">ticker<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/gin/" title="gin">gin<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/submodule/" title="submodule">submodule<sup>1</sup></a></li>
+			
+		
+			
 				<li><a href="/tags/form/" title="form">form<sup>1</sup></a></li>
 			
 		
@@ -849,26 +867,6 @@
 		
 			
 				<li><a href="/tags/xorm/" title="xorm">xorm<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/json/" title="json">json<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/html/" title="html">html<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/vim8-0/" title="vim8.0">vim8.0<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/observer/" title="observer">observer<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/php/" title="php">php<sup>1</sup></a></li>
 			
 		
 		</ul>
