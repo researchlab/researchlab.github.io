@@ -19,7 +19,7 @@
 <meta property="og:site_name" content="一线攻城狮">
 <meta property="og:description" content="在生产环境中需要用到redis做数据持久化落地数据库时,  一般应搭建专属的redis集群来避免单点故障及单点读写性能问题, 如不是重度redis用户, 数据量压力不是特别大时, 也可以考虑采用redis主从同步架构代替, 本文将试图对redis主从同步原理, 步骤, 配置项, 实践等方面进行学习总结;">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2018-10-25T11:17:21.202Z">
+<meta property="og:updated_time" content="2018-10-25T11:41:45.345Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="redis专题17 主从同步系列问题">
 <meta name="twitter:description" content="在生产环境中需要用到redis做数据持久化落地数据库时,  一般应搭建专属的redis集群来避免单点故障及单点读写性能问题, 如不是重度redis用户, 数据量压力不是特别大时, 也可以考虑采用redis主从同步架构代替, 本文将试图对redis主从同步原理, 步骤, 配置项, 实践等方面进行学习总结;">
@@ -97,7 +97,7 @@
 		
 		<p>在生产环境中需要用到<code>redis</code>做数据持久化落地数据库时,  一般应搭建专属的<code>redis</code>集群来避免单点故障及单点读写性能问题, 如不是重度<code>redis</code>用户, 数据量压力不是特别大时, 也可以考虑采用<code>redis</code>主从同步架构代替, 本文将试图对<code>redis</code>主从同步原理, 步骤, 配置项, 实践等方面进行学习总结;<br><a id="more"></a></p>
 <h5 id="主从同步目的"><a href="#主从同步目的" class="headerlink" title="主从同步目的"></a>主从同步目的</h5><blockquote>
-<p>一是为了纯粹的冗余备份, 用于故障恢复保全数据;<br>二是为了提升读性能, 如用从服务器来承担非修改类操作;</p>
+<p>一旦主节点宕机, 从节点作为主节点的备份可以随时顶上来;<br>扩展主节点的读能力, 分担主节点读压力;</p>
 </blockquote>
 <h5 id="主从同步原理"><a href="#主从同步原理" class="headerlink" title="主从同步原理"></a>主从同步原理</h5><p><code>redis</code>支持主从复制, <code>redis</code>的主从结构可以采用一主多从或者级联结构, <code>redis</code>主从复制可以根据是否是全量分为全量同步和增量同步,<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">       /  slave-1  /  slave-2-1</span><br><span class="line">Master -  slave-2--   slave-2-2</span><br><span class="line">       \  slave-3  \  slave-2-3</span><br><span class="line">        \ ...      \  ...</span><br><span class="line">          slave-n     slave-2-n</span><br></pre></td></tr></table></figure></p>
 <h6 id="全量同步"><a href="#全量同步" class="headerlink" title="全量同步"></a>全量同步</h6><p><code>redis</code>全量复制一般发生在<code>slave</code>初始化阶段, 这时<code>slave</code>需要将Master上的所有数据都复制一份, 具体过程如下,</p>
