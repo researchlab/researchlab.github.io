@@ -72,6 +72,70 @@
         <header class="article-info clearfix">
   <h1 itemprop="name">
     
+      <a href="/2018/10/15/redis-17-replication/" title="redis专题17 主从同步系列问题" itemprop="url">redis专题17 主从同步系列问题</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
+		
+  <p class="article-time">
+    <time datetime="2018-10-15T19:03:25.000Z" itemprop="datePublished"> 发表于 2018-10-15</time>
+    
+  </p>
+</header>
+    <div class="article-content">
+        
+        <p>在生产环境中需要用到<code>redis</code>做数据持久化落地数据库时,  一般应搭建专属的<code>redis</code>集群来避免单点故障及单点读写性能问题, 如不是重度<code>redis</code>用户, 数据量压力不是特别大时, 也可以考虑采用<code>redis</code>主从同步架构代替, 本文将试图对<code>redis</code>主从同步原理, 步骤, 配置项, 实践等方面进行学习总结;<br></p>
+        
+        
+        <p class="article-more-link">
+          
+            <a href="/2018/10/15/redis-17-replication/#more">Read More</a>
+          
+       </p>
+    </div>
+    <footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/redis专题/">redis专题</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/redis/">redis</a>
+  </div>
+
+</div>
+
+
+
+
+<div class="comments-count">
+	
+	  	<span></span>
+		<a href="/2018/10/15/redis-17-replication/#comments" class="ds-thread-count comments-count-link" data-thread-key="2018/10/15/redis-17-replication/" data-count-type="comments">&nbsp;</a>
+	
+</div>
+
+</footer>
+
+
+    </article>
+
+
+
+
+
+
+   
+    
+    <article class="post-expand post" itemprop="articleBody"> 
+        <header class="article-info clearfix">
+  <h1 itemprop="name">
+    
       <a href="/2018/10/13/redis-16-storage-solution-opt/" title="redis专题16 数据持久化实践" itemprop="url">redis专题16 数据持久化实践</a>
   </h1>
   <p class="article-author">By
@@ -642,70 +706,6 @@
 
 
 
-   
-    
-    <article class="post-expand post" itemprop="articleBody"> 
-        <header class="article-info clearfix">
-  <h1 itemprop="name">
-    
-      <a href="/2018/10/04/redis-07-limit-rate/" title="redis专题07 redis应用之限流策略" itemprop="url">redis专题07 redis应用之限流策略</a>
-  </h1>
-  <p class="article-author">By
-       
-		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
-		
-  <p class="article-time">
-    <time datetime="2018-10-04T17:01:59.000Z" itemprop="datePublished"> 发表于 2018-10-04</time>
-    
-  </p>
-</header>
-    <div class="article-content">
-        
-        <p>限流算法在分布式领域是一个经常被提起的话题，当系统的处理能力有限时，如何阻止计划外的请求继续对系统施压，这是一个需要重视的问题。除了控制流量，限流还有一个应用目的是用于控制用户行为，避免垃圾请求。比如在<code>UGC</code>社区, <code>用户的发帖</code>, <code>回复</code>, <code>点赞</code>等行为都要严格受控，一般要严格限定某行为在规定时间内允许的次数，超过了次数那就是非法行为。<br></p>
-        
-        
-        <p class="article-more-link">
-          
-            <a href="/2018/10/04/redis-07-limit-rate/#more">Read More</a>
-          
-       </p>
-    </div>
-    <footer class="article-footer clearfix">
-<div class="article-catetags">
-
-<div class="article-categories">
-  <span></span>
-  <a class="article-category-link" href="/categories/redis专题/">redis专题</a>
-</div>
-
-
-  <div class="article-tags">
-  
-  <span></span> <a href="/tags/redis/">redis</a>
-  </div>
-
-</div>
-
-
-
-
-<div class="comments-count">
-	
-	  	<span></span>
-		<a href="/2018/10/04/redis-07-limit-rate/#comments" class="ds-thread-count comments-count-link" data-thread-key="2018/10/04/redis-07-limit-rate/" data-count-type="comments">&nbsp;</a>
-	
-</div>
-
-</footer>
-
-
-    </article>
-
-
-
-
-
-
 
   <nav id="page-nav" class="clearfix">
     <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/7/">7</a><a class="extend next" rel="next" href="/page/2/">Next<span></span></a>
@@ -775,7 +775,7 @@
 		  
 		
 		  
-			<li><a href="/categories/redis专题/" title="redis专题">redis专题<sup>16</sup></a></li>
+			<li><a href="/categories/redis专题/" title="redis专题">redis专题<sup>17</sup></a></li>
 		  
 		
 		</ul>
@@ -793,7 +793,7 @@
 			
 		
 			
-				<li><a href="/tags/redis/" title="redis">redis<sup>16</sup></a></li>
+				<li><a href="/tags/redis/" title="redis">redis<sup>17</sup></a></li>
 			
 		
 			

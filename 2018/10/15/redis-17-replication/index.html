@@ -1,0 +1,758 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>redis专题17 主从同步系列问题 | 一线攻城狮</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="Lee Hong">
+    
+
+    
+    <meta name="description" content="在生产环境中需要用到redis做数据持久化落地数据库时,  一般应搭建专属的redis集群来避免单点故障及单点读写性能问题, 如不是重度redis用户, 数据量压力不是特别大时, 也可以考虑采用redis主从同步架构代替, 本文将试图对redis主从同步原理, 步骤, 配置项, 实践等方面进行学习总结;">
+<meta name="keywords" content="redis">
+<meta property="og:type" content="article">
+<meta property="og:title" content="redis专题17 主从同步系列问题">
+<meta property="og:url" content="http://researchlab.github.io/2018/10/15/redis-17-replication/index.html">
+<meta property="og:site_name" content="一线攻城狮">
+<meta property="og:description" content="在生产环境中需要用到redis做数据持久化落地数据库时,  一般应搭建专属的redis集群来避免单点故障及单点读写性能问题, 如不是重度redis用户, 数据量压力不是特别大时, 也可以考虑采用redis主从同步架构代替, 本文将试图对redis主从同步原理, 步骤, 配置项, 实践等方面进行学习总结;">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2018-10-25T11:12:44.658Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="redis专题17 主从同步系列问题">
+<meta name="twitter:description" content="在生产环境中需要用到redis做数据持久化落地数据库时,  一般应搭建专属的redis集群来避免单点故障及单点读写性能问题, 如不是重度redis用户, 数据量压力不是特别大时, 也可以考虑采用redis主从同步架构代替, 本文将试图对redis主从同步原理, 步骤, 配置项, 实践等方面进行学习总结;">
+
+    
+    <link rel="alternative" href="/atom.xml" title="一线攻城狮" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="一线攻城狮">一线攻城狮</a></h1>
+				<h2 class="blog-motto">十年磨一剑，一步一步脚踏实地的耕种</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">首页</a></li>
+					
+						<li><a href="/archives">归档</a></li>
+					
+						<li><a href="/about">关于</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:researchlab.github.io">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2018/10/15/redis-17-replication/" title="redis专题17 主从同步系列问题" itemprop="url">redis专题17 主从同步系列问题</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
+		
+  <p class="article-time">
+    <time datetime="2018-10-15T19:03:25.000Z" itemprop="datePublished"> 发表于 2018-10-15</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-5"><a class="toc-link" href="#主从同步目的"><span class="toc-number">1.</span> <span class="toc-text">主从同步目的</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#主从同步原理"><span class="toc-number">2.</span> <span class="toc-text">主从同步原理</span></a><ol class="toc-child"><li class="toc-item toc-level-6"><a class="toc-link" href="#全量同步"><span class="toc-number">2.1.</span> <span class="toc-text">全量同步</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#增量同步"><span class="toc-number">2.2.</span> <span class="toc-text">增量同步</span></a></li></ol></li><li class="toc-item toc-level-5"><a class="toc-link" href="#主从同步策略"><span class="toc-number">3.</span> <span class="toc-text">主从同步策略</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#主从同步过程"><span class="toc-number">4.</span> <span class="toc-text">主从同步过程</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#同步实践"><span class="toc-number">5.</span> <span class="toc-text">同步实践</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#总结"><span class="toc-number">6.</span> <span class="toc-text">总结</span></a></li></ol>
+		
+		</div>
+		
+		<p>在生产环境中需要用到<code>redis</code>做数据持久化落地数据库时,  一般应搭建专属的<code>redis</code>集群来避免单点故障及单点读写性能问题, 如不是重度<code>redis</code>用户, 数据量压力不是特别大时, 也可以考虑采用<code>redis</code>主从同步架构代替, 本文将试图对<code>redis</code>主从同步原理, 步骤, 配置项, 实践等方面进行学习总结;<br><a id="more"></a></p>
+<h5 id="主从同步目的"><a href="#主从同步目的" class="headerlink" title="主从同步目的"></a>主从同步目的</h5><blockquote>
+<p>一是为了纯粹的冗余备份, 用于故障恢复保全数据;<br>二是为了提升读性能, 如用从服务器来承担非修改类操作;</p>
+</blockquote>
+<h5 id="主从同步原理"><a href="#主从同步原理" class="headerlink" title="主从同步原理"></a>主从同步原理</h5><p><code>redis</code>支持主从复制, <code>redis</code>的主从结构可以采用一主多从或者级联结构, <code>redis</code>主从复制可以根据是否是全量分为全量同步和增量同步,<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">       /  slave-1  /  slave-2-1</span><br><span class="line">Master -  slave-2--   slave-2-2</span><br><span class="line">       \  slave-3  \  slave-2-3</span><br><span class="line">        \ ...      \  ...</span><br><span class="line">          slave-n     slave-2-n</span><br></pre></td></tr></table></figure></p>
+<h6 id="全量同步"><a href="#全量同步" class="headerlink" title="全量同步"></a>全量同步</h6><p><code>redis</code>全量复制一般发生在<code>slave</code>初始化阶段, 这时<code>slave</code>需要将Master上的所有数据都复制一份, 具体过程如下,</p>
+<ul>
+<li>1.从服务器连接主服务器, 发送<code>sync</code>命令;</li>
+<li>2.主服务器接收到<code>sync</code>命名后, 开始执行<code>bgsave</code>命令生成RDB文件并使用复制积压缓冲区记录此后执行的所有写命令;</li>
+<li>3.主服务器<code>bgsave</code>执行完后, 向所有从服务器发送快照文件, 并在发送期间继续记录被执行的写命令;</li>
+<li>4.从服务器收到快照文件后丢弃所有旧数据, 载入收到的快照;</li>
+<li>5.主服务器快照发送完毕后开始向从服务器发送缓冲区中的写命令;</li>
+<li>6.从服务器完成对快照的载入, 开始接收命令请求, 并执行来自主服务器缓冲区的写命令;</li>
+</ul>
+<p>完成上面几个步骤后就完成了从服务器数据初始化的所有操作, 从服务器此时可以接收来自用户的读请求。</p>
+<blockquote>
+<p>若多个从服务器同时发来<code>sync</code>指令, 主服务器也只会执行一次<code>bgsave</code>, 然后把持久化好的RDB文件发给多个下游;</p>
+</blockquote>
+<h6 id="增量同步"><a href="#增量同步" class="headerlink" title="增量同步"></a>增量同步</h6><p>在redis2.8之前, redis仅支持<code>sync</code>全量同步操作, <code>sync</code>命令是一个非常耗费资源的操作, 为了解决主从服务器断线重来带来的<code>sync</code>重复复制问题, <code>redis</code>从2.8版本开始, 使用<code>psync</code>命令代替<code>sync</code>命令来执行复制时的同步操作。<br><code>psync</code>命令具有完整重同步<code>(full resynchronization)</code>和增量重同步<code>(partial resynchronization)</code>两种模式, 而增量同步策略大大降低了连接断开的恢复成本。增量同步过程如下,</p>
+<ul>
+<li>1.<code>master</code>端为复制流维护一个内存缓冲区<code>(in-memory backlog)</code>, 记录最近发送的复制流命令;</li>
+<li>2.同时, Master和<code>slave</code>之间都维护一个复制偏移量<code>(replication offset)</code>和当前<code>master</code>服务器<code>ID(Masterrun id)</code>。</li>
+<li>3.当网络断开, <code>slave</code>尝试重连时:<ul>
+<li>a. 如果<code>masterID</code>相同(即仍是断网前的<code>master</code>服务器), 并且从断开时到当前时刻的历史命令依然在<code>master</code>的内存缓冲区中存在, 则Master会将缺失的这段时间的所有命令发送给<code>slave</code>执行, 然后复制工作就可以继续执行了;</li>
+<li>b. 否则, 依然需要全量复制操作;</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>增量复制的过程主要是主服务器每执行一个写命令就会向从服务器发送相同的写命令, 从服务器接收并执行收到的写命令。</p>
+</blockquote>
+<p>可见增量重同步功能由以下三个部分构成,</p>
+<ul>
+<li>1.主服务器的复制偏移量<code>(replication offset)</code>和从服务器的复制偏移量;</li>
+<li>2.主服务器的复制积压缓冲区<code>(replication backlog)</code>;</li>
+<li>3.服务器的运行<code>ID(run ID)</code>。</li>
+</ul>
+<p><strong>1.复制偏移量</strong></p>
+<p>执行复制的双方——主服务器和从服务器会分别维护一个复制偏移量,</p>
+<ul>
+<li>主服务器每次向从服务器传播<code>N</code>个字节的数据时, 就将自己的复制偏移量的值加上<code>N</code>;</li>
+<li>从服务器每次收到主服务器传播来的<code>N</code>个字节的数据时, 就将自己的复制偏移量的值加上<code>N</code>;</li>
+</ul>
+<blockquote>
+<p>主从偏移量相同, 则当前主从处于一致状态, 反之则主从状态不一致;</p>
+</blockquote>
+<p>示例分析</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">                          --(网络故障断线  )--&gt; slaveA ( offset=10086 )</span><br><span class="line">                        /</span><br><span class="line">                       /</span><br><span class="line">Master ( offset=10119 )-----(成功发送33字节)--&gt; slaveB ( offset=10119 )</span><br><span class="line">                       \</span><br><span class="line">                        \</span><br><span class="line">                          --(成功发送33字节)--&gt; slaveC ( offset=10119 )</span><br></pre></td></tr></table></figure>
+<p>如上示例, 假设从服务器<code>A</code>在断线之后就立即重新连接主服务器成功, 那么接下来, 从服务器将向主服务器发送<code>psync</code>命令, 报告从服务器A当前的复制偏移量为<code>10086</code>, 那么这时, 主服务器应该对从服务器执行完整重同步还是部分重同步呢？如果执行部分重同步的话, 主服务器又如何补偿从服务器<code>A</code>在断线期间丢失的那部分数据呢？以上问题的答案都和复制积压缓冲区有关。</p>
+<p><strong>2.复制积压缓冲区</strong><br>复制积压缓冲区是由主服务器维护的一个固定长度<code>(fixed-size)</code>先进先出<code>(FIFO)</code>队列, 默认大小为<code>1MB</code>。</p>
+<p>和普通先进先出队列随着元素的增加和减少而动态调整长度不同, 固定长度先进先出队列的长度是固定的, 当入队元素的数量大于队列长度时, 最先入队的元素会被弹出, 而新元素会被放入队列。</p>
+<p>当主服务器向从服务器发送命令时, 它不仅会将写命令发送给所有从服务器, 还会将写命令入队到复制积压缓冲区里面, 示意图,</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">          --(向从服务器发送命令)--&gt; slaveA</span><br><span class="line">        /</span><br><span class="line">       /</span><br><span class="line">Master -----(向从服务器发送命令)--&gt; slave...</span><br><span class="line">       \</span><br><span class="line">        \</span><br><span class="line">          --(同步将命令写入队列)--&gt; | 复制积压缓冲区队列 |</span><br></pre></td></tr></table></figure>
+<p>因此, 主服务器的复制积压缓冲区里面会保存着一部分最近发送的写命令, 并且复制积压缓冲区会为队列中的每个字节记录相应的复制偏移量, 就像下表所示的那样,</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">|偏移量| 10086 | 10087 | 10088 | 10089 |</span><br><span class="line">|字节值|   &apos;*&apos; |   5   | &apos;\r&apos;  | &apos;\n&apos;  |</span><br></pre></td></tr></table></figure>
+<p>当从服务器重新连上主服务器时, 从服务器会通过<code>psync</code>命令将自己的复制偏移量offset发送给主服务器, 主服务器会根据这个复制偏移量来决定对从服务器执行何种同步操作:</p>
+<blockquote>
+<p>如果<code>offset</code>偏移量之后的数据(也即是偏移量<code>offset+1</code>开始的数据)仍然存在于复制积压缓冲区里面, 那么主服务器将对从服务器执行部分重同步操作;</p>
+</blockquote>
+<blockquote>
+<p>相反, 如果<code>offset</code>偏移量之后的数据已经不存在于复制积压缓冲区, 那么主服务器将对从服务器执行完整重同步操作。</p>
+</blockquote>
+<p><strong>根据需要调整复制积压缓冲区的大小</strong></p>
+<p><code>redis</code>为复制积压缓冲区设置的默认大小为<code>1MB</code>, 如果主服务器需要执行大量写命令, 又或者主从服务器断线后重连接所需的时间比较长, 那么这个大小也许并不合适。如果复制积压缓冲区的大小设置得不恰当, 那么<code>psync</code>命令的复制重同步模式就不能正常发挥作用, 因此, 正确估算和设置复制积压缓冲区的大小非常重要。<br>复制积压缓冲区的最小大小可以根据公式<code>second*write_size_per_second</code>来估算:</p>
+<blockquote>
+<p>其中<code>second</code>为从服务器断线后重新连接上主服务器所需的平均时间(以秒计算);</p>
+</blockquote>
+<blockquote>
+<p>而<code>write_size_per_second</code>则是主服务器平均每秒产生的写命令数据量(协议格式的写命令的长度总和);</p>
+</blockquote>
+<p>例如, 如果主服务器平均每秒产生<code>1MB</code>的写数据, 而从服务器断线之后平均要<code>5秒</code>才能重新连接上主服务器, 那么复制积压缓冲区的大小就不能低于<code>5MB</code>。<br>为了安全起见, 可以将复制积压缓冲区的大小设为<code>2*second*write_size_per_second</code>, 这样可以保证绝大部分断线情况都能用部分重同步来处理。<br>可以根据实际需要, 修改配置文件中的<code>repl-backlog-size</code>选项来修改复制积压缓冲区的大小;</p>
+<p><strong>3.服务器运行ID</strong><br>除了复制偏移量和复制积压缓冲区之外, 实现部分重同步还需要用到服务器运行<code>ID(run ID)</code>:</p>
+<blockquote>
+<p>每个<code>redis</code>服务器, 不论主服务器还是从服务, 都会有自己的运行<code>ID</code>;</p>
+</blockquote>
+<blockquote>
+<p>运行<code>ID</code>在服务器启动时自动生成, 由40个随机的十六进制字符组成, 例如<code>53b9b28df8042fdc9ab5e3fcbbbabff1d5dce2b3</code>;</p>
+</blockquote>
+<p>当从服务器对主服务器进行初次复制时, 主服务器会将自己的运行<code>ID</code>传送给从服务器, 而从服务器则会将这个运行<code>ID</code>保存起来(注意哦, 是从服务器保存了主服务器的<code>ID</code>)。</p>
+<p>当从服务器断线并重新连上一个主服务器时, 从服务器将向当前连接的主服务器发送之前保存的运行<code>ID</code>:</p>
+<blockquote>
+<p>如果从服务器保存的运行<code>ID</code>和当前连接的主服务器的运行<code>ID</code>相同, 那么说明从服务器断线之前复制的就是当前连接的这个主服务器, 主服务器可以继续尝试执行部分重同步操作;</p>
+</blockquote>
+<blockquote>
+<p>相反地, 如果从服务器保存的运行<code>ID</code>和当前连接的主服务器的运行<code>ID</code>并不相同, 那么说明从服务器断线之前复制的主服务器并不是当前连接的这个主服务器, 主服务器将对从服务器执行完整重同步操作。</p>
+</blockquote>
+<p><strong>psync命令</strong><br><code>psync</code>命令的调用方法有两种,</p>
+<blockquote>
+<p>如果从服务器以前没有复制过任何主服务器, 或者之前执行过<code>SLAVEOF NO ONE</code>命令, 那么从服务器在开始一次新的复制时将向主服务器发送<code>psync ? -1</code>命令, 主动请求主服务器进行完整重同步(因为这时不可能执行部分重同步);</p>
+</blockquote>
+<blockquote>
+<p>相反地, 如果从服务器已经复制过某个主服务器, 那么从服务器在开始一次新的复制时将向主服务器发送<code>psync &lt;runid&gt; &lt;offset&gt;</code>命令: 其中<code>runid</code>是上一次复制的主服务器的运行<code>ID</code>, 而<code>offset</code>则是从服务器当前的复制偏移量, 接收到这个命令的主服务器会通过这两个参数来判断应该对从服务器执行哪种同步操作。</p>
+</blockquote>
+<h5 id="主从同步策略"><a href="#主从同步策略" class="headerlink" title="主从同步策略"></a>主从同步策略</h5><p><code>redis</code> 的复制是异步进行的, <code>redis3.0</code>开始提供的<code>wait</code>指令可以让异步复制变身同步复制, 确保系统的强一致性,<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&gt; set key value</span><br><span class="line">OK</span><br><span class="line">&gt; wait 1 0</span><br><span class="line">(integer) 1</span><br></pre></td></tr></table></figure></p>
+<p>wait 提供两个参数, 第一个参数是从库的数量<code>N</code>, 第二个参数是时间<code>t</code>, 以毫秒为单位。它表示等待<code>wait</code>指令之前的所有写操作同步到<code>N</code>个从库 (也就是确保<code>N</code>个从库的同步没有滞后), 最多等待时间<code>t</code>。如果时间<code>t=0</code>, 表示无限等待直到<code>N</code>个从库同步完成达成一致。</p>
+<p>假设此时出现了网络分区,<code>wait</code>指令第二个参数时间<code>t=0</code>, 主从同步无法继续进行, <code>wait</code>指令会永远阻塞, <code>redis</code>服务器将丧失可用性。</p>
+<p><strong>主从刚刚连接的时候, 进行全量同步; 全同步结束后, 进行增量同步。当然, 如果有需要, slave在任何时候都可以发起全量同步。redis策略是, 无论如何, 首先会尝试进行增量同步, 如不成功, 要求从机进行全量同步。</strong></p>
+<h5 id="主从同步过程"><a href="#主从同步过程" class="headerlink" title="主从同步过程"></a>主从同步过程</h5><p>从服务器每次启动时, 会立即通过<code>slaveof master-host  master-port</code> 向主服务器发起主从复制同步请求; <code>SLAVEOF</code>命令是一个异步命令, 在完成<code>master-host</code>属性和<code>master-port</code>属性的设置工作之后, 从服务器将向发送<code>SLAVEOF</code>命令的客户端返回<code>OK</code>, 表示复制指令已经被接收, 而实际的复制工作将在<code>OK</code>返回之后才真正开始执行。从服务器开始发起主从复制请求到开始复制主要经历了如下7个步骤,</p>
+<p><strong>步骤1</strong>: 设置主服务器的地址和端口, 通过<code>slaveof</code>指令发起主从复制同步请求,<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:12345&gt; SLAVEOF 127.0.0.1 6379</span><br><span class="line">OK</span><br></pre></td></tr></table></figure></p>
+<p><strong>步骤2</strong>: 建立套接字连接</p>
+<p>在SLAVEOF命令执行之后, 从服务器将根据命令所设置的IP地址和端口, 创建连向主服务器的套接字连接, 如果从服务器创建的套接字能成功连接(connect)到主服务器, 那么从服务器将为这个套接字关联一个专门用于处理复制工作的文件事件处理器, 这个处理器将负责执行后续的复制工作, 比如接收RDB文件, 以及接收主服务器传播来的写命令, 诸如此类。而主服务器在接受(accept)从服务器的套接字连接之后, 将为该套接字创建相应的客户端状态, 并将从服务器看作是一个连接到主服务器的客户端来对待, 这时从服务器将同时具有服务器(server)和客户端(client)两个身份: 从服务器可以向主服务器发送命令请求, 而主服务器则会向从服务器返回命令回复。</p>
+<p><strong>步骤3</strong>: 发送PING命令</p>
+<p>从服务器成为主服务器的客户端之后, 做的第一件事就是向主服务器发送一个PING命令。</p>
+<blockquote>
+<p>通过发送PING命令检查套接字的读写状态;</p>
+</blockquote>
+<blockquote>
+<p>通过PING命令可以检查主服务器能否正常处理命令。</p>
+</blockquote>
+<p>从服务器在发送PING命令之后可能遇到以下三种情况:</p>
+<blockquote>
+<p>主服务器向从服务器返回了一个命令回复, 但从服务器却不能在规定的时限内读取命令回复的内容(timeout), 说明网络连接状态不佳, 从服务器将断开并重新创建连向主服务器的套接字;</p>
+</blockquote>
+<blockquote>
+<p>如果主服务器返回一个错误, 那么表示主服务器暂时没有办法处理从服务器的命令请求, 从服务器也将断开并重新创建连向主服务器的套接字;</p>
+</blockquote>
+<blockquote>
+<p>如果从服务器读取到”PONG”回复, 那么表示主从服务器之间的网络连接状态正常, 那就继续执行下面的复制步骤。</p>
+</blockquote>
+<p><strong>步骤4</strong>: 身份验证</p>
+<p>从服务器在收到主服务器返回的”PONG”回复之后, 下一步要做的就是决定是否进行身份验证:</p>
+<p>如果从服务器设置了masterauth选项, 那么进行身份验证。否则不进行身份认证;<br>在需要进行身份验证的情况下, 从服务器将向主服务器发送一条AUTH命令, 命令的参数为从服务器masterauth选项的值。</p>
+<p>从服务器在身份验证阶段可能遇到的情况有以下几种:</p>
+<blockquote>
+<p>主服务器没有设置requirepass选项, 从服务器没有设置masterauth,那么就继续后面的复制工作;</p>
+</blockquote>
+<blockquote>
+<p>如果从服务器的通过AUTH命令发送的密码和主服务器requirepass选项所设置的密码相同, 那么也继续后面的工作, 否则返回错误invaild password;</p>
+</blockquote>
+<blockquote>
+<p>如果主服务器设置了requireoass选项, 但从服务器没有设置masterauth选项, 那么服务器将返回NOAUTH错误。反过来如果主服务器没有设置requirepass选项, 但是从服务器却设置了materauth选项, 那么主服务器返回no password is set错误;</p>
+</blockquote>
+<p>所有错误到只有一个结果: 中止目前的复制工作, 并从创建套接字开始重新执行复制, 直到身份验证通过, 或者从服务器放弃执行复制为止。</p>
+<p><strong>步骤5</strong>: 发送端口信息</p>
+<p>身份验证步骤之后, 从服务器将执行命令<code>REPLCONF listening-port &lt;port-number&gt;</code>, 向主服务器发送从服务器的监听端口号。</p>
+<p>主服务器在接收到这个命令之后, 会将端口号记录在从服务器所对应的客户端状态的<code>slave_listening_port</code>属性,</p>
+<blockquote>
+<p><code>slave_listening_port</code>属性目前唯一的作用就是在主服务器执行<code>INFO replication</code>命令时打印出从服务器的端口号。</p>
+</blockquote>
+<p><strong>步骤6</strong>: 同步</p>
+<p>在这一步, 从服务器将向主服务器发送<code>psync</code>命令, 执行同步操作, 并将自己的数据库更新至主服务器数据库当前所处的状态。</p>
+<p>需要注意的是在执行同步操作前, 只有从服务器是主服务器的客户端。但是执行同步操作之后, 主服务器也会成为从服务器的客户端,</p>
+<blockquote>
+<p>如果<code>psync</code>命令执行的是完整同步操作, 那么主服务器只有成为了从服务器的客户端才能将保存在缓冲区中的写命令发送给从服务器执行;</p>
+</blockquote>
+<blockquote>
+<p>如果<code>psync</code>命令执行的是部分同步操作, 那么主服务器只有成为了从服务器的客户端才能将保存在复制积压缓冲区中的写命令发送给从服务器执行;</p>
+</blockquote>
+<p><strong>步骤7</strong>: 命令传播</p>
+<p>当完成了同步之后, 主从服务器就会进入命令传播阶段, 这时主服务器只要一直将自己执行的写命令发送给从服务器, 而从服务器只要一直接收并执行主服务器发来的写命令, 就可以保证主从服务器一直保持一致了。</p>
+<p><strong>心跳检测</strong><br>在命令传播阶段, 从服务器默认会以每秒一次的频率, 向主服务器发送命令: <code>REPLCONF ACK &lt;replication_offset&gt;</code></p>
+<p>其中<code>replication_offset</code>是从服务器当前的复制偏移量。</p>
+<p>发送<code>REPLCONF ACK</code>命令对于主从服务器有三个作用:</p>
+<blockquote>
+<p>检测主从服务器的网络连接状态;</p>
+</blockquote>
+<blockquote>
+<p>辅助实现min-slaves选项;</p>
+</blockquote>
+<blockquote>
+<p>检测命令丢失。</p>
+</blockquote>
+<p>检测主从服务器的网络连接状态</p>
+<p>如果主服务器超过一秒钟没有收到从服务器发来的<code>REPLCONF ACK</code>命令, 那么主服务器就知道主从服务器之间的连接出现问题了。</p>
+<p>通过向主服务器发送<code>INFO replication</code>命令, 在列出的从服务器列表的<code>lag</code>一栏中, 我们可以看到相应从服务器最后一次向主服务器发送<code>REPLCONF ACK</code>命令距离现在过了多少秒;</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">10.1.195.19:8001&gt; info replication</span><br><span class="line"><span class="meta">#</span><span class="bash"> Replication</span></span><br><span class="line">role:master</span><br><span class="line">connected_slaves:1</span><br><span class="line">slave0:ip=172.28.0.1,port=6379,state=online,offset=0,lag=1</span><br><span class="line">master_replid:10c63aebd8f09c749d1b26eccb52856b6d894292</span><br><span class="line">master_replid2:0000000000000000000000000000000000000000</span><br><span class="line">master_repl_offset:0</span><br><span class="line">second_repl_offset:-1</span><br><span class="line">repl_backlog_active:1</span><br><span class="line">repl_backlog_size:1048576</span><br><span class="line">repl_backlog_first_byte_offset:1</span><br><span class="line">repl_backlog_histlen:0</span><br><span class="line">10.1.195.19:8001&gt;</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash">刚刚发送过 REPLCONF ACK命令</span></span><br><span class="line">slave1:ip=171.28.0.1,port=6379,state=online,offset=197,lag=15</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash">15秒之前发送过REPLCONF ACK命令</span></span><br><span class="line"></span><br><span class="line">master_repl_offset:211</span><br><span class="line">repl_backlog_active:1</span><br><span class="line">repl_backlog_size:1048576</span><br><span class="line">repl_backlog_first_byte_offset:2</span><br><span class="line">repl_backlog_histlen:210</span><br></pre></td></tr></table></figure>
+<p>在一般情况下, <code>lag</code>的值应该在0秒或者1秒之间跳动, 如果超过1秒的话, 那么说明主从服务器之间的连接出现了故障。</p>
+<p><strong>辅助实现min-slaves配置选项</strong></p>
+<p><code>redis</code>的<code>min-slaves-to-write</code>和<code>min-slaves-max-lag</code>两个选项可以防止主服务器在不安全的情况下执行写命令。</p>
+<p>举个例子, 如果我们向主服务器提供以下设置:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">min-slaves-to-write 3</span><br><span class="line">min-slaves-max-lag 10</span><br></pre></td></tr></table></figure></p>
+<p>那么在从服务器的数量少于3个, 或者三个从服务器的延迟<code>(lag)</code>值都大于或等于10秒时, 主服务器将拒绝执行写命令, 这里的延迟值就是上面提到的<code>INFO replication</code>命令的<code>(lag)</code>值。</p>
+<p><strong>检测命令丢失</strong></p>
+<p>我们从命令: <code>REPLCONF ACK &lt;replication_offset&gt;</code>就可以知道, 每发送一次这个命令从服务器都会向主服务器报告一次自己的复制偏移量。那此时尽管主服务器发送给从服务器的<code>SET key value</code>丢失了。也无所谓, 主服务器马上就知道了。</p>
+<h5 id="同步实践"><a href="#同步实践" class="headerlink" title="同步实践"></a>同步实践</h5><p><strong>0.环境准备</strong><br>通过构建如下主从级联架构来进一步实践<code>redis</code>主从复制同步机制,<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">master---&gt; slave01 --&gt; slave02</span><br></pre></td></tr></table></figure></p>
+<p>即<code>master</code>为主服务器, <code>slave01</code>为<code>master</code>从服务器，同时也是<code>slave02</code>主服务器， 由于要构建多个<code>redis container</code>环境，为方便起见通过<code>docker-compose</code>来实践,<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">version: '3'</span><br><span class="line"></span><br><span class="line">services:</span><br><span class="line">  master-redis:</span><br><span class="line">    image: redis</span><br><span class="line">    container_name: master</span><br><span class="line">    ports:</span><br><span class="line">      - "8001:6379"</span><br><span class="line">    volumes:</span><br><span class="line">      - ~/workbench/docker/docker-compose/redis/conf/redis.conf:/etc/redis/redis.conf</span><br><span class="line">    entrypoint: ["redis-server", "/etc/redis/redis.conf"]</span><br><span class="line"></span><br><span class="line">  slave-redis-01:</span><br><span class="line">    image: redis</span><br><span class="line">    container_name: slave01</span><br><span class="line">    ports:</span><br><span class="line">      - "8002:6379"</span><br><span class="line">    volumes:</span><br><span class="line">      - ~/workbench/docker/docker-compose/redis/conf/redis.conf:/etc/redis/redis.conf</span><br><span class="line">    entrypoint: ["redis-server", "/etc/redis/redis.conf"]</span><br><span class="line"></span><br><span class="line">  slave-redis-02:</span><br><span class="line">    image: redis</span><br><span class="line">    container_name: slave02</span><br><span class="line">    ports:</span><br><span class="line">      - "8003:6379"</span><br><span class="line">    volumes:</span><br><span class="line">      - ~/workbench/docker/docker-compose/redis/conf/redis.conf:/etc/redis/redis.conf</span><br><span class="line">    entrypoint: ["redis-server", "/etc/redis/redis.conf"]</span><br></pre></td></tr></table></figure></p>
+<p>将<code>redis.conf</code>配置做如下修改,</p>
+<ul>
+<li>将<code>bind 127.0.0.1</code> 修改为<code>bind 0.0.0.0</code>;</li>
+<li>将<code>daemonize yes</code> 修改为<code>daemonize no</code>, 让<code>redis</code>运行在前台;</li>
+<li>将<code>protected-mode yes</code>修改为<code>protected-mode no</code>, 在<code>protected-mode yes</code>模式下需要设置密码才能远程访问，否则<code>redis</code>只接受本地访问;</li>
+</ul>
+<p><strong>1.发送<code>slaveof</code>指令,请求主从同步</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">➜  redis docker-compose up -d</span><br><span class="line">Creating network "redis_default" with the default driver</span><br><span class="line">Creating master  ... done</span><br><span class="line">Creating slave02 ... done</span><br><span class="line">Creating slave01 ... done</span><br><span class="line">➜  redis docker-compose ps</span><br><span class="line"> Name                Command               State           Ports</span><br><span class="line">-------------------------------------------------------------------------</span><br><span class="line">master    redis-server /etc/redis/re ...   Up      0.0.0.0:8001-&gt;6379/tcp</span><br><span class="line">slave01   redis-server /etc/redis/re ...   Up      0.0.0.0:8002-&gt;6379/tcp</span><br><span class="line">slave02   redis-server /etc/redis/re ...   Up      0.0.0.0:8003-&gt;6379/tcp</span><br><span class="line">➜  redis ifconfig |grep inet |grep -v 127.0.0.1</span><br><span class="line">        inet6 ::1 prefixlen 128</span><br><span class="line">        inet6 fe80::1%lo0 prefixlen 64 scopeid 0x1</span><br><span class="line">        inet6 fe80::475:d879:2a90:ac35%en0 prefixlen 64 secured scopeid 0x5</span><br><span class="line">        inet 10.1.195.19 netmask 0xffffff00 broadcast 10.1.195.255</span><br></pre></td></tr></table></figure>
+<p>上述命令，分别启动了一台<code>master</code>主机，两台<code>slave01</code>,<code>slave02</code>从机, 并得知当前宿主机ip为<code>10.1.195.19</code></p>
+<p>登录从机发送<code>slaveof</code>指令，开始主从复制同步,<br>主机<code>master</code> 执行命令,<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">➜  docker exec -it master redis-cli -h 10.1.195.19 -p 8001</span><br><span class="line">10.1.195.19:8001&gt; flushdb</span><br><span class="line">OK</span><br><span class="line">10.1.195.19:8001&gt; hmset info name mike city shanghai code 110</span><br><span class="line">OK</span><br><span class="line">10.1.195.19:8001&gt; hgetall info</span><br><span class="line">1) "name"</span><br><span class="line">2) "mike"</span><br><span class="line">3) "city"</span><br><span class="line">4) "shanghai"</span><br><span class="line">5) "code"</span><br><span class="line">6) "110"</span><br><span class="line">10.1.195.19:8001&gt;</span><br></pre></td></tr></table></figure></p>
+<p>从机<code>slave01</code> 查询命令,<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">➜  docker exec -it slave01 redis-cli -h 10.1.195.19 -p 8002</span><br><span class="line">10.1.195.19:8002&gt; slaveof no one</span><br><span class="line">OK</span><br><span class="line">10.1.195.19:8002&gt; flushdb</span><br><span class="line">OK</span><br><span class="line">10.1.195.19:8002&gt; slaveof 10.1.195.19 8001</span><br><span class="line">OK</span><br><span class="line">10.1.195.19:8002&gt; scan 0</span><br><span class="line">1) "0"</span><br><span class="line">2) 1) "info"</span><br><span class="line">10.1.195.19:8002&gt; hgetall info</span><br><span class="line">1) "name"</span><br><span class="line">2) "mike"</span><br><span class="line">3) "city"</span><br><span class="line">4) "shanghai"</span><br><span class="line">5) "code"</span><br><span class="line">6) "110"</span><br><span class="line">10.1.195.19:8002&gt;</span><br></pre></td></tr></table></figure></p>
+<p>从机<code>slave02</code>查询命令,<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">➜  docker exec -it slave02 redis-cli -h 10.1.195.19 -p 8003</span><br><span class="line">10.1.195.19:8003&gt; slaveof no one</span><br><span class="line">OK</span><br><span class="line">10.1.195.19:8003&gt; flushdb</span><br><span class="line">OK</span><br><span class="line">10.1.195.19:8003&gt; slaveof 10.1.195.19 8002</span><br><span class="line">OK</span><br><span class="line">10.1.195.19:8003&gt; hgetall info</span><br><span class="line">1) "name"</span><br><span class="line">2) "mike"</span><br><span class="line">3) "city"</span><br><span class="line">4) "shanghai"</span><br><span class="line">5) "code"</span><br><span class="line">6) "110"</span><br><span class="line">10.1.195.19:8003&gt;</span><br></pre></td></tr></table></figure></p>
+<ul>
+<li><code>docker exec -it ${docker-name} redis-cli -h ${localhost-ip} -p ${port}</code>命令登录到各个<code>redis</code>实例服务;</li>
+<li><code>slaveof no one</code>命令将当前<code>redis</code>实例的主从服务;</li>
+<li>从上述实例可见, 通过在<code>master</code>主机中执行<code>hmset</code>命令，相应的从机以及级联从机也都同步了主机的执行命令, 上述示例显示主从复制同步成功;</li>
+</ul>
+<p>从机配置默认开启了只读模式<code>slave-read-only yes</code>,所以对从机进行修改操作是不许可的，也不建议这么做;<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">10.1.195.19:8003&gt; flushdb</span><br><span class="line">(error) READONLY You can't write against a read only replicx</span><br><span class="line">10.1.195.19:8003&gt;</span><br></pre></td></tr></table></figure></p>
+<p>当对主机操作<code>flushdb</code>时，可见从机也执行了<code>flushdb</code>命令<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">10.1.195.19:8001&gt; flushdb</span><br><span class="line">OK</span><br><span class="line">10.1.195.19:8001&gt;</span><br><span class="line"></span><br><span class="line">10.1.195.19:8002&gt; scan 0</span><br><span class="line">1) "0"</span><br><span class="line">2) (empty list or set)</span><br><span class="line">10.1.195.19:8002&gt;</span><br><span class="line"></span><br><span class="line">10.1.195.19:8003&gt; scan 0</span><br><span class="line">1) "0"</span><br><span class="line">2) (empty list or set)</span><br><span class="line">10.1.195.19:8003&gt;</span><br></pre></td></tr></table></figure></p>
+<p>当关闭<code>master</code>服务后，对从机服务无影响， 所以从机服务的启动顺序及服务提供 与<code>master</code>主机服务是否已启动及启动顺序无关;</p>
+<h5 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h5><ul>
+<li><code>redis</code>的主从同步是异步进行的, 这意味着主从同步不会影响主逻辑, 也不会降低<code>redis</code>的处理性能。</li>
+<li>主从架构中, 可以考虑关闭主服务器的数据持久化功能, 只让从服务器进行持久化, 这样可以提高主服务器的处理性能。</li>
+<li>在主从架构中, 从服务器通常被设置为只读模式, 这样可以避免从服务器的数据被误修改。但是从服务器仍然可以接受<code>config</code>等指令, 所以还是不应该将从服务器直接暴露到不安全的网络环境中。如果必须如此, 那可以考虑给重要指令进行重命名, 来避免命令被外人误执行。</li>
+<li>主从同步分为<code>全量同步</code>和<code>增量同步</code>, 文中对<code>全量同步</code>和<code>增量同步</code>原理,实现过程进行了阐述分析;</li>
+<li>进一步阐述了主从不同执行策略, 即从机初始连接主机时，先进行增量同步，若增量同步失败，则进行全量同步， 同时可以利用<code>wait</code>指令 将redis主从同步的异步行为转变为同步行为;</li>
+<li>分析了主从同步过程， 主从同步开始至复制，大致进来7个过程, 1.发起<code>slaveof</code>指令;2.建立套接字连接;3.发送ping指令测试连接状态;4.身份认证;5.发送端口信息;6.同步初始化阶段,从机载入主机RDB,准备接受主机命令;7.增量同步;</li>
+<li>通过docker-compose 构建<code>主-从-从</code>架, 深入实践分析<code>redis</code>主从复制同步过程;</li>
+</ul>
+  
+	</div>
+		<div style="padding: 10px 44px 30px 44px;" >
+<div style="border: 1px dashed #e0e0e0; padding: 10px 10px 10px 10px; background-color: #fffeee; background-repeat: no-repeat; background-attachment: scroll; background-position: 1% 50%; -moz-background-size: auto auto; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">
+<div style="float:left;margin-top:0px;">
+<img src="/img/weixin.jpg" width="125px" height="125px" style="border:1px solid #ccc; margin: 6px 5px 0px 0px"/>
+</div>
+<div>
+ <p style="margin-top:0px;">作者署名：<b><a target="_blank" href="http://www.grdtechs.com/">朴实的一线攻城狮</a></b>
+<br />本文标题：<b><a href="/2018/10/15/redis-17-replication/" target="_blank" title="redis专题17 主从同步系列问题">redis专题17 主从同步系列问题</a></b> 
+<br />本文出处：<b><a href="/2018/10/15/redis-17-replication/" target="_blank" title="redis专题17 主从同步系列问题">http://researchlab.github.io/2018/10/15/redis-17-replication/</a></b>
+<br />版权声明：本文由<b><a href="/about" target="_blank" title="Lee Hong">Lee Hong</a></b>创作和发表,采用<b>署名(BY)</b>-<b>非商业性使用(NC)</b>-<b>相同方式共享(SA)</b>国际许可协议进行许可,转载请注明作者及出处, 否则保留追究法律责任的权利。 </p>
+</div>
+</div>
+</div>
+
+   	       
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/redis专题/">redis专题</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/redis/">redis</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	<div class="share-jiathis">
+	  
+<div class="jiathis_style_24x24">
+	<a class="jiathis_button_weixin"></a>
+	<a class="jiathis_button_tsina"></a>
+	<a class="jiathis_button_tqq"></a>
+	<a class="jiathis_button_qzone"></a>
+    <a class="jiathis_button_googleplus"></a>
+	<a class="jiathis_button_douban"></a>
+	<a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+    var jiathis_config={
+    data_track_clickback:true,
+    sm:"copy,renren,cqq",
+    pic:"",
+    summary:"",
+    
+  </script> 
+<script type="text/javascript" src="//v3.jiathis.com/code/jia.js?uid=
+2084050" charset="utf-8"></script>      
+
+
+	 </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+
+<div class="next">
+<a href="/2018/10/13/redis-16-storage-solution-opt/"  title="redis专题16 数据持久化实践">
+ <strong>下一篇：</strong><br/> 
+ <span>redis专题16 数据持久化实践
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+<section id="comments" class="comment">
+	<div class="ds-thread" data-thread-key="2018/10/15/redis-17-replication/" data-title="redis专题17 主从同步系列问题" data-url="http://researchlab.github.io/2018/10/15/redis-17-replication/"></div>
+</section>
+
+
+</div>  
+
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+<div id="asidepart">
+
+  <div class="widget tag">
+<!--<hr noshade color="#ccc">-->
+<!-- <p style="text-align:center">Mike.Lee</p> -->
+<p margin="0" style="text-align:center">
+<a class="ahref" href="http://researchlab.github.io/about/">
+<img id="aboutpic"  src="/img/qzly.png" alt="@全栈炼狱之路" height="200" width="200" style="box-shadow: 0px 0px 2px 2px #9edeff;border-radius: 8px;" >
+</a></p>
+<p style="text-align:center"><font size="2" color="grey">关注微信公众号 @全栈炼狱之路</font></p>
+<div style="display:block; margin-top:10px; padding: 0px 4px 4px 0; border-top: dashed 1px #ccc; text-align:left;"></div>
+<script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<div style="float:left;position:absolute;"><font size="2" >总访问:<span id="busuanzi_value_site_pv"></span>次</font></div>
+<div style="float:right;"><font size="2" >总访客:<span id="busuanzi_value_site_uv"></span>人</font></div>
+
+<div style="margin-top:30px; padding: 5px 4px 4px 0; border-top: dashed 1px #ccc; text-align:left;"></div>
+</div>
+
+
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/DevOps/" title="DevOps">DevOps<sup>5</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Hexo/" title="Hexo">Hexo<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/algorithm/" title="algorithm">algorithm<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/docker-practice/" title="docker-practice">docker-practice<sup>8</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/go-bootcamp/" title="go-bootcamp">go-bootcamp<sup>6</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/go-pattern/" title="go-pattern">go-pattern<sup>3</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/golang/" title="golang">golang<sup>22</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/javascript/" title="javascript">javascript<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/php/" title="php">php<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/redis专题/" title="redis专题">redis专题<sup>17</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/golang/" title="golang">golang<sup>25</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/redis/" title="redis">redis<sup>17</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/docker/" title="docker">docker<sup>8</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/setcookie/" title="setcookie">setcookie<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/concurrency/" title="concurrency">concurrency<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/cache/" title="cache">cache<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mysql/" title="mysql">mysql<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Hexo/" title="Hexo">Hexo<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Blog/" title="Blog">Blog<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/getcookie/" title="getcookie">getcookie<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/rpc/" title="rpc">rpc<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/ticker/" title="ticker">ticker<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/gin/" title="gin">gin<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/submodule/" title="submodule">submodule<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/form/" title="form">form<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/post/" title="post">post<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/reflect/" title="reflect">reflect<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/net-http/" title="net/http">net/http<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/time/" title="time">time<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/xorm/" title="xorm">xorm<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="http://blog.csdn.net/xiaolongwang2010" target="_blank" title="小龙王2010csdn技术博客">Linux/c/c++</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  
+
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+  <iframe width="100%" height="550" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=550&fansRow=1&ptype=1&speed=0&skin=1&isTitle=1&noborder=1&isWeibo=1&isFans=1&uid=5141203275&verifier=a533edf5&dpc=1"></iframe>
+
+
+</aside>
+</div>
+
+    </div>
+    <footer><div id="footer" >
+	
+	
+	<div class="social-font" class="clearfix">
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/researchlab/lightman" target="_blank" title="lightman">lightman</a> ©2016 - 2018 
+		
+		<a href="/about" target="_blank" title="Lee Hong">Lee Hong</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+
+
+<script type="text/javascript">
+  var duoshuoQuery = {short_name:"gamedp"};
+  (function() {
+    var ds = document.createElement('script');
+    ds.type = 'text/javascript';ds.async = true;
+    ds.src = '//static.duoshuo.com/embed.js';
+    ds.charset = 'UTF-8';
+    (document.getElementsByTagName('head')[0] 
+    || document.getElementsByTagName('body')[0]).appendChild(ds);
+  })();
+</script> 
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>
