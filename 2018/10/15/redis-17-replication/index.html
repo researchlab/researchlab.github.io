@@ -19,7 +19,7 @@
 <meta property="og:site_name" content="一线攻城狮">
 <meta property="og:description" content="在生产环境中需要用到redis做数据持久化落地数据库时,  一般应搭建专属的redis集群来避免单点故障及单点读写性能问题, 如不是重度redis用户, 数据量压力不是特别大时, 也可以考虑采用redis主从同步架构代替, 本文将试图对redis主从同步原理, 步骤, 配置项, 实践等方面进行学习总结;">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2018-10-25T11:41:45.345Z">
+<meta property="og:updated_time" content="2018-10-26T02:07:39.969Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="redis专题17 主从同步系列问题">
 <meta name="twitter:description" content="在生产环境中需要用到redis做数据持久化落地数据库时,  一般应搭建专属的redis集群来避免单点故障及单点读写性能问题, 如不是重度redis用户, 数据量压力不是特别大时, 也可以考虑采用redis主从同步架构代替, 本文将试图对redis主从同步原理, 步骤, 配置项, 实践等方面进行学习总结;">
@@ -290,6 +290,7 @@
 <p>从机配置默认开启了只读模式<code>slave-read-only yes</code>,所以对从机进行修改操作是不许可的, 也不建议这么做;<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">10.1.195.19:8003&gt; flushdb</span><br><span class="line">(error) READONLY You can't write against a read only replicx</span><br><span class="line">10.1.195.19:8003&gt;</span><br></pre></td></tr></table></figure></p>
 <p>当对主机操作<code>flushdb</code>时, 可见从机也执行了<code>flushdb</code>命令<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">10.1.195.19:8001&gt; flushdb</span><br><span class="line">OK</span><br><span class="line">10.1.195.19:8001&gt;</span><br><span class="line"></span><br><span class="line">10.1.195.19:8002&gt; scan 0</span><br><span class="line">1) "0"</span><br><span class="line">2) (empty list or set)</span><br><span class="line">10.1.195.19:8002&gt;</span><br><span class="line"></span><br><span class="line">10.1.195.19:8003&gt; scan 0</span><br><span class="line">1) "0"</span><br><span class="line">2) (empty list or set)</span><br><span class="line">10.1.195.19:8003&gt;</span><br></pre></td></tr></table></figure></p>
 <p>当关闭<code>master</code>服务后, 对从机服务无影响,  所以从机服务的启动顺序及服务提供 与<code>master</code>主机服务是否已启动及启动顺序无关;</p>
+<p>当然上面<code>docker-compose</code>配置也可以直接配置<code>slaveof</code>参数， 就不需要手动去发起命令, 可参看 <a href="https://github.com/researchlab/dockerenv/tree/master/docker-compose-redis-replication" target="_blank" rel="noopener">docker-compose-redis-replication</a></p>
 <h5 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h5><ul>
 <li><code>redis</code>的主从同步是异步进行的, 这意味着主从同步不会影响主逻辑, 也不会降低<code>redis</code>的处理性能。</li>
 <li>主从架构中, 可以考虑关闭主服务器的数据持久化功能, 只让从服务器进行持久化, 这样可以提高主服务器的处理性能。</li>
