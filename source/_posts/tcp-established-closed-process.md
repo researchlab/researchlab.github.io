@@ -54,3 +54,4 @@ Reference
 * * * 
 [1] [Linux网络编程——浅谈 TCP 三次握手和四次挥手](https://blog.csdn.net/tennysonsky/article/details/45622395)
 [2] [关于FIN_WAIT2](https://huoding.com/2016/09/05/542)
+[3] [一个TCP FIN_WAIT2状态细节引发的感慨](https://blog.csdn.net/dog250/article/details/81256550)
