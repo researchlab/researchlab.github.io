@@ -23,7 +23,7 @@
 <meta property="og:image" content="http://researchlab.github.io/2018/08/26/tcp-established-closed-process/established02.png">
 <meta property="og:image" content="http://researchlab.github.io/2018/08/26/tcp-established-closed-process/tcp_close.png">
 <meta property="og:image" content="http://researchlab.github.io/2018/08/26/tcp-established-closed-process/closed.png">
-<meta property="og:updated_time" content="2018-10-26T11:35:39.804Z">
+<meta property="og:updated_time" content="2018-10-26T11:37:16.640Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="TCP三次握手和四次挥手过程完整分析">
 <meta name="twitter:description" content="理解TCP连接三次握手和四次挥手过程对深入学习应用TCP网络编程十分重要, 相关网络资源也灰常丰富,  本文对TCP建立和关闭连接中的三次握手和四次挥手过程进行完整分析, 同时参考网络学习资源归纳总结成文;">
@@ -122,7 +122,7 @@
 <p>这是因为虽然双方都同意关闭连接了, 而且握手的<code>4</code>个报文也都协调和发送完毕, 按理可以直接回到 <code>CLOSED</code> 状态（就好比从 <code>SYN_SEND</code> 状态到<code>ESTABLISH</code>状态那样）; 但是因为我们必须要假想网络是不可靠的, 你无法保证你最后发送的 <code>ACK</code> 报文会一定被对方收到, 因此对方处于 <code>LAST_ACK</code> 状态下的 <code>SOCKET</code> 可能会因为超时未收到 <code>ACK</code> 报文, 而重发 <code>FIN</code> 报文, 所以这个<code>TIME_WAIT</code>状态的作用就是用来重发可能丢失的 <code>ACK</code> 报文。</p>
 <p>Reference </p>
 <hr>
-<p>[1] <a href="https://blog.csdn.net/tennysonsky/article/details/45622395" target="_blank" rel="noopener">Linux网络编程——浅谈 TCP 三次握手和四次挥手</a><br>[2] <a href="https://huoding.com/2016/09/05/542" target="_blank" rel="noopener">关于FIN_WAIT2</a></p>
+<p>[1] <a href="https://blog.csdn.net/tennysonsky/article/details/45622395" target="_blank" rel="noopener">Linux网络编程——浅谈 TCP 三次握手和四次挥手</a><br>[2] <a href="https://huoding.com/2016/09/05/542" target="_blank" rel="noopener">关于FIN_WAIT2</a><br>[3] <a href="https://blog.csdn.net/dog250/article/details/81256550" target="_blank" rel="noopener">一个TCP FIN_WAIT2状态细节引发的感慨</a></p>
   
 	</div>
 		<div style="padding: 10px 44px 30px 44px;" >
