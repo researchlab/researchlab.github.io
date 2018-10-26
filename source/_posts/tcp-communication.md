@@ -10,10 +10,10 @@ description:
 
 ##### TCP通信完整过程
 * * *
-`TCP`通信完整过程
+**TCP通信过程**
 ![](tcp-communication/state02.png)
 
-`TCP`通信过程状态信息
+**TCP通信过程状态信息**
 ![](tcp-communication/state01.png)
 
 ##### TCP通信过程状态
