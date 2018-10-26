@@ -72,6 +72,71 @@
         <header class="article-info clearfix">
   <h1 itemprop="name">
     
+      <a href="/2017/09/15/docker-registry-v2/" title="搭建Docker Registry容器服务" itemprop="url">搭建Docker Registry容器服务</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
+		
+  <p class="article-time">
+    <time datetime="2017-09-15T14:32:05.000Z" itemprop="datePublished"> 发表于 2017-09-15</time>
+    
+  </p>
+</header>
+    <div class="article-content">
+        
+        <p>Docker Registry 是一个用来管理Docker镜像的服务，本身也是一个Docker容器。搭建一个私有的Docker Registry的使用场景主要有下面几个:<br>1.当需要对容器镜像存储进行完全控制,就不能依赖官方提供的Docker Hub进行管理;<br>2.当内部使用存在网络问题或安全问题等情况都适合搭建私有的Docker Registry对镜像进行管理;</p>
+<p>下面从需频繁pull镜像到某内部机器上新建容器的需求来搭建需要认证访问的Docker Registry,这样同时可以解决网络依赖问题及安全问题, 下面是搭建Docker Registry过程的记录和总结;<br></p>
+        
+        
+        <p class="article-more-link">
+          
+            <a href="/2017/09/15/docker-registry-v2/#more">Read More</a>
+          
+       </p>
+    </div>
+    <footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/docker-practice/">docker-practice</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/docker/">docker</a>
+  </div>
+
+</div>
+
+
+
+
+<div class="comments-count">
+	
+	  	<span></span>
+		<a href="/2017/09/15/docker-registry-v2/#comments" class="ds-thread-count comments-count-link" data-thread-key="2017/09/15/docker-registry-v2/" data-count-type="comments">&nbsp;</a>
+	
+</div>
+
+</footer>
+
+
+    </article>
+
+
+
+
+
+
+   
+    
+    <article class="post-expand post" itemprop="articleBody"> 
+        <header class="article-info clearfix">
+  <h1 itemprop="name">
+    
       <a href="/2017/03/20/build-rpc-server-in-golang/" title="一步一步构建自己的RPC server" itemprop="url">一步一步构建自己的RPC server</a>
   </h1>
   <p class="article-author">By
@@ -642,70 +707,6 @@
 
 
 
-   
-    
-    <article class="post-expand post" itemprop="articleBody"> 
-        <header class="article-info clearfix">
-  <h1 itemprop="name">
-    
-      <a href="/2017/02/22/mysql-import-export-summary/" title="mysql 数据库表及数据导入导出方法总结" itemprop="url">mysql 数据库表及数据导入导出方法总结</a>
-  </h1>
-  <p class="article-author">By
-       
-		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
-		
-  <p class="article-time">
-    <time datetime="2017-02-22T10:50:36.000Z" itemprop="datePublished"> 发表于 2017-02-22</time>
-    
-  </p>
-</header>
-    <div class="article-content">
-        
-        <p>由于公司的MySQL是搭建在服务器上，为了避免对服务器进行直接改动，想远程导出和导入MySQL的数据库表结构及数据进行操作, 刚好Mysql本身提供了命令行导出工具<code>Mysqldump</code>和<code>Mysql Source</code>导入命令进行SQL数据导入导出工作，通过Mysql命令行导出工具Mysqldump命令能够将Mysql数据导出为文本格式(txt)的SQL文件，通过Mysql Source命令能够将SQL文件导入Mysql数据库中，下面通过Mysql导入导出SQL实例详解Mysqldump和Source命令的用法</p>
-        
-        
-        <p class="article-more-link">
-          
-            <a href="/2017/02/22/mysql-import-export-summary/#more">Read More</a>
-          
-       </p>
-    </div>
-    <footer class="article-footer clearfix">
-<div class="article-catetags">
-
-<div class="article-categories">
-  <span></span>
-  <a class="article-category-link" href="/categories/DevOps/">DevOps</a>
-</div>
-
-
-  <div class="article-tags">
-  
-  <span></span> <a href="/tags/mysql/">mysql</a>
-  </div>
-
-</div>
-
-
-
-
-<div class="comments-count">
-	
-	  	<span></span>
-		<a href="/2017/02/22/mysql-import-export-summary/#comments" class="ds-thread-count comments-count-link" data-thread-key="2017/02/22/mysql-import-export-summary/" data-count-type="comments">&nbsp;</a>
-	
-</div>
-
-</footer>
-
-
-    </article>
-
-
-
-
-
-
 
   <nav id="page-nav" class="clearfix">
     <a class="extend prev" rel="prev" href="/page/2/"><span></span>Prev</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/">4</a><a class="page-number" href="/page/5/">5</a><span class="space">&hellip;</span><a class="page-number" href="/page/7/">7</a><a class="extend next" rel="next" href="/page/4/">Next<span></span></a>
@@ -739,7 +740,7 @@
 		<ul>
 		
 		  
-			<li><a href="/categories/DevOps/" title="DevOps">DevOps<sup>5</sup></a></li>
+			<li><a href="/categories/DevOps/" title="DevOps">DevOps<sup>6</sup></a></li>
 		  
 		
 		  

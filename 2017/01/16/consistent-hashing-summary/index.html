@@ -26,7 +26,7 @@
 <meta property="og:image" content="http://researchlab.github.io/2017/01/16/consistent-hashing-summary/add.jpg">
 <meta property="og:image" content="http://researchlab.github.io/2017/01/16/consistent-hashing-summary/virtual.jpg">
 <meta property="og:image" content="http://researchlab.github.io/2017/01/16/consistent-hashing-summary/map.jpg">
-<meta property="og:updated_time" content="2018-10-26T02:07:39.957Z">
+<meta property="og:updated_time" content="2018-10-26T10:36:27.180Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="一致性哈希算法总结">
 <meta name="twitter:description" content="存在一种场景, 当一个缓存服务由多个服务器组共同提供时, key应该路由到哪一个服务。这里假如采用最通用的方式取模求余: key%N(N为服务器数目), 这样做均衡性没有什么问题, 但是当服务器数目发送增加或减少时, 分配方式则变为key%(N+1)或key%(N-1)。这里将会有大量的key失效迁移, 如果后端key对应的是有状态的存储数据,那么毫无疑问,这种做法将导致服务器间大量的数据迁移,从">
@@ -312,7 +312,7 @@
 		<ul>
 		
 		  
-			<li><a href="/categories/DevOps/" title="DevOps">DevOps<sup>5</sup></a></li>
+			<li><a href="/categories/DevOps/" title="DevOps">DevOps<sup>6</sup></a></li>
 		  
 		
 		  
