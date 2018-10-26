@@ -4,30 +4,29 @@
 <head>
   <meta charset="UTF-8">
   
-    <title>Tcp三次握手和四次挥手过程完整分析 | 一线攻城狮</title>
+    <title>TCP三次握手和四次挥手过程完整分析 | 一线攻城狮</title>
     <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
     
     <meta name="author" content="Lee Hong">
     
 
     
-    <meta name="description" content="理解Tcp连接三次握手和四次挥手过程对深入学习应用Tcp网络编程十分重要, 相关网络资源也灰常丰富,  本文对Tcp建立和关闭连接中的三次握手和四次挥手过程进行完整分析, 同时参考网络学习资源归纳总结成文;">
-<meta name="keywords" content="Tcp">
+    <meta name="description" content="理解TCP连接三次握手和四次挥手过程对深入学习应用TCP网络编程十分重要, 相关网络资源也灰常丰富,  本文对TCP建立和关闭连接中的三次握手和四次挥手过程进行完整分析, 同时参考网络学习资源归纳总结成文;">
+<meta name="keywords" content="TCP">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Tcp三次握手和四次挥手过程完整分析">
+<meta property="og:title" content="TCP三次握手和四次挥手过程完整分析">
 <meta property="og:url" content="http://researchlab.github.io/2018/08/26/tcp-established-closed-process/index.html">
 <meta property="og:site_name" content="一线攻城狮">
-<meta property="og:description" content="理解Tcp连接三次握手和四次挥手过程对深入学习应用Tcp网络编程十分重要, 相关网络资源也灰常丰富,  本文对Tcp建立和关闭连接中的三次握手和四次挥手过程进行完整分析, 同时参考网络学习资源归纳总结成文;">
+<meta property="og:description" content="理解TCP连接三次握手和四次挥手过程对深入学习应用TCP网络编程十分重要, 相关网络资源也灰常丰富,  本文对TCP建立和关闭连接中的三次握手和四次挥手过程进行完整分析, 同时参考网络学习资源归纳总结成文;">
 <meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="http://researchlab.github.io/2018/08/26/tcp-established-closed-process/established01.png">
 <meta property="og:image" content="http://researchlab.github.io/2018/08/26/tcp-established-closed-process/established02.png">
-<meta property="og:image" content="http://researchlab.github.io/2018/08/26/tcp-established-closed-process/closed01.png">
-<meta property="og:image" content="http://researchlab.github.io/2018/08/26/tcp-established-closed-process/closed02.png">
-<meta property="og:image" content="http://researchlab.github.io/2018/08/26/tcp-established-closed-process/closed03.png">
-<meta property="og:updated_time" content="2018-10-26T10:36:27.192Z">
+<meta property="og:image" content="http://researchlab.github.io/2018/08/26/tcp-established-closed-process/tcp_close.png">
+<meta property="og:image" content="http://researchlab.github.io/2018/08/26/tcp-established-closed-process/closed.png">
+<meta property="og:updated_time" content="2018-10-26T11:34:32.877Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Tcp三次握手和四次挥手过程完整分析">
-<meta name="twitter:description" content="理解Tcp连接三次握手和四次挥手过程对深入学习应用Tcp网络编程十分重要, 相关网络资源也灰常丰富,  本文对Tcp建立和关闭连接中的三次握手和四次挥手过程进行完整分析, 同时参考网络学习资源归纳总结成文;">
+<meta name="twitter:title" content="TCP三次握手和四次挥手过程完整分析">
+<meta name="twitter:description" content="理解TCP连接三次握手和四次挥手过程对深入学习应用TCP网络编程十分重要, 相关网络资源也灰常丰富,  本文对TCP建立和关闭连接中的三次握手和四次挥手过程进行完整分析, 同时参考网络学习资源归纳总结成文;">
 <meta name="twitter:image" content="http://researchlab.github.io/2018/08/26/tcp-established-closed-process/established01.png">
 
     
@@ -81,7 +80,7 @@
 		<header class="article-info clearfix">
   <h1 itemprop="name">
     
-      <a href="/2018/08/26/tcp-established-closed-process/" title="Tcp三次握手和四次挥手过程完整分析" itemprop="url">Tcp三次握手和四次挥手过程完整分析</a>
+      <a href="/2018/08/26/tcp-established-closed-process/" title="TCP三次握手和四次挥手过程完整分析" itemprop="url">TCP三次握手和四次挥手过程完整分析</a>
   </h1>
   <p class="article-author">By
        
@@ -101,8 +100,9 @@
 		
 		</div>
 		
-		<p>理解<code>Tcp</code>连接三次握手和四次挥手过程对深入学习应用<code>Tcp</code>网络编程十分重要, 相关网络资源也灰常丰富,  本文对<code>Tcp</code>建立和关闭连接中的三次握手和四次挥手过程进行完整分析, 同时参考网络学习资源归纳总结成文;<br><a id="more"></a></p>
-<h5 id="三次握手"><a href="#三次握手" class="headerlink" title="三次握手"></a>三次握手</h5><p>在<code>Tcp/IP</code>协议中, <code>Tcp</code>协议提供可靠的连接服务, 采用三次握手建立一个连接。</p>
+		<p>理解<code>TCP</code>连接三次握手和四次挥手过程对深入学习应用<code>TCP</code>网络编程十分重要, 相关网络资源也灰常丰富,  本文对<code>TCP</code>建立和关闭连接中的三次握手和四次挥手过程进行完整分析, 同时参考网络学习资源归纳总结成文;<br><a id="more"></a></p>
+<h5 id="三次握手"><a href="#三次握手" class="headerlink" title="三次握手"></a>三次握手</h5><hr>
+<p>在<code>TCP/IP</code>协议中, <code>TCP</code>协议提供可靠的连接服务, 采用三次握手建立一个连接。</p>
 <p><img src="/2018/08/26/tcp-established-closed-process/established01.png" alt=""></p>
 <p><strong>第一次握手:</strong> 建立连接时, 客户端发送<code>SYN</code>包(syn=j)到服务器, 并进入 <code>SYN_SEND</code> 状态, 等待服务器确认;  </p>
 <p><strong>第二次握手:</strong> 服务器收到<code>SYN</code>包, 必须确认客户的 <code>SYN</code>（ack=j+1）, 同时自己也发送一个 <code>SYN</code> 包（syn=k）, 即 <code>SYN</code>+<code>ACK</code> 包, 此时服务器进入 SYN_RECV 状态;  </p>
@@ -111,19 +111,18 @@
 <p>通过这样的三次握手, 客户端与服务端建立起可靠的<code>双工</code>的连接, 开始传送数据。 三次握手的最主要目的是保证连接是<code>双工</code>的, 可靠更多的是通过重传机制来保证的。</p>
 <p><strong> 但是为什么一定要进行三次握手来保证连接是<code>双工</code>的呢, 一次握手不行么？两次不行么？</strong></p>
 <p>前两次握手是为了保证服务端能收接受到客户端的信息并能做出正确的应答, 为了保证客户端能够接收到服务端的信息并能做出正确的应答而进行后两次(第二次和第三次)握手。 </p>
-<h5 id="四次挥手"><a href="#四次挥手" class="headerlink" title="四次挥手"></a>四次挥手</h5><p>由于 <code>Tcp</code> 连接是<code>全双工</code>的, 因此每个方向都必须单独进行关闭。这好比, 我们打电话（<code>全双工</code>）, 正常的情况下（出于礼貌）, 通话的双方都要说再见后才能挂电话, 保证通信双方都把话说完了才挂电话。</p>
-<p><img src="/2018/08/26/tcp-established-closed-process/closed01.png" alt=""></p>
-<p>那<code>Tcp</code> 的四次握手, 是为了保证通信双方都关闭了连接, 具体过程如下: </p>
-<p><img src="/2018/08/26/tcp-established-closed-process/closed02.png" alt=""></p>
-<p>1）客户端 A 发送一个 FIN, 用来关闭客户 A 到服务器 B 的数据传送;<br>2）服务器 B 收到这个 FIN, 它发回一个 <code>ACK</code>, 确认序号为收到的序号加 1。和 <code>SYN</code> 一样, 一个 FIN 将占用一个序号;<br>3）服务器 B 关闭与客户端 A 的连接, 发送一个 FIN 给客户端 A;<br>4）客户端 A 发回 <code>ACK</code> 报文确认, 并将确认序号设置为收到序号加 1。</p>
-<p><img src="/2018/08/26/tcp-established-closed-process/closed03.png" alt=""></p>
+<h5 id="四次挥手"><a href="#四次挥手" class="headerlink" title="四次挥手"></a>四次挥手</h5><hr>
+<p>由于 <code>TCP</code> 连接是<code>全双工</code>的, 因此每个方向都必须单独进行关闭。那<code>TCP</code> 的四次握手, 是为了保证通信双方都关闭了连接, 具体过程如下: </p>
+<p><img src="/2018/08/26/tcp-established-closed-process/tcp_close.png" alt=""></p>
+<p>1）客户端发送一个 <code>FIN</code>, 用来关闭客户端到服务器的数据传送;<br>2）服务器收到这个 <code>FIN</code>, 它发回一个 <code>ACK</code>, 确认序号为收到的序号加 1。和 <code>SYN</code> 一样, 一个<code>FIN</code>将占用一个序号;<br>3）服务器关闭与客户端的连接, 发送一个<code>FIN</code>给客户端;<br>4）客户端发回 <code>ACK</code> 报文确认, 并将确认序号设置为收到序号加1。</p>
+<p><img src="/2018/08/26/tcp-established-closed-process/closed.png" alt=""></p>
 <p><strong>为什么建立连接协议是三次握手, 而关闭连接却是四次握手呢？</strong></p>
 <p>这是因为服务端的 <code>LISTEN</code> 状态下的 <code>SOCKET</code> 当收到 <code>SYN</code> 报文的建连请求后, 它可以把 <code>ACK</code> 和 <code>SYN</code>（<code>ACK</code> 起应答作用, 而 <code>SYN</code> 起同步作用）放在一个报文里来发送。但关闭连接时, 当收到对方的 <code>FIN</code> 报文通知时, 它仅仅表示对方没有数据发送给你了, 但是你还可以给对方发送数据, 也有这么种可能, 你还有一些数据在传给对方的途中, 所以你不能立马关闭连接,也即你可能还需要把在传输途中的数据给对方之后, 又或者, 你还有一些数据需要传输给对方后, （再关闭连接）再发送<code>FIN</code> 报文给对方来表示你同意现在可以关闭连接了, 所以它这里的 <code>ACK</code> 报文和 <code>FIN</code> 报文多数情况下都是分开发送的。</p>
-<p><strong>为什么 <code>TIME_WAIT</code> 状态还需要等<code>2ms</code> 后才能返回到 <code>CLOSED</code> 状态？</strong></p>
+<p><strong>为什么 <code>TIME_WAIT</code> 状态还需要等<code>2MSL</code>(Wait For Double Maximum Segment Life(MSL) Time) 后才能返回到 <code>CLOSED</code> 状态？</strong></p>
 <p>这是因为虽然双方都同意关闭连接了, 而且握手的<code>4</code>个报文也都协调和发送完毕, 按理可以直接回到 <code>CLOSED</code> 状态（就好比从 <code>SYN_SEND</code> 状态到<code>ESTABLISH</code>状态那样）; 但是因为我们必须要假想网络是不可靠的, 你无法保证你最后发送的 <code>ACK</code> 报文会一定被对方收到, 因此对方处于 <code>LAST_ACK</code> 状态下的 <code>SOCKET</code> 可能会因为超时未收到 <code>ACK</code> 报文, 而重发 <code>FIN</code> 报文, 所以这个<code>TIME_WAIT</code>状态的作用就是用来重发可能丢失的 <code>ACK</code> 报文。</p>
 <p>Reference </p>
 <hr>
-<p>[1] <a href="https://blog.csdn.net/tennysonsky/article/details/45622395" target="_blank" rel="noopener">Linux网络编程——浅谈 Tcp 三次握手和四次挥手</a></p>
+<p>[1] <a href="https://blog.csdn.net/tennysonsky/article/details/45622395" target="_blank" rel="noopener">Linux网络编程——浅谈 TCP 三次握手和四次挥手</a><br>[2] <a href="https://huoding.com/2016/09/05/542" target="_blank" rel="noopener">关于FIN_WAIT2</a></p>
   
 	</div>
 		<div style="padding: 10px 44px 30px 44px;" >
@@ -133,8 +132,8 @@
 </div>
 <div>
  <p style="margin-top:0px;">作者署名：<b><a target="_blank" href="http://www.grdtechs.com/">朴实的一线攻城狮</a></b>
-<br />本文标题：<b><a href="/2018/08/26/tcp-established-closed-process/" target="_blank" title="Tcp三次握手和四次挥手过程完整分析">Tcp三次握手和四次挥手过程完整分析</a></b> 
-<br />本文出处：<b><a href="/2018/08/26/tcp-established-closed-process/" target="_blank" title="Tcp三次握手和四次挥手过程完整分析">http://researchlab.github.io/2018/08/26/tcp-established-closed-process/</a></b>
+<br />本文标题：<b><a href="/2018/08/26/tcp-established-closed-process/" target="_blank" title="TCP三次握手和四次挥手过程完整分析">TCP三次握手和四次挥手过程完整分析</a></b> 
+<br />本文出处：<b><a href="/2018/08/26/tcp-established-closed-process/" target="_blank" title="TCP三次握手和四次挥手过程完整分析">http://researchlab.github.io/2018/08/26/tcp-established-closed-process/</a></b>
 <br />版权声明：本文由<b><a href="/about" target="_blank" title="Lee Hong">Lee Hong</a></b>创作和发表,采用<b>署名(BY)</b>-<b>非商业性使用(NC)</b>-<b>相同方式共享(SA)</b>国际许可协议进行许可,转载请注明作者及出处, 否则保留追究法律责任的权利。 </p>
 </div>
 </div>
@@ -152,7 +151,7 @@
 
   <div class="article-tags">
   
-  <span></span> <a href="/tags/Tcp/">Tcp</a>
+  <span></span> <a href="/tags/TCP/">TCP</a>
   </div>
 
 </div>
@@ -198,10 +197,10 @@
 <nav class="article-nav clearfix">
  
  <div class="prev" >
- <a href="/2018/10/03/redis-06-bloom-filter/" title="redis专题06 布隆过滤器">
+ <a href="/2018/08/27/tcp-communication/" title="TCP通信过程完整分析">
   <strong>上一篇：</strong><br/>
   <span>
-  redis专题06 布隆过滤器</span>
+  TCP通信过程完整分析</span>
 </a>
 </div>
 
@@ -218,7 +217,7 @@
 
 	
 <section id="comments" class="comment">
-	<div class="ds-thread" data-thread-key="2018/08/26/tcp-established-closed-process/" data-title="Tcp三次握手和四次挥手过程完整分析" data-url="http://researchlab.github.io/2018/08/26/tcp-established-closed-process/"></div>
+	<div class="ds-thread" data-thread-key="2018/08/26/tcp-established-closed-process/" data-title="TCP三次握手和四次挥手过程完整分析" data-url="http://researchlab.github.io/2018/08/26/tcp-established-closed-process/"></div>
 </section>
 
 
@@ -251,7 +250,7 @@
 		<ul>
 		
 		  
-			<li><a href="/categories/DevOps/" title="DevOps">DevOps<sup>6</sup></a></li>
+			<li><a href="/categories/DevOps/" title="DevOps">DevOps<sup>7</sup></a></li>
 		  
 		
 		  
@@ -321,6 +320,10 @@
 			
 		
 			
+				<li><a href="/tags/TCP/" title="TCP">TCP<sup>2</sup></a></li>
+			
+		
+			
 				<li><a href="/tags/cache/" title="cache">cache<sup>2</sup></a></li>
 			
 		
@@ -374,10 +377,6 @@
 		
 			
 				<li><a href="/tags/time/" title="time">time<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/xorm/" title="xorm">xorm<sup>1</sup></a></li>
 			
 		
 		</ul>
