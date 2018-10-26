@@ -450,6 +450,8 @@ OK
 
 当关闭`master`服务后, 对从机服务无影响,  所以从机服务的启动顺序及服务提供 与`master`主机服务是否已启动及启动顺序无关;
 
+当然上面`docker-compose`配置也可以直接配置`slaveof`参数， 就不需要手动去发起命令, 可参看 [docker-compose-redis-replication](https://github.com/researchlab/dockerenv/tree/master/docker-compose-redis-replication)
+
 ##### 总结
 - `redis`的主从同步是异步进行的, 这意味着主从同步不会影响主逻辑, 也不会降低`redis`的处理性能。
 - 主从架构中, 可以考虑关闭主服务器的数据持久化功能, 只让从服务器进行持久化, 这样可以提高主服务器的处理性能。
