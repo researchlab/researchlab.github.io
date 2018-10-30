@@ -2,7 +2,7 @@
 title: "TCP通信过程完整分析"
 date: 2018-08-27 18:32:59
 categories: [DevOps]
-tags: [TCP]
+tags: [tcp]
 description:
 ---
 学习`TCP`连接需要三次握手四次挥手过程后, 进一步分析学习`TCP`连接通信过程及过程状态信息, 将有助于排除和定位网络或系统故障;
