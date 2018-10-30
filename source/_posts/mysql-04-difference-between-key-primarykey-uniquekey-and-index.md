@@ -1,5 +1,5 @@
 ---
-title: "mysql专题04 mysql中key/PRIMARY KEY/UNIQUE KEY 与index区别"
+title: "mysql专题04 mysql中KEY/PRIMARY KEY/UNIQUE KEY 与INDEX区别"
 date: 2018-05-30 19:09:24
 categories: "mysql专题"
 tags: [mysql]
