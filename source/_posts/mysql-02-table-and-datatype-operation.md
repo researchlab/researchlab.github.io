@@ -14,7 +14,21 @@ description:
 # pull mysql image
 ➜  ~ docker pull mysql/mysql-server:5.7
 # 启动 mysql 容器
-➜  ~ docker run --name=dev-mysql -d -p 3307:3306 -e mysql_USER=dev -e mysql_PASSWORD=dev123 -e mysql_ROOT_PASSWORD=dev123456 -e mysql_DATABASE=testdb  mysql/mysql-server
+➜  ~ docker run --name=dev-mysql -d -p 3307:3306 -e MYSQL_USER=dev -e MYSQL_PASSWORD=dev123 -e MYSQL_ROOT_PASSWORD=dev123456 -e MYSQL_DATABASE=testdb  mysql/mysql-server
+# 修改权限
+➜  ~ docker exec -it dev-mysql mysql -uroot -pdev123456
+#授权 root账号远程可登陆
+mysql> grant all privileges on *.* to 'root'@'%' identified by 'dev123456';
+Query OK, 0 rows affected, 1 warning (0.00 sec)
+mysql> flush privileges;
+Query OK, 0 rows affected (0.00 sec)
+#授权 dev账号所有权限;
+mysql> grant all privileges on *.* to 'dev'@'%' identified by 'dev123';
+Query OK, 0 rows affected, 1 warning (0.00 sec)
+mysql> flush privileges;
+Query OK, 0 rows affected (0.00 sec)
+
+
 # 登录mysql命令端
 ➜  ~ docker exec -it dev-mysql mysql -udev -P3307 -pdev123 --prompt "\u@\d>"
 ```
