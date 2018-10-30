@@ -28,10 +28,22 @@ Query OK, 0 rows affected, 1 warning (0.00 sec)
 mysql> flush privileges;
 Query OK, 0 rows affected (0.00 sec)
 
-
 # 登录mysql命令端
 ➜  ~ docker exec -it dev-mysql mysql -udev -P3307 -pdev123 --prompt "\u@\d>"
 ```
+>  mysql 8.0 以上版本创建用户和授权是分开的, 不能直接用上述 grant all privileges on xxx
+
+- mysql 8.0+ 授权应如下操作
+  - create user
+`
+mysql> CREATE USER 'username'@'%' IDENTIFIED WITH mysql_native_password BY 'password';
+`
+  - grant
+`
+mysql> GRANT ALL ON db1.* TO 'username'@'%' WITH GRANT OPTION;
+`
+
+> 更多参考[MySQL 用户管理 增加、授权、改密码 来源官方文档](https://github.com/khs1994-docker/lnmp/issues/452)
 
 ##### Mysql基础操作
 
