@@ -72,6 +72,70 @@
         <header class="article-info clearfix">
   <h1 itemprop="name">
     
+      <a href="/2018/01/18/redis-03-delay-queue/" title="redis专题03 消息队列系列问题" itemprop="url">redis专题03 消息队列系列问题</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
+		
+  <p class="article-time">
+    <time datetime="2018-01-18T10:20:31.000Z" itemprop="datePublished"> 发表于 2018-01-18</time>
+    
+  </p>
+</header>
+    <div class="article-content">
+        
+        <p>很多业务场景中多会用到消息队列来传递消息数据问题， 常用的消息队列如<code>NSQ</code>,<code>NAS</code>, <code>Rabbitmq</code>和<code>Kafka</code>等重量级消息队列中间件，功能很强大 使用起来自然也复杂，其实在大部分场景只是需要一个消息队列来传递数据，数据量，数据之间的顺序等也没有特殊的要求， 这样的场景使用<code>redis</code>非常轻松就可以搞定，而且在使用和维护上相对而言要简单方便些,当然<code>redis</code>的消息队列不是专业的消息队列，它没有非常多的高级特性，没有<code>ack</code>保证，如果对消息的可靠性有着极致的追求，那么它就不适合使用；<br></p>
+        
+        
+        <p class="article-more-link">
+          
+            <a href="/2018/01/18/redis-03-delay-queue/#more">Read More</a>
+          
+       </p>
+    </div>
+    <footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/redis专题/">redis专题</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/redis/">redis</a>
+  </div>
+
+</div>
+
+
+
+
+<div class="comments-count">
+	
+	  	<span></span>
+		<a href="/2018/01/18/redis-03-delay-queue/#comments" class="ds-thread-count comments-count-link" data-thread-key="2018/01/18/redis-03-delay-queue/" data-count-type="comments">&nbsp;</a>
+	
+</div>
+
+</footer>
+
+
+    </article>
+
+
+
+
+
+
+   
+    
+    <article class="post-expand post" itemprop="articleBody"> 
+        <header class="article-info clearfix">
+  <h1 itemprop="name">
+    
       <a href="/2018/01/18/redis-02-distributed-lock/" title="redis专题02 分布式锁" itemprop="url">redis专题02 分布式锁</a>
   </h1>
   <p class="article-author">By
@@ -643,70 +707,6 @@
 
 
 
-   
-    
-    <article class="post-expand post" itemprop="articleBody"> 
-        <header class="article-info clearfix">
-  <h1 itemprop="name">
-    
-      <a href="/2017/03/05/docker-data-volume/" title="docker实践--02 数据卷管理" itemprop="url">docker实践--02 数据卷管理</a>
-  </h1>
-  <p class="article-author">By
-       
-		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
-		
-  <p class="article-time">
-    <time datetime="2017-03-05T00:44:31.000Z" itemprop="datePublished"> 发表于 2017-03-05</time>
-    
-  </p>
-</header>
-    <div class="article-content">
-        
-        <p>Docker中的数据可以存储在类似于虚拟机磁盘的介质中，在Docker中称为<code>数据卷</code>(Data Volume)。数据卷可以用来存储Docker应用的数据，也可以用来在Docker容器间进行数据共享。数据卷呈现给Docker容器的形式就是一个目录，支持多个容器间共享，修改也不会影响镜像。使用Docker的数据卷，类似在系统中使用<code>mount</code> 挂载一个文件系统。<br></p>
-        
-        
-        <p class="article-more-link">
-          
-            <a href="/2017/03/05/docker-data-volume/#more">Read More</a>
-          
-       </p>
-    </div>
-    <footer class="article-footer clearfix">
-<div class="article-catetags">
-
-<div class="article-categories">
-  <span></span>
-  <a class="article-category-link" href="/categories/docker-practice/">docker-practice</a>
-</div>
-
-
-  <div class="article-tags">
-  
-  <span></span> <a href="/tags/docker/">docker</a>
-  </div>
-
-</div>
-
-
-
-
-<div class="comments-count">
-	
-	  	<span></span>
-		<a href="/2017/03/05/docker-data-volume/#comments" class="ds-thread-count comments-count-link" data-thread-key="2017/03/05/docker-data-volume/" data-count-type="comments">&nbsp;</a>
-	
-</div>
-
-</footer>
-
-
-    </article>
-
-
-
-
-
-
 
   <nav id="page-nav" class="clearfix">
     <a class="extend prev" rel="prev" href="/page/2/"><span></span>Prev</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/">4</a><a class="page-number" href="/page/5/">5</a><span class="space">&hellip;</span><a class="page-number" href="/page/8/">8</a><a class="extend next" rel="next" href="/page/4/">Next<span></span></a>
@@ -772,6 +772,10 @@
 		  
 		
 		  
+			<li><a href="/categories/mysql专题/" title="mysql专题">mysql专题<sup>1</sup></a></li>
+		  
+		
+		  
 			<li><a href="/categories/php/" title="php">php<sup>2</sup></a></li>
 		  
 		
@@ -798,11 +802,15 @@
 			
 		
 			
-				<li><a href="/tags/docker/" title="docker">docker<sup>8</sup></a></li>
+				<li><a href="/tags/docker/" title="docker">docker<sup>9</sup></a></li>
 			
 		
 			
 				<li><a href="/tags/setcookie/" title="setcookie">setcookie<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mysql/" title="mysql">mysql<sup>3</sup></a></li>
 			
 		
 			
@@ -815,10 +823,6 @@
 		
 			
 				<li><a href="/tags/cache/" title="cache">cache<sup>2</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/mysql/" title="mysql">mysql<sup>2</sup></a></li>
 			
 		
 			
