@@ -8,6 +8,9 @@ description:
 `Mysql`数据库的约束类型有:主键约束（Primary Key）,外键约束（Foreign Key）,非空约束（Not Null）,唯一性约束（Unique）,默认约束（Default）。 约束的作用是保证数据的完整性和一致性, 分为表级约束和列级约束。
 <!--more-->
 
+> 如果约束只针对某一个字段来使用的话, 则称之为列级约束;
+> 如果约束针对两个及以上字段来使用的话, 则称之为表级约束;
+
 ##### 约束类型
 
 |序号|约束类型 | 约束说明|
@@ -22,6 +25,7 @@ description:
 主键约束(primary key)要求主键列的数据唯一, 并且不能为空。主键分为两种类型: 单字段主键和多字段联合主键。
 1.单字段主键
 在定义列的同时指定主键, 语法规则: `字段名 数据类型 Primary Key [默认值]`
+
 ```shell
 dev@testdb>create table if not exists t4(
     -> id INT(11) PRIMARY KEY,
@@ -43,6 +47,7 @@ dev@testdb>show columns from t4;
 ```
 
 在定义完成所有列之后指定主键, 语法规则: `[Constraint<约束名>] Primary Key [字段名]`
+
 ```shell
 dev@testdb>create table if not exists t5(
     -> id INT(11),
@@ -99,13 +104,15 @@ dev@testdb>desc t6;
 
 从表(子表):对于两个具有关联关系的表而言, 相关联字段中的外键所在的那个表即是从表。
 
-外键约束条件,
+**外键约束条件**,
 
-- 父表和子表必须有相同的存储引擎, 且存储引擎必须是InnoDB。这个可以在数据MySql的配置文件中查看及修改;
+- **父表和子表必须有相同的存储引擎, 且存储引擎必须是InnoDB。这个可以在数据MySql的配置文件中查看及修改**;
 
-- 不能使用临时表进行操作, 且外键列和参照列必须具有相似的数据类型, 如果是以数字类型作为外键, 则数据符号及长度要相同;
+- **不能使用临时表进行操作, 且外键列和参照列必须具有相似的数据类型, 如果是以数字类型作为外键, 则数据符号及长度要相同**;
 
-- 外键列和参照列必须创建索引, 如果外键列不存在索引的话, MySql将自动创建索引;
+- **外键列和参照列必须创建索引, 如果外键列不存在索引的话, MySql将自动创建索引**;
+
+> default-storage-engine = INNODB
 
 外键约束参照操作,
 
@@ -116,7 +123,7 @@ dev@testdb>desc t6;
 |`RESTRICT` |拒绝对父表进行删除或更新操作。|
 |`NO ACTION`|MySql中的关键字, 与RESTRICT的作用相同 。|
 
-语法规则: `[Constraint<外键名>]Foreign Key 字段名1[,字段名2, ....] References<主表名> 主键列1 [,主键列2, ....]`
+语法规则: `[Constraint<外键名>]Foreign Key 字段名1[,字段名2, ....] References<主表名> 主键列1 [,主键列2, ....]`
 
 ```shell
 dev@testdb>create table if not exists t7(
@@ -168,10 +175,10 @@ dev@testdb>desc t7;
 ##### 唯一性约束
 唯一性约束(Unique)要求该列唯一, 允许为空, 但是只能出现一个空值。唯一约束可以保证一列或者几列不出现重复值。
 非空约束的语法规则,
- 1.在定义完列之后直接指定唯一约束 
-  `字段名 数据类型 unique`
- 2.在定义完所有列之后指定唯一约束
-   `[Constraint<约束名>] Unique(<字段名>)`
+ 1.在定义完列之后直接指定唯一约束 
+  `字段名 数据类型 unique`
+ 2.在定义完所有列之后指定唯一约束
+   `[Constraint<约束名>] Unique(<字段名>)`
 声明: Unique在表中可以有一个或者多个字段声明, 而Primary Key, 只能有一个。
 
 ##### 默认约束
