@@ -14,10 +14,7 @@
 <% } %>
 <% if (index){ %>
 <div class="comments-count">
-	<span id="busuanzi_container_page_pv">
-   热度<span id="busuanzi_value_page_pv"></span>
-</span>
-	<% if((config.disqus_shortname || theme.disqus_shortname) && !theme.duoshuo_shortname) { %>
+		<% if((config.disqus_shortname || theme.disqus_shortname) && !theme.duoshuo_shortname) { %>
 	  	<span></span>
 		<a href="<%- config.root %><%- item.path %>#disqus_thread" class="comments-count-link">Comments</a>
 	<% } else if(theme.duoshuo_shortname) { %>
