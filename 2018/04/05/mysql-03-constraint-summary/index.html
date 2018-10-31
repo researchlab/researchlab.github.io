@@ -19,7 +19,7 @@
 <meta property="og:site_name" content="一线攻城狮">
 <meta property="og:description" content="Mysql数据库的约束类型有:主键约束（Primary Key）,外键约束（Foreign Key）,非空约束（Not Null）,唯一性约束（Unique）,默认约束（Default）。 约束的作用是保证数据的完整性和一致性, 分为表级约束和列级约束。">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2018-10-30T15:34:14.818Z">
+<meta property="og:updated_time" content="2018-10-31T14:04:53.381Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="mysql专题03  数据库约束系列问题">
 <meta name="twitter:description" content="Mysql数据库的约束类型有:主键约束（Primary Key）,外键约束（Foreign Key）,非空约束（Not Null）,唯一性约束（Unique）,默认约束（Default）。 约束的作用是保证数据的完整性和一致性, 分为表级约束和列级约束。">
@@ -96,6 +96,9 @@
 		</div>
 		
 		<p><code>Mysql</code>数据库的约束类型有:主键约束（Primary Key）,外键约束（Foreign Key）,非空约束（Not Null）,唯一性约束（Unique）,默认约束（Default）。 约束的作用是保证数据的完整性和一致性, 分为表级约束和列级约束。<br><a id="more"></a></p>
+<blockquote>
+<p>如果约束只针对某一个字段来使用的话, 则称之为列级约束;<br>如果约束针对两个及以上字段来使用的话, 则称之为表级约束;</p>
+</blockquote>
 <h5 id="约束类型"><a href="#约束类型" class="headerlink" title="约束类型"></a>约束类型</h5><table>
 <thead>
 <tr>
@@ -132,8 +135,10 @@
 </tr>
 </tbody>
 </table>
-<h5 id="主键约束"><a href="#主键约束" class="headerlink" title="主键约束"></a>主键约束</h5><p>主键约束(primary key)要求主键列的数据唯一, 并且不能为空。主键分为两种类型: 单字段主键和多字段联合主键。<br>1.单字段主键<br>在定义列的同时指定主键, 语法规则: <code>字段名 数据类型 Primary Key [默认值]</code><br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">create table <span class="keyword">if</span> not exists t4(</span></span><br><span class="line">    -&gt; id INT(11) PRIMARY KEY,</span><br><span class="line">    -&gt; name VARCHAR(255),</span><br><span class="line">    -&gt; sex INT(11),</span><br><span class="line">    -&gt; age INT(11));</span><br><span class="line">Query OK, 0 rows affected (0.02 sec)</span><br><span class="line"></span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">show columns from t4;</span></span><br><span class="line">+-------+--------------+------+-----+---------+-------+</span><br><span class="line">| Field | Type         | Null | Key | Default | Extra |</span><br><span class="line">+-------+--------------+------+-----+---------+-------+</span><br><span class="line">| id    | int(11)      | NO   | PRI | NULL    |       |</span><br><span class="line">| name  | varchar(255) | YES  |     | NULL    |       |</span><br><span class="line">| sex   | int(11)      | YES  |     | NULL    |       |</span><br><span class="line">| age   | int(11)      | YES  |     | NULL    |       |</span><br><span class="line">+-------+--------------+------+-----+---------+-------+</span><br><span class="line">4 rows in set (0.00 sec)</span><br></pre></td></tr></table></figure></p>
-<p>在定义完成所有列之后指定主键, 语法规则: <code>[Constraint&lt;约束名&gt;] Primary Key [字段名]</code><br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">create table <span class="keyword">if</span> not exists t5(</span></span><br><span class="line">    -&gt; id INT(11),</span><br><span class="line">    -&gt; name VARCHAR(255),</span><br><span class="line">    -&gt; sex INT(11),</span><br><span class="line">    -&gt; age INT(11),</span><br><span class="line">    -&gt; Constraint pr_id PRIMARY KEY(id));</span><br><span class="line">Query OK, 0 rows affected (0.02 sec)</span><br><span class="line"></span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">desc t5;</span></span><br><span class="line">+-------+--------------+------+-----+---------+-------+</span><br><span class="line">| Field | Type         | Null | Key | Default | Extra |</span><br><span class="line">+-------+--------------+------+-----+---------+-------+</span><br><span class="line">| id    | int(11)      | NO   | PRI | NULL    |       |</span><br><span class="line">| name  | varchar(255) | YES  |     | NULL    |       |</span><br><span class="line">| sex   | int(11)      | YES  |     | NULL    |       |</span><br><span class="line">| age   | int(11)      | YES  |     | NULL    |       |</span><br><span class="line">+-------+--------------+------+-----+---------+-------+</span><br><span class="line">4 rows in set (0.00 sec)</span><br></pre></td></tr></table></figure></p>
+<h5 id="主键约束"><a href="#主键约束" class="headerlink" title="主键约束"></a>主键约束</h5><p>主键约束(primary key)要求主键列的数据唯一, 并且不能为空。主键分为两种类型: 单字段主键和多字段联合主键。<br>1.单字段主键<br>在定义列的同时指定主键, 语法规则: <code>字段名 数据类型 Primary Key [默认值]</code></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">create table <span class="keyword">if</span> not exists t4(</span></span><br><span class="line">    -&gt; id INT(11) PRIMARY KEY,</span><br><span class="line">    -&gt; name VARCHAR(255),</span><br><span class="line">    -&gt; sex INT(11),</span><br><span class="line">    -&gt; age INT(11));</span><br><span class="line">Query OK, 0 rows affected (0.02 sec)</span><br><span class="line"></span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">show columns from t4;</span></span><br><span class="line">+-------+--------------+------+-----+---------+-------+</span><br><span class="line">| Field | Type         | Null | Key | Default | Extra |</span><br><span class="line">+-------+--------------+------+-----+---------+-------+</span><br><span class="line">| id    | int(11)      | NO   | PRI | NULL    |       |</span><br><span class="line">| name  | varchar(255) | YES  |     | NULL    |       |</span><br><span class="line">| sex   | int(11)      | YES  |     | NULL    |       |</span><br><span class="line">| age   | int(11)      | YES  |     | NULL    |       |</span><br><span class="line">+-------+--------------+------+-----+---------+-------+</span><br><span class="line">4 rows in set (0.00 sec)</span><br></pre></td></tr></table></figure>
+<p>在定义完成所有列之后指定主键, 语法规则: <code>[Constraint&lt;约束名&gt;] Primary Key [字段名]</code></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">create table <span class="keyword">if</span> not exists t5(</span></span><br><span class="line">    -&gt; id INT(11),</span><br><span class="line">    -&gt; name VARCHAR(255),</span><br><span class="line">    -&gt; sex INT(11),</span><br><span class="line">    -&gt; age INT(11),</span><br><span class="line">    -&gt; Constraint pr_id PRIMARY KEY(id));</span><br><span class="line">Query OK, 0 rows affected (0.02 sec)</span><br><span class="line"></span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">desc t5;</span></span><br><span class="line">+-------+--------------+------+-----+---------+-------+</span><br><span class="line">| Field | Type         | Null | Key | Default | Extra |</span><br><span class="line">+-------+--------------+------+-----+---------+-------+</span><br><span class="line">| id    | int(11)      | NO   | PRI | NULL    |       |</span><br><span class="line">| name  | varchar(255) | YES  |     | NULL    |       |</span><br><span class="line">| sex   | int(11)      | YES  |     | NULL    |       |</span><br><span class="line">| age   | int(11)      | YES  |     | NULL    |       |</span><br><span class="line">+-------+--------------+------+-----+---------+-------+</span><br><span class="line">4 rows in set (0.00 sec)</span><br></pre></td></tr></table></figure>
 <p>一般建议将主键放在所有列后面声明;</p>
 <p>多字段联合主键<br>主键由多个字段联合组成。语法规则: <code>Primary Key[字段1, 字段2, ...., 字段n]</code></p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">create table t6(</span></span><br><span class="line">    -&gt; id INT(11),</span><br><span class="line">    -&gt; name VARCHAR(255),</span><br><span class="line">    -&gt; sex INT(11),</span><br><span class="line">    -&gt; age INT(11),</span><br><span class="line">    -&gt; PRIMARY KEY(id, name));</span><br><span class="line">Query OK, 0 rows affected (0.01 sec)</span><br><span class="line"></span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">desc t6;</span></span><br><span class="line">+-------+--------------+------+-----+---------+-------+</span><br><span class="line">| Field | Type         | Null | Key | Default | Extra |</span><br><span class="line">+-------+--------------+------+-----+---------+-------+</span><br><span class="line">| id    | int(11)      | NO   | PRI | NULL    |       |</span><br><span class="line">| name  | varchar(255) | NO   | PRI | NULL    |       |</span><br><span class="line">| sex   | int(11)      | YES  |     | NULL    |       |</span><br><span class="line">| age   | int(11)      | YES  |     | NULL    |       |</span><br><span class="line">+-------+--------------+------+-----+---------+-------+</span><br><span class="line">4 rows in set (0.00 sec)</span><br></pre></td></tr></table></figure>
@@ -141,15 +146,18 @@
 <p>外键的作用:保持数据一致性, 完整性, 可以实现表与表之间一对一或一对多关系。</p>
 <p>主表(父表):对于两个具有关联关系的表而言, 相关联字段中的主键所在的那个表即是主表。</p>
 <p>从表(子表):对于两个具有关联关系的表而言, 相关联字段中的外键所在的那个表即是从表。</p>
-<p>外键约束条件,</p>
+<p><strong>外键约束条件</strong>,</p>
 <ul>
-<li><p>父表和子表必须有相同的存储引擎, 且存储引擎必须是InnoDB。这个可以在数据MySql的配置文件中查看及修改;</p>
+<li><p><strong>父表和子表必须有相同的存储引擎, 且存储引擎必须是InnoDB。这个可以在数据MySql的配置文件中查看及修改</strong>;</p>
 </li>
-<li><p>不能使用临时表进行操作, 且外键列和参照列必须具有相似的数据类型, 如果是以数字类型作为外键, 则数据符号及长度要相同;</p>
+<li><p><strong>不能使用临时表进行操作, 且外键列和参照列必须具有相似的数据类型, 如果是以数字类型作为外键, 则数据符号及长度要相同</strong>;</p>
 </li>
-<li><p>外键列和参照列必须创建索引, 如果外键列不存在索引的话, MySql将自动创建索引;</p>
+<li><p><strong>外键列和参照列必须创建索引, 如果外键列不存在索引的话, MySql将自动创建索引</strong>;</p>
 </li>
 </ul>
+<blockquote>
+<p>default-storage-engine = INNODB</p>
+</blockquote>
 <p>外键约束参照操作,</p>
 <table>
 <thead>
@@ -350,7 +358,7 @@
 		  
 		
 		  
-			<li><a href="/categories/mysql专题/" title="mysql专题">mysql专题<sup>4</sup></a></li>
+			<li><a href="/categories/mysql专题/" title="mysql专题">mysql专题<sup>5</sup></a></li>
 		  
 		
 		  
@@ -384,7 +392,7 @@
 			
 		
 			
-				<li><a href="/tags/mysql/" title="mysql">mysql<sup>6</sup></a></li>
+				<li><a href="/tags/mysql/" title="mysql">mysql<sup>7</sup></a></li>
 			
 		
 			
@@ -444,11 +452,11 @@
 			
 		
 			
-				<li><a href="/tags/net-http/" title="net/http">net/http<sup>1</sup></a></li>
+				<li><a href="/tags/time/" title="time">time<sup>1</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/time/" title="time">time<sup>1</sup></a></li>
+				<li><a href="/tags/xorm/" title="xorm">xorm<sup>1</sup></a></li>
 			
 		
 		</ul>
