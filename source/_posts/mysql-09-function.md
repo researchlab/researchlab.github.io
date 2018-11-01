@@ -1,5 +1,5 @@
 ---
-title: "mysql专题09 运算符与常用函数"
+title: "mysql专题09 常用函数及自定义函数"
 date: 2018-10-02 17:29:37
 categories: "mysql专题"
 tags: [mysql]
@@ -288,3 +288,105 @@ dev@testdb>select group_id, group_concat(name) from tb16 group by group_id;
 |`MD5()	`|计算字符串str的MD5校验和|
 |`PASSWORD(str)	`|返回字符串str的加密版本，这个加密过程是不可逆转的，和UNIX密码加密过程使用不同的算法。|
 |`SHA()	`|计算字符串str的安全散列算法(SHA)校验和|
+
+# 自定义函数
+
+Mysql中自定义函数(user-defined function, UDF) 是一种对Mysql扩展的路径, 其用法与内置函数相同;
+
+一个自定义函数必会有参数及返回值;
+函数可以返回任意类型的值, 同样也可以接收这些类型的参数;
+
+创建自定义函数
+```shell
+CREATE FUNCTION function_name 
+RETURNS 
+{STRING | INTEGER | REAL |DECIMAL}
+routine_body
+```
+
+函数体可以由如下语句构成, 
+
+1. 函数体由合法的SQL语句构成;
+2. 函数体可以是简单的SELECT或INSERT语句;
+3. 函数体如果为复合结构则使用BEGIN..END语句;
+4. 复合结构可以包含声明, 循环, 控制结构;
+
+创建不带参数的自定义函数
+
+> dev@testdb>SET NAMES utf8;  # 修改编码 临时生效
+
+```shell
+#登录root
+mysql> set global log_bin_trust_function_creators =1;
+Query OK, 0 rows affected (0.00 sec)
+
+#切换普通账号 创建f2()
+dev@testdb>CREATE FUNCTION f2() RETURNS VARCHAR(30) DETERMINISTIC RETURN date_format(NOW(), '%Y年%m月%d日 %H点:%i分:%s秒');
+Query OK, 0 rows affected (0.05 sec)
+
+dev@testdb>select f2() as now ;
++-------------------------------------+
+| now                                 |
++-------------------------------------+
+| 2018年11月01日 11点:49分:23秒       |
++-------------------------------------+
+1 row in set (0.01 sec)
+```
+
+创建带参数的函数
+
+```shell
+dev@testdb>DROP FUNCTION f1;
+Query OK, 0 rows affected (0.10 sec)
+
+dev@testdb>CREATE FUNCTION f1(num1 SMALLINT UNSIGNED, num2 SMALLINT UNSIGNED)
+    -> RETURNS FLOAT(10,2) UNSIGNED
+    -> RETURN (num1+num2)/2;
+Query OK, 0 rows affected (0.07 sec)
+
+dev@testdb>select f1(1,5) as avg;
++------+
+| avg  |
++------+
+| 3.00 |
++------+
+1 row in set (0.00 sec)
+```
+
+创建具有复合结构函数体的自定义函数
+
+```shell
+# delimiter 替换分割结束符;
+dev@testdb>DELIMITER //
+# 当函数体中包含两条以上SQL语句时, 需要用BEGIN...END包含起来
+dev@testdb>CREATE FUNCTION adduser(username VARCHAR(20))
+    -> RETURNS INT UNSIGNED
+    -> BEGIN
+    -> INSERT tb17(username) VALUES(username);
+    -> RETURN LAST_INSERT_ID();
+    -> END
+    -> //
+Query OK, 0 rows affected (0.11 sec)
+
+dev@testdb>SELECT adduser('Tom');
+    -> //
++----------------+
+| adduser('Tom') |
++----------------+
+|              3 |
++----------------+
+1 row in set, 1 warning (0.10 sec)
+
+dev@testdb>DELIMITER ;
+dev@testdb>select adduser('Jack');
++-----------------+
+| adduser('Jack') |
++-----------------+
+|               4 |
++-----------------+
+1 row in set (0.08 sec)
+```
+
+# 总结
+- 本文总结了常用的mysql函数用法，并通过实例进行实践分析学习;
+- 进一步了解学习了自定义函数的用法及适用, 通过创建带参和不带参数自定义函数的创建,以及复合函数体自定义函数的实践 进一步加深了对Mysql函数的学习过程; 自定义函数是用户扩展Mysql功能的一种便捷路径;
