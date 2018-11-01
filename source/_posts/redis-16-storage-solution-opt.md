@@ -10,11 +10,13 @@ description:
 <!--more-->
 
 ##### 环境准备
+***
 ```
 ➜ docker run -itd --name lredis -p7002:6379 -v ~/workbench/docker/redis/conf/redis.conf:/etc/redis/redis.conf redis redis-server /etc/redis/redis.conf
 ```
 
-#### 版本日志
+##### 版本日志
+***
 ```
 ➜ docker logs -f lredis
 1:C 24 Oct 2018 09:24:03.601 # oO0OoO0OoO0Oo Redis is starting oO0OoO0OoO0Oo
@@ -25,7 +27,8 @@ description:
 1:M 24 Oct 2018 09:24:03.606 * Ready to accept connections
 ```
 
-#### RDB方式持久化
+##### RDB方式持久化
+***
 `Redis`默认的持久化方式是`RDB`，并且默认是打开的。`RDB`的保存有方式分为`主动保存`与`被动保存`。`主动保存`可以在`redis-cli`中输入`save`即可；`被动保存`需要满足配置文件中设定的触发条件，满足触发条件后，数据才会被保存为快照，正是因为这样才说`RDB`的数据完整性是比不上`AOF`;
 触发保存条件后，会在指定的目录生成一个名为`dump.rdb`的文件，等到下一次启动`Redis`时，`Redis`会去读取该目录下的`dump.rdb`文件，将里面的数据恢复到`Redis`;
 
@@ -245,7 +248,7 @@ save 60 10000
 
 
 ##### AOF方式持久化
-
+***
 `redis`默认没有开启`AOF`，需要修改redis.conf配置文件中开启,
 ```shell
 # 将appendonly改为 yes
@@ -407,6 +410,7 @@ redis-cli config set save “”
 > 通过上述`CONFIG SET`命令设置的配置， 在重启`redis`服务器之后将失效，重启会依然按照之前的配置启动，所以建议在`redis.conf`配置中也应同步修改;
 
 ##### 备份建议
+***
 确保你的数据有完整的备份，磁盘故障、节点失效等问题问题可能让你的数据消失不见， 不进行备份是非常危险的。
 `Redis`对于数据备份是非常友好的， 因为你可以在服务器运行的时候对`RDB`文件进行复制, RDB 文件一旦被创建, 就不会进行任何修改。 当服务器要创建一个新的`RDB`文件时，先将文件的内容保存在一个临时文件里面, 当临时文件写入完毕时, 程序才使用`rename(2)`原子地用临时文件替换原来的`RDB`文件。
 即无论何时, 复制`RDB`文件都是绝对安全的。
@@ -418,6 +422,7 @@ redis-cli config set save “”
 > 至少每天一次, 将`RDB` 备份到你的数据中心之外, 或者至少是备份到你运行`Redis`服务器的物理机器之外;
 
 ##### 总结
+***
 - 为实践`redis`持久化机制，创建了`docker`容器环境;
 - 针对`RDB`方式持久化，分别测试了其主动保存和被动保存机制， 被动保存存在丢数据的可能，而主动保存则不会， 被动保存通过配置触发保存条件实现, 主动保存主要通过显示执行`save`,`bgsave`,`shutdown(需开启被动保存)`来执行数据保存操作;
 - 针对`AOF`方式持久化进行了实例分析测试，`AOF` 开启后自动保存操作记录到`AOF`文件， 当显示执行`save`, `bgsave`,`shutdown`操作时也会自动保存数据到`AOF`和`RDB`文件中；
