@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   
-    <title>mysql专题09 运算符与常用函数 | 一线攻城狮</title>
+    <title>mysql专题09 常用函数及自定义函数 | 一线攻城狮</title>
     <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
     
     <meta name="author" content="Lee Hong">
@@ -14,14 +14,14 @@
     <meta name="description" content="Mysql中常用函数根据功能大致可划分为1.字符函数;2.数值运算符及函数;3.比较运算符及函数;4.日期时间函数;5.信息函数;6.聚合函数;7.加密函数等;">
 <meta name="keywords" content="mysql">
 <meta property="og:type" content="article">
-<meta property="og:title" content="mysql专题09 运算符与常用函数">
+<meta property="og:title" content="mysql专题09 常用函数及自定义函数">
 <meta property="og:url" content="http://researchlab.github.io/2018/10/02/mysql-09-function/index.html">
 <meta property="og:site_name" content="一线攻城狮">
 <meta property="og:description" content="Mysql中常用函数根据功能大致可划分为1.字符函数;2.数值运算符及函数;3.比较运算符及函数;4.日期时间函数;5.信息函数;6.聚合函数;7.加密函数等;">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2018-11-01T11:21:31.987Z">
+<meta property="og:updated_time" content="2018-11-01T12:06:32.013Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="mysql专题09 运算符与常用函数">
+<meta name="twitter:title" content="mysql专题09 常用函数及自定义函数">
 <meta name="twitter:description" content="Mysql中常用函数根据功能大致可划分为1.字符函数;2.数值运算符及函数;3.比较运算符及函数;4.日期时间函数;5.信息函数;6.聚合函数;7.加密函数等;">
 
     
@@ -75,7 +75,7 @@
 		<header class="article-info clearfix">
   <h1 itemprop="name">
     
-      <a href="/2018/10/02/mysql-09-function/" title="mysql专题09 运算符与常用函数" itemprop="url">mysql专题09 运算符与常用函数</a>
+      <a href="/2018/10/02/mysql-09-function/" title="mysql专题09 常用函数及自定义函数" itemprop="url">mysql专题09 常用函数及自定义函数</a>
   </h1>
   <p class="article-author">By
        
@@ -92,7 +92,7 @@
 		<div id="toc" class="toc-article">
 			<strong class="toc-title">文章目录</strong>
 		
-			<ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#字符函数"><span class="toc-number">1.</span> <span class="toc-text">字符函数</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#格式化函数"><span class="toc-number">2.</span> <span class="toc-text">格式化函数</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#数值运算符函数"><span class="toc-number">3.</span> <span class="toc-text">数值运算符函数</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#比较运算符函数"><span class="toc-number">4.</span> <span class="toc-text">比较运算符函数</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#日期时间函数"><span class="toc-number">5.</span> <span class="toc-text">日期时间函数</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#系统信息函数"><span class="toc-number">6.</span> <span class="toc-text">系统信息函数</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#聚合函数"><span class="toc-number">7.</span> <span class="toc-text">聚合函数</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#加密函数"><span class="toc-number">8.</span> <span class="toc-text">加密函数</span></a></li></ol>
+			<ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#字符函数"><span class="toc-number">1.</span> <span class="toc-text">字符函数</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#格式化函数"><span class="toc-number">2.</span> <span class="toc-text">格式化函数</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#数值运算符函数"><span class="toc-number">3.</span> <span class="toc-text">数值运算符函数</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#比较运算符函数"><span class="toc-number">4.</span> <span class="toc-text">比较运算符函数</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#日期时间函数"><span class="toc-number">5.</span> <span class="toc-text">日期时间函数</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#系统信息函数"><span class="toc-number">6.</span> <span class="toc-text">系统信息函数</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#聚合函数"><span class="toc-number">7.</span> <span class="toc-text">聚合函数</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#加密函数"><span class="toc-number">8.</span> <span class="toc-text">加密函数</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#自定义函数"><span class="toc-number">9.</span> <span class="toc-text">自定义函数</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#总结"><span class="toc-number">10.</span> <span class="toc-text">总结</span></a></li></ol>
 		
 		</div>
 		
@@ -696,6 +696,29 @@
 </tr>
 </tbody>
 </table>
+<h1 id="自定义函数"><a href="#自定义函数" class="headerlink" title="自定义函数"></a>自定义函数</h1><p>Mysql中自定义函数(user-defined function, UDF) 是一种对Mysql扩展的路径, 其用法与内置函数相同;</p>
+<p>一个自定义函数必会有参数及返回值;<br>函数可以返回任意类型的值, 同样也可以接收这些类型的参数;</p>
+<p>创建自定义函数<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">CREATE FUNCTION function_name </span><br><span class="line">RETURNS </span><br><span class="line">&#123;STRING | INTEGER | REAL |DECIMAL&#125;</span><br><span class="line">routine_body</span><br></pre></td></tr></table></figure></p>
+<p>函数体可以由如下语句构成, </p>
+<ol>
+<li>函数体由合法的SQL语句构成;</li>
+<li>函数体可以是简单的SELECT或INSERT语句;</li>
+<li>函数体如果为复合结构则使用BEGIN..END语句;</li>
+<li>复合结构可以包含声明, 循环, 控制结构;</li>
+</ol>
+<p>创建不带参数的自定义函数</p>
+<blockquote>
+<p>dev@testdb&gt;SET NAMES utf8;  # 修改编码 临时生效</p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash">登录root</span></span><br><span class="line"><span class="meta">mysql&gt;</span><span class="bash"> <span class="built_in">set</span> global log_bin_trust_function_creators =1;</span></span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash">切换普通账号 创建f2()</span></span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">CREATE FUNCTION f2() RETURNS VARCHAR(30) DETERMINISTIC RETURN date_format(NOW(), <span class="string">'%Y年%m月%d日 %H点:%i分:%s秒'</span>);</span></span><br><span class="line">Query OK, 0 rows affected (0.05 sec)</span><br><span class="line"></span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">select f2() as now ;</span></span><br><span class="line">+-------------------------------------+</span><br><span class="line">| now                                 |</span><br><span class="line">+-------------------------------------+</span><br><span class="line">| 2018年11月01日 11点:49分:23秒       |</span><br><span class="line">+-------------------------------------+</span><br><span class="line">1 row in set (0.01 sec)</span><br></pre></td></tr></table></figure>
+<p>创建带参数的函数</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">DROP FUNCTION f1;</span></span><br><span class="line">Query OK, 0 rows affected (0.10 sec)</span><br><span class="line"></span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">CREATE FUNCTION f1(num1 SMALLINT UNSIGNED, num2 SMALLINT UNSIGNED)</span></span><br><span class="line">    -&gt; RETURNS FLOAT(10,2) UNSIGNED</span><br><span class="line">    -&gt; RETURN (num1+num2)/2;</span><br><span class="line">Query OK, 0 rows affected (0.07 sec)</span><br><span class="line"></span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">select f1(1,5) as avg;</span></span><br><span class="line">+------+</span><br><span class="line">| avg  |</span><br><span class="line">+------+</span><br><span class="line">| 3.00 |</span><br><span class="line">+------+</span><br><span class="line">1 row in set (0.00 sec)</span><br></pre></td></tr></table></figure>
+<p>创建具有复合结构函数体的自定义函数</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> delimiter 替换分割结束符;</span></span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">DELIMITER //</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 当函数体中包含两条以上SQL语句时, 需要用BEGIN...END包含起来</span></span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">CREATE FUNCTION adduser(username VARCHAR(20))</span></span><br><span class="line">    -&gt; RETURNS INT UNSIGNED</span><br><span class="line">    -&gt; BEGIN</span><br><span class="line">    -&gt; INSERT tb17(username) VALUES(username);</span><br><span class="line">    -&gt; RETURN LAST_INSERT_ID();</span><br><span class="line">    -&gt; END</span><br><span class="line">    -&gt; //</span><br><span class="line">Query OK, 0 rows affected (0.11 sec)</span><br><span class="line"></span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">SELECT adduser(<span class="string">'Tom'</span>);</span></span><br><span class="line">    -&gt; //</span><br><span class="line">+----------------+</span><br><span class="line">| adduser('Tom') |</span><br><span class="line">+----------------+</span><br><span class="line">|              3 |</span><br><span class="line">+----------------+</span><br><span class="line">1 row in set, 1 warning (0.10 sec)</span><br><span class="line"></span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">DELIMITER ;</span></span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">select adduser(<span class="string">'Jack'</span>);</span></span><br><span class="line">+-----------------+</span><br><span class="line">| adduser('Jack') |</span><br><span class="line">+-----------------+</span><br><span class="line">|               4 |</span><br><span class="line">+-----------------+</span><br><span class="line">1 row in set (0.08 sec)</span><br></pre></td></tr></table></figure>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><ul>
+<li>本文总结了常用的mysql函数用法，并通过实例进行实践分析学习;</li>
+<li>进一步了解学习了自定义函数的用法及适用, 通过创建带参和不带参数自定义函数的创建,以及复合函数体自定义函数的实践 进一步加深了对Mysql函数的学习过程; 自定义函数是用户扩展Mysql功能的一种便捷路径;</li>
+</ul>
   
 	</div>
 		<div style="padding: 10px 44px 30px 44px;" >
@@ -705,8 +728,8 @@
 </div>
 <div>
  <p style="margin-top:0px;">作者署名：<b><a target="_blank" href="http://www.grdtechs.com/">朴实的一线攻城狮</a></b>
-<br />本文标题：<b><a href="/2018/10/02/mysql-09-function/" target="_blank" title="mysql专题09 运算符与常用函数">mysql专题09 运算符与常用函数</a></b> 
-<br />本文出处：<b><a href="/2018/10/02/mysql-09-function/" target="_blank" title="mysql专题09 运算符与常用函数">http://researchlab.github.io/2018/10/02/mysql-09-function/</a></b>
+<br />本文标题：<b><a href="/2018/10/02/mysql-09-function/" target="_blank" title="mysql专题09 常用函数及自定义函数">mysql专题09 常用函数及自定义函数</a></b> 
+<br />本文出处：<b><a href="/2018/10/02/mysql-09-function/" target="_blank" title="mysql专题09 常用函数及自定义函数">http://researchlab.github.io/2018/10/02/mysql-09-function/</a></b>
 <br />版权声明：本文由<b><a href="/about" target="_blank" title="Lee Hong">Lee Hong</a></b>创作和发表,采用<b>署名(BY)</b>-<b>非商业性使用(NC)</b>-<b>相同方式共享(SA)</b>国际许可协议进行许可,转载请注明作者及出处, 否则保留追究法律责任的权利。 </p>
 </div>
 </div>
@@ -790,7 +813,7 @@
 
 	
 <section id="comments" class="comment">
-	<div class="ds-thread" data-thread-key="2018/10/02/mysql-09-function/" data-title="mysql专题09 运算符与常用函数" data-url="http://researchlab.github.io/2018/10/02/mysql-09-function/"></div>
+	<div class="ds-thread" data-thread-key="2018/10/02/mysql-09-function/" data-title="mysql专题09 常用函数及自定义函数" data-url="http://researchlab.github.io/2018/10/02/mysql-09-function/"></div>
 </section>
 
 
