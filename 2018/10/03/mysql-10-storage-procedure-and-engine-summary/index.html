@@ -1,0 +1,802 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>mysql专题10 存储过程及存储引擎 | 一线攻城狮</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="Lee Hong">
+    
+
+    
+    <meta name="description" content="MySQL 5.0开始支持存储过程，这样大大提高数据库的处理速度，同时也可以提高数据库编程的灵活性。SQL语句需要先编译然后执行，而存储过程（Stored Procedure）是一组为了完成特定功能的SQL语句集，经编译后存储在数据库中，用户通过指定存储过程的名字并给定参数（如果该存储过程带有参数）来调用执行它。">
+<meta name="keywords" content="mysql">
+<meta property="og:type" content="article">
+<meta property="og:title" content="mysql专题10 存储过程及存储引擎">
+<meta property="og:url" content="http://researchlab.github.io/2018/10/03/mysql-10-storage-procedure-and-engine-summary/index.html">
+<meta property="og:site_name" content="一线攻城狮">
+<meta property="og:description" content="MySQL 5.0开始支持存储过程，这样大大提高数据库的处理速度，同时也可以提高数据库编程的灵活性。SQL语句需要先编译然后执行，而存储过程（Stored Procedure）是一组为了完成特定功能的SQL语句集，经编译后存储在数据库中，用户通过指定存储过程的名字并给定参数（如果该存储过程带有参数）来调用执行它。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2018-11-02T05:56:26.794Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="mysql专题10 存储过程及存储引擎">
+<meta name="twitter:description" content="MySQL 5.0开始支持存储过程，这样大大提高数据库的处理速度，同时也可以提高数据库编程的灵活性。SQL语句需要先编译然后执行，而存储过程（Stored Procedure）是一组为了完成特定功能的SQL语句集，经编译后存储在数据库中，用户通过指定存储过程的名字并给定参数（如果该存储过程带有参数）来调用执行它。">
+
+    
+    <link rel="alternative" href="/atom.xml" title="一线攻城狮" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="一线攻城狮">一线攻城狮</a></h1>
+				<h2 class="blog-motto">十年磨一剑，一步一步脚踏实地的耕种</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">首页</a></li>
+					
+						<li><a href="/archives">归档</a></li>
+					
+						<li><a href="/about">关于</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:researchlab.github.io">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2018/10/03/mysql-10-storage-procedure-and-engine-summary/" title="mysql专题10 存储过程及存储引擎" itemprop="url">mysql专题10 存储过程及存储引擎</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
+		
+ <p class="article-time">
+    <time datetime="2018-10-03T08:52:02.000Z" itemprop="datePublished"> 发表于 2018-10-03</time>
+   &nbsp&nbsp热度&nbsp<span id="busuanzi_value_page_pv"></span>° 
+  </p>
+</header>
+
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#存储过程概念"><span class="toc-number">1.</span> <span class="toc-text">存储过程概念</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#存储过程语法结构"><span class="toc-number">2.</span> <span class="toc-text">存储过程语法结构</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#无参数存储过程"><span class="toc-number">3.</span> <span class="toc-text">无参数存储过程</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#有参数存储过程"><span class="toc-number">4.</span> <span class="toc-text">有参数存储过程</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#修改存储过程"><span class="toc-number">5.</span> <span class="toc-text">修改存储过程</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#删除存储过程"><span class="toc-number">6.</span> <span class="toc-text">删除存储过程</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#创建带IN和OUT类型参数的存储过程"><span class="toc-number">7.</span> <span class="toc-text">创建带IN和OUT类型参数的存储过程</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#带有多个OUT类型参数的存储过程"><span class="toc-number">8.</span> <span class="toc-text">带有多个OUT类型参数的存储过程</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#存储过程与自定义函数的区别"><span class="toc-number">9.</span> <span class="toc-text">存储过程与自定义函数的区别</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#存储引擎"><span class="toc-number">10.</span> <span class="toc-text">存储引擎</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#总结"><span class="toc-number">11.</span> <span class="toc-text">总结</span></a></li></ol>
+		
+		</div>
+		
+		<p><code>MySQL 5.0</code>开始支持存储过程，这样大大提高数据库的处理速度，同时也可以提高数据库编程的灵活性。SQL语句需要先编译然后执行，而存储过程（Stored Procedure）是一组为了完成特定功能的SQL语句集，经编译后存储在数据库中，用户通过指定存储过程的名字并给定参数（如果该存储过程带有参数）来调用执行它。<br><a id="more"></a></p>
+<p>为何要使用存储过程? </p>
+<p>经常需要对数据进行SQL CURD操作, 那么一条SQL语句从输入MySQL执行开始到得到结果为止需要经历哪些过程呢?</p>
+<p>一条SQL语句在Mysql中执行经过,</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SQL命令--&gt; MySQL引擎--(分析)--&gt;如果语法、词法正确--(翻译)--&gt; 可识别命令--(执行)--&gt;执行结果--(返回)--&gt; 客户端</span><br></pre></td></tr></table></figure>
+<p>存储过程是SQL语句和控制语句的预编译集合, 以一个名词存储并作为一个单元处理; 存储过程只在第一次执行时需要进行语法分析和编译处理, 之后再次执行存储过程就直接执行, 而不再需要进行语法分析及编译等过程, 从而可以提高Mysql的执行效率; </p>
+<h1 id="存储过程概念"><a href="#存储过程概念" class="headerlink" title="存储过程概念"></a>存储过程概念</h1><p>存储过程是可编程的函数，在数据库中创建并保存，可以由SQL语句和控制结构组成。当想要在不同的应用程序或平台上执行相同的函数，或者封装特定功能时，存储过程是非常有用的。数据库中的存储过程可以看做是对编程中面向对象方法的模拟，它允许控制数据的访问方式。</p>
+<p>存储过程的优点:</p>
+<ul>
+<li><p>增强SQL语言的功能和灵活性: 存储过程可以用控制语句编写，有很强的灵活性，可以完成复杂的判断和较复杂的运算。</p>
+</li>
+<li><p>标准组件式编程: 存储过程被创建后，可以在程序中被多次调用，而不必重新编写该存储过程的SQL语句。而且数据库专业人员可以随时对存储过程进行修改，对应用程序源代码毫无影响。</p>
+</li>
+<li><p>较快的执行速度: 如果某一操作包含大量的Transaction-SQL代码或分别被多次执行，那么存储过程要比批处理的执行速度快很多。因为存储过程是预编译的。在首次运行一个存储过程时查询，优化器对其进行分析优化，并且给出最终被存储在系统表中的执行计划。而批处理的Transaction-SQL语句在每次运行时都要进行编译和优化，速度相对要慢一些。</p>
+</li>
+<li><p>减少网络流量: 针对同一个数据库对象的操作（如查询、修改），如果这一操作所涉及的Transaction-SQL语句被组织进存储过程，那么当在客户计算机上调用该存储过程时，网络中传送的只是该调用语句，从而大大减少网络流量并降低了网络负载。</p>
+</li>
+<li><p>作为一种安全机制来充分利用: 通过对执行某一存储过程的权限进行限制，能够实现对相应的数据的访问权限的限制，避免了非授权用户对数据的访问，保证了数据的安全。</p>
+</li>
+</ul>
+<h1 id="存储过程语法结构"><a href="#存储过程语法结构" class="headerlink" title="存储过程语法结构"></a>存储过程语法结构</h1><p>Mysql存储过程语法结构解析 </p>
+<p>创建存储过程语法结构</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">CREATE </span><br><span class="line">[DEFINER = &#123;user |CURRENT_USER&#125;]</span><br><span class="line">PROCEDURE sp_name ([proc_parameter[,...]])</span><br><span class="line">[characteristic ...] routine_body</span><br><span class="line"></span><br><span class="line">proc_parameter:</span><br><span class="line">[IN | OUT | INOUT ] param_name type </span><br><span class="line"></span><br><span class="line">COMMENT 'string'</span><br><span class="line"></span><br><span class="line">| &#123;CONTAINS SQL | NO SQL | READS SQL DATA | MODIFIES SQL DATA &#125;</span><br><span class="line">| SQL SECURITY &#123;DEFINER | INVOKER&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>DEFINER 指创建者的名字, 默认是当前登录用户; </li>
+<li>sp_name 即存储过程名称; </li>
+<li>IN 表示该参数的值必须在调用存储过程时指定;</li>
+<li>OUT 表示该参数的值可以被存储过程改变, 并且可以返回;</li>
+<li>INOUT 表示该参数的调用时指定, 并且可以被改变和返回;</li>
+<li>COMMENT 注释</li>
+<li>CONTAINS SQL: 包含SQL语句, 但不包含读或写数据的语句;</li>
+<li>NO SQL: 不包含SQL语句;</li>
+<li>READS SQL DATA: 包含读数据的语句;</li>
+<li>MODIFIES SQL DATA: 包含写数据的语句;</li>
+<li>SQL SECURITY { DEFINER }INVOKER} 指明谁有权限来执行;</li>
+</ul>
+<p>存储过程过程体规则</p>
+<ul>
+<li>过程体由合法的SQL语句构成;</li>
+<li>过程体可以是任意SQL语句;</li>
+<li>过程体如果为复合结构则使用BEGIN…END语句;</li>
+<li>复合结构可以包含声明, 循环,控制结构;</li>
+</ul>
+<blockquote>
+<p>存储过程主要用于数据的CURD包含多表连接等操作;<br>不要通过存储过程去创建数据库/表等操作;</p>
+</blockquote>
+<p>调用存储过程</p>
+<ul>
+<li>CALL sp_name ([(parameter[,…]])</li>
+<li>CALL sp_name[()]</li>
+</ul>
+<h1 id="无参数存储过程"><a href="#无参数存储过程" class="headerlink" title="无参数存储过程"></a>无参数存储过程</h1><p>创建不带参数存储过程</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">dev@testdb&gt;CREATE PROC SELECT VERSION();</span></span><br><span class="line">Query OK, 0 rows affected (0.10 sec)</span><br><span class="line"></span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">CALL sp1;</span></span><br><span class="line">+-----------+</span><br><span class="line">| VERSION() |</span><br><span class="line">+-----------+</span><br><span class="line">| 8.0.12    |</span><br><span class="line">+-----------+</span><br><span class="line">1 row in set (0.00 sec)</span><br><span class="line"></span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br><span class="line"></span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">CALL sp1();</span></span><br><span class="line">+-----------+</span><br><span class="line">| VERSION() |</span><br><span class="line">+-----------+</span><br><span class="line">| 8.0.12    |</span><br><span class="line">+-----------+</span><br><span class="line">1 row in set (0.00 sec)</span><br><span class="line"></span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br></pre></td></tr></table></figure>
+<h1 id="有参数存储过程"><a href="#有参数存储过程" class="headerlink" title="有参数存储过程"></a>有参数存储过程</h1><p>创建带有IN类型参数的存储过程</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">CREATE PROCEDURE removeGoodsByID(IN id SMALLINT UNSIGNED)</span></span><br><span class="line">    -&gt; BEGIN</span><br><span class="line">    -&gt; DELETE FROM tdb_goods WHERE goods_id = id;</span><br><span class="line">    -&gt; END</span><br><span class="line">    -&gt; //</span><br><span class="line">Query OK, 0 rows affected (0.01 sec)</span><br><span class="line"></span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">DELIMITER ;</span></span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">CALL removeGoodsByID(5);</span></span><br><span class="line">Query OK, 1 row affected (0.02 sec)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>注意 存储过程入参的参数名字不能与 待删除表的待判定的字段名称一样, 否则将执行全部删除, </p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">DELIMITER //</span></span><br><span class="line"></span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">CREATE PROCEDURE remGoodsByID(IN goods_id SMALLINT UNSIGNED)</span></span><br><span class="line">    -&gt; BEGIN</span><br><span class="line">    -&gt; DELETE FROM tb13 WHERE goods_id = goods_id;</span><br><span class="line">    -&gt; END</span><br><span class="line">    -&gt; //</span><br><span class="line">Query OK, 0 rows affected (0.07 sec)</span><br><span class="line"></span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">DELIMITER ;</span></span><br><span class="line"></span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">select * from tb13;</span></span><br><span class="line">+----------+---------------------------------+---------+------------+-------------+---------+------------+</span><br><span class="line">| goods_id | goods_name                      | cate_id | brand_name | goods_price | is_show | is_saleoff |</span><br><span class="line">+----------+---------------------------------+---------+------------+-------------+---------+------------+</span><br><span class="line">|        1 | R510VC 15.6英寸笔记本           |       1 | 华硕       |    3399.000 |       1 |          0 |</span><br><span class="line">|        2 | Y400N 14.0英寸笔记本电脑        |       1 | 联想       |    4899.000 |       1 |          0 |</span><br><span class="line">|        3 | Macbook pro 15.0英寸笔记本      |       5 | Apple      |  120000.000 |       1 |          0 |</span><br><span class="line">|        4 | R510VC 15.6英寸笔记本           |       1 | 华硕       |    3399.000 |       1 |          0 |</span><br><span class="line">|        5 | Y400N 12.0英寸笔记本电脑        |       1 | 联想       |    2899.000 |       1 |          0 |</span><br><span class="line">|        6 | Macbook pro 15.0英寸笔记本      |       5 | Apple      |  120000.000 |       1 |          0 |</span><br><span class="line">+----------+---------------------------------+---------+------------+-------------+---------+------------+</span><br><span class="line">6 rows in set (0.00 sec)</span><br><span class="line"></span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">CALL remGoodsByID(5);</span></span><br><span class="line">Query OK, 6 rows affected (0.06 sec)</span><br><span class="line"></span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">select * from tb13;</span></span><br><span class="line">Empty set (0.00 sec)</span><br></pre></td></tr></table></figure>
+<h1 id="修改存储过程"><a href="#修改存储过程" class="headerlink" title="修改存储过程"></a>修改存储过程</h1><p>语法结构<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">ALTER PROCEDURE sp_name [ characteristic ...]</span><br><span class="line"></span><br><span class="line">COMMENT 'string'</span><br><span class="line"></span><br><span class="line">| &#123; CONTAINS SQL | NO SQL | READS SQL DATA | MODIFIES SQL DATA &#125;</span><br><span class="line">| SQL SECURITY &#123; DEFINER | INVOKER &#125;</span><br></pre></td></tr></table></figure></p>
+<ul>
+<li>存储存储过程时 仅能修改注释, 内容的类型等, 并不能修改过程体;</li>
+<li>若要修改过程体，只能先将存储过程删除，然后再重建;</li>
+</ul>
+<h1 id="删除存储过程"><a href="#删除存储过程" class="headerlink" title="删除存储过程"></a>删除存储过程</h1><p>语法结构</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">DROP PROCEDURE [ IF EXISTS ] sp_name</span><br></pre></td></tr></table></figure>
+<p>用法举例</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">drop procedure <span class="keyword">if</span> exists sp1;</span></span><br><span class="line">Query OK, 0 rows affected (0.06 sec)</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash">删除不存在的存储过程仅warning 无error</span></span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">DROP PROCEDURE IF EXISTS sp3;</span></span><br><span class="line">Query OK, 0 rows affected, 1 warning (0.00 sec)</span><br></pre></td></tr></table></figure>
+<h1 id="创建带IN和OUT类型参数的存储过程"><a href="#创建带IN和OUT类型参数的存储过程" class="headerlink" title="创建带IN和OUT类型参数的存储过程"></a>创建带IN和OUT类型参数的存储过程</h1><p>实例 删除指定的数据行, 返回剩下的数据行数</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">DELIMITER //</span></span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">CREATE PROCEDURE removeGoodsAndReturnGoodsNums(IN p_goods_id INT UNSIGNED, OUT goodsNums INT UNSIGNED)</span></span><br><span class="line">    -&gt; BEGIN</span><br><span class="line">    -&gt; DELETE FROM tdb_goods WHERE goods_id = p_goods_id;</span><br><span class="line">    -&gt; SELECT count(goods_id) FROM tdb_goods INTO goodsNums;</span><br><span class="line">    -&gt; END</span><br><span class="line">    -&gt; //</span><br><span class="line">Query OK, 0 rows affected (0.01 sec)</span><br><span class="line"></span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">DELIMITER ;</span></span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">SELECT COUNT(goods_id) FROM tdb_goods;</span></span><br><span class="line">+-----------------+</span><br><span class="line">| COUNT(goods_id) |</span><br><span class="line">+-----------------+</span><br><span class="line">|              20 |</span><br><span class="line">+-----------------+</span><br><span class="line">1 row in set (0.01 sec)</span><br><span class="line"></span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">CALL removeGoodsAndReturnGoodsNums(1, @nums);</span></span><br><span class="line">Query OK, 1 row affected (0.03 sec)</span><br><span class="line"></span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">SELECT @nums;</span></span><br><span class="line">+-------+</span><br><span class="line">| @nums |</span><br><span class="line">+-------+</span><br><span class="line">|    19 |</span><br><span class="line">+-------+</span><br><span class="line">1 row in set (0.00 sec)</span><br></pre></td></tr></table></figure>
+<ul>
+<li>DECLARE 声明的变量为局部变量, 并且为BEGIN … END 第一行 只在BEGIN…END内有效</li>
+<li>@nums @声明的变量 只在当前客户端有效; 通过SET设置的也是一样， 所以@变量称之为用户变量只在当前客户端有效;</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">SET @i = 7;</span></span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br><span class="line"></span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">SELECT @i;</span></span><br><span class="line">+------+</span><br><span class="line">| @i   |</span><br><span class="line">+------+</span><br><span class="line">|    7 |</span><br><span class="line">+------+</span><br><span class="line">1 row in set (0.00 sec)</span><br></pre></td></tr></table></figure>
+<h1 id="带有多个OUT类型参数的存储过程"><a href="#带有多个OUT类型参数的存储过程" class="headerlink" title="带有多个OUT类型参数的存储过程"></a>带有多个OUT类型参数的存储过程</h1><p>返回删除的用户数，返回剩余的用户数</p>
+<p>数据准备</p>
+<blockquote>
+<p> 建表脚本及数据生成可参考<a href="https://github.com/researchlab/docker-envs/tree/master/mysql/sqls" target="_blank" rel="noopener">tb18_ddl.sql tb18_dml.sql</a></p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash"><span class="built_in">source</span> /sqls/tb18_ddl.sql;</span></span><br><span class="line">Query OK, 0 rows affected (0.07 sec)</span><br><span class="line"></span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash"><span class="built_in">source</span> /sqls/tb18_dml.sql;</span></span><br><span class="line">...</span><br><span class="line">Query OK, 1 row affected (0.01 sec)</span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">select * from tb18;</span></span><br><span class="line">+----+----------+----------------------------------+------+------+</span><br><span class="line">| id | username | password                         | age  | SEX  |</span><br><span class="line">+----+----------+----------------------------------+------+------+</span><br><span class="line">|  1 | A        | 507f513353702b50c145d5b7d138095c |   20 |    1 |</span><br><span class="line">|  2 | B        | 5ecb75b1-de4c-11e8-9bb8-0242ac15 |   33 |    0 |</span><br><span class="line">|  3 | C        | 5ecbba14-de4c-11e8-9bb8-0242ac15 |   38 |    1 |</span><br><span class="line">|  4 | D        | 5ecc4ee0-de4c-11e8-9bb8-0242ac15 |   64 |    1 |</span><br><span class="line">|  5 | E        | 5ecce3ae-de4c-11e8-9bb8-0242ac15 |   29 |    0 |</span><br><span class="line">|  6 | F        | 5ecd835c-de4c-11e8-9bb8-0242ac15 |   86 |    1 |</span><br><span class="line">|  7 | G        | 5ece181e-de4c-11e8-9bb8-0242ac15 |   51 |    1 |</span><br><span class="line">|  8 | H        | 5ece6966-de4c-11e8-9bb8-0242ac15 |   65 |    1 |</span><br><span class="line">|  9 | I        | 5ecebfba-de4c-11e8-9bb8-0242ac15 |   62 |    0 |</span><br><span class="line">| 10 | J        | 5ecf22af-de4c-11e8-9bb8-0242ac15 |  102 |    0 |</span><br><span class="line">| 11 | K        | 5ecfaab5-de4c-11e8-9bb8-0242ac15 |   59 |    0 |</span><br><span class="line">| 12 | L        | 5ed08bd3-de4c-11e8-9bb8-0242ac15 |   74 |    1 |</span><br><span class="line">| 13 | M        | 5ed12952-de4c-11e8-9bb8-0242ac15 |   27 |    1 |</span><br><span class="line">| 14 | N        | 5ed1c141-de4c-11e8-9bb8-0242ac15 |   92 |    1 |</span><br><span class="line">| 15 | O        | 5ed2b90c-de4c-11e8-9bb8-0242ac15 |   59 |    0 |</span><br><span class="line">| 16 | P        | 5ed3654d-de4c-11e8-9bb8-0242ac15 |   50 |    1 |</span><br><span class="line">| 17 | Q        | 5ed3d018-de4c-11e8-9bb8-0242ac15 |   45 |    0 |</span><br><span class="line">| 18 | R        | 5ed438b6-de4c-11e8-9bb8-0242ac15 |   48 |    0 |</span><br><span class="line">| 19 | S        | 5ed4be04-de4c-11e8-9bb8-0242ac15 |   28 |    1 |</span><br><span class="line">| 20 | T        | 5ed56b4c-de4c-11e8-9bb8-0242ac15 |   94 |    0 |</span><br><span class="line">| 21 | U        | 5ed5ebf7-de4c-11e8-9bb8-0242ac15 |   88 |    0 |</span><br><span class="line">| 22 | V        | 5ed67bd1-de4c-11e8-9bb8-0242ac15 |  105 |    0 |</span><br><span class="line">| 23 | W        | 5ed6c6dc-de4c-11e8-9bb8-0242ac15 |  113 |    1 |</span><br><span class="line">| 24 | X        | 5ed7616b-de4c-11e8-9bb8-0242ac15 |    7 |    1 |</span><br><span class="line">| 25 | Y        | 5ed7ff1b-de4c-11e8-9bb8-0242ac15 |   74 |    0 |</span><br><span class="line">| 26 | Z        | 5ed86256-de4c-11e8-9bb8-0242ac15 |   12 |    1 |</span><br><span class="line">+----+----------+----------------------------------+------+------+</span><br><span class="line">26 rows in set (0.00 sec)</span><br></pre></td></tr></table></figure>
+<p>得到插入或删除更新(CREATE/UPDATE/DELETE) Mysql记录影响的行数<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">SELECT ROW_COUNT();</span></span><br><span class="line">+-------------+</span><br><span class="line">| ROW_COUNT() |</span><br><span class="line">+-------------+</span><br><span class="line">|          -1 |</span><br><span class="line">+-------------+</span><br><span class="line">1 row in set (0.00 sec)</span><br></pre></td></tr></table></figure></p>
+<p>创建存储过程</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">DELIMITER //</span></span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">CREATE PROCEDURE remUserByAgeAndReturnInfos(</span></span><br><span class="line">    -&gt; IN p_age SMALLINT UNSIGNED,</span><br><span class="line">    -&gt; OUT deletedUsers SMALLINT UNSIGNED,</span><br><span class="line">    -&gt; OUT userCounts SMALLINT UNSIGNED)</span><br><span class="line">    -&gt; BEGIN</span><br><span class="line">    -&gt; DELETE FROM tb18 WHERE age = p_age;</span><br><span class="line">    -&gt; SELECT ROW_COUNT() INTO deletedUsers;</span><br><span class="line">    -&gt; SELECT COUNT(id) FROM tb18 INTO userCounts;</span><br><span class="line">    -&gt; END</span><br><span class="line">    -&gt; //</span><br><span class="line">Query OK, 0 rows affected (0.04 sec)</span><br><span class="line"></span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">DELIMITER ;</span></span><br></pre></td></tr></table></figure>
+<p>查询数据状态</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">select age from tb18 group by age having count(age) &gt; 1;</span></span><br><span class="line">+------+</span><br><span class="line">| age  |</span><br><span class="line">+------+</span><br><span class="line">|    6 |</span><br><span class="line">|  120 |</span><br><span class="line">|   54 |</span><br><span class="line">+------+</span><br><span class="line">3 rows in set (0.00 sec)</span><br><span class="line"></span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">select count(*) from tb18;</span></span><br><span class="line">+----------+</span><br><span class="line">| count(*) |</span><br><span class="line">+----------+</span><br><span class="line">|       26 |</span><br><span class="line">+----------+</span><br><span class="line">1 row in set (0.00 sec)</span><br></pre></td></tr></table></figure>
+<p>调用存储过程</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">CALL remUserByAgeAndReturnInfos(54, @deletedUsers, @userCounts);</span></span><br><span class="line">Query OK, 1 row affected (0.02 sec)</span><br></pre></td></tr></table></figure>
+<p>查询执行结果</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">SELECT @deletedUsers as deletedUsers;</span></span><br><span class="line">+--------------+</span><br><span class="line">| deletedUsers |</span><br><span class="line">+--------------+</span><br><span class="line">|            2 |</span><br><span class="line">+--------------+</span><br><span class="line">1 row in set (0.00 sec)</span><br><span class="line"></span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">SELECT @userCounts;</span></span><br><span class="line">+-------------+</span><br><span class="line">| @userCounts |</span><br><span class="line">+-------------+</span><br><span class="line">|          24 |</span><br><span class="line">+-------------+</span><br><span class="line">1 row in set (0.00 sec)</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash">或者</span></span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">SELECT @deletedUsers as deletedUsers, @userCounts;</span></span><br><span class="line">+--------------+-------------+</span><br><span class="line">| deletedUsers | @userCounts |</span><br><span class="line">+--------------+-------------+</span><br><span class="line">|            2 |          24 |</span><br><span class="line">+--------------+-------------+</span><br><span class="line">1 row in set (0.01 sec)</span><br></pre></td></tr></table></figure>
+<ul>
+<li>上述存储过程不是事务数据一致性的, 但存储过程中执行语句错误; 则前面执行过的sql语句依然生效不回滚, 而执行错误的后继sql语句将不再执行;</li>
+</ul>
+<h1 id="存储过程与自定义函数的区别"><a href="#存储过程与自定义函数的区别" class="headerlink" title="存储过程与自定义函数的区别"></a>存储过程与自定义函数的区别</h1><ul>
+<li>存储过程实现的功能要复杂一些; 而函数的针对性更强;</li>
+<li>存储过程可以返回多个值; 函数只能有一个返回值;</li>
+<li>存储过程一般独立的来执行; 而函数可以作为其它SQL语句的组成部分来出现;</li>
+<li>存储过程的修改只能修改注释及内容类型等 不能修改存储体, 要修改存储体只能删除然后重建;</li>
+</ul>
+<h1 id="存储引擎"><a href="#存储引擎" class="headerlink" title="存储引擎"></a>存储引擎</h1><p>Mysql可以将数据以不同的技术存储在文件(内存)中, 这种技术就称为存储引擎;<br>每一种存储引擎使用不同的存储机制, 索引技巧, 锁定水平, 最终提供广泛且不同的功能; </p>
+<p>Mysql目前支持的存储引擎主要有,</p>
+<ul>
+<li>MyISAM</li>
+<li>InnoDB</li>
+<li>Memory </li>
+<li>CSV</li>
+<li>Archive</li>
+</ul>
+<p>并发控制<br>当多个连接同时对记录进行修改时保证数据的一致性和完整性; </p>
+<p>为保证数据的一致性和完整性，目前主要通过锁来处理, 主要有两种锁 </p>
+<ul>
+<li><p>共享锁(读锁)<br>在同一时间段内, 多个用户可以读取同一个资源, 读取过程中数据不会发生变化;</p>
+</li>
+<li><p>排它锁(写锁)<br>在任何时候只能有一个用户写入资源, 当进行写锁时, 会阻塞其它的读锁或者写锁操作;</p>
+</li>
+</ul>
+<p>锁的颗粒大小 及锁定数据的单元大小的度量;</p>
+<p>mysql主要有两种锁策略, </p>
+<ul>
+<li><p>表锁, 是一种开销最小的锁策略; </p>
+</li>
+<li><p>行锁, 是一种开销最大的锁策略;</p>
+</li>
+</ul>
+<p>事务 </p>
+<p>事务是数据库区别于文件系统的重要特征之一;<br>事务用于保证数据库的完整性; </p>
+<p>事务四大特性 </p>
+<ul>
+<li>原子性 (Atomicity)</li>
+<li>一致性(Consistency)</li>
+<li>隔离性(Isolation)</li>
+<li>持久性(Durability)</li>
+</ul>
+<p>外键是保证数据一致性的一种特性;</p>
+<p>索引是对数据表中一列或多列的执行排序的一种结构,如书的目录, 可以快速定位数据的方法, </p>
+<ul>
+<li>普通索引</li>
+<li>唯一索引</li>
+<li>全文索引</li>
+<li>btree索引</li>
+<li>hash索引</li>
+<li>…</li>
+</ul>
+<p>几类存储引擎的主要特征,</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">特点</th>
+<th style="text-align:left">MyISAM</th>
+<th style="text-align:left">InnoDB</th>
+<th style="text-align:left">Memory</th>
+<th style="text-align:left">Archive</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">存储限制</td>
+<td style="text-align:left">256TB</td>
+<td style="text-align:left">64TB</td>
+<td style="text-align:left">有</td>
+<td style="text-align:left">无</td>
+</tr>
+<tr>
+<td style="text-align:left">事务安全</td>
+<td style="text-align:left">-</td>
+<td style="text-align:left">支持</td>
+<td style="text-align:left">-</td>
+<td style="text-align:left">-</td>
+</tr>
+<tr>
+<td style="text-align:left">支持索引</td>
+<td style="text-align:left">支持</td>
+<td style="text-align:left">支持</td>
+<td style="text-align:left">支持</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left">锁颗粒</td>
+<td style="text-align:left">表锁</td>
+<td style="text-align:left">行锁</td>
+<td style="text-align:left">表锁</td>
+<td style="text-align:left">行锁</td>
+</tr>
+<tr>
+<td style="text-align:left">数据压缩</td>
+<td style="text-align:left">支持</td>
+<td style="text-align:left">-</td>
+<td style="text-align:left">-</td>
+<td style="text-align:left">支持</td>
+</tr>
+<tr>
+<td style="text-align:left">支持外键</td>
+<td style="text-align:left">-</td>
+<td style="text-align:left">支持</td>
+<td style="text-align:left">-</td>
+<td style="text-align:left">-</td>
+</tr>
+</tbody>
+</table>
+<p>适用场景</p>
+<ul>
+<li>MyISAM: 适用于事务的处理不多的情况;</li>
+<li>InnoDB: 适用于事务处理比较多, 需要外键支持的情况;</li>
+</ul>
+<p>修改存储引擎</p>
+<p>从Mysql5.5开始默认配置InnoDB存储引擎;</p>
+<ul>
+<li><p>可通过修改配置文件<code>default-storage-engine = InnoDB</code> 值来设置合适的引擎;</p>
+</li>
+<li><p>通过创建表时指定所使用的存储引擎,</p>
+</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">CREATE TABLE IF NOT EXISTS tbl_name(</span><br><span class="line">...</span><br><span class="line">) ENGINE = engine;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>通过ALTER 命令来修改, </li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ALTER TABLE tbl_name ENGINE [=] engine_name;</span><br></pre></td></tr></table></figure>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><ul>
+<li>简要阐述了存储过程的基本概念及为何要使用存储过程的优点;</li>
+<li>存储过程 实际为SQL语句和控制语句的预编译集合, 以一个名称存储并作为一个单元处理;</li>
+<li>存储过程<ul>
+<li>有三类参数可使用 输入类型, 输出类型,输入&amp;输出类型;</li>
+<li>通过CREATE PROCEDURE sp_name(p,…)…创建存储过程;</li>
+<li>创建存储过程或自定义函数时需要通过delimiter语句修改定界符;</li>
+<li>如果函数体或过程体有多个语句, 需要包含在BEGIN…END语句块中;</li>
+<li>存储过程通过call来调用;</li>
+</ul>
+</li>
+<li>简要分析了存储过程创建/修改/调用/修改的语法结构;</li>
+<li>通过创建无参数存储过程实例初步学习存储过程;</li>
+<li>通过创建带IN参数的存储过程实例分析进一步了解存储过程的使用;</li>
+<li>通过进一步创建带IN和OUT参数及多OUT参数的存储过程深入了解学习存储过程的使用;</li>
+<li>简要对比了存储过程与自定义函数的区别及其各自适合的场景;</li>
+<li>简要介绍了几类存储引擎的特点等;</li>
+</ul>
+  
+	</div>
+		<div style="padding: 10px 44px 30px 44px;" >
+<div style="border: 1px dashed #e0e0e0; padding: 10px 10px 10px 10px; background-color: #fffeee; background-repeat: no-repeat; background-attachment: scroll; background-position: 1% 50%; -moz-background-size: auto auto; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">
+<div style="float:left;margin-top:0px;">
+<img src="/img/weixin.jpg" width="125px" height="125px" style="border:1px solid #ccc; margin: 6px 5px 0px 0px"/>
+</div>
+<div>
+ <p style="margin-top:0px;">作者署名：<b><a target="_blank" href="http://www.grdtechs.com/">朴实的一线攻城狮</a></b>
+<br />本文标题：<b><a href="/2018/10/03/mysql-10-storage-procedure-and-engine-summary/" target="_blank" title="mysql专题10 存储过程及存储引擎">mysql专题10 存储过程及存储引擎</a></b> 
+<br />本文出处：<b><a href="/2018/10/03/mysql-10-storage-procedure-and-engine-summary/" target="_blank" title="mysql专题10 存储过程及存储引擎">http://researchlab.github.io/2018/10/03/mysql-10-storage-procedure-and-engine-summary/</a></b>
+<br />版权声明：本文由<b><a href="/about" target="_blank" title="Lee Hong">Lee Hong</a></b>创作和发表,采用<b>署名(BY)</b>-<b>非商业性使用(NC)</b>-<b>相同方式共享(SA)</b>国际许可协议进行许可,转载请注明作者及出处, 否则保留追究法律责任的权利。 </p>
+</div>
+</div>
+</div>
+
+   	       
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/mysql专题/">mysql专题</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/mysql/">mysql</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	<div class="share-jiathis">
+	  
+<div class="jiathis_style_24x24">
+	<a class="jiathis_button_weixin"></a>
+	<a class="jiathis_button_tsina"></a>
+	<a class="jiathis_button_tqq"></a>
+	<a class="jiathis_button_qzone"></a>
+    <a class="jiathis_button_googleplus"></a>
+	<a class="jiathis_button_douban"></a>
+	<a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+    var jiathis_config={
+    data_track_clickback:true,
+    sm:"copy,renren,cqq",
+    pic:"",
+    summary:"",
+    
+  </script> 
+<script type="text/javascript" src="//v3.jiathis.com/code/jia.js?uid=
+2084050" charset="utf-8"></script>      
+
+
+	 </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2018/10/03/redis-06-bloom-filter/" title="redis专题06 布隆过滤器">
+  <strong>上一篇：</strong><br/>
+  <span>
+  redis专题06 布隆过滤器</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2018/10/02/mysql-09-function/"  title="mysql专题09 常用函数及自定义函数">
+ <strong>下一篇：</strong><br/> 
+ <span>mysql专题09 常用函数及自定义函数
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+<section id="comments" class="comment">
+	<div class="ds-thread" data-thread-key="2018/10/03/mysql-10-storage-procedure-and-engine-summary/" data-title="mysql专题10 存储过程及存储引擎" data-url="http://researchlab.github.io/2018/10/03/mysql-10-storage-procedure-and-engine-summary/"></div>
+</section>
+
+
+</div>  
+
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+<div id="asidepart">
+
+  <div class="widget tag">
+<!--<hr noshade color="#ccc">-->
+<!-- <p style="text-align:center">Mike.Lee</p> -->
+<p margin="0" style="text-align:center">
+<a class="ahref" href="http://researchlab.github.io/about/">
+<img id="aboutpic"  src="/img/qzly.png" alt="@全栈炼狱之路" height="200" width="200" style="box-shadow: 0px 0px 2px 2px #9edeff;border-radius: 8px;" >
+</a></p>
+<p style="text-align:center"><font size="2" color="grey">关注微信公众号 @全栈炼狱之路</font></p>
+<div style="display:block; margin-top:10px; padding: 0px 4px 4px 0; border-top: dashed 1px #ccc; text-align:left;"></div>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<div style="float:left;position:absolute;"><font size="2" >总访问:<span id="busuanzi_value_site_pv"></span>次</font></div>
+<div style="float:right;"><font size="2" >总访客:<span id="busuanzi_value_site_uv"></span>人</font></div>
+
+<div style="margin-top:30px; padding: 5px 4px 4px 0; border-top: dashed 1px #ccc; text-align:left;"></div>
+</div>
+
+
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/DevOps/" title="DevOps">DevOps<sup>9</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Hexo/" title="Hexo">Hexo<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/algorithm/" title="algorithm">algorithm<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/docker-practice/" title="docker-practice">docker-practice<sup>8</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/go-bootcamp/" title="go-bootcamp">go-bootcamp<sup>6</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/go-pattern/" title="go-pattern">go-pattern<sup>3</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/golang/" title="golang">golang<sup>22</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/javascript/" title="javascript">javascript<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/mysql专题/" title="mysql专题">mysql专题<sup>10</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/php/" title="php">php<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/redis专题/" title="redis专题">redis专题<sup>17</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/golang/" title="golang">golang<sup>25</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/redis/" title="redis">redis<sup>17</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mysql/" title="mysql">mysql<sup>12</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/docker/" title="docker">docker<sup>9</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/setcookie/" title="setcookie">setcookie<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/tcp/" title="tcp">tcp<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/concurrency/" title="concurrency">concurrency<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/cache/" title="cache">cache<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Hexo/" title="Hexo">Hexo<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Blog/" title="Blog">Blog<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/getcookie/" title="getcookie">getcookie<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/rpc/" title="rpc">rpc<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/ticker/" title="ticker">ticker<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/gin/" title="gin">gin<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/submodule/" title="submodule">submodule<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/form/" title="form">form<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/post/" title="post">post<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/reflect/" title="reflect">reflect<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/net-http/" title="net/http">net/http<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/time/" title="time">time<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="http://blog.csdn.net/xiaolongwang2010" target="_blank" title="小龙王2010csdn技术博客">Linux/c/c++</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  
+
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+  <iframe width="100%" height="550" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=550&fansRow=1&ptype=1&speed=0&skin=1&isTitle=1&noborder=1&isWeibo=1&isFans=1&uid=5141203275&verifier=a533edf5&dpc=1"></iframe>
+
+
+</aside>
+</div>
+
+    </div>
+    <footer><div id="footer" >
+	
+	
+	<div class="social-font" class="clearfix">
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/researchlab/lightman" target="_blank" title="lightman">lightman</a> ©2016 - 2018 
+		
+		<a href="/about" target="_blank" title="Lee Hong">Lee Hong</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+
+
+<script type="text/javascript">
+  var duoshuoQuery = {short_name:"gamedp"};
+  (function() {
+    var ds = document.createElement('script');
+    ds.type = 'text/javascript';ds.async = true;
+    ds.src = '//static.duoshuo.com/embed.js';
+    ds.charset = 'UTF-8';
+    (document.getElementsByTagName('head')[0] 
+    || document.getElementsByTagName('body')[0]).appendChild(ds);
+  })();
+</script> 
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>
