@@ -467,6 +467,9 @@ mysql主要有两种锁策略,
 
 - MyISAM: 适用于事务的处理不多的情况;
 - InnoDB: 适用于事务处理比较多, 需要外键支持的情况;
+- MRG_MYISAM 适用于分段归档, 数据仓库;
+- Archive 适用于日志记录, 支持SELECT/INSERT操作,不支持UPDATE/DELETE操作;
+- Ndb cluster 适用于高可用性;
 
 修改存储引擎
 
