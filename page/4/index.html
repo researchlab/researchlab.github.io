@@ -72,6 +72,72 @@
         <header class="article-info clearfix">
   <h1 itemprop="name">
     
+      <a href="/2018/01/19/redis-04-bitmap/" title="redis专题04 数据结构之redis位图系列问题" itemprop="url">redis专题04 数据结构之redis位图系列问题</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
+		
+ <p class="article-time">
+    <time datetime="2018-01-19T11:17:30.000Z" itemprop="datePublished"> 发表于 2018-01-19</time>
+  </p>
+</header>
+
+    <div class="article-content">
+        
+        <p><code>redis</code>位图数据结构<code>bitmap</code>将很多小的整数储存到一个长度较大的位图中， 又或者将一个非常庞大的键分割为多个较小的键来进行储存，从而非常高效地使用内存，使得<code>redis</code>能够应用在诸多场景中, 如用户签到、统计活跃用户、用户在线状态等</p>
+<blockquote>
+<p>此外, <code>bitfield</code>能够以指定的方式对计算溢出进行控制的能力，使得它特别适合应用于实时分析领域；<br></p></blockquote>
+        
+        
+        <p class="article-more-link">
+          
+            <a href="/2018/01/19/redis-04-bitmap/#more">Read More</a>
+          
+       </p>
+    </div>
+    <footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/redis专题/">redis专题</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/redis/">redis</a>
+  </div>
+
+</div>
+
+
+
+
+<div class="comments-count">
+		
+	  	<span></span>
+		<a href="/2018/01/19/redis-04-bitmap/#comments" class="ds-thread-count comments-count-link" data-thread-key="2018/01/19/redis-04-bitmap/" data-count-type="comments">&nbsp;</a>
+	
+</div>
+
+</footer>
+
+
+    </article>
+
+
+
+
+
+
+   
+    
+    <article class="post-expand post" itemprop="articleBody"> 
+        <header class="article-info clearfix">
+  <h1 itemprop="name">
+    
       <a href="/2018/01/18/redis-03-delay-queue/" title="redis专题03 消息队列系列问题" itemprop="url">redis专题03 消息队列系列问题</a>
   </h1>
   <p class="article-author">By
@@ -643,70 +709,6 @@
 
 
 
-   
-    
-    <article class="post-expand post" itemprop="articleBody"> 
-        <header class="article-info clearfix">
-  <h1 itemprop="name">
-    
-      <a href="/2017/03/06/docker-image-mgr/" title="docker实践--03 镜像管理" itemprop="url">docker实践--03 镜像管理</a>
-  </h1>
-  <p class="article-author">By
-       
-		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
-		
- <p class="article-time">
-    <time datetime="2017-03-06T11:06:41.000Z" itemprop="datePublished"> 发表于 2017-03-06</time>
-  </p>
-</header>
-
-    <div class="article-content">
-        
-        <p>在前面第一篇总结中已了解了一些镜像的概念，简单的说镜像就是一个容器的只读模板，用来创建容器。当运行容器时需要指定镜像，如果本地没有该镜像，则会从Docker Registry下载。默认查找的是<code>Docker Hub</code>。Docker的镜像是增量的修改，每次创建新的镜像都会在老的镜像上面构建一个增量的层，使用到的技术是Another Union File System(AUFS)，具体可参考 <a href="http://www.infoq.com/cn/articles/analysis-of-docker-file-system-aufs-and-devicemapper/" target="_blank" rel="noopener">剖析Docker文件系统：Aufs与Devicemapper</a>, 下面主要总结记录使用和管理docker镜像的过程。</p>
-        
-        
-        <p class="article-more-link">
-          
-            <a href="/2017/03/06/docker-image-mgr/#more">Read More</a>
-          
-       </p>
-    </div>
-    <footer class="article-footer clearfix">
-<div class="article-catetags">
-
-<div class="article-categories">
-  <span></span>
-  <a class="article-category-link" href="/categories/docker-practice/">docker-practice</a>
-</div>
-
-
-  <div class="article-tags">
-  
-  <span></span> <a href="/tags/docker/">docker</a>
-  </div>
-
-</div>
-
-
-
-
-<div class="comments-count">
-		
-	  	<span></span>
-		<a href="/2017/03/06/docker-image-mgr/#comments" class="ds-thread-count comments-count-link" data-thread-key="2017/03/06/docker-image-mgr/" data-count-type="comments">&nbsp;</a>
-	
-</div>
-
-</footer>
-
-
-    </article>
-
-
-
-
-
-
 
   <nav id="page-nav" class="clearfix">
     <a class="extend prev" rel="prev" href="/page/3/"><span></span>Prev</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="page-number current">4</span><a class="page-number" href="/page/5/">5</a><a class="page-number" href="/page/6/">6</a><span class="space">&hellip;</span><a class="page-number" href="/page/9/">9</a><a class="extend next" rel="next" href="/page/5/">Next<span></span></a>
@@ -772,7 +774,7 @@
 		  
 		
 		  
-			<li><a href="/categories/mysql专题/" title="mysql专题">mysql专题<sup>11</sup></a></li>
+			<li><a href="/categories/mysql专题/" title="mysql专题">mysql专题<sup>12</sup></a></li>
 		  
 		
 		  
@@ -802,7 +804,7 @@
 			
 		
 			
-				<li><a href="/tags/mysql/" title="mysql">mysql<sup>13</sup></a></li>
+				<li><a href="/tags/mysql/" title="mysql">mysql<sup>14</sup></a></li>
 			
 		
 			

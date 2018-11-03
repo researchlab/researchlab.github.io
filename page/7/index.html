@@ -72,6 +72,70 @@
         <header class="article-info clearfix">
   <h1 itemprop="name">
     
+      <a href="/2016/10/16/close-ticker-correctly/" title="优雅的关闭ticker" itemprop="url">优雅的关闭ticker</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
+		
+ <p class="article-time">
+    <time datetime="2016-10-16T14:27:39.000Z" itemprop="datePublished"> 发表于 2016-10-16</time>
+  </p>
+</header>
+
+    <div class="article-content">
+        
+        <p>在<code>ticker</code>和<code>goroutine</code>组合使用中当调用<code>ticker.Stop()</code>关闭<code>ticker</code>之后，相应的<code>goroutine</code>中的<code>ticker.C</code>并没有停掉，下面总结一种优雅的方式关闭<code>ticker</code>.<br></p>
+        
+        
+        <p class="article-more-link">
+          
+            <a href="/2016/10/16/close-ticker-correctly/#more">Read More</a>
+          
+       </p>
+    </div>
+    <footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/golang/">golang</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/ticker/">ticker</a>
+  </div>
+
+</div>
+
+
+
+
+<div class="comments-count">
+		
+	  	<span></span>
+		<a href="/2016/10/16/close-ticker-correctly/#comments" class="ds-thread-count comments-count-link" data-thread-key="2016/10/16/close-ticker-correctly/" data-count-type="comments">&nbsp;</a>
+	
+</div>
+
+</footer>
+
+
+    </article>
+
+
+
+
+
+
+   
+    
+    <article class="post-expand post" itemprop="articleBody"> 
+        <header class="article-info clearfix">
+  <h1 itemprop="name">
+    
       <a href="/2016/09/07/go-postform/" title="Golang发送post表单请求" itemprop="url">Golang发送post表单请求</a>
   </h1>
   <p class="article-author">By
@@ -642,70 +706,6 @@
 
 
 
-   
-    
-    <article class="post-expand post" itemprop="articleBody"> 
-        <header class="article-info clearfix">
-  <h1 itemprop="name">
-    
-      <a href="/2016/03/29/gin-setcookie/" title="gin中使用设置cookie过期时间总结" itemprop="url">gin中使用设置cookie过期时间总结</a>
-  </h1>
-  <p class="article-author">By
-       
-		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
-		
- <p class="article-time">
-    <time datetime="2016-03-29T01:48:56.000Z" itemprop="datePublished"> 发表于 2016-03-29</time>
-  </p>
-</header>
-
-    <div class="article-content">
-        
-        <p>可以操作<code>Cookie</code>的<code>Http</code>头有两个:<code>Set-Cookie</code>和<code>Cookie</code>。<code>Set-Cookie</code>由服务器发送，它包含在响应请求的头部中。它用于在客户端创建一个<code>Cookie</code>。<code>Cookie</code>头由客户端发送，包含在<code>HTTP</code>请求的头部中。<br></p>
-        
-        
-        <p class="article-more-link">
-          
-            <a href="/2016/03/29/gin-setcookie/#more">Read More</a>
-          
-       </p>
-    </div>
-    <footer class="article-footer clearfix">
-<div class="article-catetags">
-
-<div class="article-categories">
-  <span></span>
-  <a class="article-category-link" href="/categories/golang/">golang</a>
-</div>
-
-
-  <div class="article-tags">
-  
-  <span></span> <a href="/tags/setcookie/">setcookie</a><a href="/tags/golang/">golang</a><a href="/tags/gin/">gin</a>
-  </div>
-
-</div>
-
-
-
-
-<div class="comments-count">
-		
-	  	<span></span>
-		<a href="/2016/03/29/gin-setcookie/#comments" class="ds-thread-count comments-count-link" data-thread-key="2016/03/29/gin-setcookie/" data-count-type="comments">&nbsp;</a>
-	
-</div>
-
-</footer>
-
-
-    </article>
-
-
-
-
-
-
 
   <nav id="page-nav" class="clearfix">
     <a class="extend prev" rel="prev" href="/page/6/"><span></span>Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/5/">5</a><a class="page-number" href="/page/6/">6</a><span class="page-number current">7</span><a class="page-number" href="/page/8/">8</a><a class="page-number" href="/page/9/">9</a><a class="extend next" rel="next" href="/page/8/">Next<span></span></a>
@@ -771,7 +771,7 @@
 		  
 		
 		  
-			<li><a href="/categories/mysql专题/" title="mysql专题">mysql专题<sup>11</sup></a></li>
+			<li><a href="/categories/mysql专题/" title="mysql专题">mysql专题<sup>12</sup></a></li>
 		  
 		
 		  
@@ -801,7 +801,7 @@
 			
 		
 			
-				<li><a href="/tags/mysql/" title="mysql">mysql<sup>13</sup></a></li>
+				<li><a href="/tags/mysql/" title="mysql">mysql<sup>14</sup></a></li>
 			
 		
 			
