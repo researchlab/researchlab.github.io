@@ -19,7 +19,7 @@
 <meta property="og:site_name" content="一线攻城狮">
 <meta property="og:description" content="MySQL 5.0开始支持存储过程，这样大大提高数据库的处理速度，同时也可以提高数据库编程的灵活性。SQL语句需要先编译然后执行，而存储过程（Stored Procedure）是一组为了完成特定功能的SQL语句集，经编译后存储在数据库中，用户通过指定存储过程的名字并给定参数（如果该存储过程带有参数）来调用执行它。">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2018-11-02T10:58:49.217Z">
+<meta property="og:updated_time" content="2018-11-03T00:41:13.777Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="mysql专题10 存储过程及存储引擎">
 <meta name="twitter:description" content="MySQL 5.0开始支持存储过程，这样大大提高数据库的处理速度，同时也可以提高数据库编程的灵活性。SQL语句需要先编译然后执行，而存储过程（Stored Procedure）是一组为了完成特定功能的SQL语句集，经编译后存储在数据库中，用户通过指定存储过程的名字并给定参数（如果该存储过程带有参数）来调用执行它。">
@@ -243,55 +243,76 @@
 <table>
 <thead>
 <tr>
-<th style="text-align:left">特点</th>
-<th style="text-align:left">MyISAM</th>
-<th style="text-align:left">InnoDB</th>
-<th style="text-align:left">Memory</th>
-<th style="text-align:left">Archive</th>
+<th style="text-align:left"></th>
+<th style="text-align:left">存储限制</th>
+<th style="text-align:left">事务安全</th>
+<th style="text-align:left">支持索引</th>
+<th style="text-align:left">锁颗粒</th>
+<th style="text-align:left">数据压缩</th>
+<th style="text-align:left">支持外键</th>
+<th style="text-align:left">忌用</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td style="text-align:left">存储限制</td>
-<td style="text-align:left">256TB</td>
+<td style="text-align:left"><code>InnoDB</code></td>
 <td style="text-align:left">64TB</td>
-<td style="text-align:left">有</td>
+<td style="text-align:left">支持</td>
+<td style="text-align:left">支持</td>
+<td style="text-align:left">支持MvCC行锁</td>
+<td style="text-align:left">-</td>
+<td style="text-align:left">支持</td>
 <td style="text-align:left">无</td>
 </tr>
 <tr>
-<td style="text-align:left">事务安全</td>
+<td style="text-align:left"><code>MyISAM</code></td>
+<td style="text-align:left">256TB</td>
 <td style="text-align:left">-</td>
 <td style="text-align:left">支持</td>
+<td style="text-align:left">表锁</td>
+<td style="text-align:left">支持</td>
+<td style="text-align:left">-</td>
+<td style="text-align:left">读写操作频繁</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>MRG_MYISAM</code></td>
+<td style="text-align:left"></td>
+<td style="text-align:left">不支持</td>
+<td style="text-align:left"></td>
+<td style="text-align:left">支持并发插入表级锁</td>
+<td style="text-align:left"></td>
+<td style="text-align:left"></td>
+<td style="text-align:left">全局查找过多的场景</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>Memory</code></td>
+<td style="text-align:left">有</td>
+<td style="text-align:left">-</td>
+<td style="text-align:left">支持</td>
+<td style="text-align:left">表锁</td>
+<td style="text-align:left">-</td>
 <td style="text-align:left">-</td>
 <td style="text-align:left">-</td>
 </tr>
 <tr>
-<td style="text-align:left">支持索引</td>
+<td style="text-align:left"><code>Archive</code></td>
+<td style="text-align:left">无</td>
+<td style="text-align:left">-</td>
+<td style="text-align:left"></td>
+<td style="text-align:left">行锁</td>
 <td style="text-align:left">支持</td>
-<td style="text-align:left">支持</td>
+<td style="text-align:left">-</td>
+<td style="text-align:left">需要随机读写/更新/删除</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>Ndb cluster</code></td>
+<td style="text-align:left"></td>
 <td style="text-align:left">支持</td>
 <td style="text-align:left"></td>
-</tr>
-<tr>
-<td style="text-align:left">锁颗粒</td>
-<td style="text-align:left">表锁</td>
 <td style="text-align:left">行锁</td>
-<td style="text-align:left">表锁</td>
-<td style="text-align:left">行锁</td>
-</tr>
-<tr>
-<td style="text-align:left">数据压缩</td>
-<td style="text-align:left">支持</td>
-<td style="text-align:left">-</td>
-<td style="text-align:left">-</td>
-<td style="text-align:left">支持</td>
-</tr>
-<tr>
-<td style="text-align:left">支持外键</td>
-<td style="text-align:left">-</td>
-<td style="text-align:left">支持</td>
-<td style="text-align:left">-</td>
-<td style="text-align:left">-</td>
+<td style="text-align:left"></td>
+<td style="text-align:left"></td>
+<td style="text-align:left">大部分应用</td>
 </tr>
 </tbody>
 </table>
@@ -299,6 +320,9 @@
 <ul>
 <li>MyISAM: 适用于事务的处理不多的情况;</li>
 <li>InnoDB: 适用于事务处理比较多, 需要外键支持的情况;</li>
+<li>MRG_MYISAM 适用于分段归档, 数据仓库;</li>
+<li>Archive 适用于日志记录, 支持SELECT/INSERT操作,不支持UPDATE/DELETE操作;</li>
+<li>Ndb cluster 适用于高可用性;</li>
 </ul>
 <p>修改存储引擎</p>
 <p>从Mysql5.5开始默认配置InnoDB存储引擎;</p>
