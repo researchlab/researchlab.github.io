@@ -182,7 +182,7 @@ drop table test;
 
 ## 锁粒度
 
-`mysql`支持表锁及行锁, InnoDB存储引擎可支持三种行锁定方式, <font color=red>默认加锁方式是next-key 锁</font>。
+`mysql`不同存储引擎支持的锁粒度不同, InnoDB存储引擎支持表锁及行锁, InnoDB存储引擎可支持三种行锁定方式, <font color=red>默认加锁方式是next-key 锁</font>。
 1. 行锁(Record Lock):锁直接加在索引记录上面，锁住的是key。 行锁又分为共享锁(S)与排他锁(X);
 2. 间隙锁(Gap Lock):锁定索引记录间隙，确保索引记录的间隙不变。间隙锁是针对事务隔离级别为可重复读或以上级别而已的。
 3. Next-Key Lock: 行锁和间隙锁组合起来就叫Next-Key Lock。 
