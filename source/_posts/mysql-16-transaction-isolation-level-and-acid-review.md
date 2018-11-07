@@ -251,6 +251,8 @@ Serializable隔离级别下，读写冲突，因此并发度急剧下降，在`m
 
 此外, 对于快照读来说，幻读的解决是依赖mvcc解决。而对于当前读则依赖于gap-lock解决。
 
+更多参考: [Mysql 的InnoDB事务方面的 多版本并发控制如何实现 MVCC](https://www.cnblogs.com/aspirant/p/6920987.html)
+
 ## 总结
 - 回顾了事务相关操作命令;
 - 回顾了事务的ACID特性及四级隔离级别, 三级封锁协议相关知识;
