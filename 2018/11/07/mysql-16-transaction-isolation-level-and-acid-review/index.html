@@ -25,7 +25,7 @@
 <meta property="og:image" content="http://researchlab.github.io/2018/11/07/mysql-16-transaction-isolation-level-and-acid-review/%60mysql%60-16-transaction-isolation-level-and-acid-review/rc1.png">
 <meta property="og:image" content="http://researchlab.github.io/2018/11/07/mysql-16-transaction-isolation-level-and-acid-review/%60mysql%60-16-transaction-isolation-level-and-acid-review/rc2.png">
 <meta property="og:image" content="http://researchlab.github.io/2018/11/07/mysql-16-transaction-isolation-level-and-acid-review/%60mysql%60-16-transaction-isolation-level-and-acid-review/rr1.png">
-<meta property="og:updated_time" content="2018-11-07T16:31:36.834Z">
+<meta property="og:updated_time" content="2018-11-07T16:35:21.610Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="mysql专题16 事务隔离级别及ACID知识回顾">
 <meta name="twitter:description" content="事务指的是满足ACID特性的一组操作,mysql中可以通过commit提交一个事务,也可以使用rollback进行回滚。 在并发场景中很难保证事务的Isolation特性, 即无法保证临界资源的排它性操作, 从而引发数据一致性问题, 临界资源互斥问题显然需要借助加锁来解决, 在并发事务中就需要用锁的并发控制来处理;">
@@ -180,7 +180,7 @@
 <blockquote>
 <p>隔离级别的设置只对当前链接有效;</p>
 </blockquote>
-<h2 id="锁粒度"><a href="#锁粒度" class="headerlink" title="锁粒度"></a>锁粒度</h2><p><code>mysql</code>支持表锁及行锁, InnoDB存储引擎可支持三种行锁定方式, <font color="red">默认加锁方式是next-key 锁</font>。</p>
+<h2 id="锁粒度"><a href="#锁粒度" class="headerlink" title="锁粒度"></a>锁粒度</h2><p><code>mysql</code>不同存储引擎支持的锁粒度不同, InnoDB存储引擎支持表锁及行锁, InnoDB存储引擎可支持三种行锁定方式, <font color="red">默认加锁方式是next-key 锁</font>。</p>
 <ol>
 <li>行锁(Record Lock):锁直接加在索引记录上面，锁住的是key。 行锁又分为共享锁(S)与排他锁(X);</li>
 <li>间隙锁(Gap Lock):锁定索引记录间隙，确保索引记录的间隙不变。间隙锁是针对事务隔离级别为可重复读或以上级别而已的。</li>
