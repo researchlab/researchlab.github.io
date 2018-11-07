@@ -127,31 +127,31 @@ drop table test;
 
 ### **未提交读(READ UNCOMMITTED)**
 不存在事务隔离级别的时, 会造成数据丢失问题, 
-![](`mysql`-16-transaction-isolation-level-and-acid-review/ru0.png)
+![](mysql-16-transaction-isolation-level-and-acid-review/ru0.png)
 很明显的看出,旺财对A添加的20块不翼而飞了,这就是"数据丢失",对事务不加任何锁(不存在事务隔离),就会导致这种问题。
 
 未提交读事务隔离级别,
 未提交事务隔离级别满足<font color=red>一级封锁协议, 即写数据的时候添加一个X锁(排他锁),也就是在写数据的时候不允许其他事务进行写操作,但是读不受限制,读不加锁</font>。
-![](`mysql`-16-transaction-isolation-level-and-acid-review/ru1.png)
+![](mysql-16-transaction-isolation-level-and-acid-review/ru1.png)
 这样就可以解决了多个人一起写数据而导致了"数据丢失"的问题,但是会引发新的问题——脏读。
 
 <font color=red>脏读:读取了别人未提交的数据</font>。
-![](`mysql`-16-transaction-isolation-level-and-acid-review/ru2.png)
+![](mysql-16-transaction-isolation-level-and-acid-review/ru2.png)
 因而引入了另外一个事务隔离级别——读已提交,
 
 ### **读已提交(READ COMMITTED)**
 
 读已提交满足<font color=red>二级封锁协议, 即写数据的时候加上X锁(排他锁),读数据的时候添加S锁(共享锁),且如果一个数据加了X锁就没法加S锁;同理如果加了S锁就没法加X锁,但是一个数据可以同时存在多个S锁(因为只是读数据),并且规定S锁读取数据,一旦读取完成就立刻释放S锁(不管后续是否还有很多其他的操作,只要是读取了S锁的数据后,就立刻释放S锁)。</font>
-![](`mysql`-16-transaction-isolation-level-and-acid-review/rc1.png)
+![](mysql-16-transaction-isolation-level-and-acid-review/rc1.png)
 这样就解决了脏读的问题,但是又有新的问题出现——不可重复读。
 
 不可重复读:同一个事务对数据的多次读取的结果不一致。
-![](`mysql`-16-transaction-isolation-level-and-acid-review/rc2.png)
+![](mysql-16-transaction-isolation-level-and-acid-review/rc2.png)
 解决方法——引入隔离级别更高事务隔离:可重复读
 
 ### **可重复读(REPEATABLE READ)**
 可重复读满足<font color=red>第三级封锁协议, 即对S锁进行修改,之前的S锁是:读取了数据之后就立刻释放S锁,现在修改是:在读取数据的时候加上S锁,但是要直到事务准备提交了才释放该S锁,X锁还是一致。</font>
-![](`mysql`-16-transaction-isolation-level-and-acid-review/rr1.png)
+![](mysql-16-transaction-isolation-level-and-acid-review/rr1.png)
 这样就解决了不可重复读的问题了,但是又有新的问题出现——幻读。
 
 例如: 有一次旺财对一个"学生表"进行操作,选取了年龄是18岁的所有行, 用X锁锁住, 并且做了修改。
