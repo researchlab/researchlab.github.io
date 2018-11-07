@@ -25,7 +25,7 @@
 <meta property="og:image" content="http://researchlab.github.io/2018/11/07/mysql-16-transaction-isolation-level-and-acid-review/rc1.png">
 <meta property="og:image" content="http://researchlab.github.io/2018/11/07/mysql-16-transaction-isolation-level-and-acid-review/rc2.png">
 <meta property="og:image" content="http://researchlab.github.io/2018/11/07/mysql-16-transaction-isolation-level-and-acid-review/rr1.png">
-<meta property="og:updated_time" content="2018-11-07T23:28:11.865Z">
+<meta property="og:updated_time" content="2018-11-07T23:34:12.830Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="mysql专题16 事务隔离级别及ACID知识回顾">
 <meta name="twitter:description" content="事务指的是满足ACID特性的一组操作,mysql中可以通过commit提交一个事务,也可以使用rollback进行回滚。 在并发场景中很难保证事务的Isolation特性, 即无法保证临界资源的排它性操作, 从而引发数据一致性问题, 临界资源互斥问题显然需要借助加锁来解决, 在并发事务中就需要用锁的并发控制来处理;">
@@ -214,6 +214,7 @@
 <p>Serializable<br>从MVCC并发控制退化为基于锁的并发控制。不区别快照读与当前读，所有的读操作均为当前读，读加读锁 (S锁)，写加写锁 (X锁)。</p>
 <p>Serializable隔离级别下，读写冲突，因此并发度急剧下降，在<code>mysql/InnoDB</code>下不建议使用。<br>对于快照读来说，幻读的解决是依赖mvcc解决。而对于当前读则依赖于gap-lock解决。</p>
 <p>此外, 对于快照读来说，幻读的解决是依赖mvcc解决。而对于当前读则依赖于gap-lock解决。</p>
+<p>更多参考: <a href="https://www.cnblogs.com/aspirant/p/6920987.html" target="_blank" rel="noopener">Mysql 的InnoDB事务方面的 多版本并发控制如何实现 MVCC</a></p>
 <h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ul>
 <li>回顾了事务相关操作命令;</li>
 <li>回顾了事务的ACID特性及四级隔离级别, 三级封锁协议相关知识;</li>
