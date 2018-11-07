@@ -5,13 +5,13 @@ categories: "mysql专题"
 tags: [mysql]
 description:
 ---
-事务指的是满足`ACID`特性的一组操作, mysql中可以通过commit提交一个事务,也可以使用rollback进行回滚。 在并发场景中很难保证事务的`Isolation`特性, 即无法保证临界资源的排它性操作, 从而引发数据一致性问题, 临界资源互斥问题显然需要借助加锁来解决, 在并发事务中就需要用锁的并发控制来处理; 
+事务指的是满足`ACID`特性的一组操作,`mysql`中可以通过`commit`提交一个事务,也可以使用`rollback`进行回滚。 在并发场景中很难保证事务的`Isolation`特性, 即无法保证临界资源的排它性操作, 从而引发数据一致性问题, 临界资源互斥问题显然需要借助加锁来解决, 在并发事务中就需要用锁的并发控制来处理; 
 <!--more-->
-根据在事务处理中对临界资源加锁及释放锁的阶段不同,可分为三种加锁方式, 即mysql的三级封锁协议, 三级封锁协议可分别解决数据丢失, 脏读, 不可重复读问题,即mysql事务隔离级别的读未提交, 读已提交, 可重读; 
+根据在事务处理中对临界资源加锁及释放锁的阶段不同,可分为三种加锁方式, 即`mysql`的`三级封锁协议`, `三级封锁协议`可分别解决数据丢失, 脏读, 不可重复读问题,即`mysql`事务隔离级别的读未提交, 读已提交, 可重读; 
 
 此外还有第四种隔离级别, 即事务串行化, 即把并行转换为串行, 也就无所谓加锁不加锁了; 下文将通过实际案例分析精要回顾事务及事务隔离级别等相关知识; 
 
->  实际情况下, 在读已提交及可重读读两中隔离级别下, Mysql/Oracle/PgSQL等是利用MVCC来处理事务，防止加锁，来提高访问效率;
+>  实际情况下, 在读已提交及可重读读两中隔离级别下, `mysql`/Oracle/PgSQL等是利用MVCC来处理事务，防止加锁，来提高访问效率;
 
 ## 事务命令
 
@@ -127,31 +127,31 @@ drop table test;
 
 ### **未提交读(READ UNCOMMITTED)**
 不存在事务隔离级别的时, 会造成数据丢失问题, 
-![](mysql-16-transaction-isolation-level-and-acid-review/ru0.png)
+![](`mysql`-16-transaction-isolation-level-and-acid-review/ru0.png)
 很明显的看出,旺财对A添加的20块不翼而飞了,这就是"数据丢失",对事务不加任何锁(不存在事务隔离),就会导致这种问题。
 
 未提交读事务隔离级别,
 未提交事务隔离级别满足<font color=red>一级封锁协议, 即写数据的时候添加一个X锁(排他锁),也就是在写数据的时候不允许其他事务进行写操作,但是读不受限制,读不加锁</font>。
-![](mysql-16-transaction-isolation-level-and-acid-review/ru1.png)
+![](`mysql`-16-transaction-isolation-level-and-acid-review/ru1.png)
 这样就可以解决了多个人一起写数据而导致了"数据丢失"的问题,但是会引发新的问题——脏读。
 
 <font color=red>脏读:读取了别人未提交的数据</font>。
-![](mysql-16-transaction-isolation-level-and-acid-review/ru2.png)
+![](`mysql`-16-transaction-isolation-level-and-acid-review/ru2.png)
 因而引入了另外一个事务隔离级别——读已提交,
 
 ### **读已提交(READ COMMITTED)**
 
 读已提交满足<font color=red>二级封锁协议, 即写数据的时候加上X锁(排他锁),读数据的时候添加S锁(共享锁),且如果一个数据加了X锁就没法加S锁;同理如果加了S锁就没法加X锁,但是一个数据可以同时存在多个S锁(因为只是读数据),并且规定S锁读取数据,一旦读取完成就立刻释放S锁(不管后续是否还有很多其他的操作,只要是读取了S锁的数据后,就立刻释放S锁)。</font>
-![](mysql-16-transaction-isolation-level-and-acid-review/rc1.png)
+![](`mysql`-16-transaction-isolation-level-and-acid-review/rc1.png)
 这样就解决了脏读的问题,但是又有新的问题出现——不可重复读。
 
 不可重复读:同一个事务对数据的多次读取的结果不一致。
-![](mysql-16-transaction-isolation-level-and-acid-review/rc2.png)
+![](`mysql`-16-transaction-isolation-level-and-acid-review/rc2.png)
 解决方法——引入隔离级别更高事务隔离:可重复读
 
 ### **可重复读(REPEATABLE READ)**
 可重复读满足<font color=red>第三级封锁协议, 即对S锁进行修改,之前的S锁是:读取了数据之后就立刻释放S锁,现在修改是:在读取数据的时候加上S锁,但是要直到事务准备提交了才释放该S锁,X锁还是一致。</font>
-![](mysql-16-transaction-isolation-level-and-acid-review/rr1.png)
+![](`mysql`-16-transaction-isolation-level-and-acid-review/rr1.png)
 这样就解决了不可重复读的问题了,但是又有新的问题出现——幻读。
 
 例如: 有一次旺财对一个"学生表"进行操作,选取了年龄是18岁的所有行, 用X锁锁住, 并且做了修改。
@@ -174,7 +174,7 @@ drop table test;
 |可重复读|NO|NO|NO|YES|
 |事务串行化执行|NO|NO|NO|NO|
 
-> mysql默认的隔离级别是:可重复读。
+> `mysql`默认的隔离级别是:可重复读。
 
 > oracle中只支持2个隔离级别:读已提交和串行化, 默认是读已提交。
 
@@ -182,7 +182,7 @@ drop table test;
 
 ## 锁粒度
 
-mysql支持表锁及行锁, InnoDB存储引擎可支持三种行锁定方式, <font color=red>默认加锁方式是next-key 锁</font>。
+`mysql`支持表锁及行锁, InnoDB存储引擎可支持三种行锁定方式, <font color=red>默认加锁方式是next-key 锁</font>。
 1. 行锁(Record Lock):锁直接加在索引记录上面，锁住的是key。 行锁又分为共享锁(S)与排他锁(X);
 2. 间隙锁(Gap Lock):锁定索引记录间隙，确保索引记录的间隙不变。间隙锁是针对事务隔离级别为可重复读或以上级别而已的。
 3. Next-Key Lock: 行锁和间隙锁组合起来就叫Next-Key Lock。 
@@ -209,7 +209,7 @@ mysql支持表锁及行锁, InnoDB存储引擎可支持三种行锁定方式, <f
 1. 快照读，读取的是记录的可见版本 (有可能是历史版本)，不用加锁。
 2. 当前读，读取的是记录的最新版本，并且，当前读返回的记录，都会加上锁，保证其他事务不会再并发修改这条记录。 
 
-在一个支持MVCC并发控制的系统中，哪些读操作是快照读？哪些操作又是当前读呢？以MySQL InnoDB为例: 
+在一个支持MVCC并发控制的系统中，哪些读操作是快照读？哪些操作又是当前读呢？以`mysql` InnoDB为例: 
 
 快照读:简单的select操作，属于快照读，不加锁。
 
@@ -246,7 +246,7 @@ Repeatable Read (RR)
 Serializable
 从MVCC并发控制退化为基于锁的并发控制。不区别快照读与当前读，所有的读操作均为当前读，读加读锁 (S锁)，写加写锁 (X锁)。
 
-Serializable隔离级别下，读写冲突，因此并发度急剧下降，在MySQL/InnoDB下不建议使用。
+Serializable隔离级别下，读写冲突，因此并发度急剧下降，在`mysql/InnoDB`下不建议使用。
 对于快照读来说，幻读的解决是依赖mvcc解决。而对于当前读则依赖于gap-lock解决。
 
 此外, 对于快照读来说，幻读的解决是依赖mvcc解决。而对于当前读则依赖于gap-lock解决。
