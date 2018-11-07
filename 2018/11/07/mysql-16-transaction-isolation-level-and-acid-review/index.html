@@ -19,17 +19,17 @@
 <meta property="og:site_name" content="一线攻城狮">
 <meta property="og:description" content="事务指的是满足ACID特性的一组操作,mysql中可以通过commit提交一个事务,也可以使用rollback进行回滚。 在并发场景中很难保证事务的Isolation特性, 即无法保证临界资源的排它性操作, 从而引发数据一致性问题, 临界资源互斥问题显然需要借助加锁来解决, 在并发事务中就需要用锁的并发控制来处理;">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:image" content="http://researchlab.github.io/2018/11/07/mysql-16-transaction-isolation-level-and-acid-review/%60mysql%60-16-transaction-isolation-level-and-acid-review/ru0.png">
-<meta property="og:image" content="http://researchlab.github.io/2018/11/07/mysql-16-transaction-isolation-level-and-acid-review/%60mysql%60-16-transaction-isolation-level-and-acid-review/ru1.png">
-<meta property="og:image" content="http://researchlab.github.io/2018/11/07/mysql-16-transaction-isolation-level-and-acid-review/%60mysql%60-16-transaction-isolation-level-and-acid-review/ru2.png">
-<meta property="og:image" content="http://researchlab.github.io/2018/11/07/mysql-16-transaction-isolation-level-and-acid-review/%60mysql%60-16-transaction-isolation-level-and-acid-review/rc1.png">
-<meta property="og:image" content="http://researchlab.github.io/2018/11/07/mysql-16-transaction-isolation-level-and-acid-review/%60mysql%60-16-transaction-isolation-level-and-acid-review/rc2.png">
-<meta property="og:image" content="http://researchlab.github.io/2018/11/07/mysql-16-transaction-isolation-level-and-acid-review/%60mysql%60-16-transaction-isolation-level-and-acid-review/rr1.png">
-<meta property="og:updated_time" content="2018-11-07T23:24:05.998Z">
+<meta property="og:image" content="http://researchlab.github.io/2018/11/07/mysql-16-transaction-isolation-level-and-acid-review/ru0.png">
+<meta property="og:image" content="http://researchlab.github.io/2018/11/07/mysql-16-transaction-isolation-level-and-acid-review/ru1.png">
+<meta property="og:image" content="http://researchlab.github.io/2018/11/07/mysql-16-transaction-isolation-level-and-acid-review/ru2.png">
+<meta property="og:image" content="http://researchlab.github.io/2018/11/07/mysql-16-transaction-isolation-level-and-acid-review/rc1.png">
+<meta property="og:image" content="http://researchlab.github.io/2018/11/07/mysql-16-transaction-isolation-level-and-acid-review/rc2.png">
+<meta property="og:image" content="http://researchlab.github.io/2018/11/07/mysql-16-transaction-isolation-level-and-acid-review/rr1.png">
+<meta property="og:updated_time" content="2018-11-07T23:28:11.865Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="mysql专题16 事务隔离级别及ACID知识回顾">
 <meta name="twitter:description" content="事务指的是满足ACID特性的一组操作,mysql中可以通过commit提交一个事务,也可以使用rollback进行回滚。 在并发场景中很难保证事务的Isolation特性, 即无法保证临界资源的排它性操作, 从而引发数据一致性问题, 临界资源互斥问题显然需要借助加锁来解决, 在并发事务中就需要用锁的并发控制来处理;">
-<meta name="twitter:image" content="http://researchlab.github.io/2018/11/07/mysql-16-transaction-isolation-level-and-acid-review/%60mysql%60-16-transaction-isolation-level-and-acid-review/ru0.png">
+<meta name="twitter:image" content="http://researchlab.github.io/2018/11/07/mysql-16-transaction-isolation-level-and-acid-review/ru0.png">
 
     
     <link rel="alternative" href="/atom.xml" title="一线攻城狮" type="application/atom+xml">
@@ -119,12 +119,12 @@
 <h3 id="一致性-Consistency"><a href="#一致性-Consistency" class="headerlink" title="一致性(Consistency)"></a><strong>一致性(Consistency)</strong></h3><p>一致性是指事务必须使数据库从一个一致性状态变换到另一个一致性状态,也就是说一个事务执行之前和执行之后都必须处于一致性状态。<br>例如: A和B进行转账操作,A有200块钱,B有300块钱;当A转了100块钱给B之后,他们2个人的总额还是500块钱,不会改变。</p>
 <h3 id="隔离性-Isolation"><a href="#隔离性-Isolation" class="headerlink" title="隔离性(Isolation)"></a><strong>隔离性(Isolation)</strong></h3><p>隔离性是指当多个用户并发访问数据库时,比如同时访问一张表,数据库每一个用户开启的事务,不能被其他事务所做的操作干扰(也就是事务之间的隔离),<font color="red">多个并发事务之间,应当相互隔离</font>。<br>例如:同时有T1和T2两个并发事务,从T1角度来看,T2要不在T1执行之前就已经结束,要么在T1执行完成后才开始。将多个事务隔离开,每个事务都不能访问到其他事务操作过程中的状态;就好比上锁操作,只有一个事务做完了,另外一个事务才能执行。</p>
 <h3 id="持久性-Durability"><a href="#持久性-Durability" class="headerlink" title="持久性(Durability)"></a><strong>持久性(Durability)</strong></h3><p>持久性是指事务的操作,一旦提交,对于数据库中数据的改变是永久性的,即使数据库发生故障也不能丢失已提交事务所完成的改变。</p>
-<h2 id="隔离级别"><a href="#隔离级别" class="headerlink" title="隔离级别"></a>隔离级别</h2><h3 id="未提交读-READ-UNCOMMITTED"><a href="#未提交读-READ-UNCOMMITTED" class="headerlink" title="未提交读(READ UNCOMMITTED)"></a><strong>未提交读(READ UNCOMMITTED)</strong></h3><p>不存在事务隔离级别的时, 会造成数据丢失问题,<br><img src="/2018/11/07/mysql-16-transaction-isolation-level-and-acid-review/`mysql`-16-transaction-isolation-level-and-acid-review/ru0.png" alt=""><br>很明显的看出,旺财对A添加的20块不翼而飞了,这就是”数据丢失”,对事务不加任何锁(不存在事务隔离),就会导致这种问题。</p>
-<p>未提交读事务隔离级别,<br>未提交事务隔离级别满足<font color="red">一级封锁协议, 即写数据的时候添加一个X锁(排他锁),也就是在写数据的时候不允许其他事务进行写操作,但是读不受限制,读不加锁</font>。<br><img src="/2018/11/07/mysql-16-transaction-isolation-level-and-acid-review/`mysql`-16-transaction-isolation-level-and-acid-review/ru1.png" alt=""><br>这样就可以解决了多个人一起写数据而导致了”数据丢失”的问题,但是会引发新的问题——脏读。</p>
-<p><font color="red">脏读:读取了别人未提交的数据</font>。<br><img src="/2018/11/07/mysql-16-transaction-isolation-level-and-acid-review/`mysql`-16-transaction-isolation-level-and-acid-review/ru2.png" alt=""><br>因而引入了另外一个事务隔离级别——读已提交,</p>
-<h3 id="读已提交-READ-COMMITTED"><a href="#读已提交-READ-COMMITTED" class="headerlink" title="读已提交(READ COMMITTED)"></a><strong>读已提交(READ COMMITTED)</strong></h3><p>读已提交满足<font color="red">二级封锁协议, 即写数据的时候加上X锁(排他锁),读数据的时候添加S锁(共享锁),且如果一个数据加了X锁就没法加S锁;同理如果加了S锁就没法加X锁,但是一个数据可以同时存在多个S锁(因为只是读数据),并且规定S锁读取数据,一旦读取完成就立刻释放S锁(不管后续是否还有很多其他的操作,只要是读取了S锁的数据后,就立刻释放S锁)。</font><br><img src="/2018/11/07/mysql-16-transaction-isolation-level-and-acid-review/`mysql`-16-transaction-isolation-level-and-acid-review/rc1.png" alt=""><br>这样就解决了脏读的问题,但是又有新的问题出现——不可重复读。</p>
-<p>不可重复读:同一个事务对数据的多次读取的结果不一致。<br><img src="/2018/11/07/mysql-16-transaction-isolation-level-and-acid-review/`mysql`-16-transaction-isolation-level-and-acid-review/rc2.png" alt=""><br>解决方法——引入隔离级别更高事务隔离:可重复读</p>
-<h3 id="可重复读-REPEATABLE-READ"><a href="#可重复读-REPEATABLE-READ" class="headerlink" title="可重复读(REPEATABLE READ)"></a><strong>可重复读(REPEATABLE READ)</strong></h3><p>可重复读满足<font color="red">第三级封锁协议, 即对S锁进行修改,之前的S锁是:读取了数据之后就立刻释放S锁,现在修改是:在读取数据的时候加上S锁,但是要直到事务准备提交了才释放该S锁,X锁还是一致。</font><br><img src="/2018/11/07/mysql-16-transaction-isolation-level-and-acid-review/`mysql`-16-transaction-isolation-level-and-acid-review/rr1.png" alt=""><br>这样就解决了不可重复读的问题了,但是又有新的问题出现——幻读。</p>
+<h2 id="隔离级别"><a href="#隔离级别" class="headerlink" title="隔离级别"></a>隔离级别</h2><h3 id="未提交读-READ-UNCOMMITTED"><a href="#未提交读-READ-UNCOMMITTED" class="headerlink" title="未提交读(READ UNCOMMITTED)"></a><strong>未提交读(READ UNCOMMITTED)</strong></h3><p>不存在事务隔离级别的时, 会造成数据丢失问题,<br><img src="/2018/11/07/mysql-16-transaction-isolation-level-and-acid-review/ru0.png" alt=""><br>很明显的看出,旺财对A添加的20块不翼而飞了,这就是”数据丢失”,对事务不加任何锁(不存在事务隔离),就会导致这种问题。</p>
+<p>未提交读事务隔离级别,<br>未提交事务隔离级别满足<font color="red">一级封锁协议, 即写数据的时候添加一个X锁(排他锁),也就是在写数据的时候不允许其他事务进行写操作,但是读不受限制,读不加锁</font>。<br><img src="/2018/11/07/mysql-16-transaction-isolation-level-and-acid-review/ru1.png" alt=""><br>这样就可以解决了多个人一起写数据而导致了”数据丢失”的问题,但是会引发新的问题——脏读。</p>
+<p><font color="red">脏读:读取了别人未提交的数据</font>。<br><img src="/2018/11/07/mysql-16-transaction-isolation-level-and-acid-review/ru2.png" alt=""><br>因而引入了另外一个事务隔离级别——读已提交,</p>
+<h3 id="读已提交-READ-COMMITTED"><a href="#读已提交-READ-COMMITTED" class="headerlink" title="读已提交(READ COMMITTED)"></a><strong>读已提交(READ COMMITTED)</strong></h3><p>读已提交满足<font color="red">二级封锁协议, 即写数据的时候加上X锁(排他锁),读数据的时候添加S锁(共享锁),且如果一个数据加了X锁就没法加S锁;同理如果加了S锁就没法加X锁,但是一个数据可以同时存在多个S锁(因为只是读数据),并且规定S锁读取数据,一旦读取完成就立刻释放S锁(不管后续是否还有很多其他的操作,只要是读取了S锁的数据后,就立刻释放S锁)。</font><br><img src="/2018/11/07/mysql-16-transaction-isolation-level-and-acid-review/rc1.png" alt=""><br>这样就解决了脏读的问题,但是又有新的问题出现——不可重复读。</p>
+<p>不可重复读:同一个事务对数据的多次读取的结果不一致。<br><img src="/2018/11/07/mysql-16-transaction-isolation-level-and-acid-review/rc2.png" alt=""><br>解决方法——引入隔离级别更高事务隔离:可重复读</p>
+<h3 id="可重复读-REPEATABLE-READ"><a href="#可重复读-REPEATABLE-READ" class="headerlink" title="可重复读(REPEATABLE READ)"></a><strong>可重复读(REPEATABLE READ)</strong></h3><p>可重复读满足<font color="red">第三级封锁协议, 即对S锁进行修改,之前的S锁是:读取了数据之后就立刻释放S锁,现在修改是:在读取数据的时候加上S锁,但是要直到事务准备提交了才释放该S锁,X锁还是一致。</font><br><img src="/2018/11/07/mysql-16-transaction-isolation-level-and-acid-review/rr1.png" alt=""><br>这样就解决了不可重复读的问题了,但是又有新的问题出现——幻读。</p>
 <p>例如: 有一次旺财对一个”学生表”进行操作,选取了年龄是18岁的所有行, 用X锁锁住, 并且做了修改。</p>
 <p>改完以后旺财再次选择所有年龄是18岁的行, 想做一个确认, 没想到有一行竟然没有修改！</p>
 <p>原来就在旺财查询并修改的的时候, 小强也对学生表进行操作, 他插入了一个新的行,其中的年龄也是18岁！ 虽然两个人的修改都没有问题, 互不影响, 但最终结果并非预期, 即幻读问题;</p>
