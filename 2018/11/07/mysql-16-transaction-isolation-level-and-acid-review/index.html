@@ -25,7 +25,7 @@
 <meta property="og:image" content="http://researchlab.github.io/2018/11/07/mysql-16-transaction-isolation-level-and-acid-review/%60mysql%60-16-transaction-isolation-level-and-acid-review/rc1.png">
 <meta property="og:image" content="http://researchlab.github.io/2018/11/07/mysql-16-transaction-isolation-level-and-acid-review/%60mysql%60-16-transaction-isolation-level-and-acid-review/rc2.png">
 <meta property="og:image" content="http://researchlab.github.io/2018/11/07/mysql-16-transaction-isolation-level-and-acid-review/%60mysql%60-16-transaction-isolation-level-and-acid-review/rr1.png">
-<meta property="og:updated_time" content="2018-11-07T16:35:21.610Z">
+<meta property="og:updated_time" content="2018-11-07T23:24:05.998Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="mysql专题16 事务隔离级别及ACID知识回顾">
 <meta name="twitter:description" content="事务指的是满足ACID特性的一组操作,mysql中可以通过commit提交一个事务,也可以使用rollback进行回滚。 在并发场景中很难保证事务的Isolation特性, 即无法保证临界资源的排它性操作, 从而引发数据一致性问题, 临界资源互斥问题显然需要借助加锁来解决, 在并发事务中就需要用锁的并发控制来处理;">
@@ -104,7 +104,7 @@
 		</div>
 		
 		<p>事务指的是满足<code>ACID</code>特性的一组操作,<code>mysql</code>中可以通过<code>commit</code>提交一个事务,也可以使用<code>rollback</code>进行回滚。 在并发场景中很难保证事务的<code>Isolation</code>特性, 即无法保证临界资源的排它性操作, 从而引发数据一致性问题, 临界资源互斥问题显然需要借助加锁来解决, 在并发事务中就需要用锁的并发控制来处理;<br><a id="more"></a><br>根据在事务处理中对临界资源加锁及释放锁的阶段不同,可分为三种加锁方式, 即<code>mysql</code>的<code>三级封锁协议</code>, <code>三级封锁协议</code>可分别解决数据丢失, 脏读, 不可重复读问题,即<code>mysql</code>事务隔离级别的读未提交, 读已提交, 可重读; </p>
-<p>此外还有第四种隔离级别, 即事务串行化, 即把并行转换为串行, 也就无所谓加锁不加锁了; 下文将通过实际案例分析精要回顾事务及事务隔离级别等相关知识; </p>
+<p>此外还有第四种隔离级别, 即事务串行化, 即把并行转换为串行; 下文将通过实际案例分析精要回顾事务及事务隔离级别等相关知识; </p>
 <blockquote>
 <p> 实际情况下, 在读已提交及可重读读两中隔离级别下, <code>mysql</code>/Oracle/PgSQL等是利用MVCC来处理事务，防止加锁，来提高访问效率;</p>
 </blockquote>
