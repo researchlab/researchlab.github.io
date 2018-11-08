@@ -72,6 +72,70 @@
         <header class="article-info clearfix">
   <h1 itemprop="name">
     
+      <a href="/2018/11/08/producer-consumer-go-channel/" title="从生产者消费者模型深入学习golang channel" itemprop="url">从生产者消费者模型深入学习golang channel</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
+		
+ <p class="article-time">
+    <time datetime="2018-11-08T19:53:14.000Z" itemprop="datePublished"> 发表于 2018-11-08</time>
+  </p>
+</header>
+
+    <div class="article-content">
+        
+        <p>从生产者消费者模型探究回顾golang channel注意事项; 实例探究no buffer及buffer channel;<br></p>
+        
+        
+        <p class="article-more-link">
+          
+            <a href="/2018/11/08/producer-consumer-go-channel/#more">Read More</a>
+          
+       </p>
+    </div>
+    <footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/golang/">golang</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/golang/">golang</a><a href="/tags/channel/">channel</a>
+  </div>
+
+</div>
+
+
+
+
+<div class="comments-count">
+		
+	  	<span></span>
+		<a href="/2018/11/08/producer-consumer-go-channel/#comments" class="ds-thread-count comments-count-link" data-thread-key="2018/11/08/producer-consumer-go-channel/" data-count-type="comments">&nbsp;</a>
+	
+</div>
+
+</footer>
+
+
+    </article>
+
+
+
+
+
+
+   
+    
+    <article class="post-expand post" itemprop="articleBody"> 
+        <header class="article-info clearfix">
+  <h1 itemprop="name">
+    
       <a href="/2018/11/07/mysql-16-transaction-isolation-level-and-acid-review/" title="mysql专题16 事务隔离级别及ACID知识回顾" itemprop="url">mysql专题16 事务隔离级别及ACID知识回顾</a>
   </h1>
   <p class="article-author">By
@@ -642,70 +706,6 @@
 
 
 
-   
-    
-    <article class="post-expand post" itemprop="articleBody"> 
-        <header class="article-info clearfix">
-  <h1 itemprop="name">
-    
-      <a href="/2018/10/07/redis-10-scan/" title="redis专题10 海量数据扫描神器之scan" itemprop="url">redis专题10 海量数据扫描神器之scan</a>
-  </h1>
-  <p class="article-author">By
-       
-		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
-		
- <p class="article-time">
-    <time datetime="2018-10-07T17:11:41.000Z" itemprop="datePublished"> 发表于 2018-10-07</time>
-  </p>
-</header>
-
-    <div class="article-content">
-        
-        <p>用<code>redis</code>模糊匹配<code>key</code>时，官方建议不要使用<code>keys</code>或<code>smembers</code>，他们的时间复杂度都是<code>O(N)</code>,使用<code>scan</code>，<code>zscan</code>，<code>hscan</code>等。<code>scan</code>系列增量式迭代命令每次执行的复杂度为<code>O(1)</code>， 对数据集进行一次完整迭代的复杂度为<code>O(N)</code>， 其中<code>N</code>为数据集中的元素数量。相比<code>keys</code>命令执行时会阻塞掉整个<code>redis</code>线程而言，<code>scan</code>系列则是通过游标分步进行的，不会阻塞<code>redis</code>线程, 且在同一时间，可以有任意多个客户端对同一数据集进行迭代。<br></p>
-        
-        
-        <p class="article-more-link">
-          
-            <a href="/2018/10/07/redis-10-scan/#more">Read More</a>
-          
-       </p>
-    </div>
-    <footer class="article-footer clearfix">
-<div class="article-catetags">
-
-<div class="article-categories">
-  <span></span>
-  <a class="article-category-link" href="/categories/redis专题/">redis专题</a>
-</div>
-
-
-  <div class="article-tags">
-  
-  <span></span> <a href="/tags/redis/">redis</a>
-  </div>
-
-</div>
-
-
-
-
-<div class="comments-count">
-		
-	  	<span></span>
-		<a href="/2018/10/07/redis-10-scan/#comments" class="ds-thread-count comments-count-link" data-thread-key="2018/10/07/redis-10-scan/" data-count-type="comments">&nbsp;</a>
-	
-</div>
-
-</footer>
-
-
-    </article>
-
-
-
-
-
-
 
   <nav id="page-nav" class="clearfix">
     <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/9/">9</a><a class="extend next" rel="next" href="/page/2/">Next<span></span></a>
@@ -763,7 +763,7 @@
 		  
 		
 		  
-			<li><a href="/categories/golang/" title="golang">golang<sup>22</sup></a></li>
+			<li><a href="/categories/golang/" title="golang">golang<sup>23</sup></a></li>
 		  
 		
 		  
@@ -793,7 +793,7 @@
 		<ul class="clearfix">
 		
 			
-				<li><a href="/tags/golang/" title="golang">golang<sup>25</sup></a></li>
+				<li><a href="/tags/golang/" title="golang">golang<sup>26</sup></a></li>
 			
 		
 			
