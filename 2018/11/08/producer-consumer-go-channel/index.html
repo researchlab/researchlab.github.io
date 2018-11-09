@@ -19,7 +19,7 @@
 <meta property="og:site_name" content="一线攻城狮">
 <meta property="og:description" content="从生产者消费者模型探究回顾golang channel注意事项; 实例探究no buffer及buffer channel;">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2018-11-08T18:21:25.889Z">
+<meta property="og:updated_time" content="2018-11-09T01:39:38.574Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="从生产者消费者模型深入学习golang channel">
 <meta name="twitter:description" content="从生产者消费者模型探究回顾golang channel注意事项; 实例探究no buffer及buffer channel;">
@@ -101,7 +101,7 @@
 <figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//no buffer channel</span></span><br><span class="line">ch := <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">int</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">//buffer channel</span></span><br><span class="line">ch := <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">int</span> bufSize)</span><br></pre></td></tr></table></figure>
 <ul>
 <li>无缓冲channel 默认channel大小为1, 写入一个值后需要被读取之后才能继续写入, 否则写阻塞;</li>
-<li>缓冲channel 的大小是初始时者的bufSize, 可连续写入bufSize值, 然后等待读取, 当len(channel) &lt; bufSize时才可以继续写入, 否则写阻塞;</li>
+<li>缓冲channel 的大小是初始时的bufSize, 可连续写入bufSize值, 然后等待读取, 当len(channel) &lt; bufSize时才可以继续写入, 否则写阻塞;</li>
 <li>channel 中没有值时 则读阻塞;</li>
 <li>channel 常用在同步, pipe, 无锁设计等场景中;</li>
 </ul>
@@ -116,7 +116,7 @@
 </ul>
 <h3 id="关闭"><a href="#关闭" class="headerlink" title="关闭"></a>关闭</h3><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">close</span>(ch)</span><br></pre></td></tr></table></figure>
 <ul>
-<li>只要当写channel写入完毕后则应立即关闭channel; 而管道则不需要处理;</li>
+<li>只要当写channel写入完毕后则应立即关闭channel; 而读channel则可以不需要处理;</li>
 </ul>
 <blockquote>
 <p>更多参考<a href="https://tour.golang.org/concurrency/4" target="_blank" rel="noopener">Range and close</a></p>
