@@ -19,7 +19,7 @@ ch := make(chan int)
 ch := make(chan int bufSize)
 ```
 - 无缓冲channel 默认channel大小为1, 写入一个值后需要被读取之后才能继续写入, 否则写阻塞;
-- 缓冲channel 的大小是初始时者的bufSize, 可连续写入bufSize值, 然后等待读取, 当len(channel) < bufSize时才可以继续写入, 否则写阻塞;
+- 缓冲channel 的大小是初始时的bufSize, 可连续写入bufSize值, 然后等待读取, 当len(channel) < bufSize时才可以继续写入, 否则写阻塞;
 - channel 中没有值时 则读阻塞;
 - channel 常用在同步, pipe, 无锁设计等场景中;
 
@@ -45,7 +45,7 @@ out, ok := <- ch
 ```golang 
 close(ch)
 ```
-- 只要当写channel写入完毕后则应立即关闭channel; 而管道则不需要处理;
+- 只要当写channel写入完毕后则应立即关闭channel; 而读channel则可以不需要处理;
 
 > 更多参考[Range and close](https://tour.golang.org/concurrency/4)
 
