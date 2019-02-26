@@ -1,0 +1,618 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>缓存穿透/击穿/雪崩 - 解决方案分析 | 一线攻城狮</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="Lee Hong">
+    
+
+    
+    <meta name="description" content="设计一个缓存系统，不得不要考虑的问题就是: 缓存穿透、缓存击穿与失效时的雪崩效应。">
+<meta name="keywords" content="cache-invalid">
+<meta property="og:type" content="article">
+<meta property="og:title" content="缓存穿透&#x2F;击穿&#x2F;雪崩 - 解决方案分析">
+<meta property="og:url" content="http://researchlab.github.io/2019/02/26/cache-invalidation-analysis-solution/index.html">
+<meta property="og:site_name" content="一线攻城狮">
+<meta property="og:description" content="设计一个缓存系统，不得不要考虑的问题就是: 缓存穿透、缓存击穿与失效时的雪崩效应。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-02-26T03:03:00.523Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="缓存穿透&#x2F;击穿&#x2F;雪崩 - 解决方案分析">
+<meta name="twitter:description" content="设计一个缓存系统，不得不要考虑的问题就是: 缓存穿透、缓存击穿与失效时的雪崩效应。">
+
+    
+    <link rel="alternative" href="/atom.xml" title="一线攻城狮" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="一线攻城狮">一线攻城狮</a></h1>
+				<h2 class="blog-motto">十年磨一剑，一步一步脚踏实地的耕种</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">首页</a></li>
+					
+						<li><a href="/archives">归档</a></li>
+					
+						<li><a href="/about">关于</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:researchlab.github.io">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2019/02/26/cache-invalidation-analysis-solution/" title="缓存穿透/击穿/雪崩 - 解决方案分析" itemprop="url">缓存穿透/击穿/雪崩 - 解决方案分析</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
+		
+ <p class="article-time">
+    <time datetime="2019-02-26T09:53:45.000Z" itemprop="datePublished"> 发表于 2019-02-26</time>
+   &nbsp&nbsp热度&nbsp<span id="busuanzi_value_page_pv"></span>° 
+  </p>
+</header>
+
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#缓存穿透"><span class="toc-number">1.</span> <span class="toc-text">缓存穿透</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#解决方案"><span class="toc-number">2.</span> <span class="toc-text">解决方案</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#缓存雪崩"><span class="toc-number">3.</span> <span class="toc-text">缓存雪崩</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#解决方案-1"><span class="toc-number">4.</span> <span class="toc-text">解决方案</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#缓存击穿"><span class="toc-number">5.</span> <span class="toc-text">缓存击穿</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#解决方案-2"><span class="toc-number">6.</span> <span class="toc-text">解决方案</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#“提前”使用互斥锁-mutex-key-："><span class="toc-number">7.</span> <span class="toc-text">“提前”使用互斥锁(mutex key)：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#“永远不过期”："><span class="toc-number">8.</span> <span class="toc-text">“永远不过期”：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#资源保护："><span class="toc-number">9.</span> <span class="toc-text">资源保护：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#总结"><span class="toc-number">10.</span> <span class="toc-text">总结</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考来源"><span class="toc-number">11.</span> <span class="toc-text">参考来源</span></a></li></ol>
+		
+		</div>
+		
+		<p>设计一个缓存系统，不得不要考虑的问题就是: 缓存穿透、缓存击穿与失效时的雪崩效应。<br><a id="more"></a></p>
+<h2 id="缓存穿透"><a href="#缓存穿透" class="headerlink" title="缓存穿透"></a>缓存穿透</h2><p>缓存穿透是指查询一个一定不存在的数据，由于缓存是不命中时被动写的，并且出于容错考虑，如果从存储层查不到数据则不写入缓存，这将导致这个不存在的数据每次请求都要到存储层去查询，失去了缓存的意义。在流量大时，可能DB就挂掉了，要是有人利用不存在的key频繁攻击我们的应用，这就是漏洞。</p>
+<h2 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h2><p>有很多种方法可以有效地解决缓存穿透问题，最常见的则是采用布隆过滤器，将所有可能存在的数据哈希到一个足够大的bitmap中，一个一定不存在的数据会被 这个bitmap拦截掉，从而避免了对底层存储系统的查询压力。另外也有一个更为简单粗暴的方法（我们采用的就是这种），如果一个查询返回的数据为空（不管是数 据不存在，还是系统故障），我们仍然把这个空结果进行缓存，但它的过期时间会很短，最长不超过五分钟。</p>
+<h2 id="缓存雪崩"><a href="#缓存雪崩" class="headerlink" title="缓存雪崩"></a>缓存雪崩</h2><p>缓存雪崩是指在我们设置缓存时采用了相同的过期时间，导致缓存在某一时刻同时失效，请求全部转发到DB，DB瞬时压力过重雪崩。</p>
+<h2 id="解决方案-1"><a href="#解决方案-1" class="headerlink" title="解决方案"></a>解决方案</h2><p>缓存失效时的雪崩效应对底层系统的冲击非常可怕。大多数系统设计者考虑用加锁或者队列的方式保证缓存的单线 程（进程）写，从而避免失效时大量的并发请求落到底层存储系统上。这里分享一个简单方案就时讲缓存失效时间分散开，比如我们可以在原有的失效时间基础上增加一个随机值，比如1-5分钟随机，这样每一个缓存的过期时间的重复率就会降低，就很难引发集体失效的事件。</p>
+<h2 id="缓存击穿"><a href="#缓存击穿" class="headerlink" title="缓存击穿"></a>缓存击穿</h2><p>对于一些设置了过期时间的key，如果这些key可能会在某些时间点被超高并发地访问，是一种非常“热点”的数据。这个时候，需要考虑一个问题: 缓存被“击穿”的问题，这个和缓存雪崩的区别在于这里针对某一key缓存，前者则是很多key。</p>
+<p>缓存在某个时间点过期的时候，恰好在这个时间点对这个Key有大量的并发请求过来，这些请求发现缓存过期一般都会从后端DB加载数据并回设到缓存，这个时候大并发的请求可能会瞬间把后端DB压垮。</p>
+<h2 id="解决方案-2"><a href="#解决方案-2" class="headerlink" title="解决方案"></a>解决方案</h2><p>1.使用互斥锁(mutex key)<br>业界比较常用的做法，是使用mutex。简单地来说，就是在缓存失效的时候（判断拿出来的值为空），不是立即去load db，而是先使用缓存工具的某些带成功操作返回值的操作（比如Redis的SETNX或者Memcache的ADD）去set一个mutex key，当操作返回成功时，再进行load db的操作并回设缓存；否则，就重试整个get缓存的方法。</p>
+<p>SETNX，是「SET if Not eXists」的缩写，也就是只有不存在的时候才设置，可以利用它来实现锁的效果。在redis2.6.1之前版本未实现setnx的过期时间，所以这里给出两种版本代码参考: </p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//2.6.1前单机版本锁</span></span><br><span class="line"><span class="function">String <span class="title">get</span><span class="params">(String key)</span> </span>&#123;  </span><br><span class="line">   String value = redis.get(key);  </span><br><span class="line">   <span class="keyword">if</span> (value  == null) &#123;  </span><br><span class="line">    <span class="keyword">if</span> (redis.setnx(key_mutex, <span class="string">"1"</span>)) &#123;  </span><br><span class="line">        <span class="comment">// 3 min timeout to avoid mutex holder crash  </span></span><br><span class="line">        redis.expire(key_mutex, <span class="number">3</span> * <span class="number">60</span>)  </span><br><span class="line">        value = db.get(key);  </span><br><span class="line">        redis.<span class="built_in">set</span>(key, value);  </span><br><span class="line">        redis.<span class="keyword">delete</span>(key_mutex);  </span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;  </span><br><span class="line">        <span class="comment">//其他线程休息50毫秒后重试  </span></span><br><span class="line">        Thread.sleep(<span class="number">50</span>);  </span><br><span class="line">        get(key);  </span><br><span class="line">    &#125;  </span><br><span class="line">  &#125;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>最新版本代码：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">get</span><span class="params">(key)</span> </span>&#123;</span><br><span class="line">      String value = redis.get(key);</span><br><span class="line">      <span class="keyword">if</span> (value == null) &#123; <span class="comment">//代表缓存值过期</span></span><br><span class="line">          <span class="comment">//设置3min的超时，防止del操作失败的时候，下次缓存过期一直不能load db</span></span><br><span class="line">		  <span class="keyword">if</span> (redis.setnx(key_mutex, <span class="number">1</span>, <span class="number">3</span> * <span class="number">60</span>) == <span class="number">1</span>) &#123;  <span class="comment">//代表设置成功</span></span><br><span class="line">               value = db.get(key);</span><br><span class="line">                      redis.<span class="built_in">set</span>(key, value, expire_secs);</span><br><span class="line">                      redis.del(key_mutex);</span><br><span class="line">              &#125; <span class="keyword">else</span> &#123;  <span class="comment">//这个时候代表同时候的其他线程已经load db并回设到缓存了，这时候重试获取缓存值即可</span></span><br><span class="line">                      sleep(<span class="number">50</span>);</span><br><span class="line">                      get(key);  <span class="comment">//重试</span></span><br><span class="line">              &#125;</span><br><span class="line">          &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">              <span class="keyword">return</span> value;</span><br><span class="line">          &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>memcache代码：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (memcache.get(key) == null) &#123;  </span><br><span class="line">    <span class="comment">// 3 min timeout to avoid mutex holder crash  </span></span><br><span class="line">    <span class="keyword">if</span> (memcache.add(key_mutex, <span class="number">3</span> * <span class="number">60</span> * <span class="number">1000</span>) == <span class="literal">true</span>) &#123;  </span><br><span class="line">        value = db.get(key);  </span><br><span class="line">        memcache.<span class="built_in">set</span>(key, value);  </span><br><span class="line">        memcache.<span class="keyword">delete</span>(key_mutex);  </span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;  </span><br><span class="line">        sleep(<span class="number">50</span>);  </span><br><span class="line">        retry();  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="“提前”使用互斥锁-mutex-key-："><a href="#“提前”使用互斥锁-mutex-key-：" class="headerlink" title="“提前”使用互斥锁(mutex key)："></a>“提前”使用互斥锁(mutex key)：</h2><p>在value内部设置1个超时值(timeout1), timeout1比实际的memcache timeout(timeout2)小。当从cache读取到timeout1发现它已经过期时候，马上延长timeout1并重新设置到cache。然后再从数据库加载数据并设置到cache中。伪代码如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">v = memcache.get(key);  </span><br><span class="line">if (v == null) &#123;  </span><br><span class="line">    if (memcache.add(key_mutex, 3 * 60 * 1000) == true) &#123;  </span><br><span class="line">        value = db.get(key);  </span><br><span class="line">        memcache.set(key, value);  </span><br><span class="line">        memcache.delete(key_mutex);  </span><br><span class="line">    &#125; else &#123;  </span><br><span class="line">        sleep(50);  </span><br><span class="line">        retry();  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125; else &#123;  </span><br><span class="line">    if (v.timeout &lt;= now()) &#123;  </span><br><span class="line">        if (memcache.add(key_mutex, 3 * 60 * 1000) == true) &#123;  </span><br><span class="line">            // extend the timeout for other threads  </span><br><span class="line">            v.timeout += 3 * 60 * 1000;  </span><br><span class="line">            memcache.set(key, v, KEY_TIMEOUT * 2);  </span><br><span class="line">  </span><br><span class="line">            // load the latest value from db  </span><br><span class="line">            v = db.get(key);  </span><br><span class="line">            v.timeout = KEY_TIMEOUT;  </span><br><span class="line">            memcache.set(key, value, KEY_TIMEOUT * 2);  </span><br><span class="line">            memcache.delete(key_mutex);  </span><br><span class="line">        &#125; else &#123;  </span><br><span class="line">            sleep(50);  </span><br><span class="line">            retry();  </span><br><span class="line">        &#125;  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="“永远不过期”："><a href="#“永远不过期”：" class="headerlink" title="“永远不过期”："></a>“永远不过期”：</h2><p>这里的“永远不过期”包含两层意思：</p>
+<blockquote>
+<p>(1) 从redis上看，确实没有设置过期时间，这就保证了，不会出现热点key过期问题，也就是“物理”不过期。</p>
+</blockquote>
+<blockquote>
+<p>(2) 从功能上看，如果不过期，那不就成静态的了吗？所以我们把过期时间存在key对应的value里，如果发现要过期了，通过一个后台的异步线程进行缓存的构建，也就是“逻辑”过期</p>
+</blockquote>
+<p> 从实战看，这种方法对于性能非常友好，唯一不足的就是构建缓存时候，其余线程(非构建缓存的线程)可能访问的是老数据，但是对于一般的互联网功能来说这个还是可以忍受。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">String get(final String key) &#123;</span><br><span class="line">        V v = redis.get(key);</span><br><span class="line">        String value = v.getValue();</span><br><span class="line">        long timeout = v.getTimeout();</span><br><span class="line">        if (v.timeout &lt;= System.currentTimeMillis()) &#123;</span><br><span class="line">            // 异步更新后台异常执行</span><br><span class="line">            threadPool.execute(new Runnable() &#123;</span><br><span class="line">                public void run() &#123;</span><br><span class="line">                    String keyMutex = &quot;mutex:&quot; + key;</span><br><span class="line">                    if (redis.setnx(keyMutex, &quot;1&quot;)) &#123;</span><br><span class="line">                        // 3 min timeout to avoid mutex holder crash</span><br><span class="line">                        redis.expire(keyMutex, 3 * 60);</span><br><span class="line">                        String dbValue = db.get(key);</span><br><span class="line">                        redis.set(key, dbValue);</span><br><span class="line">                        redis.delete(keyMutex);</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;);</span><br><span class="line">        &#125;</span><br><span class="line">        return value;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="资源保护："><a href="#资源保护：" class="headerlink" title="资源保护："></a>资源保护：</h2><p>采用netflix的hystrix，可以做资源的隔离保护主线程池，如果把这个应用到缓存的构建也未尝不可。</p>
+<p>四种解决方案：没有最佳只有最合适</p>
+<table>
+<thead>
+<tr>
+<th>解决方案</th>
+<th>优点</th>
+<th>缺点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>简单分布式互斥锁（mutex key）</td>
+<td>1.思路简单<br>2.保证一致性</td>
+<td>1.代码复杂度增大<br>2.存在死锁的风险<br>3.存在线程池阻塞的风险</td>
+</tr>
+<tr>
+<td>“提前”使用互斥锁</td>
+<td>1.保证一致性<br></td>
+<td>同上</td>
+</tr>
+<tr>
+<td>不过期(本文)</td>
+<td>1.异步构建缓存, 不会阻塞线程池</td>
+<td>1.不保证一致性。<br>2.代码复杂度增大(每个value都要维护一个timekey)。<br>3.占用一定的内存空间(每个value都要维护一个timekey)。</td>
+</tr>
+<tr>
+<td>资源隔离组件hystrix(本文)</td>
+<td>1.hystrix技术成熟,有效保证后端。<br>2.hystrix监控强大。</td>
+<td>1. 部分访问存在降级策略。</td>
+</tr>
+</tbody>
+</table>
+<p>四种方案来源网络，详文请链接：<a href="http://carlosfu.iteye.com/blog/2269687?hmsr=toutiao.io&amp;utm_medium=toutiao.io&amp;utm_source=toutiao.io" target="_blank" rel="noopener">http://carlosfu.iteye.com/blog/2269687?hmsr=toutiao.io&amp;utm_medium=toutiao.io&amp;utm_source=toutiao.io</a></p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>针对业务系统，永远都是具体情况具体分析，没有最好，只有最合适。<br>最后，对于缓存系统常见的缓存满了和数据丢失问题，需要根据具体业务分析，通常我们采用LRU策略处理溢出，Redis的RDB和AOF持久化策略来保证一定情况下的数据安全。</p>
+<h2 id="参考来源"><a href="#参考来源" class="headerlink" title="参考来源"></a>参考来源</h2><p>[1] <a href="https://blog.csdn.net/zeb_perfect/article/details/54135506" target="_blank" rel="noopener">https://blog.csdn.net/zeb_perfect/article/details/54135506</a></p>
+  
+	</div>
+		<div style="padding: 10px 44px 30px 44px;" >
+<div style="border: 1px dashed #e0e0e0; padding: 10px 10px 10px 10px; background-color: #fffeee; background-repeat: no-repeat; background-attachment: scroll; background-position: 1% 50%; -moz-background-size: auto auto; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">
+<div style="float:left;margin-top:0px;">
+<img src="/img/weixin.jpg" width="125px" height="125px" style="border:1px solid #ccc; margin: 6px 5px 0px 0px"/>
+</div>
+<div>
+ <p style="margin-top:0px;">作者署名：<b><a target="_blank" href="http://researchlab.github.io/">朴实的一线攻城狮</a></b>
+<br />本文标题：<b><a href="/2019/02/26/cache-invalidation-analysis-solution/" target="_blank" title="缓存穿透/击穿/雪崩 - 解决方案分析">缓存穿透/击穿/雪崩 - 解决方案分析</a></b> 
+<br />本文出处：<b><a href="/2019/02/26/cache-invalidation-analysis-solution/" target="_blank" title="缓存穿透/击穿/雪崩 - 解决方案分析">http://researchlab.github.io/2019/02/26/cache-invalidation-analysis-solution/</a></b>
+<br />版权声明：本文由<b><a href="/about" target="_blank" title="Lee Hong">Lee Hong</a></b>创作和发表,采用<b>署名(BY)</b>-<b>非商业性使用(NC)</b>-<b>相同方式共享(SA)</b>国际许可协议进行许可,转载请注明作者及出处, 否则保留追究法律责任的权利。 </p>
+</div>
+</div>
+</div>
+
+   	       
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/DevOps/">DevOps</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/cache-invalid/">cache-invalid</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	<div class="share-jiathis">
+	  
+<div class="jiathis_style_24x24">
+	<a class="jiathis_button_weixin"></a>
+	<a class="jiathis_button_tsina"></a>
+	<a class="jiathis_button_tqq"></a>
+	<a class="jiathis_button_qzone"></a>
+    <a class="jiathis_button_googleplus"></a>
+	<a class="jiathis_button_douban"></a>
+	<a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+    var jiathis_config={
+    data_track_clickback:true,
+    sm:"copy,renren,cqq",
+    pic:"",
+    summary:"",
+    
+  </script> 
+<script type="text/javascript" src="//v3.jiathis.com/code/jia.js?uid=
+2084050" charset="utf-8"></script>      
+
+
+	 </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+
+<div class="next">
+<a href="/2018/11/08/producer-consumer-go-channel/"  title="从生产者消费者模型深入学习golang channel">
+ <strong>下一篇：</strong><br/> 
+ <span>从生产者消费者模型深入学习golang channel
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+<section id="comments" class="comment">
+	<div class="ds-thread" data-thread-key="2019/02/26/cache-invalidation-analysis-solution/" data-title="缓存穿透/击穿/雪崩 - 解决方案分析" data-url="http://researchlab.github.io/2019/02/26/cache-invalidation-analysis-solution/"></div>
+</section>
+
+
+</div>  
+
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+<div id="asidepart">
+
+  <div class="widget tag">
+<!--<hr noshade color="#ccc">-->
+<!-- <p style="text-align:center">Mike.Lee</p> -->
+<p margin="0" style="text-align:center">
+<a class="ahref" href="http://researchlab.github.io/about/">
+<img id="aboutpic"  src="/img/qzly.png" alt="@全栈炼狱之路" height="200" width="200" style="box-shadow: 0px 0px 2px 2px #9edeff;border-radius: 8px;" >
+</a></p>
+<p style="text-align:center"><font size="2" color="grey">关注微信公众号 @全栈炼狱之路</font></p>
+<div style="display:block; margin-top:10px; padding: 0px 4px 4px 0; border-top: dashed 1px #ccc; text-align:left;"></div>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<div style="float:left;position:absolute;"><font size="2" >总访问:<span id="busuanzi_value_site_pv"></span>次</font></div>
+<div style="float:right;"><font size="2" >总访客:<span id="busuanzi_value_site_uv"></span>人</font></div>
+
+<div style="margin-top:30px; padding: 5px 4px 4px 0; border-top: dashed 1px #ccc; text-align:left;"></div>
+</div>
+
+
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/DevOps/" title="DevOps">DevOps<sup>10</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Hexo/" title="Hexo">Hexo<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/algorithm/" title="algorithm">algorithm<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/docker-practice/" title="docker-practice">docker-practice<sup>8</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/go-bootcamp/" title="go-bootcamp">go-bootcamp<sup>6</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/go-pattern/" title="go-pattern">go-pattern<sup>3</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/golang/" title="golang">golang<sup>23</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/javascript/" title="javascript">javascript<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/mysql专题/" title="mysql专题">mysql专题<sup>16</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/php/" title="php">php<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/redis专题/" title="redis专题">redis专题<sup>17</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/golang/" title="golang">golang<sup>26</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mysql/" title="mysql">mysql<sup>18</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/redis/" title="redis">redis<sup>17</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/docker/" title="docker">docker<sup>9</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/setcookie/" title="setcookie">setcookie<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/tcp/" title="tcp">tcp<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/concurrency/" title="concurrency">concurrency<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/cache/" title="cache">cache<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Hexo/" title="Hexo">Hexo<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Blog/" title="Blog">Blog<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/getcookie/" title="getcookie">getcookie<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/rpc/" title="rpc">rpc<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/ticker/" title="ticker">ticker<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/gin/" title="gin">gin<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/submodule/" title="submodule">submodule<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/form/" title="form">form<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/post/" title="post">post<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/reflect/" title="reflect">reflect<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/net-http/" title="net/http">net/http<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/time/" title="time">time<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="http://blog.csdn.net/xiaolongwang2010" target="_blank" title="小龙王2010csdn技术博客">Linux/c/c++</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  
+
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+  <iframe width="100%" height="550" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=550&fansRow=1&ptype=1&speed=0&skin=1&isTitle=1&noborder=1&isWeibo=1&isFans=1&uid=5141203275&verifier=a533edf5&dpc=1"></iframe>
+
+
+</aside>
+</div>
+
+    </div>
+    <footer><div id="footer" >
+	
+	
+	<div class="social-font" class="clearfix">
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/researchlab/lightman" target="_blank" title="lightman">lightman</a> ©2016 - 2019 
+		
+		<a href="/about" target="_blank" title="Lee Hong">Lee Hong</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+
+
+<script type="text/javascript">
+  var duoshuoQuery = {short_name:"gamedp"};
+  (function() {
+    var ds = document.createElement('script');
+    ds.type = 'text/javascript';ds.async = true;
+    ds.src = '//static.duoshuo.com/embed.js';
+    ds.charset = 'UTF-8';
+    (document.getElementsByTagName('head')[0] 
+    || document.getElementsByTagName('body')[0]).appendChild(ds);
+  })();
+</script> 
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>
