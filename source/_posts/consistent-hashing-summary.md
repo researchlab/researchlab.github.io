@@ -10,6 +10,11 @@ description:
 
 <!--more-->
 
+## 应用场景 
+1.分布式负载均衡;
+2.过渡平滑(如给分布式集群分发数据, 当分布式集群动态增删时,可尽量减少数据迁移,减少受影响的数据);
+3.分布式缓存均衡(对缓存节点进行扩缩容, 原理如上述2);
+
 ## 算法原理
 
 一致性哈希算法在1997年由麻省理工学院提出的一种分布式哈希(DHT)实现算法，设计目标是为了解决因特网中的热点(Hot spot)问题，初衷和CARP十分类似。一致性哈希修正了CARP使用的简 单哈希算法带来的问题，使得分布式哈希(DHT)可以在P2P环境中真正得到应用。 
@@ -36,86 +41,134 @@ description:
 
 ** 2 把对象映射到hash空间 **
 
-接下来考虑4个对象object1~object4，通过hash函数计算出的hash值key在环上的分布如图2所示,
+接下来考虑4个对象key1~key4，通过hash函数计算出的hash值key在环上的分布如图2所示,
 
-hash(object1) = key1;
+hash(key1) = k1;
 … …
-hash(object4) = key4;
+hash(key4) = k4;
 
-<center>![hash ring](consistent-hashing-summary/object.jpg)图2 4个对象的key值分布</center>
+<center>![object_hash ring](consistent-hashing-summary/object.jpg)图2 4个对象的key哈希值分布</center>
 
 ** 3 把cache server映射到hash空间 **
 
 一致性哈希算法的基本思想就是将对象和cache server都映射到同一个hash数值空间中，并且使用相同的hash算法。
 
-假设当前有A, B和C共3台cache server，那么其映射结果将如图3所示，他们在hash空间中，以对应的hash值排列(一般采用升序，好便于后继将对象映射到相应的cache server上)。
+同样, 假设当前有3台cache server，把缓存服务器通过hash算法，加入到上述的环中。
 
-hash(cache A) = key A;
+hash(cache1) = c1;
 … …
-hash(cache C) = key C;
+hash(cache3) = c3;
 
-<center>![hash ring](consistent-hashing-summary/cache.jpg)图3 cache server 和对象的key值分布</center>
+<center>![cache_hash ring](consistent-hashing-summary/cache.jpg)图3 cache server 和对象的key哈希值分布</center>
 
 <font color=red>通常cache server的hash计算, 是用cache机器的IP地址或机器名作为hash输入, 后继的实现案例中利用了cache server的IP地址作为参数因子。</font>
 
 ** 4 把对象映射到cache server上 **
 
-现在cache server和对象都已经通过同一个hash算法映射到hash数值空间中了，接下来要考虑的就是如何将对象映射到cache server上面了。
-在这个环形空间中，如果沿着顺时针方向从对象的key值出发，直到遇见一个cache server，那么就将该对象存储在这个cache server上，因为对象和cache server的hash值是固定的，因此这个cache server必然是唯一和确定的。这样不就找到了对象和cache server的映射方法了吗?! (程序实现时可以对hash环进行升序排序， 然后按顺时针从对象的key值出发，找到与这个key相邻的第一个大于key值的cache server hash值，则将这个key值映射到这个cache server上)
+接下来就是数据如何存储到cache服务器上了，key值哈希之后的结果顺时针找上述环形hash空间中，距离自己最近的机器节点，然后将数据存储到上面， 如上图所示，k1 存储到 c3 服务器上， k4,k3存储到c1服务器上， k2存储在c2服务器上。用图表示如下：
 
-依然继续上面的例子(参见图3)，那么根据上面的方法，对象object1将被存储到cache server A上; object2和 object3 对应到 cache  server C; object4 对应到 cache server B; 
+<center>![cache_object_hash_ring](consistent-hashing-summary/cache_object.jpg)图4 cache server 和对象的key哈希值映射</center>
 
 ** 5 考察cache server的变动 **
 前面讲过，通过hash求余的方法带来的最大问题就在于不能满足单调性，当cache server有所变动时，存储在原位置上的cache数据失效了，就需要做相应的迁移, 进而对后台服务器造成巨大的冲击，现在就来分析一致性哈希算法,
 
 5.1 移除cache server 
 
-假设cache server B 挂掉了, 根据上面讲到的映射方法，这时受影响的将仅是那些沿cache server B 逆时针遍历直到下一个cache server (cache server A)之间的对象，也即是本来映射到cache  server B上的那些对象。
+假设cache3服务器宕机，这时候需要从集群中将其摘除。那么，之前存储在c3上的k1，将会顺时针寻找距离它最近的一个节点，也就是c1节点，这样，k1就会存储到c1上了，看一看下下面的图，比较清晰。
 
-因此这里仅需要变动对象object4，将其重新映射到cache server C上即可; 参见图4。
+<center>![移除cache3](consistent-hashing-summary/remove.jpg)图4 Cache server 3被移除后的cache server映射</center>
 
-<center>![hash ring](consistent-hashing-summary/remove.jpg)图4 Cache server B被移除后的cache server映射</center>
+<font color=red>摘除c3节点之后，只影响到了原先存储再c3上的k1，而k3、k4、k2都没有受到影响，也就意味着解决了最开始的解决方案（hash(key)%N）中可能带来的雪崩问题。</font>
 
 5.2 添加cache server
 
-再考虑添加一台新的cache server D的情况，假设在这个环形hash空间中，cache server D被映射在对象object2和object3之间。这时受影响的将仅是那些沿cache server D逆时针遍历直到下一个cache server (cache server B)之间的对象(它们是也本来映射到cache server C上对象的一部分)，将这些对象重新映射到cache server D上即可。因此这里仅需要变动对象object2, 将其重新映射到cache server D上; 参见图5。
+新增C4节点之后，原先存储到C1的k4，迁移到了C4，分担了C1上的存储压力和流量压力。
 
-<center>![hash ring](consistent-hashing-summary/add.jpg)图5 添加cache server D后的映射关系</center>
+<center>![新增C4节点](consistent-hashing-summary/add.jpg)图5 添加cache server 4后的映射关系</center>
+
+为什么需要想象成环形？
+
+为了保证节点宕机摘除之后，原先存储在当前节点的key能找到可存储的位置。举个极端的例子，在不是环状hash空间下，刚好缓存的服务器处于0这个位置，那么0之后是没有任何节点信息的，那么当缓存服务器摘除的时候，以前存储在这台机器上的key便找不到顺时针距离它最近的一个节点了。但如果是环形空间，0之后的最近的一个节点信息有可能是2^32-1这个位置，他可以找到0之后的节点。如下图描述可能清晰一点。
+
+<center>![why hash ring](consistent-hashing-summary/why-hash-ring.jpg)图6 why hash环</center>
+
+为什么是2^32个桶空间？
+桶空间的大小根据选用的hash算法来定, 一般情况下, hash的返回结果为32位的整型数据, 无符号的整型的最大值是2^32-1, 最小值是0, 一共2^32个数字, 所有, 桶空间也就是2^32个了; 
+
+上面的简单的一致性hash的方案在某些情况下但依旧存在问题：一个节点宕机之后，数据需要落到距离他最近的节点上，会导致下个节点的压力突然增大，可能导致雪崩，整个服务挂掉。如下图所示，
+
+<center>![摘除c3缓存服务器](consistent-hashing-summary/remove-c3.jpg)图7 摘除c3服务器</center>
+
+当节点C3摘除之后，之前再C3上的k1就要迁移到C1上，这时候带来了两部分的压力:
+
+     1)、之前请求到C3上的流量转嫁到了C1上,会导致C1的流量增加，如果之前C3上存在热点数据，则可能导致C1扛不住压力挂掉。
+
+     2)、之前存储到C3上的key值转义到了C1，会导致C1的内容占用量增加，可能存在瓶颈。
+
+当上面两个压力发生的时候，可能导致C1节点也宕机了。那么压力便会传递到C2上，又出现了类似滚雪球的情况，服务压力出现了雪崩，导致整个服务不可用。
+
+那怎么解决这个问题呢？ 引入虚拟节点, 
 
 ** 6 虚拟节点 **
 
 考量Hash算法的另一个指标是`平衡性(Balance)`，定义如下:
-** 平衡性 ** 是指哈希的结果能够尽可能分布到所有的缓冲中去，这样可以使得所有的缓冲空间都得到利用, hash算法并不是保证绝对的平衡，如果cache server较少的话，对象并不能被均匀的映射到cache server上，比如在上面的例子中，仅部署cache server A 和 cache server C的情况下，在4个对象中，cache server A仅存储了object1，而cache server C则存储了object2, object3和object4; 分布是很不均衡的。
+** 平衡性 ** 是指哈希的结果能够尽可能分布到所有的缓冲中去，这样可以使得所有的缓冲空间都得到利用, hash算法并不是保证绝对的平衡，如果cache server较少的话，对象并不能被均匀的映射到cache server上，比如在上面的例子中，仅部署cache server 1 和 cache server 3的情况下，在4个对象中，cache server 1仅存储了key1，而cache server 3则存储了key2, key3和key4; 分布是很不均衡的。
 
-为了解决这种情况, 一致性哈希引入了"虚拟节点"的概念, 它可以如下定义:
+如上描述，一个节点宕机之后可能会引起下个节点的存储及流量压力变大，这一点违背了最开始提到的四个原则中的 平衡性， 节点宕机之后，流量及内存的分配方式打破了原有的平衡。
 
-<font color=red>"虚拟节点"(virtual node)是实际节点在hash空间的复制品(replica)，一实际个节点对应了若干个"虚拟节点"，这个对应个数也成为"复制个数"，"虚拟节点"在hash空间中以hash值排列。</font>
+虚拟节点，从名字可以看出来，这个节点是个虚拟的，每个实际节点对应多个虚拟节点。比较专业的说法如下：
 
-仍以仅部署cache server A 和cache server C 的情况为例, 在图4中我们已经看到, cache server分布并不均匀。现在我们引入虚拟节点，并设置"复制个数"为2，这就意味着一共会存在4个"虚拟节点", cache server A1, cache server A2代表了cache server A; cache server C1, cache server C2代表了cache server C; 假设一种比较理想的情况，参见图6,
+“虚拟节点”（ virtual node ）是实际节点（机器）在 hash 空间的复制品（ replica ），一实际个节点（机器）对应了若干个“虚拟节点”，这个对应个数也成为“复制个数”，“虚拟节点”在 hash 空间中以hash值排列。
 
-<center>![hash ring](consistent-hashing-summary/virtual.jpg)图6 引入"虚拟节点"后的映射关系</center>
+依旧用图片来解释，假设存在以下的真实节点和虚拟节点的对应关系。
 
-此时, 对象到"虚拟节点"的映射关系为:
+Visual100—> Real1
 
-objec1->cache A2; objec2->cache A1; objec3->cache C1; objec4->cache C2; 
+Visual101—> Real1
 
-因此对象object1和object2都被映射到了cache server A上，而object3和object4映射到了cache server C上; 平衡性有了很大提高。
+Visual200—> Real2
 
-引入"虚拟节点"后, 映射关系就从`{对象->节点}`转换到了`{对象->虚拟节点}`。查询物体所在cache server时的映射关系如图7所示,
+Visual201—> Real2
 
-<center>![object to virtual node](consistent-hashing-summary/map.jpg)图7 查询对象所在cache server</center>
+Visual300—> Real3
 
-"虚拟节点"的hash计算可以采用对应节点的IP地址加数字后缀的方式。例如假设cache server A 的IP地址为202.168.14.241。
+Visual301—> Real3
 
-引入"虚拟节点"前，计算cache server A的hash值:
+同样的，hash之后的结果如下：
 
-Hash("202.168.14.241");
+hash(Visual100)—> V100  —> Real1
 
-引入"虚拟节点"后，计算"虚拟节点"cache server A1和cache server A2的hash值:
+hash(Visual101)—> V101  —> Real1
 
-Hash("202.168.14.241-1-1");  // cache server A1 [Hash(server_IP-virtual_node_id-physical-node-id)]
+hash(Visual200)—> V200  —> Real2
 
-Hash("202.168.14.241-2-1");  // cache server A2 [Hash(server_IP-virtual_node_id-physical-node-id)]
+hash(Visual201)—> V201  —> Real2
+
+hash(Visual300)—> V300  —> Real3
+
+hash(Visual301)—> V301  —> Real3
+
+key值的hash结果如上，这里暂时不写了。
+
+如图解释：
+
+<center>![虚拟节点](consistent-hashing-summary/virtual1.jpg)图8 虚拟节点</center>
+
+和之前介绍的不添加虚拟节点的类似，主要聊下如果宕机之后的情况。 
+
+假设Real1机器宕机，则会发生一下情况。
+
+1、原先存储在虚拟节点V100上的k1数据将迁移到V301上，也就意味着迁移到了Real3机器上。 
+
+2、原先存储再虚拟节点V101上的k4数据将迁移到V200上，也就意味着迁移到了Real2机器上。
+
+结果如下图：
+
+<center>![虚拟节点](consistent-hashing-summary/virtual2.png)图8 虚拟节点</center>
+
+这个就解决之前的问题了，某个节点宕机之后，存储及流量压力并没有全部转移到某台机器上，而是分散到了多台节点上。解决了节点宕机可能存在的雪崩问题。
+
+当物理节点多的时候，虚拟节点多，这个的雪崩可能就越小。
 
 ## 算法实现
 
