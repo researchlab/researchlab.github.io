@@ -19,7 +19,7 @@
 <meta property="og:site_name" content="一线攻城狮">
 <meta property="og:description" content="golang 1.5版本之后默认设置GOMAXPROCS值为当前计算机真实核心数，使得goroutines从默认的单线程内并发执行变成了默认的（真实核心数支持的）的多线程内并行执行。多线程并行执行goroutines需要考虑并行执行过程中引入的线程安全问题。">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2019-04-30T08:39:14.195Z">
+<meta property="og:updated_time" content="2019-04-30T09:19:46.939Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="golang 设计模式之singleton使用总结">
 <meta name="twitter:description" content="golang 1.5版本之后默认设置GOMAXPROCS值为当前计算机真实核心数，使得goroutines从默认的单线程内并发执行变成了默认的（真实核心数支持的）的多线程内并行执行。多线程并行执行goroutines需要考虑并行执行过程中引入的线程安全问题。">
@@ -203,9 +203,22 @@
 </nav>
 
 	
-<section id="comments" class="comment">
-	<div class="ds-thread" data-thread-key="2016/02/25/singleton-pattern-in-go/" data-title="golang 设计模式之singleton使用总结" data-url="http://researchlab.github.io/2016/02/25/singleton-pattern-in-go/"></div>
-</section>
+<!-- gitment评论框 start -->
+	<div id="gitment" class="ds-thread"></div>
+	<link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">
+	<script src="https://imsun.github.io/gitment/dist/gitment.browser.js"></script>
+	<script>
+	  var gitment = new Gitment({
+	    id: 'lThu Feb 25 2016 17:01:43 GMT+0000', // 可选。建议为Thu Feb 25 2016 17:01:43 GMT+0000
+	    owner: 'researchlab', // 可以是你的GitHub用户名，也可以是github id
+	    repo: 'researchlab.github.io', //可以是你的任意一个repo，推荐使用githubpage所在的repo
+	    oauth: {
+	      client_id: 'e4971ec4c4fdbefb392f',
+	      client_secret: 'e5001b2dda2dcb9a9c66417991be57836c17a72b',
+	    },
+	  })
+	  gitment.render('gitment')
+</script>
 
 
 </div>  

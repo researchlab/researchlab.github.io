@@ -19,7 +19,7 @@
 <meta property="og:site_name" content="一线攻城狮">
 <meta property="og:description" content="Hexo是一个基于Node.js免费开源的静态博客框架，方便将生成的静态网页托管在github和Heroku上，可快速部署，并支持Markdown写作，这也是选择Hexo部署本站的理由。无特殊说明，本站所有操作均在Mac OS下完成。">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2019-04-30T08:39:14.187Z">
+<meta property="og:updated_time" content="2019-04-30T09:19:46.931Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="用Hexo+github搭建本站">
 <meta name="twitter:description" content="Hexo是一个基于Node.js免费开源的静态博客框架，方便将生成的静态网页托管在github和Heroku上，可快速部署，并支持Markdown写作，这也是选择Hexo部署本站的理由。无特殊说明，本站所有操作均在Mac OS下完成。">
@@ -266,9 +266,22 @@ $ hexo deploy #部署到github上
 </nav>
 
 	
-<section id="comments" class="comment">
-	<div class="ds-thread" data-thread-key="2016/01/15/hexo-blog-1/" data-title="用Hexo+github搭建本站" data-url="http://researchlab.github.io/2016/01/15/hexo-blog-1/"></div>
-</section>
+<!-- gitment评论框 start -->
+	<div id="gitment" class="ds-thread"></div>
+	<link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">
+	<script src="https://imsun.github.io/gitment/dist/gitment.browser.js"></script>
+	<script>
+	  var gitment = new Gitment({
+	    id: 'lFri Jan 15 2016 12:10:10 GMT+0000', // 可选。建议为Fri Jan 15 2016 12:10:10 GMT+0000
+	    owner: 'researchlab', // 可以是你的GitHub用户名，也可以是github id
+	    repo: 'researchlab.github.io', //可以是你的任意一个repo，推荐使用githubpage所在的repo
+	    oauth: {
+	      client_id: 'e4971ec4c4fdbefb392f',
+	      client_secret: 'e5001b2dda2dcb9a9c66417991be57836c17a72b',
+	    },
+	  })
+	  gitment.render('gitment')
+</script>
 
 
 </div>  

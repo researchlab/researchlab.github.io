@@ -29,7 +29,7 @@
 <meta property="og:image" content="http://researchlab.github.io/2017/01/16/consistent-hashing-summary/remove-c3.jpg">
 <meta property="og:image" content="http://researchlab.github.io/2017/01/16/consistent-hashing-summary/virtual1.jpg">
 <meta property="og:image" content="http://researchlab.github.io/2017/01/16/consistent-hashing-summary/virtual2.png">
-<meta property="og:updated_time" content="2019-04-30T08:39:14.175Z">
+<meta property="og:updated_time" content="2019-04-30T09:19:46.923Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="一致性哈希算法总结">
 <meta name="twitter:description" content="存在一种场景, 当一个缓存服务由多个服务器组共同提供时, key应该路由到哪一个服务。这里假如采用最通用的方式取模求余: key%N(N为服务器数目), 这样做均衡性没有什么问题, 但是当服务器数目发送增加或减少时, 分配方式则变为key%(N+1)或key%(N-1)。这里将会有大量的key失效迁移, 如果后端key对应的是有状态的存储数据,那么毫无疑问,这种做法将导致服务器间大量的数据迁移,从">
@@ -311,9 +311,22 @@
 </nav>
 
 	
-<section id="comments" class="comment">
-	<div class="ds-thread" data-thread-key="2017/01/16/consistent-hashing-summary/" data-title="一致性哈希算法总结" data-url="http://researchlab.github.io/2017/01/16/consistent-hashing-summary/"></div>
-</section>
+<!-- gitment评论框 start -->
+	<div id="gitment" class="ds-thread"></div>
+	<link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">
+	<script src="https://imsun.github.io/gitment/dist/gitment.browser.js"></script>
+	<script>
+	  var gitment = new Gitment({
+	    id: 'lMon Jan 16 2017 11:02:50 GMT+0000', // 可选。建议为Mon Jan 16 2017 11:02:50 GMT+0000
+	    owner: 'researchlab', // 可以是你的GitHub用户名，也可以是github id
+	    repo: 'researchlab.github.io', //可以是你的任意一个repo，推荐使用githubpage所在的repo
+	    oauth: {
+	      client_id: 'e4971ec4c4fdbefb392f',
+	      client_secret: 'e5001b2dda2dcb9a9c66417991be57836c17a72b',
+	    },
+	  })
+	  gitment.render('gitment')
+</script>
 
 
 </div>  

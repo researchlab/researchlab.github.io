@@ -25,7 +25,7 @@
 <meta property="og:image" content="http://researchlab.github.io/2018/11/07/mysql-16-transaction-isolation-level-and-acid-review/rc1.png">
 <meta property="og:image" content="http://researchlab.github.io/2018/11/07/mysql-16-transaction-isolation-level-and-acid-review/rc2.png">
 <meta property="og:image" content="http://researchlab.github.io/2018/11/07/mysql-16-transaction-isolation-level-and-acid-review/rr1.png">
-<meta property="og:updated_time" content="2019-04-30T08:39:14.191Z">
+<meta property="og:updated_time" content="2019-04-30T09:19:46.935Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="mysql专题16 事务隔离级别及ACID知识回顾">
 <meta name="twitter:description" content="事务指的是满足ACID特性的一组操作,mysql中可以通过commit提交一个事务,也可以使用rollback进行回滚。 在并发场景中很难保证事务的Isolation特性, 即无法保证临界资源的排它性操作, 从而引发数据一致性问题, 临界资源互斥问题显然需要借助加锁来解决, 在并发事务中就需要用锁的并发控制来处理;">
@@ -315,9 +315,22 @@
 </nav>
 
 	
-<section id="comments" class="comment">
-	<div class="ds-thread" data-thread-key="2018/11/07/mysql-16-transaction-isolation-level-and-acid-review/" data-title="mysql专题16 事务隔离级别及ACID知识回顾" data-url="http://researchlab.github.io/2018/11/07/mysql-16-transaction-isolation-level-and-acid-review/"></div>
-</section>
+<!-- gitment评论框 start -->
+	<div id="gitment" class="ds-thread"></div>
+	<link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">
+	<script src="https://imsun.github.io/gitment/dist/gitment.browser.js"></script>
+	<script>
+	  var gitment = new Gitment({
+	    id: 'lWed Nov 07 2018 19:10:48 GMT+0000', // 可选。建议为Wed Nov 07 2018 19:10:48 GMT+0000
+	    owner: 'researchlab', // 可以是你的GitHub用户名，也可以是github id
+	    repo: 'researchlab.github.io', //可以是你的任意一个repo，推荐使用githubpage所在的repo
+	    oauth: {
+	      client_id: 'e4971ec4c4fdbefb392f',
+	      client_secret: 'e5001b2dda2dcb9a9c66417991be57836c17a72b',
+	    },
+	  })
+	  gitment.render('gitment')
+</script>
 
 
 </div>  

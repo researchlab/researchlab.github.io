@@ -19,7 +19,7 @@
 <meta property="og:site_name" content="一线攻城狮">
 <meta property="og:description" content="redis提供两种方式进行持久化，一种是RDB快照持久化(原理是将Reids在内存中的数据库记录压缩后定时dump到磁盘上的RDB持久化,存储紧凑)，另外一种是AOF(append only file)持久化(原理是将Reids的操作日志以追加的方式写入文件), AOF 日志在长期的运行过程中会变的无比庞大，数据库重启时需要加载AOF日志进行指令重放，这个时间就会无比漫长。所以需要定期进行AOF重">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2019-04-30T08:39:14.195Z">
+<meta property="og:updated_time" content="2019-04-30T09:19:46.939Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="redis专题13 数据存储与持久化">
 <meta name="twitter:description" content="redis提供两种方式进行持久化，一种是RDB快照持久化(原理是将Reids在内存中的数据库记录压缩后定时dump到磁盘上的RDB持久化,存储紧凑)，另外一种是AOF(append only file)持久化(原理是将Reids的操作日志以追加的方式写入文件), AOF 日志在长期的运行过程中会变的无比庞大，数据库重启时需要加载AOF日志进行指令重放，这个时间就会无比漫长。所以需要定期进行AOF重">
@@ -268,9 +268,22 @@
 </nav>
 
 	
-<section id="comments" class="comment">
-	<div class="ds-thread" data-thread-key="2018/10/10/redis-13-data-storage-solution/" data-title="redis专题13 数据存储与持久化" data-url="http://researchlab.github.io/2018/10/10/redis-13-data-storage-solution/"></div>
-</section>
+<!-- gitment评论框 start -->
+	<div id="gitment" class="ds-thread"></div>
+	<link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">
+	<script src="https://imsun.github.io/gitment/dist/gitment.browser.js"></script>
+	<script>
+	  var gitment = new Gitment({
+	    id: 'lWed Oct 10 2018 12:36:10 GMT+0000', // 可选。建议为Wed Oct 10 2018 12:36:10 GMT+0000
+	    owner: 'researchlab', // 可以是你的GitHub用户名，也可以是github id
+	    repo: 'researchlab.github.io', //可以是你的任意一个repo，推荐使用githubpage所在的repo
+	    oauth: {
+	      client_id: 'e4971ec4c4fdbefb392f',
+	      client_secret: 'e5001b2dda2dcb9a9c66417991be57836c17a72b',
+	    },
+	  })
+	  gitment.render('gitment')
+</script>
 
 
 </div>  

@@ -19,7 +19,7 @@
 <meta property="og:site_name" content="一线攻城狮">
 <meta property="og:description" content="现在golang已经可以通过vendor来管理第三方依赖包了，但是之前的一个老项目用的是git submodule来管理的，但是.gitsubmodule文件中只记录管理了项目的部分依赖包， 需要把还没有被管理的第三包也加上，下面总结使用git submodule的过程。">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2019-04-30T08:39:14.183Z">
+<meta property="og:updated_time" content="2019-04-30T09:19:46.927Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="git submodule使用总结">
 <meta name="twitter:description" content="现在golang已经可以通过vendor来管理第三方依赖包了，但是之前的一个老项目用的是git submodule来管理的，但是.gitsubmodule文件中只记录管理了项目的部分依赖包， 需要把还没有被管理的第三包也加上，下面总结使用git submodule的过程。">
@@ -207,9 +207,22 @@
 </nav>
 
 	
-<section id="comments" class="comment">
-	<div class="ds-thread" data-thread-key="2017/01/18/git-submodule/" data-title="git submodule使用总结" data-url="http://researchlab.github.io/2017/01/18/git-submodule/"></div>
-</section>
+<!-- gitment评论框 start -->
+	<div id="gitment" class="ds-thread"></div>
+	<link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">
+	<script src="https://imsun.github.io/gitment/dist/gitment.browser.js"></script>
+	<script>
+	  var gitment = new Gitment({
+	    id: 'lWed Jan 18 2017 17:11:52 GMT+0000', // 可选。建议为Wed Jan 18 2017 17:11:52 GMT+0000
+	    owner: 'researchlab', // 可以是你的GitHub用户名，也可以是github id
+	    repo: 'researchlab.github.io', //可以是你的任意一个repo，推荐使用githubpage所在的repo
+	    oauth: {
+	      client_id: 'e4971ec4c4fdbefb392f',
+	      client_secret: 'e5001b2dda2dcb9a9c66417991be57836c17a72b',
+	    },
+	  })
+	  gitment.render('gitment')
+</script>
 
 
 </div>  

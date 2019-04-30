@@ -19,7 +19,7 @@
 <meta property="og:site_name" content="一线攻城狮">
 <meta property="og:description" content="Redis是单进程单线程模型的KV数据库,那为什么还常应用在高并发场景中? 其中一个重要原因是Redis是一个单进程单线程且采用多路I/O复用模型，非阻塞IO技术, 使之可以同时处理多个连接请求(减少网络IO耗时), 也不需要关心锁，线程切换等资源消耗问题;">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2019-04-30T08:39:14.195Z">
+<meta property="og:updated_time" content="2019-04-30T09:19:46.939Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="redis专题11 线程IO模型">
 <meta name="twitter:description" content="Redis是单进程单线程模型的KV数据库,那为什么还常应用在高并发场景中? 其中一个重要原因是Redis是一个单进程单线程且采用多路I/O复用模型，非阻塞IO技术, 使之可以同时处理多个连接请求(减少网络IO耗时), 也不需要关心锁，线程切换等资源消耗问题;">
@@ -250,9 +250,22 @@
 </nav>
 
 	
-<section id="comments" class="comment">
-	<div class="ds-thread" data-thread-key="2018/10/08/redis-11-redisio/" data-title="redis专题11 线程IO模型" data-url="http://researchlab.github.io/2018/10/08/redis-11-redisio/"></div>
-</section>
+<!-- gitment评论框 start -->
+	<div id="gitment" class="ds-thread"></div>
+	<link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">
+	<script src="https://imsun.github.io/gitment/dist/gitment.browser.js"></script>
+	<script>
+	  var gitment = new Gitment({
+	    id: 'lMon Oct 08 2018 15:31:15 GMT+0000', // 可选。建议为Mon Oct 08 2018 15:31:15 GMT+0000
+	    owner: 'researchlab', // 可以是你的GitHub用户名，也可以是github id
+	    repo: 'researchlab.github.io', //可以是你的任意一个repo，推荐使用githubpage所在的repo
+	    oauth: {
+	      client_id: 'e4971ec4c4fdbefb392f',
+	      client_secret: 'e5001b2dda2dcb9a9c66417991be57836c17a72b',
+	    },
+	  })
+	  gitment.render('gitment')
+</script>
 
 
 </div>  

@@ -19,7 +19,7 @@
 <meta property="og:site_name" content="一线攻城狮">
 <meta property="og:description" content="限流算法在分布式领域是一个经常被提起的话题，当系统的处理能力有限时，如何阻止计划外的请求继续对系统施压，这是一个需要重视的问题。除了控制流量，限流还有一个应用目的是用于控制用户行为，避免垃圾请求。比如在UGC社区, 用户的发帖, 回复, 点赞等行为都要严格受控，一般要严格限定某行为在规定时间内允许的次数，超过了次数那就是非法行为。">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2019-04-30T08:39:14.195Z">
+<meta property="og:updated_time" content="2019-04-30T09:19:46.939Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="redis专题07 redis应用之限流策略">
 <meta name="twitter:description" content="限流算法在分布式领域是一个经常被提起的话题，当系统的处理能力有限时，如何阻止计划外的请求继续对系统施压，这是一个需要重视的问题。除了控制流量，限流还有一个应用目的是用于控制用户行为，避免垃圾请求。比如在UGC社区, 用户的发帖, 回复, 点赞等行为都要严格受控，一般要严格限定某行为在规定时间内允许的次数，超过了次数那就是非法行为。">
@@ -208,9 +208,22 @@
 </nav>
 
 	
-<section id="comments" class="comment">
-	<div class="ds-thread" data-thread-key="2018/10/04/redis-07-limit-rate/" data-title="redis专题07 redis应用之限流策略" data-url="http://researchlab.github.io/2018/10/04/redis-07-limit-rate/"></div>
-</section>
+<!-- gitment评论框 start -->
+	<div id="gitment" class="ds-thread"></div>
+	<link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">
+	<script src="https://imsun.github.io/gitment/dist/gitment.browser.js"></script>
+	<script>
+	  var gitment = new Gitment({
+	    id: 'lThu Oct 04 2018 17:01:59 GMT+0000', // 可选。建议为Thu Oct 04 2018 17:01:59 GMT+0000
+	    owner: 'researchlab', // 可以是你的GitHub用户名，也可以是github id
+	    repo: 'researchlab.github.io', //可以是你的任意一个repo，推荐使用githubpage所在的repo
+	    oauth: {
+	      client_id: 'e4971ec4c4fdbefb392f',
+	      client_secret: 'e5001b2dda2dcb9a9c66417991be57836c17a72b',
+	    },
+	  })
+	  gitment.render('gitment')
+</script>
 
 
 </div>  

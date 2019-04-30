@@ -19,7 +19,7 @@
 <meta property="og:site_name" content="一线攻城狮">
 <meta property="og:description" content="很多业务场景中多会用到消息队列来传递消息数据问题， 常用的消息队列如NSQ,NAS, Rabbitmq和Kafka等重量级消息队列中间件，功能很强大 使用起来自然也复杂，其实在大部分场景只是需要一个消息队列来传递数据，数据量，数据之间的顺序等也没有特殊的要求， 这样的场景使用redis非常轻松就可以搞定，而且在使用和维护上相对而言要简单方便些,当然redis的消息队列不是专业的消息队列，它没有非常">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2019-04-30T08:39:14.195Z">
+<meta property="og:updated_time" content="2019-04-30T09:19:46.939Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="redis专题03 消息队列系列问题">
 <meta name="twitter:description" content="很多业务场景中多会用到消息队列来传递消息数据问题， 常用的消息队列如NSQ,NAS, Rabbitmq和Kafka等重量级消息队列中间件，功能很强大 使用起来自然也复杂，其实在大部分场景只是需要一个消息队列来传递数据，数据量，数据之间的顺序等也没有特殊的要求， 这样的场景使用redis非常轻松就可以搞定，而且在使用和维护上相对而言要简单方便些,当然redis的消息队列不是专业的消息队列，它没有非常">
@@ -226,9 +226,22 @@
 </nav>
 
 	
-<section id="comments" class="comment">
-	<div class="ds-thread" data-thread-key="2018/01/18/redis-03-delay-queue/" data-title="redis专题03 消息队列系列问题" data-url="http://researchlab.github.io/2018/01/18/redis-03-delay-queue/"></div>
-</section>
+<!-- gitment评论框 start -->
+	<div id="gitment" class="ds-thread"></div>
+	<link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">
+	<script src="https://imsun.github.io/gitment/dist/gitment.browser.js"></script>
+	<script>
+	  var gitment = new Gitment({
+	    id: 'lThu Jan 18 2018 10:20:31 GMT+0000', // 可选。建议为Thu Jan 18 2018 10:20:31 GMT+0000
+	    owner: 'researchlab', // 可以是你的GitHub用户名，也可以是github id
+	    repo: 'researchlab.github.io', //可以是你的任意一个repo，推荐使用githubpage所在的repo
+	    oauth: {
+	      client_id: 'e4971ec4c4fdbefb392f',
+	      client_secret: 'e5001b2dda2dcb9a9c66417991be57836c17a72b',
+	    },
+	  })
+	  gitment.render('gitment')
+</script>
 
 
 </div>  

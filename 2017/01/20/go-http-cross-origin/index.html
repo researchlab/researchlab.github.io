@@ -20,7 +20,7 @@
 <meta property="og:description" content="server提供api服务直接对接前端js, 但是存在跨域问题，本文使用先查询请求过来的host 然后判断主域名是否存在，存在,则在返回头部设置这个请求域名充许跨域访问。">
 <meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="http://researchlab.github.io/2017/01/20/go-http-cross-origin/cross_website.png">
-<meta property="og:updated_time" content="2019-04-30T08:39:14.183Z">
+<meta property="og:updated_time" content="2019-04-30T09:19:46.927Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="golang server 跨域解决总结">
 <meta name="twitter:description" content="server提供api服务直接对接前端js, 但是存在跨域问题，本文使用先查询请求过来的host 然后判断主域名是否存在，存在,则在返回头部设置这个请求域名充许跨域访问。">
@@ -214,9 +214,22 @@
 </nav>
 
 	
-<section id="comments" class="comment">
-	<div class="ds-thread" data-thread-key="2017/01/20/go-http-cross-origin/" data-title="golang server 跨域解决总结" data-url="http://researchlab.github.io/2017/01/20/go-http-cross-origin/"></div>
-</section>
+<!-- gitment评论框 start -->
+	<div id="gitment" class="ds-thread"></div>
+	<link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">
+	<script src="https://imsun.github.io/gitment/dist/gitment.browser.js"></script>
+	<script>
+	  var gitment = new Gitment({
+	    id: 'lFri Jan 20 2017 15:30:40 GMT+0000', // 可选。建议为Fri Jan 20 2017 15:30:40 GMT+0000
+	    owner: 'researchlab', // 可以是你的GitHub用户名，也可以是github id
+	    repo: 'researchlab.github.io', //可以是你的任意一个repo，推荐使用githubpage所在的repo
+	    oauth: {
+	      client_id: 'e4971ec4c4fdbefb392f',
+	      client_secret: 'e5001b2dda2dcb9a9c66417991be57836c17a72b',
+	    },
+	  })
+	  gitment.render('gitment')
+</script>
 
 
 </div>  

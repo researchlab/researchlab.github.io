@@ -21,7 +21,7 @@
 <meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="http://researchlab.github.io/2017/03/07/docker-dockerfile/apache.png">
 <meta property="og:image" content="http://researchlab.github.io/2017/03/07/docker-dockerfile/simplecloudhp.png">
-<meta property="og:updated_time" content="2019-04-30T08:39:14.179Z">
+<meta property="og:updated_time" content="2019-04-30T09:19:46.927Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="docker实践--05 编写Dockerfile">
 <meta name="twitter:description" content="docker容器是在指定的镜像上运行的, 创建docker镜像的方法也有很多中比如直接到docker Hub上通过docker pull创建一个镜像, 也可以通过修改其它镜像然后提交修改docker commit 来创建新的镜像, 还有如导入某个现有的镜像, 但是在实际中难觅要定制化改进出符合特定场景的镜像, 虽然用上述方式也是可以创建新的镜像的, 但是缺点也很多, 主要缺点是不便于维护, 其实创">
@@ -262,9 +262,22 @@
 </nav>
 
 	
-<section id="comments" class="comment">
-	<div class="ds-thread" data-thread-key="2017/03/07/docker-dockerfile/" data-title="docker实践--05 编写Dockerfile" data-url="http://researchlab.github.io/2017/03/07/docker-dockerfile/"></div>
-</section>
+<!-- gitment评论框 start -->
+	<div id="gitment" class="ds-thread"></div>
+	<link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">
+	<script src="https://imsun.github.io/gitment/dist/gitment.browser.js"></script>
+	<script>
+	  var gitment = new Gitment({
+	    id: 'lTue Mar 07 2017 16:03:35 GMT+0000', // 可选。建议为Tue Mar 07 2017 16:03:35 GMT+0000
+	    owner: 'researchlab', // 可以是你的GitHub用户名，也可以是github id
+	    repo: 'researchlab.github.io', //可以是你的任意一个repo，推荐使用githubpage所在的repo
+	    oauth: {
+	      client_id: 'e4971ec4c4fdbefb392f',
+	      client_secret: 'e5001b2dda2dcb9a9c66417991be57836c17a72b',
+	    },
+	  })
+	  gitment.render('gitment')
+</script>
 
 
 </div>  
