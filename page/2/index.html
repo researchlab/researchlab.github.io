@@ -74,6 +74,70 @@
         <header class="article-info clearfix">
   <h1 itemprop="name">
     
+      <a href="/2018/10/10/redis-13-data-storage-solution/" title="redis专题13 数据存储与持久化" itemprop="url">redis专题13 数据存储与持久化</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
+		
+ <p class="article-time">
+    <time datetime="2018-10-10T12:36:10.000Z" itemprop="datePublished"> 发表于 2018-10-10</time>
+  </p>
+</header>
+
+    <div class="article-content">
+        
+        <p><code>redis</code>提供两种方式进行持久化，一种是<code>RDB</code>快照持久化(原理是将Reids在内存中的数据库记录压缩后定时dump到磁盘上的<code>RDB</code>持久化,存储紧凑)，另外一种是<code>AOF</code>(append only file)持久化(原理是将Reids的操作日志以追加的方式写入文件), <code>AOF</code> 日志在长期的运行过程中会变的无比庞大，数据库重启时需要加载<code>AOF</code>日志进行指令重放，这个时间就会无比漫长。所以需要定期进行<code>AOF</code>重写，给<code>AOF</code>日志进行瘦身。<br></p>
+        
+        
+        <p class="article-more-link">
+          
+            <a href="/2018/10/10/redis-13-data-storage-solution/#more">Read More</a>
+          
+       </p>
+    </div>
+    <footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/redis专题/">redis专题</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/redis/">redis</a>
+  </div>
+
+</div>
+
+
+
+
+<div class="comments-count">
+		
+	  	<span></span>
+		<a href="/2018/10/10/redis-13-data-storage-solution/#comments" class="ds-thread-count comments-count-link" data-thread-key="2018/10/10/redis-13-data-storage-solution/" data-count-type="comments">&nbsp;</a>
+	
+</div>
+
+</footer>
+
+
+    </article>
+
+
+
+
+
+
+   
+    
+    <article class="post-expand post" itemprop="articleBody"> 
+        <header class="article-info clearfix">
+  <h1 itemprop="name">
+    
       <a href="/2018/10/09/redis-12-resp/" title="redis专题12 redis通信协议" itemprop="url">redis专题12 redis通信协议</a>
   </h1>
   <p class="article-author">By
@@ -644,70 +708,6 @@
 
 
 
-   
-    
-    <article class="post-expand post" itemprop="articleBody"> 
-        <header class="article-info clearfix">
-  <h1 itemprop="name">
-    
-      <a href="/2018/10/04/redis-07-limit-rate/" title="redis专题07 redis应用之限流策略" itemprop="url">redis专题07 redis应用之限流策略</a>
-  </h1>
-  <p class="article-author">By
-       
-		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
-		
- <p class="article-time">
-    <time datetime="2018-10-04T17:01:59.000Z" itemprop="datePublished"> 发表于 2018-10-04</time>
-  </p>
-</header>
-
-    <div class="article-content">
-        
-        <p>限流算法在分布式领域是一个经常被提起的话题，当系统的处理能力有限时，如何阻止计划外的请求继续对系统施压，这是一个需要重视的问题。除了控制流量，限流还有一个应用目的是用于控制用户行为，避免垃圾请求。比如在<code>UGC</code>社区, <code>用户的发帖</code>, <code>回复</code>, <code>点赞</code>等行为都要严格受控，一般要严格限定某行为在规定时间内允许的次数，超过了次数那就是非法行为。<br></p>
-        
-        
-        <p class="article-more-link">
-          
-            <a href="/2018/10/04/redis-07-limit-rate/#more">Read More</a>
-          
-       </p>
-    </div>
-    <footer class="article-footer clearfix">
-<div class="article-catetags">
-
-<div class="article-categories">
-  <span></span>
-  <a class="article-category-link" href="/categories/redis专题/">redis专题</a>
-</div>
-
-
-  <div class="article-tags">
-  
-  <span></span> <a href="/tags/redis/">redis</a>
-  </div>
-
-</div>
-
-
-
-
-<div class="comments-count">
-		
-	  	<span></span>
-		<a href="/2018/10/04/redis-07-limit-rate/#comments" class="ds-thread-count comments-count-link" data-thread-key="2018/10/04/redis-07-limit-rate/" data-count-type="comments">&nbsp;</a>
-	
-</div>
-
-</footer>
-
-
-    </article>
-
-
-
-
-
-
 
   <nav id="page-nav" class="clearfix">
     <a class="extend prev" rel="prev" href="/"><span></span>Prev</a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><span class="space">&hellip;</span><a class="page-number" href="/page/10/">10</a><a class="extend next" rel="next" href="/page/3/">Next<span></span></a>
@@ -777,7 +777,7 @@
 		  
 		
 		  
-			<li><a href="/categories/k8s/" title="k8s">k8s<sup>1</sup></a></li>
+			<li><a href="/categories/k8s/" title="k8s">k8s<sup>2</sup></a></li>
 		  
 		
 		  
@@ -843,6 +843,10 @@
 			
 		
 			
+				<li><a href="/tags/minikube/" title="minikube">minikube<sup>2</sup></a></li>
+			
+		
+			
 				<li><a href="/tags/getcookie/" title="getcookie">getcookie<sup>1</sup></a></li>
 			
 		
@@ -876,10 +880,6 @@
 		
 			
 				<li><a href="/tags/hash/" title="hash">hash<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/gin/" title="gin">gin<sup>1</sup></a></li>
 			
 		
 		</ul>

@@ -74,6 +74,70 @@
         <header class="article-info clearfix">
   <h1 itemprop="name">
     
+      <a href="/2019/08/24/minikube-pull-image-from-docker-registry/" title="minikube从本地docker registry 拉取镜像的两种方法" itemprop="url">minikube从本地docker registry 拉取镜像的两种方法</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
+		
+ <p class="article-time">
+    <time datetime="2019-08-24T19:47:33.000Z" itemprop="datePublished"> 发表于 2019-08-24</time>
+  </p>
+</header>
+
+    <div class="article-content">
+        
+        <p>在mac中用minikube搭建了一个k8s环境，但是每次拉取镜像都很慢甚至失败, 本文总结两种从本地私有镜像仓库拉取镜像的方法实践, 先将镜像在宿主机上翻墙拉取到本地, 再由minikube 虚机中的k8s 来拉取本地镜像, 这样即可解决之前的拉取镜像失败，也可提升拉取镜像的速度;<br></p>
+        
+        
+        <p class="article-more-link">
+          
+            <a href="/2019/08/24/minikube-pull-image-from-docker-registry/#more">Read More</a>
+          
+       </p>
+    </div>
+    <footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/k8s/">k8s</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/minikube/">minikube</a>
+  </div>
+
+</div>
+
+
+
+
+<div class="comments-count">
+		
+	  	<span></span>
+		<a href="/2019/08/24/minikube-pull-image-from-docker-registry/#comments" class="ds-thread-count comments-count-link" data-thread-key="2019/08/24/minikube-pull-image-from-docker-registry/" data-count-type="comments">&nbsp;</a>
+	
+</div>
+
+</footer>
+
+
+    </article>
+
+
+
+
+
+
+   
+    
+    <article class="post-expand post" itemprop="articleBody"> 
+        <header class="article-info clearfix">
+  <h1 itemprop="name">
+    
       <a href="/2019/08/13/mac-install-minikube/" title="mac 利用minikube搭建k8s环境" itemprop="url">mac 利用minikube搭建k8s环境</a>
   </h1>
   <p class="article-author">By
@@ -645,70 +709,6 @@
 
 
 
-   
-    
-    <article class="post-expand post" itemprop="articleBody"> 
-        <header class="article-info clearfix">
-  <h1 itemprop="name">
-    
-      <a href="/2018/10/10/redis-13-data-storage-solution/" title="redis专题13 数据存储与持久化" itemprop="url">redis专题13 数据存储与持久化</a>
-  </h1>
-  <p class="article-author">By
-       
-		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
-		
- <p class="article-time">
-    <time datetime="2018-10-10T12:36:10.000Z" itemprop="datePublished"> 发表于 2018-10-10</time>
-  </p>
-</header>
-
-    <div class="article-content">
-        
-        <p><code>redis</code>提供两种方式进行持久化，一种是<code>RDB</code>快照持久化(原理是将Reids在内存中的数据库记录压缩后定时dump到磁盘上的<code>RDB</code>持久化,存储紧凑)，另外一种是<code>AOF</code>(append only file)持久化(原理是将Reids的操作日志以追加的方式写入文件), <code>AOF</code> 日志在长期的运行过程中会变的无比庞大，数据库重启时需要加载<code>AOF</code>日志进行指令重放，这个时间就会无比漫长。所以需要定期进行<code>AOF</code>重写，给<code>AOF</code>日志进行瘦身。<br></p>
-        
-        
-        <p class="article-more-link">
-          
-            <a href="/2018/10/10/redis-13-data-storage-solution/#more">Read More</a>
-          
-       </p>
-    </div>
-    <footer class="article-footer clearfix">
-<div class="article-catetags">
-
-<div class="article-categories">
-  <span></span>
-  <a class="article-category-link" href="/categories/redis专题/">redis专题</a>
-</div>
-
-
-  <div class="article-tags">
-  
-  <span></span> <a href="/tags/redis/">redis</a>
-  </div>
-
-</div>
-
-
-
-
-<div class="comments-count">
-		
-	  	<span></span>
-		<a href="/2018/10/10/redis-13-data-storage-solution/#comments" class="ds-thread-count comments-count-link" data-thread-key="2018/10/10/redis-13-data-storage-solution/" data-count-type="comments">&nbsp;</a>
-	
-</div>
-
-</footer>
-
-
-    </article>
-
-
-
-
-
-
 
   <nav id="page-nav" class="clearfix">
     <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/10/">10</a><a class="extend next" rel="next" href="/page/2/">Next<span></span></a>
@@ -778,7 +778,7 @@
 		  
 		
 		  
-			<li><a href="/categories/k8s/" title="k8s">k8s<sup>1</sup></a></li>
+			<li><a href="/categories/k8s/" title="k8s">k8s<sup>2</sup></a></li>
 		  
 		
 		  
@@ -844,6 +844,10 @@
 			
 		
 			
+				<li><a href="/tags/minikube/" title="minikube">minikube<sup>2</sup></a></li>
+			
+		
+			
 				<li><a href="/tags/getcookie/" title="getcookie">getcookie<sup>1</sup></a></li>
 			
 		
@@ -877,10 +881,6 @@
 		
 			
 				<li><a href="/tags/hash/" title="hash">hash<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/gin/" title="gin">gin<sup>1</sup></a></li>
 			
 		
 		</ul>

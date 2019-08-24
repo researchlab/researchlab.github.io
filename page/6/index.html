@@ -74,6 +74,70 @@
         <header class="article-info clearfix">
   <h1 itemprop="name">
     
+      <a href="/2017/03/05/docker-data-volume/" title="docker实践--02 数据卷管理" itemprop="url">docker实践--02 数据卷管理</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
+		
+ <p class="article-time">
+    <time datetime="2017-03-05T00:44:31.000Z" itemprop="datePublished"> 发表于 2017-03-05</time>
+  </p>
+</header>
+
+    <div class="article-content">
+        
+        <p>Docker中的数据可以存储在类似于虚拟机磁盘的介质中，在Docker中称为<code>数据卷</code>(Data Volume)。数据卷可以用来存储Docker应用的数据，也可以用来在Docker容器间进行数据共享。数据卷呈现给Docker容器的形式就是一个目录，支持多个容器间共享，修改也不会影响镜像。使用Docker的数据卷，类似在系统中使用<code>mount</code> 挂载一个文件系统。<br></p>
+        
+        
+        <p class="article-more-link">
+          
+            <a href="/2017/03/05/docker-data-volume/#more">Read More</a>
+          
+       </p>
+    </div>
+    <footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/docker-practice/">docker-practice</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/docker/">docker</a>
+  </div>
+
+</div>
+
+
+
+
+<div class="comments-count">
+		
+	  	<span></span>
+		<a href="/2017/03/05/docker-data-volume/#comments" class="ds-thread-count comments-count-link" data-thread-key="2017/03/05/docker-data-volume/" data-count-type="comments">&nbsp;</a>
+	
+</div>
+
+</footer>
+
+
+    </article>
+
+
+
+
+
+
+   
+    
+    <article class="post-expand post" itemprop="articleBody"> 
+        <header class="article-info clearfix">
+  <h1 itemprop="name">
+    
       <a href="/2017/03/04/docker-basic-use/" title="docker实践--01 创建docker应用" itemprop="url">docker实践--01 创建docker应用</a>
   </h1>
   <p class="article-author">By
@@ -644,70 +708,6 @@
 
 
 
-   
-    
-    <article class="post-expand post" itemprop="articleBody"> 
-        <header class="article-info clearfix">
-  <h1 itemprop="name">
-    
-      <a href="/2017/01/14/too-many-open-files-solution/" title="linux too many open files 问题解决总结" itemprop="url">linux too many open files 问题解决总结</a>
-  </h1>
-  <p class="article-author">By
-       
-		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
-		
- <p class="article-time">
-    <time datetime="2017-01-14T10:58:37.000Z" itemprop="datePublished"> 发表于 2017-01-14</time>
-  </p>
-</header>
-
-    <div class="article-content">
-        
-        <p>运行在Linux系统上的网络程序可能会出现”Too many open files”的异常情况，且常见于高并发访问文件系统，多线程网络连接等场景。<br></p>
-        
-        
-        <p class="article-more-link">
-          
-            <a href="/2017/01/14/too-many-open-files-solution/#more">Read More</a>
-          
-       </p>
-    </div>
-    <footer class="article-footer clearfix">
-<div class="article-catetags">
-
-<div class="article-categories">
-  <span></span>
-  <a class="article-category-link" href="/categories/DevOps/">DevOps</a>
-</div>
-
-
-  <div class="article-tags">
-  
-  <span></span> <a href="/tags/linux/">linux</a>
-  </div>
-
-</div>
-
-
-
-
-<div class="comments-count">
-		
-	  	<span></span>
-		<a href="/2017/01/14/too-many-open-files-solution/#comments" class="ds-thread-count comments-count-link" data-thread-key="2017/01/14/too-many-open-files-solution/" data-count-type="comments">&nbsp;</a>
-	
-</div>
-
-</footer>
-
-
-    </article>
-
-
-
-
-
-
 
   <nav id="page-nav" class="clearfix">
     <a class="extend prev" rel="prev" href="/page/5/"><span></span>Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/4/">4</a><a class="page-number" href="/page/5/">5</a><span class="page-number current">6</span><a class="page-number" href="/page/7/">7</a><a class="page-number" href="/page/8/">8</a><span class="space">&hellip;</span><a class="page-number" href="/page/10/">10</a><a class="extend next" rel="next" href="/page/7/">Next<span></span></a>
@@ -777,7 +777,7 @@
 		  
 		
 		  
-			<li><a href="/categories/k8s/" title="k8s">k8s<sup>1</sup></a></li>
+			<li><a href="/categories/k8s/" title="k8s">k8s<sup>2</sup></a></li>
 		  
 		
 		  
@@ -843,6 +843,10 @@
 			
 		
 			
+				<li><a href="/tags/minikube/" title="minikube">minikube<sup>2</sup></a></li>
+			
+		
+			
 				<li><a href="/tags/getcookie/" title="getcookie">getcookie<sup>1</sup></a></li>
 			
 		
@@ -876,10 +880,6 @@
 		
 			
 				<li><a href="/tags/hash/" title="hash">hash<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/gin/" title="gin">gin<sup>1</sup></a></li>
 			
 		
 		</ul>
