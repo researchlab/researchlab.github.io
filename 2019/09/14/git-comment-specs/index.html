@@ -4,27 +4,25 @@
 <head>
   <meta charset="UTF-8">
   
-    <title>golang server 跨域解决总结 | 一线攻城狮</title>
+    <title>Git 提交日志格式规约 | 一线攻城狮</title>
     <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
     
     <meta name="author" content="Lee Hong">
     
 
     
-    <meta name="description" content="server提供api服务直接对接前端js, 但是存在跨域问题，本文使用先查询请求过来的host 然后判断主域名是否存在，存在,则在返回头部设置这个请求域名充许跨域访问。">
-<meta name="keywords" content="golang">
+    <meta name="description" content="规范化git提交日志,便于检索和追溯代码修订含义">
+<meta name="keywords" content="git">
 <meta property="og:type" content="article">
-<meta property="og:title" content="golang server 跨域解决总结">
-<meta property="og:url" content="http://researchlab.github.io/2017/01/20/go-http-cross-origin/index.html">
+<meta property="og:title" content="Git 提交日志格式规约">
+<meta property="og:url" content="http://researchlab.github.io/2019/09/14/git-comment-specs/index.html">
 <meta property="og:site_name" content="一线攻城狮">
-<meta property="og:description" content="server提供api服务直接对接前端js, 但是存在跨域问题，本文使用先查询请求过来的host 然后判断主域名是否存在，存在,则在返回头部设置这个请求域名充许跨域访问。">
+<meta property="og:description" content="规范化git提交日志,便于检索和追溯代码修订含义">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:image" content="http://researchlab.github.io/2017/01/20/go-http-cross-origin/cross_website.png">
 <meta property="og:updated_time" content="2019-09-14T08:02:56.460Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="golang server 跨域解决总结">
-<meta name="twitter:description" content="server提供api服务直接对接前端js, 但是存在跨域问题，本文使用先查询请求过来的host 然后判断主域名是否存在，存在,则在返回头部设置这个请求域名充许跨域访问。">
-<meta name="twitter:image" content="http://researchlab.github.io/2017/01/20/go-http-cross-origin/cross_website.png">
+<meta name="twitter:title" content="Git 提交日志格式规约">
+<meta name="twitter:description" content="规范化git提交日志,便于检索和追溯代码修订含义">
 
     
     <link rel="alternative" href="/atom.xml" title="一线攻城狮" type="application/atom+xml">
@@ -79,14 +77,14 @@
 		<header class="article-info clearfix">
   <h1 itemprop="name">
     
-      <a href="/2017/01/20/go-http-cross-origin/" title="golang server 跨域解决总结" itemprop="url">golang server 跨域解决总结</a>
+      <a href="/2019/09/14/git-comment-specs/" title="Git 提交日志格式规约" itemprop="url">Git 提交日志格式规约</a>
   </h1>
   <p class="article-author">By
        
 		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
 		
  <p class="article-time">
-    <time datetime="2017-01-20T15:30:40.000Z" itemprop="datePublished"> 发表于 2017-01-20</time>
+    <time datetime="2019-09-14T15:50:34.000Z" itemprop="datePublished"> 发表于 2019-09-14</time>
    &nbsp&nbsp热度&nbsp<span id="busuanzi_value_page_pv"></span>° 
   </p>
 </header>
@@ -96,33 +94,73 @@
 		<div id="toc" class="toc-article">
 			<strong class="toc-title">文章目录</strong>
 		
-			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#跨域概念"><span class="toc-number">1.</span> <span class="toc-text">跨域概念</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#获取完整url"><span class="toc-number">2.</span> <span class="toc-text">获取完整url</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#动态许可跨域"><span class="toc-number">3.</span> <span class="toc-text">动态许可跨域</span></a></li></ol>
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#git规范说明"><span class="toc-number">1.</span> <span class="toc-text">git规范说明</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Commit-格式"><span class="toc-number">2.</span> <span class="toc-text">Commit 格式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#前置条件"><span class="toc-number">3.</span> <span class="toc-text">前置条件</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#示例说明"><span class="toc-number">4.</span> <span class="toc-text">示例说明</span></a></li></ol>
 		
 		</div>
 		
-		<p>server提供api服务直接对接前端js, 但是存在跨域问题，本文使用先查询请求过来的host 然后判断主域名是否存在，存在,则在返回头部设置这个请求域名充许跨域访问。<br><a id="more"></a></p>
-<h2 id="跨域概念"><a href="#跨域概念" class="headerlink" title="跨域概念"></a>跨域概念</h2><p>浏览器的同源策略，出于防范跨站脚本的攻击，禁止客户端脚本（如 JavaScript）对不同域的服务进行跨站调用。</p>
-<p>一般的，只要网站的 协议名protocol 、 主机host 、 端口号port 这三个中的任意一个不同，网站间的数据请求与传输便构成了跨域调用。</p>
-<p>一般的，发起跨域请求而没有被设置许可跨域时，则会返回类型下面的说明</p>
-<center><img src="/2017/01/20/go-http-cross-origin/cross_website.png" alt=""></center>
-
-<p>上面返回提示说明: 跨域请求并非是浏览器限制了发起跨站请求，而是请求可以正常发起，到达服务器端，但是服务器返回的结果会被浏览器拦截。</p>
-<blockquote>
-<p>为了防止CSRF的攻击，我们建议修改浏览器在发送POST请求的时候加上一个Origin字段，这个Origin字段主要是用来标识出最初请求是从哪里发起的。如果浏览器不能确定源在哪里，那么在发送的请求里面Origin字段的值就为空。隐私方面：这种Origin字段的方式比Referer更人性化，因为它尊重了用户的隐私。<br>1、Origin字段里只包含是谁发起的请求，并没有其他信息 (通常情况下是方案，主机和活动文档URL的端口)。跟Referer不一样的是，Origin字段并没有包含涉及到用户隐私的URL路径和请求内容，这个尤其重要。<br>2、Origin字段只存在于POST请求，而Referer则存在于所有类型的请求, (随便点击一个超链接（比如从搜索列表里或者企业intranet），并不会发送Origin字段)。</p>
+		<p>规范Git 提交日志内容及格式对说明代码内容和后记追溯问题有很多的帮助, 本文从工作中总结相关的经验成文,<br><a id="more"></a></p>
+<h2 id="git规范说明"><a href="#git规范说明" class="headerlink" title="git规范说明"></a>git规范说明</h2><blockquote>
+<p>为什么要对 Git 提交日志的格式进行规约约束？</p>
 </blockquote>
-<h2 id="获取完整url"><a href="#获取完整url" class="headerlink" title="获取完整url"></a>获取完整url</h2><p>查阅了r *http.Request对象中的所有属性，没有发现可以直接获取完整的url的方法。于是尝试根据host和请求地址进行拼接。在golang中可以通过r.Host获取hostname，r.RequestURI获取相应的请求地址。</p>
-<p>但是还少一个协议的判断，怎么区分是http和https呢？一开始尝试通过r.Proto属性判断，但是发现该属性不管是http，还是https都是返回HTTP/1.1，又寻找了下发现TLS属性，在https协议下有对应值，在http下为nil。</p>
-<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"> </span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">    <span class="string">"fmt"</span></span><br><span class="line">    <span class="string">"log"</span></span><br><span class="line">    <span class="string">"net/http"</span></span><br><span class="line">    <span class="string">"strings"</span></span><br><span class="line">)</span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">index</span><span class="params">(w http.ResponseWriter, r *http.Request)</span></span> &#123;</span><br><span class="line">    fmt.Println(r.Proto)</span><br><span class="line">    <span class="comment">// output:HTTP/1.1</span></span><br><span class="line">    fmt.Println(r.TLS)</span><br><span class="line">    <span class="comment">// output: &lt;nil&gt;</span></span><br><span class="line">    fmt.Println(r.Host)</span><br><span class="line">    <span class="comment">// output: localhost:9090</span></span><br><span class="line">    fmt.Println(r.RequestURI)</span><br><span class="line">    <span class="comment">// output: /index?id=1</span></span><br><span class="line"> </span><br><span class="line">    scheme := <span class="string">"http://"</span></span><br><span class="line">    <span class="keyword">if</span> r.TLS != <span class="literal">nil</span> &#123;</span><br><span class="line">        scheme = <span class="string">"https://"</span></span><br><span class="line">    &#125;</span><br><span class="line">    fmt.Println(strings.Join([]<span class="keyword">string</span>&#123;scheme, r.Host, r.RequestURI&#125;, <span class="string">""</span>))</span><br><span class="line">    <span class="comment">// output: http://localhost:9090/index?id=1</span></span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    http.HandleFunc(<span class="string">"/index"</span>, index)</span><br><span class="line"> </span><br><span class="line">    err := http.ListenAndServe(<span class="string">":9090"</span>, <span class="literal">nil</span>)</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        log.Fatal(<span class="string">"ListenAndServe: "</span>, err)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h2 id="动态许可跨域"><a href="#动态许可跨域" class="headerlink" title="动态许可跨域"></a>动态许可跨域</h2><p>1.直接取头部的<code>Origin</code>字段， 如果取到， 则判断是否包含主域名，然后设置跨域，如果<code>Origin</code>字段为空不存在，则转下面第2步;<br>2.获取子域名(scheme + r.Host)之后, 先判断是否存在，并且是否包含主域名，然后设置跨域, 如果<code>r.Host</code>字段为空， 则转下面第3步;<br>3.获取子域名(scheme + r.URL.Host)之后， 判断是否存在， 并且是否包含主域名， 然后设置跨域，</p>
-<p>还有一种方法是利用redis缓存，同样通过上述三个方法获取子域名， 然后查询redis缓存是否存在这个域名，如果有则设置许可跨域; redis缓存的数据来源是 另外准备一个后台，当后台有修改许可跨域网站时，写完db(mysql)的同时先清空缓存，然后在回填缓存即可。</p>
-<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Origin := r.Header.Get(<span class="string">"Origin"</span>)</span><br><span class="line">    <span class="keyword">if</span> <span class="number">0</span> != <span class="built_in">len</span>(Origin) &amp;&amp; strings.Contains(Origin, <span class="string">"domain.com"</span>)&#123;</span><br><span class="line">        w.Header().Add(<span class="string">"Access-Control-Allow-Origin"</span>, Origin)</span><br><span class="line">        w.Header().Add(<span class="string">"Access-Control-Allow-Methods"</span>, <span class="string">"POST,GET,OPTIONS,DELETE"</span>)</span><br><span class="line">        w.Header().Add(<span class="string">"Access-Control-Allow-Headers"</span>, <span class="string">"x-requested-with,content-type"</span>)</span><br><span class="line">        w.Header().Add(<span class="string">"Access-Control-Allow-Credentials"</span>, <span class="string">"true"</span>)</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<ol>
+<li>最重要的原因：便于人类程序员对提交历史进行追溯，了解发生了什么情况。因此像「update」甚至于「u」这样的 log，都是不合格的写法，想必诸如此类的 log 已经被大家咒骂过一遍遍。</li>
+<li>另外，一旦约束了提交日志，意味着我们将慎重地进行每一次提交，不能再一股脑儿地把各种各样的改动都放到一个提交里面，这样一来，整个代码改动的历史也将更加清晰。</li>
+<li>想得更远一点，格式化的 log 才可能用于自动化输出 changelog。</li>
+</ol>
 <blockquote>
-<p>当不添加 <code>Access-Control-Allow-Methods</code>属性时， 默认支持使用GET、HEAD或者POST请求方法跨域请求</p>
+<p>对Git提交日志进行格式约束是否带来较高的执行成本？</p>
 </blockquote>
-<p>更多参考</p>
-<p><a href="http://www.open-open.com/lib/view/open1473667695212.html" target="_blank" rel="noopener">前端跨域请求原理与实践</a></p>
-<p><a href="http://www.cnblogs.com/dojo-lzz/p/4265637.html" target="_blank" rel="noopener">探讨跨域请求资源的几种方式</a></p>
-<p><a href="https://github.com/hstarorg/HstarDoc/blob/master/%E5%89%8D%E7%AB%AF%E7%9B%B8%E5%85%B3/CORS%E8%AF%A6%E8%A7%A3.md" target="_blank" rel="noopener">关于CORS</a></p>
+<ol>
+<li>所谓仓廪实而知礼节，随着大型共建项目 / 开源项目的增多，必然要用更专业化的态度去面对。规约化的 Git log 正是其中一环。</li>
+<li>最后，如果实在无法完美遵循日志规约，最最重要的原则是：至少要保证在整个项目中 log 格式的一致性！不要做一个朝秦暮楚的人</li>
+</ol>
+<h2 id="Commit-格式"><a href="#Commit-格式" class="headerlink" title="Commit 格式"></a>Commit 格式</h2><p> Commit Message = <code>{type}:{Jira号},{subject}</code></p>
+<blockquote>
+<p>type, 必须</p>
+</blockquote>
+<p>提交类型 type 用来描述一次提交行为的改动方向。</p>
+<p>type 的可选值如下。注意：Git log 的 type 和 changelog 的 type 存在紧密联系；然而它们两者之间并非一一对应，比如在 changelog 中一般不会指出文档 docs 或测试用例 test 等方面发生的变化。</p>
+<ul>
+<li>feat: 新增功能。（task功能提交）</li>
+<li>fix: 修复 bug。(bug修复)</li>
+<li>docs: 文档相关的改动。(在线文档，说明文档，注释内容)</li>
+<li>style: 对代码的格式化改动，代码逻辑并未产生任何变化。(样式文件修改)</li>
+<li>test: 新增或修改测试用例。</li>
+<li>refactor: 重构代码或其他优化举措。</li>
+<li>chore: 项目工程方面的改动，代码逻辑并未产生任何变化。</li>
+</ul>
+<blockquote>
+<p>Jira号</p>
+</blockquote>
+<ul>
+<li>task/已有bug提交，必须携带Jira号，提交纪录，jira上都会有log统计</li>
+<li>自我修复，优化内容，如果没有对应的Jira可以省略，但subject必须写清楚修改内容</li>
+</ul>
+<blockquote>
+<p>subject</p>
+</blockquote>
+<ul>
+<li>主题 subject 用来概括一次提交行为囊括的内容（注意不是jira的标题）</li>
+<li>简要明了的描述下修改的内容，方便代码review，和后期自己查找纪录</li>
+<li>原则上，通过描述就能清楚的知道，修改的内容</li>
+<li>默认使用中文</li>
+</ul>
+<h2 id="前置条件"><a href="#前置条件" class="headerlink" title="前置条件"></a>前置条件</h2><ul>
+<li>单一原则，一个commit就只做一个内容，不要提交和主题无关的内容，无论这次提交的内容有多简单</li>
+<li>没有task, 自己创建并关联到对应的Story上，代码通过review，关闭相关task/bug</li>
+<li>不要task,bug混提交</li>
+<li>不要多个task,bug合并提交</li>
+<li>如果在提交feat/fix, 对这部分提交相关的代码做了重构/优化，可以合并到feat/fix提交中</li>
+<li>提交后立即找相关Review人review代码，如有有打回，继续追加提交修复内容了，建议不要多个commit一起提交</li>
+</ul>
+<h2 id="示例说明"><a href="#示例说明" class="headerlink" title="示例说明"></a>示例说明</h2><ul>
+<li>feat：JIRA-1224，告警信息列表页面以及告警信息详情页面，日期时间的显示调整</li>
+<li>fix：JIRA-1215，修复系统镜像、自定义镜像，修改镜像名称，操作系统和系统盘大小不会相应改变</li>
+<li>style：修复列表头部按钮，左右间距</li>
+<li>docs: 更新在线文档</li>
+<li>chore: 调整开发环境地址</li>
+<li>refactor：优化云主机创建页面代码逻辑</li>
+</ul>
   
 	</div>
 		<div style="padding: 10px 44px 30px 44px;" >
@@ -132,8 +170,8 @@
 </div>
 <div>
  <p style="margin-top:0px;">作者署名：<b><a target="_blank" href="http://researchlab.github.io/">朴实的一线攻城狮</a></b>
-<br />本文标题：<b><a href="/2017/01/20/go-http-cross-origin/" target="_blank" title="golang server 跨域解决总结">golang server 跨域解决总结</a></b> 
-<br />本文出处：<b><a href="/2017/01/20/go-http-cross-origin/" target="_blank" title="golang server 跨域解决总结">http://researchlab.github.io/2017/01/20/go-http-cross-origin/</a></b>
+<br />本文标题：<b><a href="/2019/09/14/git-comment-specs/" target="_blank" title="Git 提交日志格式规约">Git 提交日志格式规约</a></b> 
+<br />本文出处：<b><a href="/2019/09/14/git-comment-specs/" target="_blank" title="Git 提交日志格式规约">http://researchlab.github.io/2019/09/14/git-comment-specs/</a></b>
 <br />版权声明：本文由<b><a href="/about" target="_blank" title="Lee Hong">Lee Hong</a></b>创作和发表,采用<b>署名(BY)</b>-<b>非商业性使用(NC)</b>-<b>相同方式共享(SA)</b>国际许可协议进行许可,转载请注明作者及出处, 否则保留追究法律责任的权利。 </p>
 </div>
 </div>
@@ -145,13 +183,13 @@
 
 <div class="article-categories">
   <span></span>
-  <a class="article-category-link" href="/categories/golang/">golang</a>
+  <a class="article-category-link" href="/categories/DevOps/">DevOps</a>
 </div>
 
 
   <div class="article-tags">
   
-  <span></span> <a href="/tags/golang/">golang</a>
+  <span></span> <a href="/tags/git/">git</a>
   </div>
 
 </div>
@@ -196,19 +234,11 @@
 	
 <nav class="article-nav clearfix">
  
- <div class="prev" >
- <a href="/2017/01/22/linux-signal-golang/" title="Linux Signal及Golang中的信号处理">
-  <strong>上一篇：</strong><br/>
-  <span>
-  Linux Signal及Golang中的信号处理</span>
-</a>
-</div>
-
 
 <div class="next">
-<a href="/2017/01/18/git-submodule/"  title="git submodule使用总结">
+<a href="/2019/09/07/mac-upgrade-java-version/"  title="Switching between JDK 8 and 11 using SDKMAN!">
  <strong>下一篇：</strong><br/> 
- <span>git submodule使用总结
+ <span>Switching between JDK 8 and 11 using SDKMAN!
 </span>
 </a>
 </div>
@@ -222,7 +252,7 @@
 	<script src="https://github.com/researchlab/gitment/blob/master/dist/gitment.browser.js"></script>
 	<script>
 	  var gitment = new Gitment({
-	    id: 'lFri Jan 20 2017 15:30:40 GMT+0000', // 可选。建议为Fri Jan 20 2017 15:30:40 GMT+0000
+	    id: 'lSat Sep 14 2019 15:50:34 GMT+0000', // 可选。建议为Sat Sep 14 2019 15:50:34 GMT+0000
 	    owner: 'researchlab', // 可以是你的GitHub用户名，也可以是github id
 	    repo: 'researchlab.github.io', //可以是你的任意一个repo，推荐使用githubpage所在的repo
 	    oauth: {
