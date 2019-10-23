@@ -10,6 +10,7 @@ date: 2019-02-26 09:53:45
 
 - [Kibana数据可视化](https://book.douban.com/subject/30398495/)
 - [Istio实战指南](https://www.epubit.com/bookDetails?id=UB6c782ba3ed7a4)
+- [docker--从入门到实践](https://yeasy.gitbooks.io/docker_practice/content/)
 
 - 余华作品集
   - [在细雨中呼喊](https://book.douban.com/subject/20421947/)
