@@ -12,6 +12,7 @@ date: 2019-02-26 09:53:45
 - [Istio实战指南](https://www.epubit.com/bookDetails?id=UB6c782ba3ed7a4)
 - [docker--从入门到实践](https://yeasy.gitbooks.io/docker_practice/content/)
 - [kubernetes指南](https://kubernetes.feisky.xyz/introduction/index)
+- [Go语言并发之道](https://book.douban.com/subject/30424330/)
 
 - 余华作品集
   - [在细雨中呼喊](https://book.douban.com/subject/20421947/)
