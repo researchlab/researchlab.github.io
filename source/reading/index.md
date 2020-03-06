@@ -13,6 +13,8 @@ date: 2019-02-26 09:53:45
 - [docker--从入门到实践](https://yeasy.gitbooks.io/docker_practice/content/)
 - [kubernetes指南](https://kubernetes.feisky.xyz/introduction/index)
 - [Go语言并发之道](https://book.douban.com/subject/30424330/)
+- [Think Python 2e中译本](https://codingpy.com/books/thinkpython2/01-the-way-of-the-program.html)
+- [Think Python 2e](https://greenteapress.com/wp/think-python-2e/ )
 
 - 余华作品集
   - [在细雨中呼喊](https://book.douban.com/subject/20421947/)
