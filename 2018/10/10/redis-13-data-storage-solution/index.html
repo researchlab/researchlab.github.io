@@ -19,7 +19,7 @@
 <meta property="og:site_name" content="一线攻城狮">
 <meta property="og:description" content="redis提供两种方式进行持久化，一种是RDB快照持久化(原理是将Reids在内存中的数据库记录压缩后定时dump到磁盘上的RDB持久化,存储紧凑)，另外一种是AOF(append only file)持久化(原理是将Reids的操作日志以追加的方式写入文件), AOF 日志在长期的运行过程中会变的无比庞大，数据库重启时需要加载AOF日志进行指令重放，这个时间就会无比漫长。所以需要定期进行AOF重">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2020-03-06T02:02:27.521Z">
+<meta property="og:updated_time" content="2020-03-14T14:27:07.276Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="redis专题13 数据存储与持久化">
 <meta name="twitter:description" content="redis提供两种方式进行持久化，一种是RDB快照持久化(原理是将Reids在内存中的数据库记录压缩后定时dump到磁盘上的RDB持久化,存储紧凑)，另外一种是AOF(append only file)持久化(原理是将Reids的操作日志以追加的方式写入文件), AOF 日志在长期的运行过程中会变的无比庞大，数据库重启时需要加载AOF日志进行指令重放，这个时间就会无比漫长。所以需要定期进行AOF重">
@@ -298,9 +298,9 @@
 <!-- <p style="text-align:center">Mike.Lee</p> -->
 <p margin="0" style="text-align:center">
 <a class="ahref" href="http://researchlab.github.io/about/">
-<img id="aboutpic"  src="/img/qzly.png" alt="@全栈炼狱之路" height="200" width="200" style="box-shadow: 0px 0px 2px 2px #9edeff;border-radius: 8px;" >
+<img id="aboutpic"  src="/img/qzly.png" alt="@一线攻城狮" height="200" width="200" style="box-shadow: 0px 0px 2px 2px #9edeff;border-radius: 8px;" >
 </a></p>
-<p style="text-align:center"><font size="2" color="grey">关注微信公众号 @全栈炼狱之路</font></p>
+<p style="text-align:center"><font size="2" color="grey">关注微信公众号 @一线攻城狮</font></p>
 <div style="display:block; margin-top:10px; padding: 0px 4px 4px 0; border-top: dashed 1px #ccc; text-align:left;"></div>
 <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 <div style="float:left;position:absolute;"><font size="2" >总访问:<span id="busuanzi_value_site_pv"></span>次</font></div>
