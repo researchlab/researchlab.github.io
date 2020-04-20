@@ -11,6 +11,7 @@ date: 2019-02-26 09:53:45
 4 [kubernetes指南](https://kubernetes.feisky.xyz/introduction/index)
 5 [Think Python 2e](https://greenteapress.com/wp/think-python-2e/ )
 6 [Think Python 2e中译本](https://codingpy.com/books/thinkpython2/01-the-way-of-the-program.html)
+7 [HttpRunner](https://cn.httprunner.org/quickstart/)
 - 余华作品集
 1 [在细雨中呼喊](https://book.douban.com/subject/20421947/)
 - 待读书单
