@@ -1,0 +1,631 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>redis专题03 消息队列系列问题 | 一线攻城狮</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="Lee Hong">
+    
+
+    
+    <meta name="description" content="很多业务场景中多会用到消息队列来传递消息数据问题， 常用的消息队列如NSQ,NAS, Rabbitmq和Kafka等重量级消息队列中间件，功能很强大 使用起来自然也复杂，其实在大部分场景只是需要一个消息队列来传递数据，数据量，数据之间的顺序等也没有特殊的要求， 这样的场景使用redis非常轻松就可以搞定，而且在使用和维护上相对而言要简单方便些,当然redis的消息队列不是专业的消息队列，它没有非常">
+<meta name="keywords" content="redis">
+<meta property="og:type" content="article">
+<meta property="og:title" content="redis专题03 消息队列系列问题">
+<meta property="og:url" content="http://researchlab.github.io/2018/01/18/redis-03-delay-queue/index.html">
+<meta property="og:site_name" content="一线攻城狮">
+<meta property="og:description" content="很多业务场景中多会用到消息队列来传递消息数据问题， 常用的消息队列如NSQ,NAS, Rabbitmq和Kafka等重量级消息队列中间件，功能很强大 使用起来自然也复杂，其实在大部分场景只是需要一个消息队列来传递数据，数据量，数据之间的顺序等也没有特殊的要求， 这样的场景使用redis非常轻松就可以搞定，而且在使用和维护上相对而言要简单方便些,当然redis的消息队列不是专业的消息队列，它没有非常">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2018-10-18T03:08:07.676Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="redis专题03 消息队列系列问题">
+<meta name="twitter:description" content="很多业务场景中多会用到消息队列来传递消息数据问题， 常用的消息队列如NSQ,NAS, Rabbitmq和Kafka等重量级消息队列中间件，功能很强大 使用起来自然也复杂，其实在大部分场景只是需要一个消息队列来传递数据，数据量，数据之间的顺序等也没有特殊的要求， 这样的场景使用redis非常轻松就可以搞定，而且在使用和维护上相对而言要简单方便些,当然redis的消息队列不是专业的消息队列，它没有非常">
+
+    
+    <link rel="alternative" href="/atom.xml" title="一线攻城狮" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="一线攻城狮">一线攻城狮</a></h1>
+				<h2 class="blog-motto">十年磨一剑，一步一步脚踏实地的耕种</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">首页</a></li>
+					
+						<li><a href="/archives">归档</a></li>
+					
+						<li><a href="/about">关于</a></li>
+					
+						<li><a href="/reading">书单</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:researchlab.github.io">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2018/01/18/redis-03-delay-queue/" title="redis专题03 消息队列系列问题" itemprop="url">redis专题03 消息队列系列问题</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
+		
+ <p class="article-time">
+    <time datetime="2018-01-18T02:20:31.000Z" itemprop="datePublished"> 发表于 2018-01-18</time>
+   &nbsp&nbsp热度&nbsp<span id="busuanzi_value_page_pv"></span>° 
+  </p>
+</header>
+
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#list结构模拟队列"><span class="toc-number">1.</span> <span class="toc-text">list结构模拟队列</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#总结"><span class="toc-number">2.</span> <span class="toc-text">总结</span></a></li></ol>
+		
+		</div>
+		
+		<p>很多业务场景中多会用到消息队列来传递消息数据问题， 常用的消息队列如<code>NSQ</code>,<code>NAS</code>, <code>Rabbitmq</code>和<code>Kafka</code>等重量级消息队列中间件，功能很强大 使用起来自然也复杂，其实在大部分场景只是需要一个消息队列来传递数据，数据量，数据之间的顺序等也没有特殊的要求， 这样的场景使用<code>redis</code>非常轻松就可以搞定，而且在使用和维护上相对而言要简单方便些,当然<code>redis</code>的消息队列不是专业的消息队列，它没有非常多的高级特性，没有<code>ack</code>保证，如果对消息的可靠性有着极致的追求，那么它就不适合使用；<br><a id="more"></a></p>
+<p>新秀<code>NQS</code>集群搭建相对简单，文档也很简介易懂，但其维护性和代码嵌入性上来讲要比用<code>redis消息队列</code>复杂的多， 此外使用过<code>Rabbitmq</code>的同学知道它使用起来有多复杂，发消息之前要创建<code>Exchange</code>，再创建<code>Queue</code>，还要将 <code>Queue</code>和<code>Exchange</code>通过某种规则绑定起来，发消息的时候要指定<code>routing-key</code>，还要控制头部信息。消费者在消费消息之前也要进行上面一系列的繁琐过程。</p>
+<h4 id="list结构模拟队列"><a href="#list结构模拟队列" class="headerlink" title="list结构模拟队列"></a>list结构模拟队列</h4><p><code>redis</code>中可以用<code>list</code>(列表）结构来模拟队列和栈，而且非常简单，也常用来作为异步消息队列使用，使用<code>rpush/lpush</code>操作入队列，使用<code>lpop/rpop</code>来出队列。</p>
+<p>客户端是通过队列的<code>pop</code>操作来获取消息，然后进行处理。处理完了再接着获取消息，再进行处理。显然客户端不停的<code>pop</code>操作，当队列空后，客户端就会陷入<code>pop</code>的死循环，此时空轮询不但拉高了客户端的<code>CPU</code>占用率,<code>redis</code>的 <code>QPS</code>也会被拉高，如果这样空轮询的客户端有几十来个，<code>redis</code>的慢查询可能会显著增多。</p>
+<p>上述问题通常可以通过<code>sleep</code>命令来解决这个问题，让线程休眠一下，如<code>sleep (1s)</code>，但是休眠会导致消息的延迟增大。如果只有1个消费者，那么这个延迟就是1s。如果有多个消费者，这个延迟会有所下降，因为每个消费者的休眠时间是岔开来的。</p>
+<p>有没有什么办法能显著降低延迟呢？</p>
+<p>当然可以，借助redis提供了一组<code>blpop/brpop</code>阻塞读命令就可以，阻塞读在队列没有数据的时候，会立即进入休眠状态，一旦数据到来，则立刻醒过来。消息的延迟几乎为零。用<code>blpop/brpop</code>替代前面的<code>lpop/rpop</code>，就完美解决了上面的问题。</p>
+<p>但是在实际使用过程中,<code>blpop/brpop</code> 可能会产生<code>假死</code>现象，就是当没有数据的时候通过<code>blpop/brpop</code>操作进入阻塞休眠状态，当再次有数据进来后，<code>blpop/brpop</code>操作并没有被唤醒继续执行<code>pop</code>, 这是为什么呢？</p>
+<p>什么问题？ —— 空闲连接的问题。</p>
+<p>如果线程一直阻塞在哪里，<code>Redis</code>的客户端连接就成了闲置连接，闲置过久，服务器一般会主动断开连接，减少闲置资源占用。这个时候blpop/brpop会抛出异常来。所以编写客户端消费者的时候要小心，注意捕获异常，还要重试。</p>
+<p><strong>应用场景一 延时队列</strong></p>
+<p>当客户端在处理请求时加锁没加成功怎么办。一般有3种策略来处理加锁失败：</p>
+<ul>
+<li><p>直接抛出异常，通知用户稍后重试；</p>
+<ul>
+<li>这种方式比较适合由用户直接发起的请求，用户看到错误对话框后，会先阅读对话框的内容，再点击重试，这样就可以起到人工延时的效果。如果考虑到用户体验，可以由前端的代码替代用户自己来进行延时重试控制。它本质上是对当前请求的放弃，由用户决定是否重新发起新的请求。</li>
+</ul>
+</li>
+<li><p><code>sleep</code>一会再重试；</p>
+<ul>
+<li><code>sleep</code> 会阻塞当前的消息处理线程，会导致队列的后续消息处理出现延迟。如果碰撞的比较频繁或者队列里消息比较多，</li>
+<li><code>sleep</code> 可能并不合适。如果因为个别死锁的 key 导致加锁不成功，线程会彻底堵死，导致后续消息永远得不到及时处理。</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li><u><strong>将请求转移至延时队列，过一会再试；</strong></u></li>
+</ul>
+<p>这种方式比较适合异步消息处理，将当前冲突的请求扔到另一个队列延后处理以避开冲突。</p>
+<p><code>延时队列</code>可以通过<code>redis</code>的<code>zset(有序列表)</code>来实现。我们将消息序列化成一个字符串作为<code>zset</code>的<code>value</code>，这个消息的到期处理时间作为<code>score</code>，然后用多个线程轮询<code>zset</code>获取到期的任务进行处理，多个线程是为了保障可用性，万一挂了一个线程还有其它线程可以继续处理。因为有多个线程，所以需要考虑并发争抢任务，确保任务不能被多次执行。在处理上可以将<code>zrangebyscore</code>和<code>zrem</code>一同挪到服务器端进行原子化操作;</p>
+<h4 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h4><hr>
+<ul>
+<li>阐述了<code>redis</code>利用<code>list</code>结构模拟消息队列的使用原理，场景;</li>
+<li>进一步分析了通过<code>list</code>结构模拟异步消息队列出现队列延迟的问题，引入<code>blpop/brpop</code>阻塞读命令操作；</li>
+<li>进一步在<code>blpop/brpop</code>阻塞读命令休眠过久时无法再次唤醒<code>pop</code>操作，是因为当前连接休眠过久被会<code>redis</code>认为是<code>空闲连接</code>而强行断开连接， 导致后继的<code>blpop/brpop</code>在数据再次到达后无法再次唤醒<code>pop</code>操作， 此情况需要在程序实现时注意捕获<code>blpop/brpop</code>阻塞读异常并进行重试reload操作;</li>
+<li>进一步分析了分布式锁加锁失败后的使用方法， 进而引入分析<code>延时队列</code>策略解决分布式锁加锁失败重试问题；</li>
+</ul>
+  
+	</div>
+		<div style="padding: 10px 44px 30px 44px;" >
+<div style="border: 1px dashed #e0e0e0; padding: 10px 10px 10px 10px; background-color: #fffeee; background-repeat: no-repeat; background-attachment: scroll; background-position: 1% 50%; -moz-background-size: auto auto; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">
+<div style="float:left;margin-top:0px;">
+<img src="/img/weixin.jpg" width="125px" height="125px" style="border:1px solid #ccc; margin: 6px 5px 0px 0px"/>
+</div>
+<div>
+ <p style="margin-top:0px;">作者署名：<b><a target="_blank" href="http://researchlab.github.io/">朴实的一线攻城狮</a></b>
+<br />本文标题：<b><a href="/2018/01/18/redis-03-delay-queue/" target="_blank" title="redis专题03 消息队列系列问题">redis专题03 消息队列系列问题</a></b> 
+<br />本文出处：<b><a href="/2018/01/18/redis-03-delay-queue/" target="_blank" title="redis专题03 消息队列系列问题">http://researchlab.github.io/2018/01/18/redis-03-delay-queue/</a></b>
+<br />版权声明：本文由<b><a href="/about" target="_blank" title="Lee Hong">Lee Hong</a></b>创作和发表,采用<b>署名(BY)</b>-<b>非商业性使用(NC)</b>-<b>相同方式共享(SA)</b>国际许可协议进行许可,转载请注明作者及出处, 否则保留追究法律责任的权利。 </p>
+</div>
+</div>
+</div>
+
+   	       
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/redis专题/">redis专题</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/redis/">redis</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	<div class="share-jiathis">
+	  
+<div class="jiathis_style_24x24">
+	<a class="jiathis_button_weixin"></a>
+	<a class="jiathis_button_tsina"></a>
+	<a class="jiathis_button_tqq"></a>
+	<a class="jiathis_button_qzone"></a>
+    <a class="jiathis_button_googleplus"></a>
+	<a class="jiathis_button_douban"></a>
+	<a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+    var jiathis_config={
+    data_track_clickback:true,
+    sm:"copy,renren,cqq",
+    pic:"",
+    summary:"",
+    
+  </script> 
+<script type="text/javascript" src="//v3.jiathis.com/code/jia.js?uid=
+2084050" charset="utf-8"></script>      
+
+
+	 </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2018/01/19/redis-04-bitmap/" title="redis专题04 数据结构之redis位图系列问题">
+  <strong>上一篇：</strong><br/>
+  <span>
+  redis专题04 数据结构之redis位图系列问题</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2018/01/18/redis-02-distributed-lock/"  title="redis专题02 分布式锁">
+ <strong>下一篇：</strong><br/> 
+ <span>redis专题02 分布式锁
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+<!-- gitment评论框 start -->
+	<div id="gitment" class="ds-thread"></div>
+	<link rel="stylesheet" href="https://github.com/researchlab/gitment/blob/master/style/default.css">
+	<script src="https://github.com/researchlab/gitment/blob/master/dist/gitment.browser.js"></script>
+	<script>
+	  var gitment = new Gitment({
+	    id: 'lThu Jan 18 2018 10:20:31 GMT+0800', // 可选。建议为Thu Jan 18 2018 10:20:31 GMT+0800
+	    owner: 'researchlab', // 可以是你的GitHub用户名，也可以是github id
+	    repo: 'researchlab.github.io', //可以是你的任意一个repo，推荐使用githubpage所在的repo
+	    oauth: {
+	      client_id: 'e4971ec4c4fdbefb392f',
+	      client_secret: 'e5001b2dda2dcb9a9c66417991be57836c17a72b',
+	    },
+	  })
+	  gitment.render('gitment')
+</script>
+
+
+</div>  
+
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+<div id="asidepart">
+
+  <div class="widget tag">
+<!--<hr noshade color="#ccc">-->
+<!-- <p style="text-align:center">Mike.Lee</p> -->
+<p margin="0" style="text-align:center">
+<a class="ahref" href="http://researchlab.github.io/about/">
+<img id="aboutpic"  src="/img/qzly.png" alt="@一线攻城狮" height="200" width="200" style="box-shadow: 0px 0px 2px 2px #9edeff;border-radius: 8px;" >
+</a></p>
+<p style="text-align:center"><font size="2" color="grey">关注微信公众号 @一线攻城狮</font></p>
+<div style="display:block; margin-top:10px; padding: 0px 4px 4px 0; border-top: dashed 1px #ccc; text-align:left;"></div>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<div style="float:left;position:absolute;"><font size="2" >总访问:<span id="busuanzi_value_site_pv"></span>次</font></div>
+<div style="float:right;"><font size="2" >总访客:<span id="busuanzi_value_site_uv"></span>人</font></div>
+
+<div style="margin-top:30px; padding: 5px 4px 4px 0; border-top: dashed 1px #ccc; text-align:left;"></div>
+</div>
+
+
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/DevOps/" title="DevOps">DevOps<sup>12</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Hexo/" title="Hexo">Hexo<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/MQ/" title="MQ">MQ<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/algorithm/" title="algorithm">algorithm<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/docker-practice/" title="docker-practice">docker-practice<sup>8</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/go-bootcamp/" title="go-bootcamp">go-bootcamp<sup>6</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/go-pattern/" title="go-pattern">go-pattern<sup>3</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/golang/" title="golang">golang<sup>23</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/java/" title="java">java<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/javascript/" title="javascript">javascript<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/k8s/" title="k8s">k8s<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/mysql专题/" title="mysql专题">mysql专题<sup>16</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/php/" title="php">php<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/redis专题/" title="redis专题">redis专题<sup>17</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/golang/" title="golang">golang<sup>26</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mysql/" title="mysql">mysql<sup>18</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/redis/" title="redis">redis<sup>17</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/docker/" title="docker">docker<sup>9</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/setcookie/" title="setcookie">setcookie<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/tcp/" title="tcp">tcp<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/cache/" title="cache">cache<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/concurrency/" title="concurrency">concurrency<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Hexo/" title="Hexo">Hexo<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Blog/" title="Blog">Blog<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/minikube/" title="minikube">minikube<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/getcookie/" title="getcookie">getcookie<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/cache-invalid/" title="cache-invalid">cache-invalid<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/rpc/" title="rpc">rpc<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/vendoring/" title="vendoring">vendoring<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/godep/" title="godep">godep<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/govendor/" title="govendor">govendor<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/glide/" title="glide">glide<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/ticker/" title="ticker">ticker<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/hash/" title="hash">hash<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="http://blog.csdn.net/xiaolongwang2010" target="_blank" title="小龙王2010csdn技术博客">Linux/c/c++</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  
+
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+  <iframe width="100%" height="550" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=550&fansRow=1&ptype=1&speed=0&skin=1&isTitle=1&noborder=1&isWeibo=1&isFans=1&uid=5141203275&verifier=a533edf5&dpc=1"></iframe>
+
+
+</aside>
+</div>
+
+    </div>
+    <footer><div id="footer" >
+	
+	
+	<div class="social-font" class="clearfix">
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/researchlab/lightman" target="_blank" title="lightman">lightman</a> ©2016 - 2020 
+		
+		<a href="/about" target="_blank" title="Lee Hong">Lee Hong</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+
+
+<script type="text/javascript">
+  var duoshuoQuery = {short_name:"gamedp"};
+  (function() {
+    var ds = document.createElement('script');
+    ds.type = 'text/javascript';ds.async = true;
+    ds.src = '//static.duoshuo.com/embed.js';
+    ds.charset = 'UTF-8';
+    (document.getElementsByTagName('head')[0] 
+    || document.getElementsByTagName('body')[0]).appendChild(ds);
+  })();
+</script> 
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>
