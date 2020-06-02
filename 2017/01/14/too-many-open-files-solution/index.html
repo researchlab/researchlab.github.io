@@ -1,0 +1,635 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>linux too many open files 问题解决总结 | 一线攻城狮</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="Lee Hong">
+    
+
+    
+    <meta name="description" content="运行在Linux系统上的网络程序可能会出现”Too many open files”的异常情况，且常见于高并发访问文件系统，多线程网络连接等场景。">
+<meta name="keywords" content="linux">
+<meta property="og:type" content="article">
+<meta property="og:title" content="linux too many open files 问题解决总结">
+<meta property="og:url" content="http://researchlab.github.io/2017/01/14/too-many-open-files-solution/index.html">
+<meta property="og:site_name" content="一线攻城狮">
+<meta property="og:description" content="运行在Linux系统上的网络程序可能会出现”Too many open files”的异常情况，且常见于高并发访问文件系统，多线程网络连接等场景。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://researchlab.github.io/2017/01/14/too-many-open-files-solution/too-many-files.jpg">
+<meta property="og:updated_time" content="2020-06-02T14:14:01.855Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="linux too many open files 问题解决总结">
+<meta name="twitter:description" content="运行在Linux系统上的网络程序可能会出现”Too many open files”的异常情况，且常见于高并发访问文件系统，多线程网络连接等场景。">
+<meta name="twitter:image" content="http://researchlab.github.io/2017/01/14/too-many-open-files-solution/too-many-files.jpg">
+
+    
+    <link rel="alternative" href="/atom.xml" title="一线攻城狮" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="一线攻城狮">一线攻城狮</a></h1>
+				<h2 class="blog-motto">十年磨一剑，一步一步脚踏实地的耕种</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">首页</a></li>
+					
+						<li><a href="/archives">归档</a></li>
+					
+						<li><a href="/about">关于</a></li>
+					
+						<li><a href="/reading">书单</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:researchlab.github.io">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2017/01/14/too-many-open-files-solution/" title="linux too many open files 问题解决总结" itemprop="url">linux too many open files 问题解决总结</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
+		
+ <p class="article-time">
+    <time datetime="2017-01-14T02:58:37.000Z" itemprop="datePublished"> 发表于 2017-01-14</time>
+   &nbsp&nbsp热度&nbsp<span id="busuanzi_value_page_pv"></span>° 
+  </p>
+</header>
+
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#概念"><span class="toc-number">1.</span> <span class="toc-text">概念</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#解决方案总结"><span class="toc-number">2.</span> <span class="toc-text">解决方案总结</span></a></li></ol>
+		
+		</div>
+		
+		<p>运行在Linux系统上的网络程序可能会出现”Too many open files”的异常情况，且常见于高并发访问文件系统，多线程网络连接等场景。<br><a id="more"></a></p>
+<h2 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h2><p>程序经常访问的文件、socket等在Linux中都是指的文件file，系统需要记录每个当前访问file的name、location、access authority等相关信息，这样的一个实体被称为file entry。<code>open files table</code>存储这些file entry，以数组的形式线性管理。文件描述符(file descriptor)是作为<code>进程</code>到<code>open files table</code>的指针，也就是<code>open files table</code>的下标索引，将每个进程与它所访问的文件关联起来了。 </p>
+<center><img src="/2017/01/14/too-many-open-files-solution/too-many-files.jpg" alt="too many open files theory"></center>
+
+<p> 每个进程中都有一个<code>file descriptor table</code>管理当前进程所访问(open or create)的所有文件file，文件描述符关联着<code>open files table</code>中文件的file entry。对于<code>open files table</code>能容纳多少file entry, 可由Linux系统配置<code>open files table</code>的文件限制，如果超过配置值，就会拒绝其它文件操作的请求，并抛出Too many open files异常。这种限制有系统级和用户级之分。 </p>
+<ul>
+<li><p>系统级：<br>  系统级设置对所有用户有效。可通过两种方式查看系统最大文件限制<br>  1  cat /proc/sys/fs/file-max<br>  2  sysctl -a 查看结果中fs.file-max这项的配置数量<br>  如果需要增加配置数量就修改/etc/sysctl.conf文件，配置fs.file-max属性，如果属性不存在就添加, 配置完成后使用sysctl -p来通知系统启用这项配置 </p>
+</li>
+<li><p>用户级：<br>  Linux限制每个登录用户的可连接文件数。可通过<code>ulimit -n</code>来查看当前有效设置。如果想修改这个值就使用<code>ulimit -n &lt;setting number&gt;</code>命令。<br>  对于文件描述符增加的比例，资料推荐是以2的幂次为参考。如当前文件描述符数量是1024，可增加到2048，如果不够，可设置到4096，依此类推。<br>  在出现Too many open files问题后，首先得找出主要原因。最大的可能是打开的文件或是socket没有正常关闭。为了定位问题是否由目标网络进程引起，通过目标网络程序进程号查看当前进程占用文件描述符情况： </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">lsof -p <span class="variable">$target_pid</span> <span class="comment">#每个文件描述符的具体属性</span></span><br><span class="line">lsof -p <span class="variable">$target_pid</span> | wc -l  <span class="comment">#当前目标网络进程file descriptor table中FD的总量</span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h2 id="解决方案总结"><a href="#解决方案总结" class="headerlink" title="解决方案总结"></a>解决方案总结</h2><p>方案一:</p>
+<p>查看系统许可的最大文件限制， 如果不够可以修改此值。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root nginx]<span class="comment"># cat /proc/sys/fs/file-max</span></span><br><span class="line">8096</span><br></pre></td></tr></table></figure></p>
+<p>文件系统最大可打开文件数<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root nginx]<span class="comment"># ulimit -n</span></span><br><span class="line">1024</span><br></pre></td></tr></table></figure></p>
+<p>程序限制只能打开1024个文件</p>
+<p>使用[root nginx]# ulimit -n 8096调整一下<br>或者永久调整打开文件数 可在启动文件/etc/rc.d/rc.local末尾添加（在/etc/sysctl.conf末尾添加fs.file-max=xxx无效）<br>ulimit -n 8096 </p>
+<p>方案二:</p>
+<p>Linux内核有时会报告<code>Too many open files</code>，起因是file-max默认值（8096）太小, 要解决这个问题，可以root身份执行下列命令（或将它们加入/etc/rcS.d/*下的init脚本。）</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">echo</span> <span class="string">"65536"</span>  &gt; /proc/sys/fs/file-max  <span class="comment"># 适用于2.2和2.4版内核</span></span><br><span class="line"><span class="comment">#或者</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">"131072"</span> &gt; /proc/sys/fs/inode-max <span class="comment"># 仅适用于2.2版内核</span></span><br></pre></td></tr></table></figure>
+<p>方案三:</p>
+<p>办法是修改操作系统的打开文件数量限制，方法如下:</p>
+<p>1.按照最大打开文件数量的需求设置系统，并且通过检查/proc/sys/fs/file-max文件来确认最大打开文件数已经被正确设置。 </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cat /proc/sys/fs/file-max</span><br></pre></td></tr></table></figure>
+<p>如果设置值太小， 修改文件/etc/sysctl.conf的变量到合适的值。 这样会在每次重启之后生效。(如果设置值够大，跳过下步)</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">echo</span> 2048 &gt; /proc/sys/fs/file-max</span><br></pre></td></tr></table></figure>
+<p>编辑文件/etc/sysctl.conf，整体修改如下:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#kernel2.6之后的内核版本添加如下配置：                                                                                                                                                                          </span></span><br><span class="line">net.nf_conntrack_max = 3276800                                                                                                                                                                                  </span><br><span class="line">net.netfilter.nf_conntrack_tcp_timeout_established = 1200                                                                                                                                                       </span><br><span class="line">                                                                                                                                                                                                                </span><br><span class="line"><span class="comment">#当出现SYN等待队列溢出时，启用cookies来处理，可防范少量SYN攻击，默认为0，表示关闭                                                                                                                               </span></span><br><span class="line">net.ipv4.tcp_syncookies = 1                                                                                                                                                                                     </span><br><span class="line"><span class="comment">#开启TCP连接中TIME-WAIT sockets的快速回收，默认为0，表示关闭。                                                                                                                                                  </span></span><br><span class="line">net.ipv4.tcp_tw_recycle = 1                                                                                                                                                                                     </span><br><span class="line"><span class="comment">#开启重用，将TIME-WAIT sockets重新用于新的TCP连接，默认为0，表示关闭；                                                                                                                                          </span></span><br><span class="line">net.ipv4.tcp_tw_reuse = 1                                                                                                                                                                                       </span><br><span class="line"><span class="comment">#修改系統默认的 TIMEOUT 时间                                                                                                                                                                                    </span></span><br><span class="line">net.ipv4.tcp_fin_timeout = 25                                                                                                                                                                                   </span><br><span class="line">net.ipv4.tcp_orphan_retries = 1                                                                                                                                                                                 </span><br><span class="line">net.ipv4.tcp_max_orphans = 8192                                                                                                                                                                                 </span><br><span class="line">net.ipv4.ip_local_port_range = 32768 61000                                                                                                                                                                      </span><br><span class="line">                                                                                                                                                                                                                </span><br><span class="line"><span class="comment"># Disabled ipV6                                                                                                                                                                                                 </span></span><br><span class="line">net.ipv6.conf.all.disable_ipv6 = 1                                                                                                                                                                              </span><br><span class="line">net.ipv6.conf.default.disable_ipv6 = 1                                                                                                                                                                          </span><br><span class="line">net.ipv6.conf.lo.disable_ipv6 = 1</span><br></pre></td></tr></table></figure>
+<p>2.在/etc/security/limits.conf文件中设置最大打开文件数，添加如下这行:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">* - nofile 8192</span><br></pre></td></tr></table></figure>
+<p>这行设置了每个用户的默认打开文件数为2048。注意<code>nofile</code>项有两个可能的限制措施。就是项下的hard和soft, 要使修改过的最大打开文件数生效，必须对这两种限制进行设定。 如果使用”-“字符设定, 则hard和soft设定会同时被设定。硬限制表明soft限制中所能设定的最大值。soft限制指的是当前系统生效的设置值。hard限制值可以被普通用户降低, 但是不能增加。soft限制不能设置的比hard限制更高。只有root用户才能够增加hard限制值。当增加文件限制描述，可以简单的把当前值双倍。 例: 如果你要提高默认值1024， 最好提高到2048， 如果还要继续增加， 就需要设置成4096。<br>另外一种情况是在创建索引的时候，也有两种可能，一种是合并因子太小，导致创建文件数量超过操作系统限制，这时可以修改合并因子，也可以修改操作系统的打开文件数限制；另外一种是合并因子受虚拟机内存的限制，无法调整到更大，而需要索引的doc数量又非常的大，这个时候就只能通过修改操作系统的打开文件数限制来解决了。</p>
+<p>在此基础上，我还修改了以下一个配置文件</p>
+<p>vim /etc/sysctl.conf, 添加：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Decrease the time default value for tcp_fin_timeout connection</span></span><br><span class="line">net.ipv4.tcp_fin_timeout = 30</span><br><span class="line"><span class="comment"># Decrease the time default value for tcp_keepalive_time connection</span></span><br><span class="line">net.ipv4.tcp_keepalive_time = 1800</span><br><span class="line"><span class="comment"># Turn off tcp_window_scaling</span></span><br><span class="line">net.ipv4.tcp_window_scaling = 0</span><br><span class="line"><span class="comment"># Turn off the tcp_sack</span></span><br><span class="line">net.ipv4.tcp_sack = 0</span><br><span class="line"><span class="comment">#Turn off tcp_timestamps</span></span><br><span class="line">net.ipv4.tcp_timestamps = 0</span><br></pre></td></tr></table></figure>
+<p>然后 service network restart, 这些都和<code>TCP sockets</code>有关的优化。</p>
+<p>另外需要在 /etc/rc.d/rc.local里添加已使得重启的时候生效。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">echo</span> <span class="string">"30"</span>&gt;/proc/sys/net/ipv4/tcp_fin_timeout</span><br><span class="line"><span class="built_in">echo</span> <span class="string">"1800"</span>&gt;/proc/sys/net/ipv4/tcp_keepalive_time</span><br><span class="line"><span class="built_in">echo</span> <span class="string">"0"</span>&gt;/proc/sys/net/ipv4/tcp_window_scaling</span><br><span class="line"><span class="built_in">echo</span> <span class="string">"0"</span>&gt;/proc/sys/net/ipv4/tcp_sack</span><br><span class="line"><span class="built_in">echo</span> <span class="string">"0"</span>&gt;/proc/sys/net/ipv4/tcp_timestamps</span><br></pre></td></tr></table></figure>
+<p>因为不是所有的程序都在root下跑的，所有linux有对hard与soft open files的区分，普通用户受hard的限制，无论ulimit -n $数值调到多高，都跑不到 /etc/security/limits.conf里nofile的值。</p>
+<p>这样的优化后 lsof -p $target_pid|wc -l可以跑到4千以上都不会抛出too many open files。</p>
+  
+	</div>
+		<div style="padding: 10px 44px 30px 44px;" >
+<div style="border: 1px dashed #e0e0e0; padding: 10px 10px 10px 10px; background-color: #fffeee; background-repeat: no-repeat; background-attachment: scroll; background-position: 1% 50%; -moz-background-size: auto auto; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">
+<div style="float:left;margin-top:0px;">
+<img src="/img/weixin.jpg" width="125px" height="125px" style="border:1px solid #ccc; margin: 6px 5px 0px 0px"/>
+</div>
+<div>
+ <p style="margin-top:0px;">作者署名：<b><a target="_blank" href="http://researchlab.github.io/">朴实的一线攻城狮</a></b>
+<br />本文标题：<b><a href="/2017/01/14/too-many-open-files-solution/" target="_blank" title="linux too many open files 问题解决总结">linux too many open files 问题解决总结</a></b> 
+<br />本文出处：<b><a href="/2017/01/14/too-many-open-files-solution/" target="_blank" title="linux too many open files 问题解决总结">http://researchlab.github.io/2017/01/14/too-many-open-files-solution/</a></b>
+<br />版权声明：本文由<b><a href="/about" target="_blank" title="Lee Hong">Lee Hong</a></b>创作和发表,采用<b>署名(BY)</b>-<b>非商业性使用(NC)</b>-<b>相同方式共享(SA)</b>国际许可协议进行许可,转载请注明作者及出处, 否则保留追究法律责任的权利。 </p>
+</div>
+</div>
+</div>
+
+   	       
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/DevOps/">DevOps</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/linux/">linux</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	<div class="share-jiathis">
+	  
+<div class="jiathis_style_24x24">
+	<a class="jiathis_button_weixin"></a>
+	<a class="jiathis_button_tsina"></a>
+	<a class="jiathis_button_tqq"></a>
+	<a class="jiathis_button_qzone"></a>
+    <a class="jiathis_button_googleplus"></a>
+	<a class="jiathis_button_douban"></a>
+	<a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+    var jiathis_config={
+    data_track_clickback:true,
+    sm:"copy,renren,cqq",
+    pic:"",
+    summary:"",
+    
+  </script> 
+<script type="text/javascript" src="//v3.jiathis.com/code/jia.js?uid=
+2084050" charset="utf-8"></script>      
+
+
+	 </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2017/01/16/consistent-hashing-summary/" title="一致性哈希算法总结">
+  <strong>上一篇：</strong><br/>
+  <span>
+  一致性哈希算法总结</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2017/01/06/go-printf-format/"  title="总结printf 格式化标识">
+ <strong>下一篇：</strong><br/> 
+ <span>总结printf 格式化标识
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+<!-- gitment评论框 start -->
+	<div id="gitment" class="ds-thread"></div>
+	<link rel="stylesheet" href="https://github.com/researchlab/gitment/blob/master/style/default.css">
+	<script src="https://github.com/researchlab/gitment/blob/master/dist/gitment.browser.js"></script>
+	<script>
+	  var gitment = new Gitment({
+	    id: 'lSat Jan 14 2017 10:58:37 GMT+0800', // 可选。建议为Sat Jan 14 2017 10:58:37 GMT+0800
+	    owner: 'researchlab', // 可以是你的GitHub用户名，也可以是github id
+	    repo: 'researchlab.github.io', //可以是你的任意一个repo，推荐使用githubpage所在的repo
+	    oauth: {
+	      client_id: 'e4971ec4c4fdbefb392f',
+	      client_secret: 'e5001b2dda2dcb9a9c66417991be57836c17a72b',
+	    },
+	  })
+	  gitment.render('gitment')
+</script>
+
+
+</div>  
+
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+<div id="asidepart">
+
+  <div class="widget tag">
+<!--<hr noshade color="#ccc">-->
+<!-- <p style="text-align:center">Mike.Lee</p> -->
+<p margin="0" style="text-align:center">
+<a class="ahref" href="http://researchlab.github.io/about/">
+<img id="aboutpic"  src="/img/qzly.png" alt="@一线攻城狮" height="200" width="200" style="box-shadow: 0px 0px 2px 2px #9edeff;border-radius: 8px;" >
+</a></p>
+<p style="text-align:center"><font size="2" color="grey">关注微信公众号 @一线攻城狮</font></p>
+<div style="display:block; margin-top:10px; padding: 0px 4px 4px 0; border-top: dashed 1px #ccc; text-align:left;"></div>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<div style="float:left;position:absolute;"><font size="2" >总访问:<span id="busuanzi_value_site_pv"></span>次</font></div>
+<div style="float:right;"><font size="2" >总访客:<span id="busuanzi_value_site_uv"></span>人</font></div>
+
+<div style="margin-top:30px; padding: 5px 4px 4px 0; border-top: dashed 1px #ccc; text-align:left;"></div>
+</div>
+
+
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/DevOps/" title="DevOps">DevOps<sup>12</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Hexo/" title="Hexo">Hexo<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/MQ/" title="MQ">MQ<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/algorithm/" title="algorithm">algorithm<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/docker-practice/" title="docker-practice">docker-practice<sup>8</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/go-bootcamp/" title="go-bootcamp">go-bootcamp<sup>6</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/go-pattern/" title="go-pattern">go-pattern<sup>3</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/golang/" title="golang">golang<sup>23</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/java/" title="java">java<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/javascript/" title="javascript">javascript<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/k8s/" title="k8s">k8s<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/mysql专题/" title="mysql专题">mysql专题<sup>16</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/php/" title="php">php<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/redis专题/" title="redis专题">redis专题<sup>17</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/golang/" title="golang">golang<sup>26</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mysql/" title="mysql">mysql<sup>18</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/redis/" title="redis">redis<sup>17</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/docker/" title="docker">docker<sup>9</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/setcookie/" title="setcookie">setcookie<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/tcp/" title="tcp">tcp<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/cache/" title="cache">cache<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/concurrency/" title="concurrency">concurrency<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Hexo/" title="Hexo">Hexo<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Blog/" title="Blog">Blog<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/minikube/" title="minikube">minikube<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/getcookie/" title="getcookie">getcookie<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/rpc/" title="rpc">rpc<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/cache-invalid/" title="cache-invalid">cache-invalid<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/ticker/" title="ticker">ticker<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/vendoring/" title="vendoring">vendoring<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/godep/" title="godep">godep<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/govendor/" title="govendor">govendor<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/glide/" title="glide">glide<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/hash/" title="hash">hash<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="http://blog.csdn.net/xiaolongwang2010" target="_blank" title="小龙王2010csdn技术博客">Linux/c/c++</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  
+
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+  <iframe width="100%" height="550" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=550&fansRow=1&ptype=1&speed=0&skin=1&isTitle=1&noborder=1&isWeibo=1&isFans=1&uid=5141203275&verifier=a533edf5&dpc=1"></iframe>
+
+
+</aside>
+</div>
+
+    </div>
+    <footer><div id="footer" >
+	
+	
+	<div class="social-font" class="clearfix">
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/researchlab/lightman" target="_blank" title="lightman">lightman</a> ©2016 - 2020 
+		
+		<a href="/about" target="_blank" title="Lee Hong">Lee Hong</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+
+
+<script type="text/javascript">
+  var duoshuoQuery = {short_name:"gamedp"};
+  (function() {
+    var ds = document.createElement('script');
+    ds.type = 'text/javascript';ds.async = true;
+    ds.src = '//static.duoshuo.com/embed.js';
+    ds.charset = 'UTF-8';
+    (document.getElementsByTagName('head')[0] 
+    || document.getElementsByTagName('body')[0]).appendChild(ds);
+  })();
+</script> 
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

@@ -1,0 +1,663 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>mysql 数据库表及数据导入导出方法总结 | 一线攻城狮</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="Lee Hong">
+    
+
+    
+    <meta name="description" content="由于公司的MySQL是搭建在服务器上，为了避免对服务器进行直接改动，想远程导出和导入MySQL的数据库表结构及数据进行操作, 刚好Mysql本身提供了命令行导出工具Mysqldump和Mysql Source导入命令进行SQL数据导入导出工作，通过Mysql命令行导出工具Mysqldump命令能够将Mysql数据导出为文本格式(txt)的SQL文件，通过Mysql Source命令能够将SQL文件">
+<meta name="keywords" content="mysql">
+<meta property="og:type" content="article">
+<meta property="og:title" content="mysql 数据库表及数据导入导出方法总结">
+<meta property="og:url" content="http://researchlab.github.io/2017/02/22/mysql-import-export-summary/index.html">
+<meta property="og:site_name" content="一线攻城狮">
+<meta property="og:description" content="由于公司的MySQL是搭建在服务器上，为了避免对服务器进行直接改动，想远程导出和导入MySQL的数据库表结构及数据进行操作, 刚好Mysql本身提供了命令行导出工具Mysqldump和Mysql Source导入命令进行SQL数据导入导出工作，通过Mysql命令行导出工具Mysqldump命令能够将Mysql数据导出为文本格式(txt)的SQL文件，通过Mysql Source命令能够将SQL文件">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://researchlab.github.io/2017/02/22/mysql-import-export-summary/mysqldump_error.png">
+<meta property="og:image" content="http://researchlab.github.io/2017/02/22/mysql-import-export-summary/mysqldump_ret.png">
+<meta property="og:updated_time" content="2020-06-02T14:14:01.829Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="mysql 数据库表及数据导入导出方法总结">
+<meta name="twitter:description" content="由于公司的MySQL是搭建在服务器上，为了避免对服务器进行直接改动，想远程导出和导入MySQL的数据库表结构及数据进行操作, 刚好Mysql本身提供了命令行导出工具Mysqldump和Mysql Source导入命令进行SQL数据导入导出工作，通过Mysql命令行导出工具Mysqldump命令能够将Mysql数据导出为文本格式(txt)的SQL文件，通过Mysql Source命令能够将SQL文件">
+<meta name="twitter:image" content="http://researchlab.github.io/2017/02/22/mysql-import-export-summary/mysqldump_error.png">
+
+    
+    <link rel="alternative" href="/atom.xml" title="一线攻城狮" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="一线攻城狮">一线攻城狮</a></h1>
+				<h2 class="blog-motto">十年磨一剑，一步一步脚踏实地的耕种</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">首页</a></li>
+					
+						<li><a href="/archives">归档</a></li>
+					
+						<li><a href="/about">关于</a></li>
+					
+						<li><a href="/reading">书单</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:researchlab.github.io">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2017/02/22/mysql-import-export-summary/" title="mysql 数据库表及数据导入导出方法总结" itemprop="url">mysql 数据库表及数据导入导出方法总结</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
+		
+ <p class="article-time">
+    <time datetime="2017-02-22T02:50:36.000Z" itemprop="datePublished"> 发表于 2017-02-22</time>
+   &nbsp&nbsp热度&nbsp<span id="busuanzi_value_page_pv"></span>° 
+  </p>
+</header>
+
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#数据库表及数据导出"><span class="toc-number">1.</span> <span class="toc-text">数据库表及数据导出</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#数据库表及数据导入"><span class="toc-number">2.</span> <span class="toc-text">数据库表及数据导入</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#mysqldump使用总结"><span class="toc-number">3.</span> <span class="toc-text">mysqldump使用总结</span></a></li></ol>
+		
+		</div>
+		
+		<p>由于公司的MySQL是搭建在服务器上，为了避免对服务器进行直接改动，想远程导出和导入MySQL的数据库表结构及数据进行操作, 刚好Mysql本身提供了命令行导出工具<code>Mysqldump</code>和<code>Mysql Source</code>导入命令进行SQL数据导入导出工作，通过Mysql命令行导出工具Mysqldump命令能够将Mysql数据导出为文本格式(txt)的SQL文件，通过Mysql Source命令能够将SQL文件导入Mysql数据库中，下面通过Mysql导入导出SQL实例详解Mysqldump和Source命令的用法</p>
+<a id="more"></a>
+<h2 id="数据库表及数据导出"><a href="#数据库表及数据导出" class="headerlink" title="数据库表及数据导出"></a>数据库表及数据导出</h2><p>需求说明是要希望导出整个数据库结构脚本，而MySQL提供的Mysqldump命令刚好可达到此目的而且还可以将数据库中的数据也一并导出，</p>
+<p><strong> mysqldump导出语法以及实践 </strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mysqldump -h&#123;hostname&#125; [-P&#123;port&#125;] -u&#123;username&#125; -p&#123;password&#125; [--default-character-set=charset] database [tablename] &gt; &#123;you file path&#125;</span><br><span class="line"><span class="comment"># 注:-h和[hostname]之间并没有空格相连, 后同之, []扩起来的为可选项, 可不填</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>hostname表示主机名, 本地则填localhost, 远程则填写你的远程IP, 如192.168.0.3;</li>
+<li>username是你的MySQL登录帐号, password则是登录密码;</li>
+<li>default-character-set则是你的字符集编码, 如gb2312、gbk和utf8(没有横杠哦);</li>
+<li>dbname是你的数据库名称, tablename是你的表名, 假如你不填写tablename的话则默认导出所有的表。</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysqldump -h192.168.0.3 -P3307 -uroot -p123456 --default-character-set=utf8  crm_adapter &gt; ./crm_adapter_db.sql</span><br></pre></td></tr></table></figure>
+<p>通过上面的导出语句, 将会在当前目录下面创建一个crm_adapter_db.sql脚本文件, 这个脚本文件是可运行的, 它包含了crm_adapter数据库中所有数据表的建表细节以及其所有的数据。这就是导出命令的特点，它不但会导出数据，还会导出表或者数据库的结构信息。另外如果不带”&gt; {you file path}”这一部分路径信息，mysqldump导出命令或把内容打印在terminal命令界面上。</p>
+<h2 id="数据库表及数据导入"><a href="#数据库表及数据导入" class="headerlink" title="数据库表及数据导入"></a>数据库表及数据导入</h2><p>数据库表及数据导入可用mysqldump 和source 两种方法来操作， </p>
+<p><strong> 通过mysqldump 工具导入</strong><br>mysqldump -h{hostname} [-P{port}] -u{username} -p{password} [–default-character-set=charset] database [tablename] &lt; {you file path}</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysqldump -h192.168.0.3 -P3308 -uroot -p123456  databasename &lt; ./crm_adapter_db.sql</span><br></pre></td></tr></table></figure>
+<p><strong> 通过source 命令导入 </strong></p>
+<p><code>source</code>命令导入不同于mysqldump, 它是一个SQL命令, 必须登录进入MySQL在命令行那里才可以运行, 而mysqldump实则是一个管理工具，无须登入MySQ在命令行那里运行，只须在命令行下运行即可。先登入MySQL:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysql -h&#123;hostname&#125; [-p&#123;port&#125;] -u&#123;username&#125; -p&#123;password&#125;</span><br></pre></td></tr></table></figure>
+<p>举例, 我们登入一个远程MySQL可以用下面的命令,</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysql -h192.168.0.3 -unikey -p123456</span><br></pre></td></tr></table></figure>
+<p>登入之后，进入我们要作用的数据库,</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysql &gt; use my_crm_adapter;</span><br></pre></td></tr></table></figure>
+<p>然后我们可以使用source命令来运行前面导出的sql脚本实现数据的导入,</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysql &gt; <span class="built_in">source</span> ./crm_adapter_db.sql;</span><br></pre></td></tr></table></figure>
+<p><strong> mysqldump vs source </strong><br>mysqldump虽然好用, 但它实际上也是运用先登录在运行脚本的策略, 只是其中的细节我们无需关心, 但是, 因为其中有很多远程连接细节, 我们有可能遭遇中文乱码问题。</p>
+<center><img src="/2017/02/22/mysql-import-export-summary/mysqldump_error.png" alt="mysqldump 乱码"></center>
+
+<p>关于为何在使用mysqldump做导入时会出现中文乱码问题, 我们先用mysql命令登入, 然后输入下面的命令:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysql &gt; show variables like <span class="string">'character%'</span>;</span><br></pre></td></tr></table></figure></p>
+<center><img src="/2017/02/22/mysql-import-export-summary/mysqldump_ret.png" alt="mysqldump character error"></center>
+
+<p>是否注意到红圈部分的编码是latin1? latin1是MySQL的默认字符集, 可能由于某种原因你没有指定默认编码, 它就会默认为latin1了, 这就是你中文乱码出现的原因。</p>
+<p><strong> <font color="red"> 所以建议优先使用source 命令来导入数据 </font> </strong> </p>
+<h2 id="mysqldump使用总结"><a href="#mysqldump使用总结" class="headerlink" title="mysqldump使用总结"></a>mysqldump使用总结</h2><ul>
+<li><p>导出所有库<br>  系统命令行</p>
+  <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysqldump -uusername -ppassword --all-databases &gt; all.sql</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>导入所有库<br>  mysql命令行</p>
+  <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt;<span class="built_in">source</span> all.sql;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>导出某些库<br>  系统命令行</p>
+  <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysqldump -uusername -ppassword --databases db1 db2 &gt; db1db2.sql</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>导入某些库<br>  mysql命令行</p>
+  <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt;<span class="built_in">source</span> db1db2.sql;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>导入某个库<br>  系统命令行</p>
+  <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysql -uusername -ppassword db1 &lt; db1.sql;</span><br></pre></td></tr></table></figure>
+<p>  或mysql命令行</p>
+  <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt;<span class="built_in">source</span> db1.sql;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>导出某些数据表<br>  系统命令行</p>
+  <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysqldump -uusername -ppassword db1 table1 table2 &gt; tb1tb2.sql</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>导入某些数据表<br>  系统命令行</p>
+  <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysql -uusername -ppassword db1 &lt; tb1tb2.sql</span><br></pre></td></tr></table></figure>
+<p>  或mysql命令行</p>
+  <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt;user db1;</span><br><span class="line">mysql&gt;<span class="built_in">source</span> tb1tb2.sql;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>mysqldump字符集设置<br>  mysqldump -uusername -ppassword –default-character-set=gb2312 db1 table1 &gt; tb1.sql<br>  mysqldump客户端可用来转储数据库或搜集数据库进行备份或将数据转移到另一个sql服务器(不一定是一个mysql服务器)。转储包含创建表和/或装载表的sql语句。<br>  如果在服务器上进行备份，并且表均为myisam表，应考虑使用mysqlhotcopy，因为可以更快地进行备份和恢复。<br>  有3种方式来调用mysqldump:<br>  系统命令行</p>
+  <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">	mysqldump [options] db_name [tables]</span><br><span class="line"><span class="comment"># 或</span></span><br><span class="line">	mysqldump [options] ---database db1 [db2 db3...]</span><br><span class="line"><span class="comment"># 或</span></span><br><span class="line">	mysqldump [options] --all--database</span><br></pre></td></tr></table></figure>
+<p>  如果没有指定任何表或使用了—database或–all–database选项，则转储整个数据库。<br>  要想获得你的版本的mysqldump支持的选项，执行mysqldump —help。<br>  如果运行mysqldump没有–quick或–opt选项，mysqldump在转储结果前将整个结果集装入内存。如果转储大数据库可能会出现问题。该选项默认启用，但可以用–skip-opt禁用。<br>  如果使用最新版本的mysqldump程序生成一个转储重装到很旧版本的mysql服务器中，不应使用–opt或-e选项。<br>  mysqldump支持下面的选项:<br>   <code>--help</code> 或<code>-?</code><br>   显示帮助消息并退出。<br>   <code>--add-drop--database</code><br>   在每个create database语句前添加drop database语句。<br>   <code>--add-drop-tables</code><br>   在每个create table语句前添加drop table语句。<br>   <code>--add-locking</code><br>   用lock tables和unlock tables语句引用每个表转储。重载转储文件时插入得更快。<br>   <code>--all--database</code> 或 <code>-a</code><br>  转储所有数据库中的所有表。与使用—database选项相同，在命令行中命名所有数据库。<br>   <code>--allow-keywords</code><br>   允许创建关键字列名。应在每个列名前面加上表名前缀。<br>   <code>--comments[={0|1}]</code><br>   如果设置为0, 禁止转储文件中的其它信息, 例如程序版本, 服务器版本和主机。<code>--skip—comments</code>与<code>--comments=0</code>的结果相同。 默认值为1，即包括额外信息。<br>   <code>--compact</code><br>   产生少量输出。该选项禁用注释并启用<code>--skip-add-drop-tables</code>、<code>--no-set-names</code>、<code>--skip-disable-keys</code>和<code>--skip-add-locking</code>选项。<br>   <code>--compatible=name</code><br>   产生与其它数据库系统或旧的mysql服务器更兼容的输出。值可以为ansi、mysql323、mysql40、postgresql、oracle、mssql、db2、maxdb、no_key_options、no_tables_options或者no_field_options。要使用几个值，用逗号将它们隔开。这些值与设置服务器sql模式的相应选项有相同的含义。该选项不能保证同其它服务器之间的兼容性。它只启用那些目前能够使转储输出更兼容的sql模式值。例如，–compatible=oracle 不映射oracle类型或使用oracle注释语法的数据类型。<br>   <code>--complete-insert</code> 或 <code>-c</code><br>   使用包括列名的完整的insert语句。<br>   <code>--compress</code> 或<code>-c</code><br>   压缩在客户端和服务器之间发送的所有信息（如果二者均支持压缩）。<br>   <code>--create-option</code><br>   在create table语句中包括所有mysql表选项。<br>  <code>--database</code> 或 <code>-b</code><br>  转储几个数据库。通常情况, mysqldump将命令行中的第1个名字参量看作数据库名，后面的名看作表名。使用该选项，它将所有名字参量看作数据库名。create database if not exists db_name和use db_name语句包含在每个新数据库前的输出中。<br>   <code>--debug[=debug_options]</code> 或<code>-# [debug_options]</code><br>   写调试日志。debug_options字符串通常为’d:t:o,file_name’。<br>   <code>--default-character-set=charset</code><br>   使用charsetas默认字符集。如果没有指定，mysqldump使用utf8。<br>   <code>--delayed-insert</code><br>   使用insert delayed语句插入行。<br>   <code>--delete-master-logs</code><br>   在主复制服务器上，完成转储操作后删除二进制日志。该选项自动启用<code>--master-data</code>。<br>   <code>--disable-keys</code> 或 <code>-k</code><br>   对于每个表，用/<em>!40000 alter table tbl_name disable keys </em>/;和/<em>!40000 alter table tbl_name enable keys </em>/;语句引用insert语句。这样可以更快地装载转储文件，因为在插入所有行后创建索引。该选项只适合myisam表。<br>   <code>--extended-insert</code> 或 <code>-e</code><br>   使用包括几个values列表的多行insert语法。这样使转储文件更小，重载文件时可以加速插入。<br>   <code>--fields-terminated-by=...，--fields-enclosed-by=...，--fields-optionally-enclosed-by=...，--fields-escaped-by=...，--行-terminated-by=...</code><br>   这些选项结合-t选项使用，与load data infile的相应子句有相同的含义。<br>   <code>--first-slave</code> 或 <code>-x</code><br>   不赞成使用，现在重新命名为–lock-all-tables。<br>   <code>--flush-logs</code> 或 <code>-f</code><br>   开始转储前刷新mysql服务器日志文件。该选项要求reload权限。请注意如果结合<code>--all--database</code>(或-a)选项使用该选项，根据每个转储的数据库刷新日志。例外情况是当使用<code>--lock-all-tables</code>或<code>--master-data</code>的时候:在这种情况下, 日志只刷新一次, 在所有表被锁定后刷新。如果你想要同时转储和刷新日志，应使用<code>--flush-logs</code>连同<code>--lock-all-tables</code>或<code>--master-data</code>。<br>   <code>--force</code>或<code>-f</code><br>   在表转储过程中, 即使出现sql错误也继续。<br>   <code>--host=host_name</code> 或 <code>-h host_name</code><br>   从给定主机的mysql服务器转储数据。默认主机是localhost。<br>   <code>--hex-blob</code><br>   使用十六进制符号转储二进制字符串列(例如，’abc’ 变为0x616263)。影响到的列有binary、varbinary、blob。<br>   <code>--lock-all-tables</code> 或 <code>-x</code><br>   所有数据库中的所有表加锁。在整体转储过程中通过全局读锁定来实现。该选项自动关闭<code>--single-transaction</code>和<code>--lock-tables</code>。<br>   <code>--lock-tables</code> 或<code>-l</code><br>   开始转储前锁定所有表。用read local锁定表以允许并行插入myisam表。对于事务表例如innodb和bdb，<code>--single-transaction</code>是一个更好的选项，因为它不根本需要锁定表。请注意当转储多个数据库时，–lock-tables分别为每个数据库锁定表。因此，该选项不能保证转储文件中的表在数据库之间的逻辑一致性。不同数据库表的转储状态可以完全不同。<br>   <code>--master-data[=value]</code><br>   该选项将二进制日志的位置和文件名写入到输出中。该选项要求有reload权限，并且必须启用二进制日志。如果该选项值等于1，位置和文件名被写入change master语句形式的转储输出，如果你使用该sql转储主服务器以设置从服务器，从服务器从主服务器二进制日志的正确位置开始。如果选项值等于2，change master语句被写成sql注释。如果value被省略，这是默认动作。<br>   <code>--master-data</code>选项启用<code>--lock-all-tables</code>，除非还指定<code>--single-transaction</code>(在这种情况下，只在刚开始转储时短时间获得全局读锁定。又见<code>--single-transaction</code>。在任何一种情况下，日志相关动作发生在转储时。该选项自动关闭<code>--lock-tables</code>。<br>   <code>--no-create-db</code> 或 <code>-n</code><br>   该选项禁用create database /<em>!32312 if not exists</em>/ db_name语句，如果给出—database或–all–database选项，则包含到输出中。<br>   <code>--no-create-info</code> 或 <code>-t</code><br>   不写重新创建每个转储表的create table语句。<br>   <code>--no-data</code> 或 <code>-d</code><br>   不写表的任何行信息。如果你只想转储表的结构这很有用。<br>   <code>--opt</code><br>   该选项是速记；等同于指定 –add-drop-tables–add-locking –create-option –disable-keys–extended-insert –lock-tables –quick –set-charset。它可以给出很快的转储操作并产生一个可以很快装入mysql服务器的转储文件。该选项默认开启，但可以用–skip-opt禁用。要想只禁用确信用-opt启用的选项，使用–skip形式；例如，–skip-add-drop-tables或–skip-quick。<br>   –password[=password]，-p[password]<br>   连接服务器时使用的密码。如果你使用短选项形式(-p)，不能在选项和密码之间有一个空格。如果在命令行中，忽略了–password或-p选项后面的 密码值，将提示你输入一个。<br>   –port=port_num，-p port_num<br>   用于连接的tcp/ip端口号。<br>   –protocol={tcp | socket | pipe | memory}<br>   使用的连接协议。<br>   –quick，-q<br>   该选项用于转储大的表。它强制mysqldump从服务器一次一行地检索表中的行而不是检索所有行并在输出前将它缓存到内存中。<br>   –quote-names，-q<br>   用”`“字符引用数据库、表和列名。如果服务器sql模式包括ansi_quotes选项，用”字符引用名。默认启用该选项。可以用–skip-quote-names禁用，但该选项应跟在其它选项后面，例如可以启用–quote-names的–compatible。<br>   –result-file=file，-r file<br>  –socket=path，-s path<br>   当连接localhost(为默认主机)时使用的套接字文件。<br>   –skip–comments<br>  参见—comments选项的描述。<br>  –tab=path，-t path<br>  产生tab分割的数据文件。对于每个转储的表，mysqldump创建一个包含创建表的create table语句的tbl_name.sql文件，和一个包含其数据的tbl_name.txt文件。选项值为写入文件的目录。<br>  默认情况，.txt数据文件的格式是在列值和每行后面的新行之间使用tab字符。可以使用–fields-xxx和–行–xxx选项明显指定格式。<br>  注释：该选项只适用于mysqldump与mysqld服务器在同一台机器上运行时。你必须具有file权限，并且服务器必须有在你指定的目录中有写文件的许可。<br>  –tables<br>  覆盖—database或-b选项。选项后面的所有参量被看作表名。<br>  –triggers<br>  为每个转储的表转储触发器。该选项默认启用；用–skip-triggers禁用它。<br>  –tz-utc<br>  在转储文件中加入set time_zone=’+00:00’以便timestamp列可以在具有不同时区的服务器之间转储和重载。(不使用该选项，timestamp列在具有本地时区的源服务器和目的服务器之间转储和重载）。–tz-utc也可以保护由于夏令时带来的更改。–tz-utc默认启用。要想禁用它，使用–skip-tz-utc。该选项在mysql 5.1.2中加入。<br>   –where=’where-condition’, -w ‘where-condition’<br>   只转储给定的where条件选择的记录。请注意如果条件包含命令解释符专用空格或字符，一定要将条件引用起来。<br>   例如:<br>   <code>&quot;--where=user=&#39;jimf&#39;&quot;
+   &quot;-wuserid&gt;1&quot;
+   &quot;-wuserid&lt;1&quot;</code><br>   –xml，-x<br>   将转储输出写成xml。<br>   还可以使用–var_name=value选项设置下面的变量:<br>   max_allowed_packet<br>   客户端/服务器之间通信的缓存区的最大大小。最大为1gb。<br>   net_buffer_length<br>   客户端/服务器之间通信的缓存区的初始大小。当创建多行插入语句时(如同使用选项–extended-insert或–opt)，mysqldump创建长度达net_buffer_length的行。如果增加该变量，还应确保在mysql服务器中的net_buffer_length变量至少这么大。<br>   还可以使用–set-variable=var_name=value或-o var_name=value语法设置变量。然而，现在不赞成使用该语法。<br>   mysqldump最常用于备份一个整个的数据库:<br>  mysqldump –opt db_name &gt; backup-file.sql<br>  可以这样将转储文件读回到服务器:<br>  mysql db_name &lt; backup-file.sql<br>   或:<br>  mysql -e “source /path-to–backup/backup-file.sql” db_name<br>   mysqldump也可用于从一个mysql服务器向另一个服务器复制数据时装载数据库:<br>  mysqldump –opt db_name | mysql –host=remote_host -c db_name<br>  可以用一个命令转储几个数据库:<br>  mysqldump —database db_name1 [db_name2 …] &gt; my_databases.sql<br>  如果想要转储所有数据库，使用–all–database选项:<br>  mysqldump –all-databases &gt; all_databases.sql<br>  如果表保存在innodb存储引擎中，mysqldump提供了一种联机备份的途径(参见下面的命令)。该备份只需要在开始转储时对所有表进行全局读锁定(使用flush tables with read lock)。获得锁定后，读取二进制日志的相应内容并将锁释放。因此如果并且只有当发出flush…时正执行一个长的更新语句，mysql服务器才停止直到长语句结束，然后转储则释放锁。因此如果mysql服务器只接收到短(“短执行时间”)的更新语句，即使有大量的语句，也不会注意到锁期间。<br>  mysqldump –all-databases –single-transaction &gt; all_databases.sql<br>  对于点对点恢复(也称为“前滚”，当你需要恢复旧的备份并重放该备份以后的更改时)，循环二进制日志或至少知道转储对应的二进制日志内容很有用：<br>  mysqldump –all-databases –master-data=2 &gt; all_databases.sql<br>  或<br>  mysqldump –all-databases –flush-logs –master-data=2 &gt; all_databases.sql<br>  如果表保存在innodb存储引擎中，同时使用–master-data和–single-transaction提供了一个很方便的方式来进行适合点对点恢复的联机备份。</p>
+</li>
+</ul>
+  
+	</div>
+		<div style="padding: 10px 44px 30px 44px;" >
+<div style="border: 1px dashed #e0e0e0; padding: 10px 10px 10px 10px; background-color: #fffeee; background-repeat: no-repeat; background-attachment: scroll; background-position: 1% 50%; -moz-background-size: auto auto; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">
+<div style="float:left;margin-top:0px;">
+<img src="/img/weixin.jpg" width="125px" height="125px" style="border:1px solid #ccc; margin: 6px 5px 0px 0px"/>
+</div>
+<div>
+ <p style="margin-top:0px;">作者署名：<b><a target="_blank" href="http://researchlab.github.io/">朴实的一线攻城狮</a></b>
+<br />本文标题：<b><a href="/2017/02/22/mysql-import-export-summary/" target="_blank" title="mysql 数据库表及数据导入导出方法总结">mysql 数据库表及数据导入导出方法总结</a></b> 
+<br />本文出处：<b><a href="/2017/02/22/mysql-import-export-summary/" target="_blank" title="mysql 数据库表及数据导入导出方法总结">http://researchlab.github.io/2017/02/22/mysql-import-export-summary/</a></b>
+<br />版权声明：本文由<b><a href="/about" target="_blank" title="Lee Hong">Lee Hong</a></b>创作和发表,采用<b>署名(BY)</b>-<b>非商业性使用(NC)</b>-<b>相同方式共享(SA)</b>国际许可协议进行许可,转载请注明作者及出处, 否则保留追究法律责任的权利。 </p>
+</div>
+</div>
+</div>
+
+   	       
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/DevOps/">DevOps</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/mysql/">mysql</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	<div class="share-jiathis">
+	  
+<div class="jiathis_style_24x24">
+	<a class="jiathis_button_weixin"></a>
+	<a class="jiathis_button_tsina"></a>
+	<a class="jiathis_button_tqq"></a>
+	<a class="jiathis_button_qzone"></a>
+    <a class="jiathis_button_googleplus"></a>
+	<a class="jiathis_button_douban"></a>
+	<a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+    var jiathis_config={
+    data_track_clickback:true,
+    sm:"copy,renren,cqq",
+    pic:"",
+    summary:"",
+    
+  </script> 
+<script type="text/javascript" src="//v3.jiathis.com/code/jia.js?uid=
+2084050" charset="utf-8"></script>      
+
+
+	 </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2017/03/01/use-beego-orm-summary/" title="beego/orm使用总结">
+  <strong>上一篇：</strong><br/>
+  <span>
+  beego/orm使用总结</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2017/01/22/linux-signal-golang/"  title="Linux Signal及Golang中的信号处理">
+ <strong>下一篇：</strong><br/> 
+ <span>Linux Signal及Golang中的信号处理
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+<!-- gitment评论框 start -->
+	<div id="gitment" class="ds-thread"></div>
+	<link rel="stylesheet" href="https://github.com/researchlab/gitment/blob/master/style/default.css">
+	<script src="https://github.com/researchlab/gitment/blob/master/dist/gitment.browser.js"></script>
+	<script>
+	  var gitment = new Gitment({
+	    id: 'lWed Feb 22 2017 10:50:36 GMT+0800', // 可选。建议为Wed Feb 22 2017 10:50:36 GMT+0800
+	    owner: 'researchlab', // 可以是你的GitHub用户名，也可以是github id
+	    repo: 'researchlab.github.io', //可以是你的任意一个repo，推荐使用githubpage所在的repo
+	    oauth: {
+	      client_id: 'e4971ec4c4fdbefb392f',
+	      client_secret: 'e5001b2dda2dcb9a9c66417991be57836c17a72b',
+	    },
+	  })
+	  gitment.render('gitment')
+</script>
+
+
+</div>  
+
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+<div id="asidepart">
+
+  <div class="widget tag">
+<!--<hr noshade color="#ccc">-->
+<!-- <p style="text-align:center">Mike.Lee</p> -->
+<p margin="0" style="text-align:center">
+<a class="ahref" href="http://researchlab.github.io/about/">
+<img id="aboutpic"  src="/img/qzly.png" alt="@一线攻城狮" height="200" width="200" style="box-shadow: 0px 0px 2px 2px #9edeff;border-radius: 8px;" >
+</a></p>
+<p style="text-align:center"><font size="2" color="grey">关注微信公众号 @一线攻城狮</font></p>
+<div style="display:block; margin-top:10px; padding: 0px 4px 4px 0; border-top: dashed 1px #ccc; text-align:left;"></div>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<div style="float:left;position:absolute;"><font size="2" >总访问:<span id="busuanzi_value_site_pv"></span>次</font></div>
+<div style="float:right;"><font size="2" >总访客:<span id="busuanzi_value_site_uv"></span>人</font></div>
+
+<div style="margin-top:30px; padding: 5px 4px 4px 0; border-top: dashed 1px #ccc; text-align:left;"></div>
+</div>
+
+
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/DevOps/" title="DevOps">DevOps<sup>12</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Hexo/" title="Hexo">Hexo<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/MQ/" title="MQ">MQ<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/algorithm/" title="algorithm">algorithm<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/docker-practice/" title="docker-practice">docker-practice<sup>8</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/go-bootcamp/" title="go-bootcamp">go-bootcamp<sup>6</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/go-pattern/" title="go-pattern">go-pattern<sup>3</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/golang/" title="golang">golang<sup>23</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/java/" title="java">java<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/javascript/" title="javascript">javascript<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/k8s/" title="k8s">k8s<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/mysql专题/" title="mysql专题">mysql专题<sup>16</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/php/" title="php">php<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/redis专题/" title="redis专题">redis专题<sup>17</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/golang/" title="golang">golang<sup>26</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mysql/" title="mysql">mysql<sup>18</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/redis/" title="redis">redis<sup>17</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/docker/" title="docker">docker<sup>9</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/setcookie/" title="setcookie">setcookie<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/tcp/" title="tcp">tcp<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/cache/" title="cache">cache<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/concurrency/" title="concurrency">concurrency<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Hexo/" title="Hexo">Hexo<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Blog/" title="Blog">Blog<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/minikube/" title="minikube">minikube<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/getcookie/" title="getcookie">getcookie<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/rpc/" title="rpc">rpc<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/cache-invalid/" title="cache-invalid">cache-invalid<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/ticker/" title="ticker">ticker<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/vendoring/" title="vendoring">vendoring<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/godep/" title="godep">godep<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/govendor/" title="govendor">govendor<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/glide/" title="glide">glide<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/hash/" title="hash">hash<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="http://blog.csdn.net/xiaolongwang2010" target="_blank" title="小龙王2010csdn技术博客">Linux/c/c++</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  
+
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+  <iframe width="100%" height="550" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=550&fansRow=1&ptype=1&speed=0&skin=1&isTitle=1&noborder=1&isWeibo=1&isFans=1&uid=5141203275&verifier=a533edf5&dpc=1"></iframe>
+
+
+</aside>
+</div>
+
+    </div>
+    <footer><div id="footer" >
+	
+	
+	<div class="social-font" class="clearfix">
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/researchlab/lightman" target="_blank" title="lightman">lightman</a> ©2016 - 2020 
+		
+		<a href="/about" target="_blank" title="Lee Hong">Lee Hong</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+
+
+<script type="text/javascript">
+  var duoshuoQuery = {short_name:"gamedp"};
+  (function() {
+    var ds = document.createElement('script');
+    ds.type = 'text/javascript';ds.async = true;
+    ds.src = '//static.duoshuo.com/embed.js';
+    ds.charset = 'UTF-8';
+    (document.getElementsByTagName('head')[0] 
+    || document.getElementsByTagName('body')[0]).appendChild(ds);
+  })();
+</script> 
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

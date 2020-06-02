@@ -1,0 +1,660 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>docker实践--04 网络管理 | 一线攻城狮</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="Lee Hong">
+    
+
+    
+    <meta name="description" content="Docker中的网络一直是比较弱的, 本文从基础配置到访问控制再到容器互联等几个方面进行总结, 在较早期的docker版本中只提供最基本的网络通信支持, 如早期版本支持的最常见的三种场景,1.使用NAT方式连接外部网络;2.映射容器和宿主机的端口, 使外部可以访问容器中的应用;3.容器间网络互联.">
+<meta name="keywords" content="docker">
+<meta property="og:type" content="article">
+<meta property="og:title" content="docker实践--04 网络管理">
+<meta property="og:url" content="http://researchlab.github.io/2017/03/07/docker-network-mgr/index.html">
+<meta property="og:site_name" content="一线攻城狮">
+<meta property="og:description" content="Docker中的网络一直是比较弱的, 本文从基础配置到访问控制再到容器互联等几个方面进行总结, 在较早期的docker版本中只提供最基本的网络通信支持, 如早期版本支持的最常见的三种场景,1.使用NAT方式连接外部网络;2.映射容器和宿主机的端口, 使外部可以访问容器中的应用;3.容器间网络互联.">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2020-06-02T14:14:01.786Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="docker实践--04 网络管理">
+<meta name="twitter:description" content="Docker中的网络一直是比较弱的, 本文从基础配置到访问控制再到容器互联等几个方面进行总结, 在较早期的docker版本中只提供最基本的网络通信支持, 如早期版本支持的最常见的三种场景,1.使用NAT方式连接外部网络;2.映射容器和宿主机的端口, 使外部可以访问容器中的应用;3.容器间网络互联.">
+
+    
+    <link rel="alternative" href="/atom.xml" title="一线攻城狮" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="一线攻城狮">一线攻城狮</a></h1>
+				<h2 class="blog-motto">十年磨一剑，一步一步脚踏实地的耕种</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">首页</a></li>
+					
+						<li><a href="/archives">归档</a></li>
+					
+						<li><a href="/about">关于</a></li>
+					
+						<li><a href="/reading">书单</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:researchlab.github.io">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2017/03/07/docker-network-mgr/" title="docker实践--04 网络管理" itemprop="url">docker实践--04 网络管理</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
+		
+ <p class="article-time">
+    <time datetime="2017-03-07T04:01:18.000Z" itemprop="datePublished"> 发表于 2017-03-07</time>
+   &nbsp&nbsp热度&nbsp<span id="busuanzi_value_page_pv"></span>° 
+  </p>
+</header>
+
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#网络基本配置"><span class="toc-number">1.</span> <span class="toc-text">网络基本配置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#网络访问控制"><span class="toc-number">2.</span> <span class="toc-text">网络访问控制</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#容器端口映射"><span class="toc-number">3.</span> <span class="toc-text">容器端口映射</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#容器互联"><span class="toc-number">4.</span> <span class="toc-text">容器互联</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#总结"><span class="toc-number">5.</span> <span class="toc-text">总结</span></a></li></ol>
+		
+		</div>
+		
+		<p>Docker中的网络一直是比较弱的, 本文从基础配置到访问控制再到容器互联等几个方面进行总结, 在较早期的docker版本中只提供最基本的网络通信支持, 如早期版本支持的最常见的三种场景,<br>1.使用NAT方式连接外部网络;<br>2.映射容器和宿主机的端口, 使外部可以访问容器中的应用;<br>3.容器间网络互联.<br><a id="more"></a></p>
+<h2 id="网络基本配置"><a href="#网络基本配置" class="headerlink" title="网络基本配置"></a>网络基本配置</h2><p><strong> 1. 默认情况 </strong></p>
+<p>Docker服务启动时会自动创建一个<code>docker0</code>的虚拟网桥，后续新创建的容器都会有个虚拟接口连接到这个网桥,<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">lihong@dev:~$ ifconfig docker0</span><br><span class="line">docker0   Link encap:Ethernet  HWaddr 02:42:3e:4c:b6:22</span><br><span class="line">          inet addr:172.17.0.1  Bcast:0.0.0.0  Mask:255.255.0.0</span><br><span class="line">          inet6 addr: fe80::42:3eff:fe4c:b622/64 Scope:Link</span><br><span class="line">          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1</span><br><span class="line">          RX packets:8317 errors:0 dropped:0 overruns:0 frame:0</span><br><span class="line">          TX packets:12931 errors:0 dropped:0 overruns:0 carrier:0</span><br><span class="line">          collisions:0 txqueuelen:0</span><br><span class="line">          RX bytes:341661 (341.6 KB)  TX bytes:27114650 (27.1 MB)</span><br></pre></td></tr></table></figure></p>
+<p>Docker网桥会设置为NAT模式, 自动分配一个网段, 从上面看<code>docker0</code>的地址是<code>172.17.0.1</code>, 每个容器都会自动分配的到一个IP地址,<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">lihong@dev:~$ docker attach demo</span><br><span class="line">root@1b9a2f9bfd51:/<span class="comment">#</span></span><br><span class="line">root@1b9a2f9bfd51:/<span class="comment"># ifconfig</span></span><br><span class="line">eth0      Link encap:Ethernet  HWaddr 02:42:ac:11:00:02</span><br><span class="line">          inet addr:172.17.0.2  Bcast:0.0.0.0  Mask:255.255.0.0</span><br><span class="line">          inet6 addr: fe80::42:acff:fe11:2/64 Scope:Link</span><br><span class="line">          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1</span><br><span class="line">          RX packets:20 errors:0 dropped:0 overruns:0 frame:0</span><br><span class="line">          TX packets:7 errors:0 dropped:0 overruns:0 carrier:0</span><br><span class="line">          collisions:0 txqueuelen:0</span><br><span class="line">          RX bytes:2878 (2.8 KB)  TX bytes:578 (578.0 B)</span><br><span class="line"></span><br><span class="line">lo        Link encap:Local Loopback</span><br><span class="line">          inet addr:127.0.0.1  Mask:255.0.0.0</span><br><span class="line">          inet6 addr: ::1/128 Scope:Host</span><br><span class="line">          UP LOOPBACK RUNNING  MTU:65536  Metric:1</span><br><span class="line">          RX packets:0 errors:0 dropped:0 overruns:0 frame:0</span><br><span class="line">          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0</span><br><span class="line">          collisions:0 txqueuelen:1</span><br><span class="line">          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)</span><br></pre></td></tr></table></figure></p>
+<p>可以看到创建<code>demo</code>容器的ip地址是<code>172.17.0.2</code>， 可以通过<code>docker inspect</code>命令来详细查看<code>demo</code>容器的各项配置信息, 如查看<code>demo</code>容器的ip地址和网关地址，<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">lihong@dev:~$ docker inspect -f <span class="string">'&#123;&#123;.NetworkSettings.Gateway&#125;&#125;'</span> demo</span><br><span class="line">172.17.0.1</span><br><span class="line">lihong@dev:~$ docker inspect -f <span class="string">'&#123;&#123;.NetworkSettings.IPAddress&#125;&#125;'</span> demo</span><br><span class="line">172.17.0.2</span><br></pre></td></tr></table></figure></p>
+<p>通过上面可知，用户可以为<code>Docker</code>服务指定不同的网桥以及网段，这些配置都可以写在<code>/etc/default/docker</code>文件中, 作为服务启动的参数。</p>
+<p><strong> 2. 配置文件 /etc/default/docker </strong><br><code>/etc/default/docker</code>文件为Ubuntu 16.04.2操作系统中<code>Docker</code>服务启动时使用的配置文件，不同的操作系统位置会有不同。这个文件本身是个 Shell 脚本, 配置文件内容如下,<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">lihong@dev:~$ cat /etc/default/docker</span><br><span class="line"><span class="comment"># Here in Debian, this file is sourced by:</span></span><br><span class="line"><span class="comment">#   - /etc/init.d/docker (sysvinit)</span></span><br><span class="line"><span class="comment">#   - /etc/init/docker (upstart)</span></span><br><span class="line"><span class="comment">#   - systemd's docker.service</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Use of this file for configuring your Docker daemon is discouraged.</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># The recommended alternative is "/etc/docker/daemon.json", as described in:</span></span><br><span class="line"><span class="comment">#   https://docs.docker.com/v1.11/engine/reference/commandline/daemon/#daemon-configuration-file</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># If that does not suit your needs, try a systemd drop-in file, as described in:</span></span><br><span class="line"><span class="comment">#   https://docs.docker.com/v1.11/engine/admin/systemd/#custom-docker-daemon-options</span></span><br></pre></td></tr></table></figure></p>
+<p>可以看到上述说明已经不建议使用<code>/etc/default/docker</code>来配置<code>docker daemon</code>参数了，并且它给出了使用新方法的参考地址，其实就是在命令行中输入参数。记得老版本的<code>docker</code>要对网络进行配置，只需将必要的配置参数填入<code>/etc/default/docker</code>配置文件中的<code>DOCKER_OPTS</code>启动参数行即可。</p>
+<p>下面通过一个栗子展示如何修改docker网络配置, 具体步骤大致如下,</p>
+<ul>
+<li>删除原有的docker0虚拟网络</li>
+<li>创建一个新的虚拟网络newnet0</li>
+<li>配置newnet0的网段为172.17.100.1/22</li>
+<li>配置Docker使用新的虚拟网络newnet0</li>
+</ul>
+<p>首先, 删除docker0, 删除前需要删除所有容器并停止Docker服务,<br>操作命令如下,<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 安装brctl管理工具</span></span><br><span class="line">sudo apt-get install bridge-utils</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看当前虚拟网络列表</span></span><br><span class="line">sudo brctl show</span><br><span class="line"></span><br><span class="line"><span class="comment"># 停止docker服务</span></span><br><span class="line">sudo service docker stop</span><br><span class="line"></span><br><span class="line"><span class="comment"># 停止docker0</span></span><br><span class="line">sudo ip link <span class="built_in">set</span> dev docker0 down</span><br><span class="line"></span><br><span class="line"><span class="comment"># 删除docker0</span></span><br><span class="line">sudo brctl delbr docker0</span><br></pre></td></tr></table></figure></p>
+<p>操作结果如下,<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">lihong@dev:~$ sudo apt install bridge-utils</span><br><span class="line">[sudo] password <span class="keyword">for</span> lihong:</span><br><span class="line">Reading package lists... Done</span><br><span class="line">Building dependency tree</span><br><span class="line">Reading state information... Done</span><br><span class="line">bridge-utils is already the newest version (1.5-9ubuntu1).</span><br><span class="line">bridge-utils <span class="built_in">set</span> to manually installed.</span><br><span class="line">0 upgraded, 0 newly installed, 0 to remove and 61 not upgraded.</span><br><span class="line">lihong@dev:~$ sudo brctl show</span><br><span class="line">bridge name    	bridge id      		STP enabled    	interfaces</span><br><span class="line">docker0		8000.02423e4cb622      	no     		veth136401f</span><br><span class="line">lihong@dev:~$ sudo service docker stop</span><br><span class="line">lihong@dev:~$ sudo ip link <span class="built_in">set</span> dev docker0 down</span><br><span class="line">lihong@dev:~$ sudo brctl delbr docker0</span><br><span class="line">lihong@dev:~$ sudo brctl show</span><br><span class="line">bridge name    	bridge id      		STP enabled    	interfaces</span><br><span class="line">lihong@dev:~$</span><br></pre></td></tr></table></figure></p>
+<p>然后, 开始创建一个新的虚拟网络：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">lihong@dev:~$ sudo brctl addbr newnet0</span><br><span class="line">lihong@dev:~$ sudo brctl show</span><br><span class="line">bridge name    	bridge id      		STP enabled    	interfaces</span><br><span class="line">newnet0		8000.000000000000      	no</span><br></pre></td></tr></table></figure></p>
+<p>配置<code>newnet0</code>的网络,<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">lihong@dev:~$ sudo ip addr add 172.17.100.1/22 dev newnet0</span><br><span class="line">lihong@dev:~$ sudo ip addr show newnet0</span><br><span class="line">8: newnet0: &lt;BROADCAST,MULTICAST&gt; mtu 1500 qdisc noop state DOWN group default qlen 1000</span><br><span class="line">    link/ether 8a:38:24:8d:6c:e6 brd ff:ff:ff:ff:ff:ff</span><br><span class="line">    inet 172.17.100.1/22 scope global newnet0</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">lihong@dev:~$ sudo ip link <span class="built_in">set</span> dev newnet0 up</span><br><span class="line">lihong@dev:~$ sudo brctl show newnet0</span><br><span class="line">bridge name    	bridge id      		STP enabled    	interfaces</span><br><span class="line">newnet0		8000.000000000000      	no</span><br><span class="line">lihong@dev:~$</span><br></pre></td></tr></table></figure></p>
+<p>下面就要重启docker daemon 来修改一下配置参数, 如下,<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">lihong@dev:~$ sudo dockerd -b=newnet0 --icc=<span class="literal">false</span> --ip-forward=<span class="literal">true</span></span><br><span class="line">[sudo] password <span class="keyword">for</span> lihong:</span><br><span class="line">INFO[0000] libcontainerd: new containerd process, pid: 25310</span><br><span class="line">INFO[0006] libcontainerd: new containerd process, pid: 25316</span><br><span class="line">WARN[0000] containerd: low RLIMIT_NOFILE changing to max  current=1024 max=65536</span><br><span class="line">INFO[0011] [graphdriver] using prior storage driver <span class="string">"aufs"</span></span><br><span class="line">INFO[0013] Graph migration to content-addressability took 0.00 seconds</span><br><span class="line">WARN[0013] Your kernel does not support swap memory <span class="built_in">limit</span>.</span><br><span class="line">INFO[0013] Loading containers: start.</span><br><span class="line">.INFO[0015] Firewalld running: <span class="literal">false</span></span><br><span class="line"></span><br><span class="line">INFO[0020] Loading containers: <span class="keyword">done</span>.</span><br><span class="line">INFO[0020] Daemon has completed initialization</span><br><span class="line">INFO[0020] Docker daemon                                 commit=78d1802 graphdriver=aufs version=1.12.6</span><br><span class="line">INFO[0021] API listen on /var/run/docker.sock</span><br></pre></td></tr></table></figure></p>
+<p>docker1.12.6版本启动守护进程不再是<code>docker daemon</code>,而是用<code>dockerd</code>的代替了,下面关于上面参数设置说明,<br><code>-b</code> –bridge ：指定连接的网桥<br><code>--icc</code>=true|false：是否允许容器间网络互通<br><code>--ip-forward</code>=true|false：是否允许IP转发，可以对容器的外网访问进行限制</p>
+<p>可以通过创建新的容器来看下修改后的效果,<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line">lihong@dev:~$ docker run -t -i --name container ubuntu /bin/bash</span><br><span class="line">root@47fc5e302c80:/<span class="comment"># ifconfig</span></span><br><span class="line">bash: ifconfig: <span class="built_in">command</span> not found</span><br><span class="line">root@47fc5e302c80:/<span class="comment"># apt update</span></span><br><span class="line">Get:1 http://archive.ubuntu.com/ubuntu xenial InRelease [247 kB]</span><br><span class="line">....</span><br><span class="line">Get:15 http://archive.ubuntu.com/ubuntu xenial-updates/universe amd64 Packages [545 kB]</span><br><span class="line">Fetched 24.9 MB <span class="keyword">in</span> 52s (473 kB/s)</span><br><span class="line">Reading package lists... Done</span><br><span class="line">Building dependency tree</span><br><span class="line">Reading state information... Done</span><br><span class="line">All packages are up to date.</span><br><span class="line">root@47fc5e302c80:/<span class="comment"># apt install net-tools</span></span><br><span class="line">Reading package lists... Done</span><br><span class="line">Building dependency tree</span><br><span class="line">Reading state information... Done</span><br><span class="line">The following NEW packages will be installed:</span><br><span class="line">  net-tools</span><br><span class="line">0 upgraded, 1 newly installed, 0 to remove and 0 not upgraded.</span><br><span class="line">Unpacking net-tools (1.60-26ubuntu1) ...</span><br><span class="line">Setting up net-tools (1.60-26ubuntu1) ...</span><br><span class="line">root@47fc5e302c80:/<span class="comment"># ifconfig</span></span><br><span class="line">eth0      Link encap:Ethernet  HWaddr 02:42:ac:11:64:02</span><br><span class="line">          inet addr:172.17.100.2  Bcast:0.0.0.0  Mask:255.255.252.0</span><br><span class="line">          inet6 addr: fe80::42:acff:fe11:6402/64 Scope:Link</span><br><span class="line">          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1</span><br><span class="line">          RX packets:12780 errors:0 dropped:0 overruns:0 frame:0</span><br><span class="line">          TX packets:5551 errors:0 dropped:0 overruns:0 carrier:0</span><br><span class="line">          collisions:0 txqueuelen:0</span><br><span class="line">          RX bytes:25924957 (25.9 MB)  TX bytes:305225 (305.2 KB)</span><br><span class="line"></span><br><span class="line">lo        Link encap:Local Loopback</span><br><span class="line">          inet addr:127.0.0.1  Mask:255.0.0.0</span><br><span class="line">          inet6 addr: ::1/128 Scope:Host</span><br><span class="line">          UP LOOPBACK RUNNING  MTU:65536  Metric:1</span><br><span class="line">          RX packets:0 errors:0 dropped:0 overruns:0 frame:0</span><br><span class="line">          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0</span><br><span class="line">          collisions:0 txqueuelen:1</span><br><span class="line">          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)</span><br><span class="line"></span><br><span class="line">root@47fc5e302c80:/<span class="comment"># apt install iputils-ping</span></span><br><span class="line">Reading package lists... Done</span><br><span class="line">....</span><br><span class="line">root@47fc5e302c80:/<span class="comment"># ping 172.17.100.1</span></span><br><span class="line">PING 172.17.100.1 (172.17.100.1) 56(84) bytes of data.</span><br><span class="line">64 bytes from 172.17.100.1: icmp_seq=1 ttl=64 time=0.095 ms</span><br><span class="line">root@47fc5e302c80:/<span class="comment">#</span></span><br></pre></td></tr></table></figure></p>
+<p>从上面的实践可知新容器创建时，IP地址被自动分配为<code>172.17.100.2</code>; 此外在容器启动时, <code>docker run</code>命令也有网络相关的参数，可以在容器启动时进行针对单个容器的网络配置, 常见的配置选项,<br><code>-h --hostname</code>：配置容器主机名;<br><code>--link</code>：添加另外一个容器的链接;<br><code>--net=bridge|none|container|host</code>：设置容器的网络模式;<br>下面创建一个新的容器，设置主机名为test1，网络模式为none,<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">lihong@dev:~/docker$ docker run --name test1 --hostname test1 --net none -t -i nbuntu /bin/bash</span><br><span class="line">root@test1:/<span class="comment"># ifconfig</span></span><br><span class="line">lo        Link encap:Local Loopback</span><br><span class="line">          inet addr:127.0.0.1  Mask:255.0.0.0</span><br><span class="line">          inet6 addr: ::1/128 Scope:Host</span><br><span class="line">          UP LOOPBACK RUNNING  MTU:65536  Metric:1</span><br><span class="line">          RX packets:0 errors:0 dropped:0 overruns:0 frame:0</span><br><span class="line">          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0</span><br><span class="line">          collisions:0 txqueuelen:1</span><br><span class="line">          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)</span><br><span class="line"></span><br><span class="line">root@test1:/<span class="comment"># hostname</span></span><br><span class="line">test1</span><br></pre></td></tr></table></figure></p>
+<p>可以看到网络模式none设置后，在容器中没有出现<code>eth0</code>网卡了。</p>
+<h2 id="网络访问控制"><a href="#网络访问控制" class="headerlink" title="网络访问控制"></a>网络访问控制</h2><p>容器默认是通过docker0的NAT模式访问外部网络，如果我们希望限制容器访问，有很多种办法,</p>
+<p><strong> 1. 限制容器访问外网 </strong><br>在上面的实践中创建的<code>container</code>容器是可以连接外网的，是通过<code>newnet0</code>虚拟交换机进行了NAT转换,<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">lihong@dev:~/docker$ docker attach demo</span><br><span class="line">root@1b9a2f9bfd51:/<span class="comment">#</span></span><br><span class="line">root@1b9a2f9bfd51:/<span class="comment"># ping www.baidu.com</span></span><br><span class="line">PING www.a.shifen.com (119.75.217.109) 56(84) bytes of data.</span><br><span class="line">64 bytes from 119.75.217.109: icmp_seq=1 ttl=127 time=32.4 ms</span><br><span class="line">64 bytes from 119.75.217.109: icmp_seq=2 ttl=127 time=32.0 ms</span><br><span class="line">--- www.a.shifen.com ping statistics ---</span><br><span class="line">2 packets transmitted, 2 received, 0% packet loss, time 1002ms</span><br><span class="line">rtt min/avg/max/mdev = 32.012/32.206/32.400/0.194 ms</span><br></pre></td></tr></table></figure></p>
+<p>限制容器访问外网，可以关闭IP转发，设置方法是启动Docker时<code>--ip-forward=false</code><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">lihong@dev:~$ sudo dockerd -b=newnet0 --icc=<span class="literal">false</span> --ip-forward=<span class="literal">false</span></span><br><span class="line">[sudo] password <span class="keyword">for</span> lihong:</span><br><span class="line">INFO[0000] libcontainerd: new containerd process, pid: 27004</span><br><span class="line">WARN[0000] containerd: low RLIMIT_NOFILE changing to max  current=1024 max=65536</span><br><span class="line">INFO[0001] [graphdriver] using prior storage driver <span class="string">"aufs"</span></span><br><span class="line">INFO[0001] Graph migration to content-addressability took 0.00 seconds</span><br><span class="line">WARN[0001] Your kernel does not support swap memory <span class="built_in">limit</span>.</span><br><span class="line">INFO[0001] Loading containers: start.</span><br><span class="line">.INFO[0001] Firewalld running: <span class="literal">false</span></span><br><span class="line"></span><br><span class="line">INFO[0001] Loading containers: <span class="keyword">done</span>.</span><br><span class="line">INFO[0001] Daemon has completed initialization</span><br><span class="line">INFO[0001] Docker daemon                                 commit=78d1802 graphdriver=aufs version=1.12.6</span><br><span class="line">INFO[0001] API listen on /var/run/docker.sock</span><br></pre></td></tr></table></figure></p>
+<p>创建新的容器，查看关闭IP转发后的效果,<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">lihong@dev:~/docker$ docker run -ti --name noip nbuntu /bin/bash</span><br><span class="line">root@04972966e18b:/<span class="comment"># ifconfig</span></span><br><span class="line">eth0      Link encap:Ethernet  HWaddr 02:42:ac:11:64:02</span><br><span class="line">          inet addr:172.17.100.2  Bcast:0.0.0.0  Mask:255.255.252.0</span><br><span class="line">          inet6 addr: fe80::42:acff:fe11:6402/64 Scope:Link</span><br><span class="line">          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1</span><br><span class="line">          RX packets:14 errors:0 dropped:0 overruns:0 frame:0</span><br><span class="line">          TX packets:6 errors:0 dropped:0 overruns:0 carrier:0</span><br><span class="line">          collisions:0 txqueuelen:0</span><br><span class="line">          RX bytes:1938 (1.9 KB)  TX bytes:508 (508.0 B)</span><br><span class="line"></span><br><span class="line">lo        Link encap:Local Loopback</span><br><span class="line">          inet addr:127.0.0.1  Mask:255.0.0.0</span><br><span class="line">          inet6 addr: ::1/128 Scope:Host</span><br><span class="line">          UP LOOPBACK RUNNING  MTU:65536  Metric:1</span><br><span class="line">          RX packets:0 errors:0 dropped:0 overruns:0 frame:0</span><br><span class="line">          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0</span><br><span class="line">          collisions:0 txqueuelen:1</span><br><span class="line">          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)</span><br><span class="line"></span><br><span class="line">root@04972966e18b:/<span class="comment"># ping www.baidu.com</span></span><br><span class="line">PING www.a.shifen.com (119.75.217.109) 56(84) bytes of data.</span><br><span class="line">64 bytes from 119.75.217.109: icmp_seq=1 ttl=127 time=32.8 ms</span><br></pre></td></tr></table></figure></p>
+<p>不过并没有效果，依然可以ping <a href="http://www.baidu.com" target="_blank" rel="noopener">www.baidu.com</a>, 然后看<code>dockerd</code>输出的结果是,<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">lihong@dev:~$ sudo dockerd -b=newnet0 --icc=<span class="literal">false</span> --ip-forward=<span class="literal">false</span> --ipv6=<span class="literal">false</span></span><br><span class="line">....</span><br><span class="line">INFO[0021] No non-localhost DNS nameservers are left <span class="keyword">in</span> resolv.conf. Using default external servers : [nameserver 8.8.8.8 nameserver 8.8.4.4]</span><br><span class="line">INFO[0021] IPv6 enabled; Adding default IPv6 external servers : [nameserver 2001:4860:4860::8888 nameserver 2001:4860:4860::8844]</span><br></pre></td></tr></table></figure></p>
+<p>上述<code>--ip-forward=false</code>表示<code>ipv4</code>禁止转发, <code>ipv6=false</code>表示禁<code>ipv6</code>, 但是实际好像不起作用, 目前还不知道什么情况?</p>
+<p>注意, 如果有容器正在运行时重启Docker服务，所有运行的容器都会被强制停止。Docker服务重启后也不会重启被停止的容器。</p>
+<p><strong> 2. 限制容器间的访问 </strong></p>
+<p>限制容器间的访问，可以设置<code>--icc</code>参数，或设置<code>iptables</code>参数。默认容器间可以互相访问，通过设置<code>--icc=false</code>可以禁止, 即此时不同的容器间不能互ping对方，无法进行通信,<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">lihong@dev:~$ docker run --name site1 -ti nbuntu /bin/bash</span><br><span class="line">root@73b9d8b7ec70:/<span class="comment"># ifconfig eth0</span></span><br><span class="line">eth0      Link encap:Ethernet  HWaddr 02:42:ac:11:64:02</span><br><span class="line">          inet addr:172.17.100.2  Bcast:0.0.0.0  Mask:255.255.252.0</span><br><span class="line">          inet6 addr: fe80::42:acff:fe11:6402/64 Scope:Link</span><br><span class="line">          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1</span><br><span class="line">          RX packets:16 errors:0 dropped:0 overruns:0 frame:0</span><br><span class="line">          TX packets:6 errors:0 dropped:0 overruns:0 carrier:0</span><br><span class="line">          collisions:0 txqueuelen:0</span><br><span class="line">          RX bytes:2338 (2.3 KB)  TX bytes:508 (508.0 B)</span><br><span class="line"></span><br><span class="line">root@73b9d8b7ec70:/<span class="comment"># ping 172.17.100.3</span></span><br><span class="line">PING 172.17.100.3 (172.17.100.3) 56(84) bytes of data.</span><br><span class="line"></span><br><span class="line">──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────</span><br><span class="line">lihong@dev:~/docker$ docker run --name site2 -ti nbuntu /bin/bash</span><br><span class="line">root@7395b959e752:/<span class="comment"># ifconfig eth0</span></span><br><span class="line">eth0      Link encap:Ethernet  HWaddr 02:42:ac:11:64:03</span><br><span class="line">          inet addr:172.17.100.3  Bcast:0.0.0.0  Mask:255.255.252.0</span><br><span class="line">          inet6 addr: fe80::42:acff:fe11:6403/64 Scope:Link</span><br><span class="line">          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1</span><br><span class="line">          RX packets:8 errors:0 dropped:0 overruns:0 frame:0</span><br><span class="line">          TX packets:5 errors:0 dropped:0 overruns:0 carrier:0</span><br><span class="line">          collisions:0 txqueuelen:0</span><br><span class="line">          RX bytes:920 (920.0 B)  TX bytes:418 (418.0 B)</span><br><span class="line"></span><br><span class="line">root@7395b959e752:/<span class="comment"># ping 172.17.100.2</span></span><br><span class="line">PING 172.17.100.2 (172.17.100.2) 56(84) bytes of data.</span><br></pre></td></tr></table></figure></p>
+<p>可以看到site1,site2互ping是不通的，因为<code>docker</code>启动时设置<code>-icc=false</code>禁止了容器之间互通, 如果需要打开容器间访问, 只需要设置<code>--icc=true</code>即可。</p>
+<h2 id="容器端口映射"><a href="#容器端口映射" class="headerlink" title="容器端口映射"></a>容器端口映射</h2><p>运行<code>docker run</code>的时候可以使用<code>-P</code>参数进行端口映射，这个参数不需要指定任何宿主机的端口，会自动从49000~49900端口中选择一个映射到容器中开放的端口。</p>
+<p>而容器中开放的端口号如何获得呢？可以写在创建镜像的Dockerfile中：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">FROM ubuntu:latest</span><br><span class="line"></span><br><span class="line">EXPOSE 80</span><br></pre></td></tr></table></figure></p>
+<p>基于该Dockerfile创建一个新的镜像port<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">lihong@dev:~/docker$ vim Dockerfile</span><br><span class="line">lihong@dev:~/docker$ cat Dockerfile</span><br><span class="line">from ubuntu:latest</span><br><span class="line"></span><br><span class="line">EXPOSE 80</span><br><span class="line">lihong@dev:~/docker$ docker build -t port:1.0 .</span><br><span class="line">Sending build context to Docker daemon 2.048 kB</span><br><span class="line">Step 1 : FROM ubuntu:latest</span><br><span class="line"> ---&gt; 0ef2e08ed3fa</span><br><span class="line">Step 2 : EXPOSE 80</span><br><span class="line"> ---&gt; Running <span class="keyword">in</span> 487a948fcda6</span><br><span class="line"> ---&gt; 35d62582a16a</span><br><span class="line">Removing intermediate container 487a948fcda6</span><br><span class="line">Successfully built 35d62582a16a</span><br><span class="line">lihong@dev:~/docker$ docker images</span><br><span class="line">REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE</span><br><span class="line">port                1.0                 35d62582a16a        10 seconds ago      130 MB</span><br><span class="line">nbuntu              latest              f16a2621960a        39 minutes ago      174.2 MB</span><br><span class="line">ubuntu              latest              0ef2e08ed3fa        8 days ago          130 MB</span><br><span class="line">lihong@dev:~/docker$ docker run -P -ti --name portdemo port:1.0 /bin/bash</span><br><span class="line">root@2d4b6a054e9e:/<span class="comment"># lihong@dev:~/docker$</span></span><br><span class="line">lihong@dev:~/docker$ docker inspect -f &#123;&#123;.NetworkSettings.Ports&#125;&#125; portdemo</span><br><span class="line">map[80/tcp:[&#123;0.0.0.0 32768&#125;]]</span><br></pre></td></tr></table></figure></p>
+<p>如果想指定映射端口，可以使用<code>-p</code>参数，请注意一个宿主机的端口只能绑定到一个容器，如果该端口已经有进程在用则不可以绑定。并且<code>-p</code>参数可以绑定多个端口,<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">lihong@dev:~/docker$ docker run -ti -p 80:80 -p 5000:5000 --name portdemo1 port:1.0 /bin/bash</span><br><span class="line">root@dfb3563babd5:/<span class="comment"># lihong@dev:~/docker$</span></span><br><span class="line">lihong@dev:~/docker$ docker inspect -f &#123;&#123;.NetworkSettings.Ports&#125;&#125; portdemo1</span><br><span class="line">map[5000/tcp:[&#123;0.0.0.0 5000&#125;] 80/tcp:[&#123;0.0.0.0 80&#125;]]</span><br></pre></td></tr></table></figure></p>
+<p>如果想映射到指定的本地地址，可以增加<code>IP</code>参数，比如映射到<code>127.0.0.1</code>地址，只需要将参数写成 <code>-p 127.0.0.1:80:80</code>。<br>查看指定容器的端口映射可以使用<code>docker port</code>命令,<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">lihong@dev:~/docker$ docker port portdemo1 80</span><br><span class="line">0.0.0.0:80</span><br><span class="line">lihong@dev:~/docker$ docker port portdemo1</span><br><span class="line">5000/tcp -&gt; 0.0.0.0:5000</span><br><span class="line">80/tcp -&gt; 0.0.0.0:80</span><br></pre></td></tr></table></figure></p>
+<p><code>Docker</code>的端口映射也是通过<code>iptables</code>规则来设置的，当完成映射后，使用<code>iptables</code>命令查看是否新增了规则,<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">lihong@dev:~/docker$ sudo iptables -L</span><br><span class="line">[sudo] password <span class="keyword">for</span> lihong:</span><br><span class="line">Chain INPUT (policy ACCEPT)</span><br><span class="line">target     prot opt <span class="built_in">source</span>               destination</span><br><span class="line"></span><br><span class="line">Chain FORWARD (policy ACCEPT)</span><br><span class="line">target     prot opt <span class="built_in">source</span>               destination</span><br><span class="line">DOCKER-ISOLATION  all  --  anywhere             anywhere</span><br><span class="line">DOCKER     all  --  anywhere             anywhere</span><br><span class="line">ACCEPT     all  --  anywhere             anywhere             ctstate RELATED,ESTABLISHED</span><br><span class="line">ACCEPT     all  --  anywhere             anywhere</span><br><span class="line">DROP       all  --  anywhere             anywhere</span><br><span class="line"></span><br><span class="line">Chain OUTPUT (policy ACCEPT)</span><br><span class="line">target     prot opt <span class="built_in">source</span>               destination</span><br><span class="line"></span><br><span class="line">Chain DOCKER (1 references)</span><br><span class="line">target     prot opt <span class="built_in">source</span>               destination</span><br><span class="line">ACCEPT     tcp  --  anywhere             172.17.100.2         tcp dpt:5000</span><br><span class="line">ACCEPT     tcp  --  anywhere             172.17.100.2         tcp dpt:http</span><br><span class="line"></span><br><span class="line">Chain DOCKER-ISOLATION (1 references)</span><br><span class="line">target     prot opt <span class="built_in">source</span>               destination</span><br><span class="line">RETURN     all  --  anywhere             anywhere</span><br></pre></td></tr></table></figure></p>
+<h2 id="容器互联"><a href="#容器互联" class="headerlink" title="容器互联"></a>容器互联</h2><p><strong> 需求 </strong><br>设定一个场景，我们的应用包含多个容器,</p>
+<p>容器1：Web前端服务 端口80<br>容器2：App应用服务 端口80<br>容器3：Redis数据库服务 端口6379<br>创建容器后，如何让这三个容器连接共同构成我们所需的Web应用服务呢？</p>
+<p>此时我们并不想将每个容器的端口都通过映射的方式暴露出来，那么Docker又提供了怎样的方案呢？</p>
+<p>这就需要用到Docker强大的<code>--link</code>参数，完美支持容器间互联。</p>
+<p><strong> 需求分析 </strong></p>
+<p>需要创建三个容器, 分别根据作用命名, 在创建过程中使用<code>--link</code>参数让容器间建立安全的互联通道。<br><code>docker run</code>命令的<code>--link</code>参数可以在不映射端口的前提下为两个容器间建立安全连接。<code>--link</code>参数可以连接一个或多个容器到将要创建的容器。</p>
+<p>现在假设三个容器命名为: web, app, db, 连接方式分别是web连接app, app连接db。其中web和app容器使用上面创建的EXPOSE 80端口的镜像port:1.0。</p>
+<p><strong> 需求实现 </strong></p>
+<p>首先依次创建三个容器db, app 和web,<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">lihong@dev:~/docker$ docker run -d --name db redis</span><br><span class="line">Unable to find image <span class="string">'redis:latest'</span> locally</span><br><span class="line">latest: Pulling from library/redis</span><br><span class="line">693502eb7dfb: Pull complete</span><br><span class="line">338a71333959: Pull complete</span><br><span class="line">83f12ff60ff1: Pull complete</span><br><span class="line">4b7726832aec: Pull complete</span><br><span class="line">19a7e34366a6: Pull complete</span><br><span class="line">622732cddc34: Pull complete</span><br><span class="line">3b281f2bcae3: Pull complete</span><br><span class="line">Digest: sha256:e4a69910ba49d7c211135df2b8220ee94c634f4789c9b3c7ed391a36bbdbddbf</span><br><span class="line">Status: Downloaded newer image <span class="keyword">for</span> redis:latest</span><br><span class="line">25a3e1d54cac360110cee428b29e7c6db293353043fabc0f5e2e6a40b5a84d37</span><br><span class="line">lihong@dev:~/docker$ docker run -ti --name app --link db:db port:1.0 /bin/bash</span><br><span class="line">root@49b603633f45:/<span class="comment"># lihong@dev:~/docker$ docker run -ti --name web --link app:app port:1.0 /bin/bash</span></span><br><span class="line">root@e19881f8497c:/<span class="comment">#</span></span><br></pre></td></tr></table></figure></p>
+<p>注: <code>-d</code>, –detach                  Run container in background and print container ID</p>
+<p>现在进入到<code>web容器</code>中可以查看到<code>--link</code>参数为了连接容器做了哪些改变,<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">root@e19881f8497c:/<span class="comment"># cat /etc/hosts</span></span><br><span class="line">127.0.0.1      	localhost</span><br><span class="line">::1    	localhost ip6-localhost ip6-loopback</span><br><span class="line">fe00::0	ip6-localnet</span><br><span class="line">ff00::0	ip6-mcastprefix</span><br><span class="line">ff02::1	ip6-allnodes</span><br><span class="line">ff02::2	ip6-allrouters</span><br><span class="line">172.17.100.3   	app 49b603633f45</span><br><span class="line">172.17.100.4   	e19881f8497c</span><br><span class="line">root@e19881f8497c:/<span class="comment"># ping app</span></span><br><span class="line">PING app (172.17.100.3) 56(84) bytes of data.</span><br><span class="line">64 bytes from app (172.17.100.3): icmp_seq=1 ttl=64 time=0.072 ms</span><br><span class="line">64 bytes from app (172.17.100.3): icmp_seq=2 ttl=64 time=0.062 ms</span><br><span class="line">^C</span><br><span class="line">--- app ping statistics ---</span><br><span class="line">2 packets transmitted, 2 received, 0% packet loss, time 1015ms</span><br><span class="line">rtt min/avg/max/mdev = 0.062/0.067/0.072/0.005 ms</span><br><span class="line">root@e19881f8497c:/<span class="comment"># env | grep APP</span></span><br><span class="line">APP_PORT_80_TCP_PORT=80</span><br><span class="line">APP_PORT_80_TCP_ADDR=172.17.100.3</span><br><span class="line">APP_PORT_80_TCP=tcp://172.17.100.3:80</span><br><span class="line">APP_PORT_80_TCP_PROTO=tcp</span><br><span class="line">APP_NAME=/web/app</span><br><span class="line">APP_PORT=tcp://172.17.100.3:80</span><br><span class="line">root@e19881f8497c:/<span class="comment">#</span></span><br></pre></td></tr></table></figure></p>
+<p>注意: 要使得容器间互通, 要保证<code>dockerd</code>启动时, <code>--icc=true</code>设置或者不设置这个参数, 因为默认是true, 否则如上面的ping app是ping不通的,</p>
+<p>可以看到环境变量和/etc/hosts文件的变化，在web容器中可以<code>ping app</code>进行测试。<br>通过<code>--link</code>参数可以把几个容器绑定在一起，并且不需要向外部公开内部应用容器和数据库容器的端口号，只需要将对外提供服务的web服务端口<code>80</code>开放即可。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本文主要实践了如下内容, </p>
+<ul>
+<li>Docker 网络基本配置</li>
+<li>Docker 网络访问控制</li>
+<li>Docker 容器端口映射</li>
+<li>Docker 容器互联</li>
+</ul>
+<p>额外收获如下,</p>
+<blockquote>
+<p>实验过程中在Mac/Linux(ubuntu)系统中同时进行(即在Mac上做一遍然后又到ubuntu上做一遍(简直时间多，折腾啊)), 其中遇到问题的相关解决方案记录</p>
+</blockquote>
+<p><strong> 1. 在ubuntu上安装docker之后，pull东西慢 </strong><br>从docker Hub上pull东西很慢,是因为使用的是国外的下载源, 所以要修改docker Hub pull的源, 本文解决方案是到daocloud.io官网注册一个账号,然后到控制台那有个加速器会生成一个docker 加速器地址，按照它的说明更换掉docker源即可。</p>
+<p><strong> 2. 没有<code>ifconfig</code>, <code>ping</code>命令 </strong><br>通过docker 运行的镜像ubuntu容器里没有<code>ifconfig</code>, <code>ping</code>命令, 这个可以直接进入相关的容器执行下面三条命令即可将<code>ifconfig</code>, <code>ping</code>命令安装上来,<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">apt-get update </span><br><span class="line">apt install net-tools    <span class="comment"># ifconfig</span></span><br><span class="line">apt install iputils-ping <span class="comment"># ping</span></span><br></pre></td></tr></table></figure></p>
+  
+	</div>
+		<div style="padding: 10px 44px 30px 44px;" >
+<div style="border: 1px dashed #e0e0e0; padding: 10px 10px 10px 10px; background-color: #fffeee; background-repeat: no-repeat; background-attachment: scroll; background-position: 1% 50%; -moz-background-size: auto auto; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">
+<div style="float:left;margin-top:0px;">
+<img src="/img/weixin.jpg" width="125px" height="125px" style="border:1px solid #ccc; margin: 6px 5px 0px 0px"/>
+</div>
+<div>
+ <p style="margin-top:0px;">作者署名：<b><a target="_blank" href="http://researchlab.github.io/">朴实的一线攻城狮</a></b>
+<br />本文标题：<b><a href="/2017/03/07/docker-network-mgr/" target="_blank" title="docker实践--04 网络管理">docker实践--04 网络管理</a></b> 
+<br />本文出处：<b><a href="/2017/03/07/docker-network-mgr/" target="_blank" title="docker实践--04 网络管理">http://researchlab.github.io/2017/03/07/docker-network-mgr/</a></b>
+<br />版权声明：本文由<b><a href="/about" target="_blank" title="Lee Hong">Lee Hong</a></b>创作和发表,采用<b>署名(BY)</b>-<b>非商业性使用(NC)</b>-<b>相同方式共享(SA)</b>国际许可协议进行许可,转载请注明作者及出处, 否则保留追究法律责任的权利。 </p>
+</div>
+</div>
+</div>
+
+   	       
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/docker-practice/">docker-practice</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/docker/">docker</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	<div class="share-jiathis">
+	  
+<div class="jiathis_style_24x24">
+	<a class="jiathis_button_weixin"></a>
+	<a class="jiathis_button_tsina"></a>
+	<a class="jiathis_button_tqq"></a>
+	<a class="jiathis_button_qzone"></a>
+    <a class="jiathis_button_googleplus"></a>
+	<a class="jiathis_button_douban"></a>
+	<a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+    var jiathis_config={
+    data_track_clickback:true,
+    sm:"copy,renren,cqq",
+    pic:"",
+    summary:"",
+    
+  </script> 
+<script type="text/javascript" src="//v3.jiathis.com/code/jia.js?uid=
+2084050" charset="utf-8"></script>      
+
+
+	 </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2017/03/07/docker-dockerfile/" title="docker实践--05 编写Dockerfile">
+  <strong>上一篇：</strong><br/>
+  <span>
+  docker实践--05 编写Dockerfile</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2017/03/06/docker-image-mgr/"  title="docker实践--03 镜像管理">
+ <strong>下一篇：</strong><br/> 
+ <span>docker实践--03 镜像管理
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+<!-- gitment评论框 start -->
+	<div id="gitment" class="ds-thread"></div>
+	<link rel="stylesheet" href="https://github.com/researchlab/gitment/blob/master/style/default.css">
+	<script src="https://github.com/researchlab/gitment/blob/master/dist/gitment.browser.js"></script>
+	<script>
+	  var gitment = new Gitment({
+	    id: 'lTue Mar 07 2017 12:01:18 GMT+0800', // 可选。建议为Tue Mar 07 2017 12:01:18 GMT+0800
+	    owner: 'researchlab', // 可以是你的GitHub用户名，也可以是github id
+	    repo: 'researchlab.github.io', //可以是你的任意一个repo，推荐使用githubpage所在的repo
+	    oauth: {
+	      client_id: 'e4971ec4c4fdbefb392f',
+	      client_secret: 'e5001b2dda2dcb9a9c66417991be57836c17a72b',
+	    },
+	  })
+	  gitment.render('gitment')
+</script>
+
+
+</div>  
+
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+<div id="asidepart">
+
+  <div class="widget tag">
+<!--<hr noshade color="#ccc">-->
+<!-- <p style="text-align:center">Mike.Lee</p> -->
+<p margin="0" style="text-align:center">
+<a class="ahref" href="http://researchlab.github.io/about/">
+<img id="aboutpic"  src="/img/qzly.png" alt="@一线攻城狮" height="200" width="200" style="box-shadow: 0px 0px 2px 2px #9edeff;border-radius: 8px;" >
+</a></p>
+<p style="text-align:center"><font size="2" color="grey">关注微信公众号 @一线攻城狮</font></p>
+<div style="display:block; margin-top:10px; padding: 0px 4px 4px 0; border-top: dashed 1px #ccc; text-align:left;"></div>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<div style="float:left;position:absolute;"><font size="2" >总访问:<span id="busuanzi_value_site_pv"></span>次</font></div>
+<div style="float:right;"><font size="2" >总访客:<span id="busuanzi_value_site_uv"></span>人</font></div>
+
+<div style="margin-top:30px; padding: 5px 4px 4px 0; border-top: dashed 1px #ccc; text-align:left;"></div>
+</div>
+
+
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/DevOps/" title="DevOps">DevOps<sup>12</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Hexo/" title="Hexo">Hexo<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/MQ/" title="MQ">MQ<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/algorithm/" title="algorithm">algorithm<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/docker-practice/" title="docker-practice">docker-practice<sup>8</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/go-bootcamp/" title="go-bootcamp">go-bootcamp<sup>6</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/go-pattern/" title="go-pattern">go-pattern<sup>3</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/golang/" title="golang">golang<sup>23</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/java/" title="java">java<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/javascript/" title="javascript">javascript<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/k8s/" title="k8s">k8s<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/mysql专题/" title="mysql专题">mysql专题<sup>16</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/php/" title="php">php<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/redis专题/" title="redis专题">redis专题<sup>17</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/golang/" title="golang">golang<sup>26</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mysql/" title="mysql">mysql<sup>18</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/redis/" title="redis">redis<sup>17</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/docker/" title="docker">docker<sup>9</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/setcookie/" title="setcookie">setcookie<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/tcp/" title="tcp">tcp<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/cache/" title="cache">cache<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/concurrency/" title="concurrency">concurrency<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Hexo/" title="Hexo">Hexo<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Blog/" title="Blog">Blog<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/minikube/" title="minikube">minikube<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/getcookie/" title="getcookie">getcookie<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/rpc/" title="rpc">rpc<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/cache-invalid/" title="cache-invalid">cache-invalid<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/ticker/" title="ticker">ticker<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/vendoring/" title="vendoring">vendoring<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/godep/" title="godep">godep<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/govendor/" title="govendor">govendor<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/glide/" title="glide">glide<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/hash/" title="hash">hash<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="http://blog.csdn.net/xiaolongwang2010" target="_blank" title="小龙王2010csdn技术博客">Linux/c/c++</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  
+
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+  <iframe width="100%" height="550" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=550&fansRow=1&ptype=1&speed=0&skin=1&isTitle=1&noborder=1&isWeibo=1&isFans=1&uid=5141203275&verifier=a533edf5&dpc=1"></iframe>
+
+
+</aside>
+</div>
+
+    </div>
+    <footer><div id="footer" >
+	
+	
+	<div class="social-font" class="clearfix">
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/researchlab/lightman" target="_blank" title="lightman">lightman</a> ©2016 - 2020 
+		
+		<a href="/about" target="_blank" title="Lee Hong">Lee Hong</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+
+
+<script type="text/javascript">
+  var duoshuoQuery = {short_name:"gamedp"};
+  (function() {
+    var ds = document.createElement('script');
+    ds.type = 'text/javascript';ds.async = true;
+    ds.src = '//static.duoshuo.com/embed.js';
+    ds.charset = 'UTF-8';
+    (document.getElementsByTagName('head')[0] 
+    || document.getElementsByTagName('body')[0]).appendChild(ds);
+  })();
+</script> 
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

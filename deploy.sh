@@ -1,4 +1,5 @@
 
+rm -rf db.json
 rm -r $(ls |grep -v deploy.sh |grep -v node_modules | grep -v public)
 mv public/* .
 git add .
