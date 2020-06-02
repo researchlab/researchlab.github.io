@@ -13,6 +13,9 @@ date: 2019-02-26 09:53:45
 6 [Think Python 2e中译本](https://codingpy.com/books/thinkpython2/01-the-way-of-the-program.html)
 7 [HttpRunner](https://cn.httprunner.org/quickstart/)
 8 [RPCX](https://books.studygolang.com/go-rpc-programming-guide/)
+9 [js stack zh](https://github.com/lowerfish/js-stack-from-scratch)
+10 [zh.javascript](https://zh.javascript.info/)
+11 [javascript](https://javascript.info/)
 - 余华作品集
 1 [在细雨中呼喊](https://book.douban.com/subject/20421947/)
 - 待读书单
