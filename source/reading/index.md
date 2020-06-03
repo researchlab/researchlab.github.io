@@ -17,6 +17,7 @@ date: 2019-02-26 09:53:45
 10 [zh.javascript](https://zh.javascript.info/)
 11 [javascript](https://javascript.info/)
 12 [zh.goblog](https://learnku.com/docs/go-blog)
+13 [awsome-go](https://awesome-go.com/)
 - 余华作品集
 1 [在细雨中呼喊](https://book.douban.com/subject/20421947/)
 - 待读书单
