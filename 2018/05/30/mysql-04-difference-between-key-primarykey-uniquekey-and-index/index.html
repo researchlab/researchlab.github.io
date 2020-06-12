@@ -1,0 +1,739 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>mysql专题04 mysql中KEY/PRIMARY KEY/UNIQUE KEY 与INDEX区别 | 一线攻城狮</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="Lee Hong">
+    
+
+    
+    <meta name="description" content="索引被用来快速找出在一个列上用一特定值的行。没有索引，MySQL不得不首先以第一条记录开始并然后读完整个表直到它找出相关的行。表越大，花费时间越多。如果表对于查询的列有一个索引，MySQL能快速到达一个位置去搜寻到数据文件的中间，没有必要考虑所有数据。">
+<meta name="keywords" content="mysql">
+<meta property="og:type" content="article">
+<meta property="og:title" content="mysql专题04 mysql中KEY&#x2F;PRIMARY KEY&#x2F;UNIQUE KEY 与INDEX区别">
+<meta property="og:url" content="http://researchlab.github.io/2018/05/30/mysql-04-difference-between-key-primarykey-uniquekey-and-index/index.html">
+<meta property="og:site_name" content="一线攻城狮">
+<meta property="og:description" content="索引被用来快速找出在一个列上用一特定值的行。没有索引，MySQL不得不首先以第一条记录开始并然后读完整个表直到它找出相关的行。表越大，花费时间越多。如果表对于查询的列有一个索引，MySQL能快速到达一个位置去搜寻到数据文件的中间，没有必要考虑所有数据。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2020-06-12T07:26:52.022Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="mysql专题04 mysql中KEY&#x2F;PRIMARY KEY&#x2F;UNIQUE KEY 与INDEX区别">
+<meta name="twitter:description" content="索引被用来快速找出在一个列上用一特定值的行。没有索引，MySQL不得不首先以第一条记录开始并然后读完整个表直到它找出相关的行。表越大，花费时间越多。如果表对于查询的列有一个索引，MySQL能快速到达一个位置去搜寻到数据文件的中间，没有必要考虑所有数据。">
+
+    
+    <link rel="alternative" href="/atom.xml" title="一线攻城狮" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="一线攻城狮">一线攻城狮</a></h1>
+				<h2 class="blog-motto">十年磨一剑，一步一步脚踏实地的耕种</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">首页</a></li>
+					
+						<li><a href="/archives">归档</a></li>
+					
+						<li><a href="/about">关于</a></li>
+					
+						<li><a href="/reading">书单</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:researchlab.github.io">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2018/05/30/mysql-04-difference-between-key-primarykey-uniquekey-and-index/" title="mysql专题04 mysql中KEY/PRIMARY KEY/UNIQUE KEY 与INDEX区别" itemprop="url">mysql专题04 mysql中KEY/PRIMARY KEY/UNIQUE KEY 与INDEX区别</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
+		
+ <p class="article-time">
+    <time datetime="2018-05-30T11:09:24.000Z" itemprop="datePublished"> 发表于 2018-05-30</time>
+   &nbsp&nbsp热度&nbsp<span id="busuanzi_value_page_pv"></span>° 
+  </p>
+</header>
+
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-5"><a class="toc-link" href="#mysql索引"><span class="toc-number">1.</span> <span class="toc-text">mysql索引</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#环境准备"><span class="toc-number">2.</span> <span class="toc-text">环境准备</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#key-primarykey-uniquekey与index区别"><span class="toc-number">3.</span> <span class="toc-text">key/primarykey/uniquekey与index区别</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#key与primary-key区别"><span class="toc-number">4.</span> <span class="toc-text">key与primary key区别</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#KEY与INDEX区别"><span class="toc-number">5.</span> <span class="toc-text">KEY与INDEX区别</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#UNIQUE-KEY和PRIMARY-KEY区别"><span class="toc-number">6.</span> <span class="toc-text">UNIQUE KEY和PRIMARY KEY区别</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#UNIQUE-KEY"><span class="toc-number">7.</span> <span class="toc-text">UNIQUE KEY</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#总结"><span class="toc-number">8.</span> <span class="toc-text">总结</span></a></li></ol>
+		
+		</div>
+		
+		<p>索引被用来快速找出在一个列上用一特定值的行。没有索引，MySQL不得不首先以第一条记录开始并然后读完整个表直到它找出相关的行。表越大，花费时间越多。如果表对于查询的列有一个索引，MySQL能快速到达一个位置去搜寻到数据文件的中间，没有必要考虑所有数据。<br><a id="more"></a></p>
+<h5 id="mysql索引"><a href="#mysql索引" class="headerlink" title="mysql索引"></a>mysql索引</h5><p>如果一个表有1000行，这比顺序读取至少快100倍。注意你需要存取几乎所有1000行，它较快的顺序读取，因为此时我们避免磁盘寻道。</p>
+<p>所有的MySQL索引(PRIMARY、UNIQUE和INDEX)在B树中存储。字符串是自动地压缩前缀和结尾空间。</p>
+<p>索引用于:</p>
+<ul>
+<li>快速找出匹配一个WHERE子句的行；</li>
+<li>当执行联结时，从其他表检索行；</li>
+<li>对特定的索引列找出MAX()或MIN()值；</li>
+<li>如果排序或分组在一个可用键的最左面前缀上进行(例如，ORDER BY key_part_1,key_part_2)，排序或分组一个表。</li>
+<li>如果所有键值部分跟随DESC，键以倒序被读取。</li>
+<li>在一些情况中，一个查询能被优化来检索值，不用咨询数据文件。</li>
+<li>如果对某些表的所有使用的列是数字型的并且构成某些键的最左面前缀，为了更快，值可以从索引树被检索出来。</li>
+</ul>
+<h5 id="环境准备"><a href="#环境准备" class="headerlink" title="环境准备"></a>环境准备</h5><p>前面准备的Mysql容器环境 没有载入sql脚本的能力, 后继大量的sql操作如果都通过命令行写入的话， 一串很长的指令如创建一个复杂的表语句如果出错的话需要重新写, 这种情况可以通过载入sql脚本文件可以避免因拼写错误而需要重写所有命令的行为, </p>
+<blockquote>
+<p>具体脚本可参见 <a href="https://github.com/researchlab/docker-envs/tree/master/mysql" target="_blank" rel="noopener">mysql 容器环境脚本</a></p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 启动mysql容器环境, 挂载sqls目录</span></span><br><span class="line">➜ docker run --name=dev-mysql -d -p 3307:3306 -v ~/workbench/docker/docker-envs/mysql/sqls:/sqls/ -e MYSQL_USER=dev -e MYSQL_PASSWORD=dev123 -e MYSQL_ROOT_PASSWORD=dev123456 -e MYSQL_DATABASE=testdb  mysql/mysql-server</span><br><span class="line">451aede9869416e21a6788b2496d89ac993aabb09b6cd5e602c4688d53927575</span><br></pre></td></tr></table></figure>
+<p>授权远程访问和普通账号访问权限, </p>
+<blockquote>
+<p>注意mysql 8.0+ 将老的grant 授权及创建命令分开了<br>所以老的grant all privileges on <em>.</em> to ‘root‘@’%’ identified by ‘pwd’; 命令已不可使用; 会报错,<br>ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near ‘identified by ‘devpwd’’ at line 1</p>
+</blockquote>
+<ul>
+<li>mysql 8.0+ 授权应如下操作<ul>
+<li>create user<br><code>mysql&gt; CREATE USER &#39;username&#39;@&#39;%&#39; IDENTIFIED WITH mysql_native_password BY &#39;password&#39;;</code></li>
+<li>grant<br><code>mysql&gt; GRANT ALL ON db1.* TO &#39;username&#39;@&#39;%&#39; WITH GRANT OPTION;</code></li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>更多参考<a href="https://github.com/khs1994-docker/lnmp/issues/452" target="_blank" rel="noopener">MySQL 用户管理 增加、授权、改密码 来源官方文档</a></p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 授权root远程登录</span></span><br><span class="line"><span class="meta">mysql&gt;</span><span class="bash"> create user <span class="string">'root'</span>@<span class="string">'%'</span> identified by <span class="string">'dev123456'</span>;</span></span><br><span class="line">Query OK, 0 rows affected (0.10 sec)</span><br><span class="line"></span><br><span class="line"><span class="meta">mysql&gt;</span><span class="bash"> grant all privileges on *.* to <span class="string">'root'</span>@<span class="string">'%'</span> with grant option;</span></span><br><span class="line">Query OK, 0 rows affected (0.04 sec)</span><br><span class="line"></span><br><span class="line"><span class="meta">mysql&gt;</span><span class="bash"> flush privileges;</span></span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash">创建dev普通账号</span></span><br><span class="line"><span class="meta">mysql&gt;</span><span class="bash"> create user <span class="string">'dev'</span>@<span class="string">'%'</span> identified by <span class="string">'dev123'</span>;</span></span><br><span class="line">ERROR 1396 (HY000): Operation CREATE USER failed for 'dev'@'%'</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash">出现上述1396错误 是因为dev账号已存在, 所以不需要再创建了;</span></span><br><span class="line"><span class="meta">mysql&gt;</span><span class="bash"> select * from user <span class="built_in">where</span> user=<span class="string">'dev'</span> \G:</span></span><br><span class="line">*************************** 1. row ***************************</span><br><span class="line">                  Host: %</span><br><span class="line">                  User: dev</span><br><span class="line"><span class="meta">#</span><span class="bash"> 授权dev普通账号仅可对testdb数据库进行select,insert,update,delete,create,drop操作;</span></span><br><span class="line"><span class="meta">mysql&gt;</span><span class="bash"> grant select,insert,update,delete,create,drop on testdb.* to <span class="string">'dev'</span>@<span class="string">'%'</span> with grant option;</span></span><br><span class="line">Query OK, 0 rows affected (0.07 sec)</span><br><span class="line"></span><br><span class="line"><span class="meta">mysql&gt;</span><span class="bash"> flush privileges;</span></span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>授权指令规则: grant 权限1,权限2,…权限n on 数据库名称.表名称 to 用户名@用户地址 identified by ‘连接口令’;</p>
+</blockquote>
+<blockquote>
+<p>mysql 8.0+ grant之前需要先create user; grant 指令为: grant 权限1,权限2,…权限n on 数据库名称.表名称 to 用户名@用户地址 with grant option;</p>
+</blockquote>
+<p>登录普通账号dev</p>
+<blockquote>
+<p>非DBA 请养成使用普通账号操作数据库的习惯, 非一般情况不要使用root账号直接操作;</p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">➜  docker exec -it dev-mysql mysql -udev -P3307 -pdev123 --prompt "\u@\d&gt;"</span><br><span class="line">mysql: [Warning] Using a password on the command line interface can be insecure.</span><br><span class="line">Welcome to the MySQL monitor.  Commands end with ; or \g.</span><br><span class="line">Your MySQL connection id is 193</span><br><span class="line">Server version: 8.0.12 MySQL Community Server - GPL</span><br><span class="line"></span><br><span class="line">Copyright (c) 2000, 2018, Oracle and/or its affiliates. All rights reserved.</span><br><span class="line"></span><br><span class="line">Oracle is a registered trademark of Oracle Corporation and/or its</span><br><span class="line">affiliates. Other names may be trademarks of their respective</span><br><span class="line">owners.</span><br><span class="line"></span><br><span class="line">Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.</span><br><span class="line"></span><br><span class="line"><span class="meta">dev@(none)&gt;</span><span class="bash">use testdb;</span></span><br><span class="line">Reading table information for completion of table and column names</span><br><span class="line">You can turn off this feature to get a quicker startup with -A</span><br><span class="line"></span><br><span class="line">Database changed</span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash"></span></span><br></pre></td></tr></table></figure>
+<h5 id="key-primarykey-uniquekey与index区别"><a href="#key-primarykey-uniquekey与index区别" class="headerlink" title="key/primarykey/uniquekey与index区别"></a>key/primarykey/uniquekey与index区别</h5><p>tb1<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> /sqls/tb1.sql</span></span><br><span class="line"></span><br><span class="line">CREATE TABLE IF NOT EXISTS tb1(</span><br><span class="line">	id MEDIUMINT(8) NOT NULL AUTO_INCREMENT,</span><br><span class="line">	name VARCHAR(30) NOT NULL,</span><br><span class="line">	type MEDIUMINT(1) NOT NULL,</span><br><span class="line">	code TEXT,</span><br><span class="line">	PRIMARY KEY (id),</span><br><span class="line">	KEY type (type)</span><br><span class="line">	);</span><br><span class="line"></span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash"><span class="built_in">source</span> /sqls/tb1.sql;</span></span><br><span class="line">Query OK, 0 rows affected (0.07 sec)</span><br><span class="line"></span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">desc tb1;</span></span><br><span class="line">+-------+--------------+------+-----+---------+----------------+</span><br><span class="line">| Field | Type         | Null | Key | Default | Extra          |</span><br><span class="line">+-------+--------------+------+-----+---------+----------------+</span><br><span class="line">| id    | mediumint(8) | NO   | PRI | NULL    | auto_increment |</span><br><span class="line">| name  | varchar(30)  | NO   |     | NULL    |                |</span><br><span class="line">| type  | mediumint(1) | NO   | MUL | NULL    |                |</span><br><span class="line">| code  | text         | YES  |     | NULL    |                |</span><br><span class="line">+-------+--------------+------+-----+---------+----------------+</span><br><span class="line">4 rows in set (0.00 sec)</span><br></pre></td></tr></table></figure></p>
+<p><strong>tb1.sql最后一句的KEY type (type)是什么意思？</strong></p>
+<p>如果只是key的话，就是普通索引。<br>mysql的key和index多少有点令人迷惑，单独的key和其它关键词结合的key(PRIMARY KEY)实际表示的意义是不同，这实际上考察对数据库体系结构的了解的。</p>
+<p>key是数据库的物理结构，它包含两层意义和作用，</p>
+<ul>
+<li><p>一是约束（偏重于约束和规范数据库的结构完整性）,</p>
+</li>
+<li><p>二是索引(辅助查询用的), 包括PRIMARY KEY, UNIQUE KEY, FOREIGN KEY 等,</p>
+</li>
+</ul>
+<p><code>PRIMARY KEY</code> 有两个作用, </p>
+<blockquote>
+<p>一是约束作用（constraint），用来规范一个存储主键和唯一性，<br>但同时也在此key上建立了一个主键索引；</p>
+</blockquote>
+<p> PRIMARY KEY 约束: 唯一标识数据库表中的每条记录；</p>
+<p> 主键必须包含唯一的值；</p>
+<p> 主键列不能包含 NULL 值；</p>
+<p> 每个表都应该有一个主键，并且每个表只能有一个主键。（PRIMARY KEY 拥有自动定义的 UNIQUE 约束）</p>
+<p><code>UNIQUE KEY</code>也有两个作用，</p>
+<blockquote>
+<p>一是约束作用（constraint），规范数据的唯一性，<br>但同时也在这个key上建立了一个唯一索引；<br>UNIQUE 约束: 唯一标识数据库表中的每条记录。</p>
+</blockquote>
+<p>UNIQUE 和 PRIMARY KEY 约束均为列或列集合提供了唯一性的保证。</p>
+<p>（每个表可以有多个 UNIQUE 约束，但是每个表只能有一个 PRIMARY KEY 约束）</p>
+<p><code>FOREIGN KEY</code>也有两个作用，</p>
+<blockquote>
+<p>一是约束作用（constraint），规范数据的引用完整性，<br>但同时也在这个key上建立了一个index；</p>
+</blockquote>
+<p>可见，mysql的key是同时具有constraint和index的意义，这点和其他数据库表现的可能有区别。</p>
+<p>（至少在oracle上建立外键，不会自动建立index），因此创建key也有如下几种方式:<br>（1）在字段级以key方式建立， 如 create table t (id int not null PRIMARY KEY);<br>（2）在表级以constraint方式建立，如create table t(id int, CONSTRAINT pk_t_id PRIMARY KEY (id));<br>（3）在表级以key方式建立，如create table t(id int, PRIMARY KEY (id));</p>
+<p>其它key创建类似，但不管那种方式，既建立了constraint，又建立了index，只不过index使用的就是这个constraint或key。</p>
+<p><code>index</code>是数据库的物理结构，它只是辅助查询的，它创建时会在另外的表空间（mysql中的innodb表空间）以一个类似目录的结构存储。索引要分类的话，分为前缀索引、全文本索引等；<br>因此，索引只是索引，它不会去约束索引的字段的行为（那是key要做的事情）。如，create table t(id int,index inx_tx_id (id));</p>
+<p>索引分类，分为</p>
+<p><code>主键索引</code>（必须指定为“PRIMARY KEY”，没有PRIMARY Index）;</p>
+<p><code>唯一索引</code>（unique index，一般写成unique key）;</p>
+<p><code>普通索引</code> (index，只有这一种才是纯粹的index)等，也是基于是不是把index看作了key。比如 create table t(id int, unique indexinx_tx_id (id));–index当作了key使用</p>
+<p>最重要的也就是，不管如何描述，需要理解index是纯粹的index（普通的key，或者普通索引index），还是被当作key（如: unique index、unique key和primary key），若当作key时则会有两种意义或起两种作用。</p>
+<p>MySQL Key值（PRI, UNI, MUL）的含义：</p>
+<p>PRI主键约束；</p>
+<p>UNI唯一约束；</p>
+<p>MUL可以重复。</p>
+<p>注：若是普通的key或者普通的index（实际上，普通的key与普通的index同义）。</p>
+<p>tb2<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> /sqls/tb2.sql</span></span><br><span class="line"></span><br><span class="line">CREATE TABLE IF NOT EXISTS tb2(</span><br><span class="line">	id SMALLINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,</span><br><span class="line">	name VARCHAR(255) NOT NULL UNIQUE KEY,</span><br><span class="line">  sex ENUM('1','2','3') DEFAULT '3',</span><br><span class="line">	age TINYINT NOT NULL,</span><br><span class="line">	KEY age (age)</span><br><span class="line">	);</span><br><span class="line"></span><br><span class="line"><span class="meta">	dev@testdb&gt;</span><span class="bash"><span class="built_in">source</span> /sqls/tb2.sql;</span></span><br><span class="line">Query OK, 0 rows affected (0.08 sec)</span><br><span class="line"></span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">desc tb2;</span></span><br><span class="line">+-------+----------------------+------+-----+---------+----------------+</span><br><span class="line">| Field | Type                 | Null | Key | Default | Extra          |</span><br><span class="line">+-------+----------------------+------+-----+---------+----------------+</span><br><span class="line">| id    | smallint(5) unsigned | NO   | PRI | NULL    | auto_increment |</span><br><span class="line">| name  | varchar(255)         | NO   | UNI | NULL    |                |</span><br><span class="line">| sex   | enum('1','2','3')    | YES  |     | 3       |                |</span><br><span class="line">| age   | tinyint(4)           | NO   | MUL | NULL    |                |</span><br><span class="line">+-------+----------------------+------+-----+---------+----------------+</span><br><span class="line">4 rows in set (0.00 sec)</span><br></pre></td></tr></table></figure></p>
+<p>看到Key那一栏，可能会有4种值，即’啥也没有’,’PRI’,’UNI’,’MUL’</p>
+<ul>
+<li>如果Key是空的, 那么该列值的可以重复，表示该列没有索引, 或者是一个非唯一的复合索引的非前导列</li>
+<li>如果Key是PRI,  那么该列是主键的组成部分</li>
+<li>如果Key是UNI,  那么该列是一个唯一值索引的第一列(前导列)，且不能含有空值(NULL)</li>
+<li>如果Key是MUL,  那么该列的值可以重复, 该列是一个非唯一索引的前导列(第一列)或者是一个唯一性索引的组成部分但是可以含有空值NULL</li>
+</ul>
+<blockquote>
+<p>如果对于一个列的定义，同时满足上述4种情况的多种，比如一个列既是PRI，又是UNI（如果是PRI，则一定是UNI）那么”desc 表名”; 的时候，显示的Key值按照优先级来显示 PRI-&gt;UNI-&gt;MUL,  那么此时，显示PRI。</p>
+</blockquote>
+<blockquote>
+<p>如果某列不能含有空值，同时该表没有主键，则一个唯一性索引列可以显示为PRI，</p>
+</blockquote>
+<blockquote>
+<p>如果多列构成了一个唯一性复合索引，那么一个唯一性索引列可以显示为MUL。（因为虽然索引的多列组合是唯一的，比如ID+NAME是唯一的，但是每一个单独的列依然可以有重复的值，因为只要ID+NAME是唯一的即可）</p>
+</blockquote>
+<h5 id="key与primary-key区别"><a href="#key与primary-key区别" class="headerlink" title="key与primary key区别"></a>key与primary key区别</h5><p>tb3<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> /sqls/tb3.sql</span></span><br><span class="line">CREATE TABLE IF NOT EXISTS tb3(</span><br><span class="line">	logrecord_id INT(11) NOT NULL AUTO_INCREMENT,</span><br><span class="line">	user_name VARCHAR(100) DEFAULT NULL,</span><br><span class="line">	operation_time DATETIME DEFAULT NULL,</span><br><span class="line">	logrecord_operation VARCHAR(100) DEFAULT NULL,</span><br><span class="line">	PRIMARY KEY (logrecord_id),</span><br><span class="line">	KEY tb3_user_name (user_name)</span><br><span class="line">	);</span><br><span class="line"></span><br><span class="line"><span class="meta">	dev@testdb&gt;</span><span class="bash"><span class="built_in">source</span> /sqls/tb3.sql;</span></span><br><span class="line">Query OK, 0 rows affected (0.05 sec)</span><br><span class="line"></span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">desc tb3;</span></span><br><span class="line">+---------------------+--------------+------+-----+---------+----------------+</span><br><span class="line">| Field               | Type         | Null | Key | Default | Extra          |</span><br><span class="line">+---------------------+--------------+------+-----+---------+----------------+</span><br><span class="line">| logrecord_id        | int(11)      | NO   | PRI | NULL    | auto_increment |</span><br><span class="line">| user_name           | varchar(100) | YES  | MUL | NULL    |                |</span><br><span class="line">| operation_time      | datetime     | YES  |     | NULL    |                |</span><br><span class="line">| logrecord_operation | varchar(100) | YES  |     | NULL    |                |</span><br><span class="line">+---------------------+--------------+------+-----+---------+----------------+</span><br><span class="line">4 rows in set (0.00 sec)</span><br></pre></td></tr></table></figure></p>
+<p><code>KEY tb3_user_name (user_name)</code><br>本表的user_name字段与tb3_user_name表user_name字段建立外键<br>括号外是建立外键的对应表，括号内是对应字段<br>类似还有 KEY user(userid)<br>当然，key未必都是外键</p>
+<p>总结：<br>Key是索引约束，对表中字段进行约束索引的，都是通过primary foreign unique等创建的。常见有foreign key，外键关联用的。<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">KEY forum (status,type,displayorder)  # 是多列索引（键）</span><br><span class="line">KEY tid (tid)                         # 是单列索引（键）。</span><br></pre></td></tr></table></figure></p>
+<p>如建表时： KEY forum (status,type,displayorder)<br>select <em> from table group by status,type,displayorder 是否就自动用上了此索引，<br>而当 select </em> from table group by status 此索引有用吗？</p>
+<blockquote>
+<p><strong>key的用途：主要是用来加快查询速度的。</strong></p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">CREATE TABLE `admin_role` (</span><br><span class="line">  `adminSet_id` varchar(32) NOT NULL,</span><br><span class="line">  `roleSet_id` varchar(32) NOT NULL,</span><br><span class="line">  PRIMARY KEY (`adminSet_id`,`roleSet_id`),</span><br><span class="line">  KEY `FK9FC63FA6DAED032` (`adminSet_id`),</span><br><span class="line">  KEY `FK9FC63FA6C7B24C48` (`roleSet_id`)</span><br><span class="line">) ENGINE=InnoDB DEFAULT CHARSET=utf8;</span><br></pre></td></tr></table></figure>
+<p>主键，两个列组合在一起，是唯一的，内建唯一性索引，并且不能为NULL<br>另外，两个Key定义，相当于分别对这两列建立索引。</p>
+<blockquote>
+<p>在innodb存储引擎中, primary key 创建主键聚集索引, 而key创建的是普通索引</p>
+</blockquote>
+<h5 id="KEY与INDEX区别"><a href="#KEY与INDEX区别" class="headerlink" title="KEY与INDEX区别"></a>KEY与INDEX区别</h5><p>KEY通常是INDEX同义词。如果关键字属性PRIMARY KEY在列定义中已给定，则PRIMARY KEY也可以只指定为KEY。</p>
+<p>PRIMARY KEY是一个唯一KEY，此时，所有的关键字列必须定义为NOT NULL。</p>
+<p>如果这些列没有被明确地定义为NOT NULL，MySQL应隐含地定义这些列。一个表只有一个PRIMARY KEY。</p>
+<p>MySQL 中Index 与Key 的区别</p>
+<p>Key即键值，是关系模型理论中的一部份，比如有主键（Primary Key)，外键（Foreign Key）等，用于数据完整性与唯一性约束等。</p>
+<p>而Index则处于实现层面，比如可以对表的任意列建立索引，那么当建立索引的列处于SQL语句中的Where条件中时，就可以得到快速的数据定位，从而快速检索。</p>
+<p>至于Unique Index，则只是属于Index中的一种而已，建立了Unique Index表示此列数据不可重复，猜想MySQL对Unique Index类型的索引可以做进一步特殊优化吧。</p>
+<p>在设计表的时候，Key只是要处于模型层面的，而当需要进行查询优化，则对相关列建立索引即可。</p>
+<p>另外，在MySQL中，对于一个Primary Key的列，MySQL已经自动对其建立了Unique Index，无需重复再在上面建立索引了。</p>
+<h5 id="UNIQUE-KEY和PRIMARY-KEY区别"><a href="#UNIQUE-KEY和PRIMARY-KEY区别" class="headerlink" title="UNIQUE KEY和PRIMARY KEY区别"></a>UNIQUE KEY和PRIMARY KEY区别</h5><ul>
+<li><p>primary key的1个或多个列必须为NOT NULL，如果列为NULL，在增加PRIMARY KEY时，列自动更改为NOT NULL。而UNIQUE KEY 对列没有此要求</p>
+</li>
+<li><p>一个表只能有一个PRIMARY KEY，但可以有多个UNIQUE KEY</p>
+</li>
+<li><p>主键和唯一键约束是通过参考索引实施的，如果插入的值均为NULL，则根据索引的原理，全NULL值不被记录在索引上，所以插入全NULL值时，可以有重复的，而其他的则不能插入重复值。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">alter table t add constraint uk_t_1 unique (a,b);</span><br><span class="line">insert into t (a ,b ) values (null,1);    # 不能重复</span><br><span class="line">insert into t (a ,b ) values (null,null);#可以重复</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h5 id="UNIQUE-KEY"><a href="#UNIQUE-KEY" class="headerlink" title="UNIQUE KEY"></a>UNIQUE KEY</h5><p>UNIQUE KEY的用途：主要是用来防止数据插入的时候重复的。</p>
+<p>建表时创建UNIQUE KEY<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">CREATE TABLE Persons </span><br><span class="line">( </span><br><span class="line">Id int NOT NULL, </span><br><span class="line">LastName varchar(255) NOT NULL UNIQUE KEY, </span><br><span class="line">FirstName varchar(255), </span><br><span class="line">Address varchar(255), </span><br><span class="line">City varchar(255), </span><br><span class="line">UNIQUE (Id) </span><br><span class="line"><span class="meta">#</span><span class="bash">CONSTRAINT uc_PersonID UNIQUE (Id, LastName) </span></span><br><span class="line">);</span><br></pre></td></tr></table></figure></p>
+<p>增加UNIQUE KEY<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">ALTER TABLE Persons</span><br><span class="line">ADD UNIQUE (Id);</span><br><span class="line"></span><br><span class="line">ALTER TABLE Persons</span><br><span class="line">ADD CONSTRAINT uc_PersonID UNIQUE (Id,LastName);</span><br></pre></td></tr></table></figure></p>
+<p>撤销UNIQUE KEY<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ALTER TABLE Persons</span><br><span class="line">DROP INDEX uc_PersonID;</span><br></pre></td></tr></table></figure></p>
+<h5 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h5><ul>
+<li>mysql索引概述, sql脚本载入环境准备;</li>
+<li>分析key/primarykey/uniquekey与index区别;</li>
+<li>总结key与primary key区别;</li>
+<li>进一步总结KEY与INDEX区别;</li>
+<li>进一步总结UNIQUE KEY和PRIMARY KEY区别;</li>
+<li>进一步归纳UNIQUE KEY基本操作;</li>
+</ul>
+  
+	</div>
+		<div style="padding: 10px 44px 30px 44px;" >
+<div style="border: 1px dashed #e0e0e0; padding: 10px 10px 10px 10px; background-color: #fffeee; background-repeat: no-repeat; background-attachment: scroll; background-position: 1% 50%; -moz-background-size: auto auto; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">
+<div style="float:left;margin-top:0px;">
+<img src="/img/weixin.jpg" width="125px" height="125px" style="border:1px solid #ccc; margin: 6px 5px 0px 0px"/>
+</div>
+<div>
+ <p style="margin-top:0px;">作者署名：<b><a target="_blank" href="http://researchlab.github.io/">朴实的一线攻城狮</a></b>
+<br />本文标题：<b><a href="/2018/05/30/mysql-04-difference-between-key-primarykey-uniquekey-and-index/" target="_blank" title="mysql专题04 mysql中KEY/PRIMARY KEY/UNIQUE KEY 与INDEX区别">mysql专题04 mysql中KEY/PRIMARY KEY/UNIQUE KEY 与INDEX区别</a></b> 
+<br />本文出处：<b><a href="/2018/05/30/mysql-04-difference-between-key-primarykey-uniquekey-and-index/" target="_blank" title="mysql专题04 mysql中KEY/PRIMARY KEY/UNIQUE KEY 与INDEX区别">http://researchlab.github.io/2018/05/30/mysql-04-difference-between-key-primarykey-uniquekey-and-index/</a></b>
+<br />版权声明：本文由<b><a href="/about" target="_blank" title="Lee Hong">Lee Hong</a></b>创作和发表,采用<b>署名(BY)</b>-<b>非商业性使用(NC)</b>-<b>相同方式共享(SA)</b>国际许可协议进行许可,转载请注明作者及出处, 否则保留追究法律责任的权利。 </p>
+</div>
+</div>
+</div>
+
+   	       
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/mysql专题/">mysql专题</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/mysql/">mysql</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	<div class="share-jiathis">
+	  
+<div class="jiathis_style_24x24">
+	<a class="jiathis_button_weixin"></a>
+	<a class="jiathis_button_tsina"></a>
+	<a class="jiathis_button_tqq"></a>
+	<a class="jiathis_button_qzone"></a>
+    <a class="jiathis_button_googleplus"></a>
+	<a class="jiathis_button_douban"></a>
+	<a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+    var jiathis_config={
+    data_track_clickback:true,
+    sm:"copy,renren,cqq",
+    pic:"",
+    summary:"",
+    
+  </script> 
+<script type="text/javascript" src="//v3.jiathis.com/code/jia.js?uid=
+2084050" charset="utf-8"></script>      
+
+
+	 </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2018/06/06/docker-permission-denied/" title="Docker操作提示Get Permission Denied">
+  <strong>上一篇：</strong><br/>
+  <span>
+  Docker操作提示Get Permission Denied</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2018/04/05/mysql-03-constraint-summary/"  title="mysql专题03  数据库约束系列问题">
+ <strong>下一篇：</strong><br/> 
+ <span>mysql专题03  数据库约束系列问题
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+<!-- gitment评论框 start -->
+	<div id="gitment" class="ds-thread"></div>
+	<link rel="stylesheet" href="https://github.com/researchlab/gitment/blob/master/style/default.css">
+	<script src="https://github.com/researchlab/gitment/blob/master/dist/gitment.browser.js"></script>
+	<script>
+	  var gitment = new Gitment({
+	    id: 'lWed May 30 2018 19:09:24 GMT+0800', // 可选。建议为Wed May 30 2018 19:09:24 GMT+0800
+	    owner: 'researchlab', // 可以是你的GitHub用户名，也可以是github id
+	    repo: 'researchlab.github.io', //可以是你的任意一个repo，推荐使用githubpage所在的repo
+	    oauth: {
+	      client_id: 'e4971ec4c4fdbefb392f',
+	      client_secret: 'e5001b2dda2dcb9a9c66417991be57836c17a72b',
+	    },
+	  })
+	  gitment.render('gitment')
+</script>
+
+
+</div>  
+
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+<div id="asidepart">
+
+  <div class="widget tag">
+<!--<hr noshade color="#ccc">-->
+<!-- <p style="text-align:center">Mike.Lee</p> -->
+<p margin="0" style="text-align:center">
+<a class="ahref" href="http://researchlab.github.io/about/">
+<img id="aboutpic"  src="/img/qzly.png" alt="@一线攻城狮" height="200" width="200" style="box-shadow: 0px 0px 2px 2px #9edeff;border-radius: 8px;" >
+</a></p>
+<p style="text-align:center"><font size="2" color="grey">关注微信公众号 @一线攻城狮</font></p>
+<div style="display:block; margin-top:10px; padding: 0px 4px 4px 0; border-top: dashed 1px #ccc; text-align:left;"></div>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<div style="float:left;position:absolute;"><font size="2" >总访问:<span id="busuanzi_value_site_pv"></span>次</font></div>
+<div style="float:right;"><font size="2" >总访客:<span id="busuanzi_value_site_uv"></span>人</font></div>
+
+<div style="margin-top:30px; padding: 5px 4px 4px 0; border-top: dashed 1px #ccc; text-align:left;"></div>
+</div>
+
+
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/DevOps/" title="DevOps">DevOps<sup>12</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Hexo/" title="Hexo">Hexo<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/MQ/" title="MQ">MQ<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/algorithm/" title="algorithm">algorithm<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/docker-practice/" title="docker-practice">docker-practice<sup>8</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/go-bootcamp/" title="go-bootcamp">go-bootcamp<sup>6</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/go-pattern/" title="go-pattern">go-pattern<sup>3</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/golang/" title="golang">golang<sup>23</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/java/" title="java">java<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/javascript/" title="javascript">javascript<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/k8s/" title="k8s">k8s<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/mysql专题/" title="mysql专题">mysql专题<sup>16</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/php/" title="php">php<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/redis专题/" title="redis专题">redis专题<sup>17</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/golang/" title="golang">golang<sup>26</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mysql/" title="mysql">mysql<sup>18</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/redis/" title="redis">redis<sup>17</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/docker/" title="docker">docker<sup>9</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/setcookie/" title="setcookie">setcookie<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/tcp/" title="tcp">tcp<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/cache/" title="cache">cache<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/concurrency/" title="concurrency">concurrency<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Hexo/" title="Hexo">Hexo<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Blog/" title="Blog">Blog<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/minikube/" title="minikube">minikube<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/cache-invalid/" title="cache-invalid">cache-invalid<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/getcookie/" title="getcookie">getcookie<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/ticker/" title="ticker">ticker<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/rpc/" title="rpc">rpc<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/vendoring/" title="vendoring">vendoring<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/godep/" title="godep">godep<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/govendor/" title="govendor">govendor<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/glide/" title="glide">glide<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/hash/" title="hash">hash<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="http://blog.csdn.net/xiaolongwang2010" target="_blank" title="小龙王2010csdn技术博客">Linux/c/c++</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  
+
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+  <iframe width="100%" height="550" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=550&fansRow=1&ptype=1&speed=0&skin=1&isTitle=1&noborder=1&isWeibo=1&isFans=1&uid=5141203275&verifier=a533edf5&dpc=1"></iframe>
+
+
+</aside>
+</div>
+
+    </div>
+    <footer><div id="footer" >
+	
+	
+	<div class="social-font" class="clearfix">
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/researchlab/lightman" target="_blank" title="lightman">lightman</a> ©2016 - 2020 
+		
+		<a href="/about" target="_blank" title="Lee Hong">Lee Hong</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+
+
+<script type="text/javascript">
+  var duoshuoQuery = {short_name:"gamedp"};
+  (function() {
+    var ds = document.createElement('script');
+    ds.type = 'text/javascript';ds.async = true;
+    ds.src = '//static.duoshuo.com/embed.js';
+    ds.charset = 'UTF-8';
+    (document.getElementsByTagName('head')[0] 
+    || document.getElementsByTagName('body')[0]).appendChild(ds);
+  })();
+</script> 
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

@@ -1,0 +1,1217 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>mysql专题09 常用函数及自定义函数 | 一线攻城狮</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="Lee Hong">
+    
+
+    
+    <meta name="description" content="Mysql中常用函数根据功能大致可划分为1.字符函数;2.数值运算符及函数;3.比较运算符及函数;4.日期时间函数;5.信息函数;6.聚合函数;7.加密函数等;">
+<meta name="keywords" content="mysql">
+<meta property="og:type" content="article">
+<meta property="og:title" content="mysql专题09 常用函数及自定义函数">
+<meta property="og:url" content="http://researchlab.github.io/2018/10/02/mysql-09-function/index.html">
+<meta property="og:site_name" content="一线攻城狮">
+<meta property="og:description" content="Mysql中常用函数根据功能大致可划分为1.字符函数;2.数值运算符及函数;3.比较运算符及函数;4.日期时间函数;5.信息函数;6.聚合函数;7.加密函数等;">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2020-06-12T07:26:52.025Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="mysql专题09 常用函数及自定义函数">
+<meta name="twitter:description" content="Mysql中常用函数根据功能大致可划分为1.字符函数;2.数值运算符及函数;3.比较运算符及函数;4.日期时间函数;5.信息函数;6.聚合函数;7.加密函数等;">
+
+    
+    <link rel="alternative" href="/atom.xml" title="一线攻城狮" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="一线攻城狮">一线攻城狮</a></h1>
+				<h2 class="blog-motto">十年磨一剑，一步一步脚踏实地的耕种</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">首页</a></li>
+					
+						<li><a href="/archives">归档</a></li>
+					
+						<li><a href="/about">关于</a></li>
+					
+						<li><a href="/reading">书单</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:researchlab.github.io">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2018/10/02/mysql-09-function/" title="mysql专题09 常用函数及自定义函数" itemprop="url">mysql专题09 常用函数及自定义函数</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
+		
+ <p class="article-time">
+    <time datetime="2018-10-02T09:29:37.000Z" itemprop="datePublished"> 发表于 2018-10-02</time>
+   &nbsp&nbsp热度&nbsp<span id="busuanzi_value_page_pv"></span>° 
+  </p>
+</header>
+
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#字符函数"><span class="toc-number">1.</span> <span class="toc-text">字符函数</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#格式化函数"><span class="toc-number">2.</span> <span class="toc-text">格式化函数</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#数值运算符函数"><span class="toc-number">3.</span> <span class="toc-text">数值运算符函数</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#比较运算符函数"><span class="toc-number">4.</span> <span class="toc-text">比较运算符函数</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#日期时间函数"><span class="toc-number">5.</span> <span class="toc-text">日期时间函数</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#系统信息函数"><span class="toc-number">6.</span> <span class="toc-text">系统信息函数</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#聚合函数"><span class="toc-number">7.</span> <span class="toc-text">聚合函数</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#加密函数"><span class="toc-number">8.</span> <span class="toc-text">加密函数</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#自定义函数"><span class="toc-number">9.</span> <span class="toc-text">自定义函数</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#总结"><span class="toc-number">10.</span> <span class="toc-text">总结</span></a></li></ol>
+		
+		</div>
+		
+		<p>Mysql中常用函数根据功能大致可划分为1.字符函数;2.数值运算符及函数;3.比较运算符及函数;4.日期时间函数;5.信息函数;6.聚合函数;7.加密函数等;<br><a id="more"></a></p>
+<h1 id="字符函数"><a href="#字符函数" class="headerlink" title="字符函数"></a>字符函数</h1><ol>
+<li>函数整理</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">语法</th>
+<th style="text-align:left">用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><code>ASCII(char)</code></td>
+<td style="text-align:left">返回字符的ASCII码值</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>BIT_LENGTH(str)</code></td>
+<td style="text-align:left">返回字符串的比特长度</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>CONCAT(s1,s2…,sn)</code></td>
+<td style="text-align:left">将s1,s2…,sn连接成字符串</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>CONCAT_WS(separator,s1,s2…,sn)</code></td>
+<td style="text-align:left">将s1,s2…,sn连接成字符串，并用separator字符间隔</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>INSERT(str,pos,lenth,newstr)</code></td>
+<td style="text-align:left">将字符串str从第pos位置开始，lenth个字符长的子串替换为字符串newstr，返回结果</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>FIND_IN_SET(str,list)</code></td>
+<td style="text-align:left">分析逗号分隔的list列表，如果发现str，返回str在list中的位置</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>LCASE(str)或LOWER(str)</code></td>
+<td style="text-align:left">返回将字符串str中所有字符改变为小写后的结果</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>LEFT(str,x)</code></td>
+<td style="text-align:left">返回字符串str中最左边的x个字符</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>RIGHT(str,x)</code></td>
+<td style="text-align:left">返回字符串str中最右边的x个字符</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>LENGTH(s)</code></td>
+<td style="text-align:left">返回字符串str中的字符数</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>LTRIM(str)</code></td>
+<td style="text-align:left">从字符串str中切掉开头的空格</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>POSITION(substr,str)</code></td>
+<td style="text-align:left">返回子串substr在字符串str中第一次出现的位置</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>POSITION(substr IN str)</code></td>
+<td style="text-align:left">返回子串substr在字符串str中第一次出现的位置</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>QUOTE(str)</code></td>
+<td style="text-align:left">用反斜杠转义str中的单引号</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>REPEAT(str,count)</code></td>
+<td style="text-align:left">返回字符串str重复count次的结果</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>REVERSE(str)</code></td>
+<td style="text-align:left">返回颠倒字符串str的结果</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>RTRIM(str)</code></td>
+<td style="text-align:left">去掉字符串str尾部的空格</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>STRCMP(s1,s2)</code></td>
+<td style="text-align:left">比较字符串s1和s2</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>TRIM(str)</code></td>
+<td style="text-align:left">去除字符串首部和尾部的所有空格</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>UCASE(str)或UPPER(str)</code></td>
+<td style="text-align:left">返回将字符串str中所有字符转变为大写后的结果</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>REPLACE(str,from_str,to_str)</code></td>
+<td style="text-align:left">将str中的from_str替换为to_str</td>
+</tr>
+</tbody>
+</table>
+<ol start="2">
+<li>用法举例</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">select CONCAT('11','22','33');//结果--&gt;   112233</span><br><span class="line">select CONCAT_WS(',','11','22','33');//结果--&gt; 11,22,33</span><br><span class="line">SELECT INSERT('abcdef',1,2,'xyz');//结果--&gt;xyzcdef 注:a是1,b是2,从1开始替换2个字符,也就是ab2各字符替换为xyz</span><br><span class="line">SELECT FIND_IN_SET('b','a,b,c,d');    //结果--&gt;2</span><br><span class="line">SELECT FIND_IN_SET('b','a,b,c,d,b');  //结果--&gt;2</span><br><span class="line">SELECT FIND_IN_SET('f','a,b,c,d');    //结果--&gt;0</span><br><span class="line">SELECT LEFT('abcdef',3);//结果-&gt;abc</span><br><span class="line">SELECT POSITION('abc' IN 'aababdabcdabc');//7,注:5.7.11为POSITION(substr in str),是IN不是,号</span><br><span class="line">SELECT QUOTE('d''abc');//结果'd\'abc'</span><br><span class="line">SELECT REPEAT('abc',3);//abcabcabc</span><br><span class="line">SELECT REVERSE('abcdef')//fedcba</span><br><span class="line">SELECT STRCMP('abc','edf');//-1</span><br><span class="line">SELECT STRCMP('def','abc');//1</span><br><span class="line">SELECT STRCMP('1','0');//1</span><br><span class="line">SELECT STRCMP('0','1');//-1</span><br><span class="line">SELECT STRCMP('aaa','aaa');//0</span><br><span class="line">SELECT REPLACE('abcxyzdefxyz','xyz','mnt');//abcmntdefmnt</span><br><span class="line">SELECT TRIM(LEADING '?' FROM '??MYSQL???'); //MYSQL??? </span><br><span class="line">SELECT TRIM(TRAILING '?' FROM '??MYSQL???'); //??MYSQL</span><br><span class="line">SELECT TRIM(BOTH '?' FROM '??MYSQL???'); //MYSQL </span><br><span class="line">SELECT SUBSTRING('MYSQL',1,2); //MY 下标是从1开始的;</span><br><span class="line">SELECT SUBSTRING('MYSQL', 3); //SQL  从3开始取 一直取完整个字符串;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>在MySQL中百分号(%)中代表匹配任意字符串;下划线(_)代表匹配任意一个字符;</li>
+<li>SELECT * FROM tb where name LIKE ‘%1%%’ ESCAPE ‘1’; 表示1后的%不需要转义了, 而1仅起标识作用; 上述标识返回包含%的字符串;</li>
+</ul>
+<h1 id="格式化函数"><a href="#格式化函数" class="headerlink" title="格式化函数"></a>格式化函数</h1><ol>
+<li>函数整理</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">语法</th>
+<th style="text-align:left">用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><code>DATE_FORMAT(date,fmt)</code></td>
+<td style="text-align:left">依照字符串fmt格式化日期date值</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>FORMAT(x,y)</code></td>
+<td style="text-align:left">把x格式化为以逗号隔开的数字序列，y是结果的小数位数</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>INET_ATON(ip)</code></td>
+<td style="text-align:left">返回IP地址的数字表示</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>INET_NTOA(num)</code></td>
+<td style="text-align:left">返回数字所代表的IP地址</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>TIME_FORMAT(time,fmt)</code></td>
+<td style="text-align:left">依照字符串fmt格式化时间time值</td>
+</tr>
+</tbody>
+</table>
+<h1 id="数值运算符函数"><a href="#数值运算符函数" class="headerlink" title="数值运算符函数"></a>数值运算符函数</h1><ol>
+<li>函数整理</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">语法</th>
+<th style="text-align:left">用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><code>ABS(x)</code></td>
+<td style="text-align:left">返回x的绝对值</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>BIN(x)</code></td>
+<td style="text-align:left">返回x的二进制（OCT返回八进制，HEX返回十六进制）</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>CEILING(x)</code></td>
+<td style="text-align:left">返回大于x的最小整数值</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>EXP(x)</code></td>
+<td style="text-align:left">返回值e（自然对数的底）的x次方</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>FLOOR(x)</code></td>
+<td style="text-align:left">返回小于x的最大整数值</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>GREATEST(x1,x2,…,xn)</code></td>
+<td style="text-align:left">返回集合中最大的值</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>LEAST(x1,x2,…,xn)</code></td>
+<td style="text-align:left">返回集合中最小的值</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>LN(x)</code></td>
+<td style="text-align:left">返回x的自然对数</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>LOG(x,y)</code></td>
+<td style="text-align:left">返回x的以y为底的对数</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>MOD(x,y)</code></td>
+<td style="text-align:left">返回x/y的模（余数）</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>PI()</code></td>
+<td style="text-align:left">返回pi的值（圆周率）</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>RAND()</code></td>
+<td style="text-align:left">返回０到１内的随机值,可以通过提供一个参数(种子)使RAND()随机数生成器生成一个指定的值。</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>ROUND(x,y)</code></td>
+<td style="text-align:left">返回参数x的四舍五入的有y位小数的值</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>SIGN(x)</code></td>
+<td style="text-align:left">返回代表数字x的符号的值</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>SQRT(x)</code></td>
+<td style="text-align:left">返回一个数的平方根</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>TRUNCATE(x,y)</code></td>
+<td style="text-align:left">返回数字x截短为y位小数的结果</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>CEIL()</code></td>
+<td style="text-align:left">进一取整</td>
+</tr>
+</tbody>
+</table>
+<ol start="2">
+<li>用法示例</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">SELECT CEIL(3.01); // 4</span><br><span class="line">SELECT FLOOR(3.99); //3</span><br><span class="line">SELECT 3 DIV 4; // 0</span><br><span class="line">SELECT 5 % 3; // 2;</span><br><span class="line">SELECT 5 MOD 3; //2;</span><br><span class="line">SELECT POWER(2,3); //8</span><br><span class="line">SELECT ROUND(3.652, 2); //3.65</span><br><span class="line">SELECT ROUND(3.652, 1); /3.7 四舍五入</span><br><span class="line">SELECT TRUNCATE(125.80,0); // 125</span><br><span class="line">SELECT TRUNCATE(125.89,-1); //120</span><br></pre></td></tr></table></figure>
+<h1 id="比较运算符函数"><a href="#比较运算符函数" class="headerlink" title="比较运算符函数"></a>比较运算符函数</h1><ol>
+<li>函数整理</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">语法</th>
+<th style="text-align:left">说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><code>IS [NOT] NULL</code></td>
+<td style="text-align:left">是否为空</td>
+</tr>
+</tbody>
+</table>
+<ol start="2">
+<li>使用举例</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">SELECT NULL IS NULL; //1</span><br><span class="line">SELECT '' IS NULL; //0</span><br><span class="line">SELECT 0 IS NULL; //0</span><br></pre></td></tr></table></figure>
+<h1 id="日期时间函数"><a href="#日期时间函数" class="headerlink" title="日期时间函数"></a>日期时间函数</h1><ol>
+<li>函数整理</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">语法</th>
+<th style="text-align:left">用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><code>CURDATE()或CURRENT_DATE()</code></td>
+<td style="text-align:left">返回当前的日期</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>CURTIME()或CURRENT_TIME()</code></td>
+<td style="text-align:left">返回当前的时间</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>DATE_ADD(date,INTERVAL int keyword)</code></td>
+<td style="text-align:left">返回日期date加上间隔时间int的结果(int必须按照关键字进行格式化),如：SELECTDATE_ADD(CURRENT_DATE,INTERVAL 6 MONTH);</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>DATE_FORMAT(date,fmt)</code></td>
+<td style="text-align:left">依照指定的fmt格式格式化日期date值</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>DATE_SUB(date,INTERVAL exprtype)</code></td>
+<td style="text-align:left">返回日期date加上间隔时间int的结果(int必须按照关键字进行格式化),如：SELECTDATE_SUB(CURRENT_DATE,INTERVAL 6 MONTH);</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>DAYOFWEEK(date)</code></td>
+<td style="text-align:left">返回date所代表的一星期中的第几天(1~7)</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>DAYOFMONTH(date)</code></td>
+<td style="text-align:left">返回date是一个月的第几天(1~31)</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>DAYOFYEAR(date)</code></td>
+<td style="text-align:left">返回date是一年的第几天(1~366)</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>DAYNAME(date)</code></td>
+<td style="text-align:left">返回date的星期名，如：SELECT DAYNAME(CURRENT_DATE);</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>FROM_UNIXTIME(ts,fmt)</code></td>
+<td style="text-align:left">根据指定的fmt格式，格式化UNIX时间戳ts</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>HOUR(time)</code></td>
+<td style="text-align:left">返回time的小时值(0~23)</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>MINUTE(time)</code></td>
+<td style="text-align:left">返回time的分钟值(0~59)</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>MONTH(date)</code></td>
+<td style="text-align:left">返回date的月份值(1~12)</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>MONTHNAME(date)</code></td>
+<td style="text-align:left">返回date的月份名，如：SELECT***</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>NOW()</code></td>
+<td style="text-align:left">返回当前的日期和时间</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>QUARTER(date)</code></td>
+<td style="text-align:left">返回date在一年中的季度(1~4)，如SELECT***</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>WEEK(date)</code></td>
+<td style="text-align:left">返回日期date为一年中第几周(0~53)</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>YEAR(date)</code></td>
+<td style="text-align:left">返回日期date的年份(1000~9999)</td>
+</tr>
+</tbody>
+</table>
+<ol start="2">
+<li>格式化的类型格式</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">格式</th>
+<th style="text-align:left">描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><code>%a</code></td>
+<td style="text-align:left">缩写星期名</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>%b</code></td>
+<td style="text-align:left">缩写月名</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>%c</code></td>
+<td style="text-align:left">月，数值</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>%D</code></td>
+<td style="text-align:left">带有英文前缀的月中的天</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>%d</code></td>
+<td style="text-align:left">月的天，数值(00-31)</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>%e</code></td>
+<td style="text-align:left">月的天，数值(0-31)</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>%f</code></td>
+<td style="text-align:left">微秒</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>%H</code></td>
+<td style="text-align:left">小时 (00-23)</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>%h</code></td>
+<td style="text-align:left">小时 (01-12)</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>%I</code></td>
+<td style="text-align:left">小时 (01-12)</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>%i</code></td>
+<td style="text-align:left">分钟，数值(00-59)</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>%j</code></td>
+<td style="text-align:left">年的天 (001-366)</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>%k</code></td>
+<td style="text-align:left">小时 (0-23)</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>%l</code></td>
+<td style="text-align:left">小时 (1-12)</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>%M</code></td>
+<td style="text-align:left">月名</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>%m</code></td>
+<td style="text-align:left">月，数值(00-12)</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>%p</code></td>
+<td style="text-align:left">AM 或 PM</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>%r</code></td>
+<td style="text-align:left">时间，12-小时（hh:mm:ss AM 或 PM）</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>%S</code></td>
+<td style="text-align:left">秒(00-59)</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>%s</code></td>
+<td style="text-align:left">秒(00-59)</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>%T</code></td>
+<td style="text-align:left">时间, 24-小时 (hh:mm:ss)</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>%U</code></td>
+<td style="text-align:left">周 (00-53) 星期日是一周的第一天</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>%u</code></td>
+<td style="text-align:left">周 (00-53) 星期一是一周的第一天</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>%V</code></td>
+<td style="text-align:left">周 (01-53) 星期日是一周的第一天，与 %X 使用</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>%v</code></td>
+<td style="text-align:left">周 (01-53) 星期一是一周的第一天，与 %x 使用</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>%W</code></td>
+<td style="text-align:left">星期名</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>%w</code></td>
+<td style="text-align:left">周的天 （0=星期日, 6=星期六）</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>%X</code></td>
+<td style="text-align:left">年，其中的星期日是周的第一天，4 位，与 %V 使用</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>%x</code></td>
+<td style="text-align:left">年，其中的星期一是周的第一天，4 位，与 %v 使用</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>%Y</code></td>
+<td style="text-align:left">年，4 位</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>%y</code></td>
+<td style="text-align:left">年，2 位</td>
+</tr>
+</tbody>
+</table>
+<ol start="3">
+<li><p>单位整理<br>DATE_SUB()和DATE_ADD()对应的keyword参数</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">MICROSECOND</span><br><span class="line">SECOND</span><br><span class="line">MINUTE</span><br><span class="line">HOUR</span><br><span class="line">DAY</span><br><span class="line">WEEK</span><br><span class="line">MONTH</span><br><span class="line">QUARTER</span><br><span class="line">YEAR</span><br><span class="line">SECOND_MICROSECOND</span><br><span class="line">MINUTE_MICROSECOND</span><br><span class="line">MINUTE_SECOND</span><br><span class="line">HOUR_MICROSECOND</span><br><span class="line">HOUR_SECOND</span><br><span class="line">HOUR_MINUTE</span><br><span class="line">DAY_MICROSECOND</span><br><span class="line">DAY_SECOND</span><br><span class="line">DAY_MINUTE</span><br><span class="line">DAY_HOUR</span><br><span class="line">YEAR_MONTH</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>使用举例</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">SELECT DATE_FORMAT(FROM_DAYS(TO_DAYS(NOW())-TO_DAYS(birthday)),'%Y')+0 AS age FROM employee;</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash">这样，如果Brithday是未来的年月日的话，计算结果为0。</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash">下面的SQL语句计算员工的绝对年龄，即当Birthday是未来的日期时，将得到负值。</span></span><br><span class="line"></span><br><span class="line">SELECT DATE_FORMAT(NOW(), '%Y') - DATE_FORMAT(birthday, '%Y') -(DATE_FORMAT(NOW(), '00-%m-%d') &lt;DATE_FORMAT(birthday, '00-%m-%d')) AS age from employee</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<h1 id="系统信息函数"><a href="#系统信息函数" class="headerlink" title="系统信息函数"></a>系统信息函数</h1><ol>
+<li>函数整理</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">语法</th>
+<th style="text-align:left">说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><code>DATABASE()</code></td>
+<td style="text-align:left">返回当前数据库名</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>BENCHMARK(count,expr)</code></td>
+<td style="text-align:left">将表达式expr重复运行count次</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>CONNECTION_ID()</code></td>
+<td style="text-align:left">返回当前客户的连接ID</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>FOUND_ROWS()</code></td>
+<td style="text-align:left">返回最后一个SELECT查询进行检索的总行数</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>USER()或SYSTEM_USER()</code></td>
+<td style="text-align:left">返回当前登陆用户名</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>VERSION()</code></td>
+<td style="text-align:left">返回MySQL服务器的版本</td>
+</tr>
+</tbody>
+</table>
+<ol start="2">
+<li>用法举例</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT DATABASE(),VERSION(),USER();</span><br></pre></td></tr></table></figure>
+<h1 id="聚合函数"><a href="#聚合函数" class="headerlink" title="聚合函数"></a>聚合函数</h1><p>聚合函数,常用于GROUP BY从句的SELECT查询中</p>
+<ol>
+<li>函数整理</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">语法</th>
+<th style="text-align:left">用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><code>AVG(col)</code></td>
+<td style="text-align:left">返回指定列的平均值</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>COUNT(col)</code></td>
+<td style="text-align:left">返回指定列中非NULL值的个数</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>MIN(col)</code></td>
+<td style="text-align:left">返回指定列的最小值</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>MAX(col)</code></td>
+<td style="text-align:left">返回指定列的最大值</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>SUM(col)</code></td>
+<td style="text-align:left">返回指定列的所有值之和</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>GROUP_CONCAT(col)</code></td>
+<td style="text-align:left">返回由属于一组的列值连接组合而成的结果</td>
+</tr>
+</tbody>
+</table>
+<ol start="2">
+<li>用法举例</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">select group_id, group_concat(name) from tb16 group by group_id;</span></span><br><span class="line">+----------+--------------------+</span><br><span class="line">| group_id | group_concat(name) |</span><br><span class="line">+----------+--------------------+</span><br><span class="line">| A        | 小刚               |</span><br><span class="line">| B        | 小明,小花          |</span><br><span class="line">| C        | 小红               |</span><br><span class="line">+----------+--------------------+</span><br><span class="line">3 rows in set (0.00 sec)</span><br></pre></td></tr></table></figure>
+<h1 id="加密函数"><a href="#加密函数" class="headerlink" title="加密函数"></a>加密函数</h1><table>
+<thead>
+<tr>
+<th style="text-align:left">语法</th>
+<th style="text-align:left">用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><code>AES_ENCRYPT(str,key)</code></td>
+<td style="text-align:left">返回用密钥key对字符串str利用高级加密标准算法加密后的结果，调用AES_ENCRYPT的结果是一个二进制字符串，以BLOB类型存储</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>AES_DECRYPT(str,key)</code></td>
+<td style="text-align:left">返回用密钥key对字符串str利用高级加密标准算法解密后的结果</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>DECODE(str,key)</code></td>
+<td style="text-align:left">使用key作为密钥解密加密字符串str</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>ENCRYPT(str,salt)</code></td>
+<td style="text-align:left">使用UNIXcrypt()函数，用关键词salt(一个可以惟一确定口令的字符串，就像钥匙一样)加密字符串str</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>ENCODE(str,key)</code></td>
+<td style="text-align:left">使用key作为密钥加密字符串str，调用ENCODE()的结果是一个二进制字符串，它以BLOB类型存储</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>MD5()</code></td>
+<td style="text-align:left">计算字符串str的MD5校验和</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>PASSWORD(str)</code></td>
+<td style="text-align:left">返回字符串str的加密版本，这个加密过程是不可逆转的，和UNIX密码加密过程使用不同的算法。</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>SHA()</code></td>
+<td style="text-align:left">计算字符串str的安全散列算法(SHA)校验和</td>
+</tr>
+</tbody>
+</table>
+<h1 id="自定义函数"><a href="#自定义函数" class="headerlink" title="自定义函数"></a>自定义函数</h1><p>Mysql中自定义函数(user-defined function, UDF) 是一种对Mysql扩展的路径, 其用法与内置函数相同;</p>
+<p>一个自定义函数必会有参数及返回值;<br>函数可以返回任意类型的值, 同样也可以接收这些类型的参数;</p>
+<p>创建自定义函数<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">CREATE FUNCTION function_name </span><br><span class="line">RETURNS </span><br><span class="line">&#123;STRING | INTEGER | REAL |DECIMAL&#125;</span><br><span class="line">routine_body</span><br></pre></td></tr></table></figure></p>
+<p>函数体可以由如下语句构成, </p>
+<ol>
+<li>函数体由合法的SQL语句构成;</li>
+<li>函数体可以是简单的SELECT或INSERT语句;</li>
+<li>函数体如果为复合结构则使用BEGIN..END语句;</li>
+<li>复合结构可以包含声明, 循环, 控制结构;</li>
+</ol>
+<p>创建不带参数的自定义函数</p>
+<blockquote>
+<p>dev@testdb&gt;SET NAMES utf8;  # 修改编码 临时生效</p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash">登录root</span></span><br><span class="line"><span class="meta">mysql&gt;</span><span class="bash"> <span class="built_in">set</span> global log_bin_trust_function_creators =1;</span></span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash">切换普通账号 创建f2()</span></span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">CREATE FUNCTION f2() RETURNS VARCHAR(30) DETERMINISTIC RETURN date_format(NOW(), <span class="string">'%Y年%m月%d日 %H点:%i分:%s秒'</span>);</span></span><br><span class="line">Query OK, 0 rows affected (0.05 sec)</span><br><span class="line"></span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">select f2() as now ;</span></span><br><span class="line">+-------------------------------------+</span><br><span class="line">| now                                 |</span><br><span class="line">+-------------------------------------+</span><br><span class="line">| 2018年11月01日 11点:49分:23秒       |</span><br><span class="line">+-------------------------------------+</span><br><span class="line">1 row in set (0.01 sec)</span><br></pre></td></tr></table></figure>
+<p>创建带参数的函数</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">DROP FUNCTION f1;</span></span><br><span class="line">Query OK, 0 rows affected (0.10 sec)</span><br><span class="line"></span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">CREATE FUNCTION f1(num1 SMALLINT UNSIGNED, num2 SMALLINT UNSIGNED)</span></span><br><span class="line">    -&gt; RETURNS FLOAT(10,2) UNSIGNED</span><br><span class="line">    -&gt; RETURN (num1+num2)/2;</span><br><span class="line">Query OK, 0 rows affected (0.07 sec)</span><br><span class="line"></span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">select f1(1,5) as avg;</span></span><br><span class="line">+------+</span><br><span class="line">| avg  |</span><br><span class="line">+------+</span><br><span class="line">| 3.00 |</span><br><span class="line">+------+</span><br><span class="line">1 row in set (0.00 sec)</span><br></pre></td></tr></table></figure>
+<p>创建具有复合结构函数体的自定义函数</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> delimiter 替换分割结束符;</span></span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">DELIMITER //</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 当函数体中包含两条以上SQL语句时, 需要用BEGIN...END包含起来</span></span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">CREATE FUNCTION adduser(username VARCHAR(20))</span></span><br><span class="line">    -&gt; RETURNS INT UNSIGNED</span><br><span class="line">    -&gt; BEGIN</span><br><span class="line">    -&gt; INSERT tb17(username) VALUES(username);</span><br><span class="line">    -&gt; RETURN LAST_INSERT_ID();</span><br><span class="line">    -&gt; END</span><br><span class="line">    -&gt; //</span><br><span class="line">Query OK, 0 rows affected (0.11 sec)</span><br><span class="line"></span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">SELECT adduser(<span class="string">'Tom'</span>);</span></span><br><span class="line">    -&gt; //</span><br><span class="line">+----------------+</span><br><span class="line">| adduser('Tom') |</span><br><span class="line">+----------------+</span><br><span class="line">|              3 |</span><br><span class="line">+----------------+</span><br><span class="line">1 row in set, 1 warning (0.10 sec)</span><br><span class="line"></span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">DELIMITER ;</span></span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">select adduser(<span class="string">'Jack'</span>);</span></span><br><span class="line">+-----------------+</span><br><span class="line">| adduser('Jack') |</span><br><span class="line">+-----------------+</span><br><span class="line">|               4 |</span><br><span class="line">+-----------------+</span><br><span class="line">1 row in set (0.08 sec)</span><br></pre></td></tr></table></figure>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><ul>
+<li>本文总结了常用的mysql函数用法，并通过实例进行实践分析学习;</li>
+<li>进一步了解学习了自定义函数的用法及适用, 通过创建带参和不带参数自定义函数的创建,以及复合函数体自定义函数的实践 进一步加深了对Mysql函数的学习过程; 自定义函数是用户扩展Mysql功能的一种便捷路径;</li>
+</ul>
+  
+	</div>
+		<div style="padding: 10px 44px 30px 44px;" >
+<div style="border: 1px dashed #e0e0e0; padding: 10px 10px 10px 10px; background-color: #fffeee; background-repeat: no-repeat; background-attachment: scroll; background-position: 1% 50%; -moz-background-size: auto auto; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">
+<div style="float:left;margin-top:0px;">
+<img src="/img/weixin.jpg" width="125px" height="125px" style="border:1px solid #ccc; margin: 6px 5px 0px 0px"/>
+</div>
+<div>
+ <p style="margin-top:0px;">作者署名：<b><a target="_blank" href="http://researchlab.github.io/">朴实的一线攻城狮</a></b>
+<br />本文标题：<b><a href="/2018/10/02/mysql-09-function/" target="_blank" title="mysql专题09 常用函数及自定义函数">mysql专题09 常用函数及自定义函数</a></b> 
+<br />本文出处：<b><a href="/2018/10/02/mysql-09-function/" target="_blank" title="mysql专题09 常用函数及自定义函数">http://researchlab.github.io/2018/10/02/mysql-09-function/</a></b>
+<br />版权声明：本文由<b><a href="/about" target="_blank" title="Lee Hong">Lee Hong</a></b>创作和发表,采用<b>署名(BY)</b>-<b>非商业性使用(NC)</b>-<b>相同方式共享(SA)</b>国际许可协议进行许可,转载请注明作者及出处, 否则保留追究法律责任的权利。 </p>
+</div>
+</div>
+</div>
+
+   	       
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/mysql专题/">mysql专题</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/mysql/">mysql</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	<div class="share-jiathis">
+	  
+<div class="jiathis_style_24x24">
+	<a class="jiathis_button_weixin"></a>
+	<a class="jiathis_button_tsina"></a>
+	<a class="jiathis_button_tqq"></a>
+	<a class="jiathis_button_qzone"></a>
+    <a class="jiathis_button_googleplus"></a>
+	<a class="jiathis_button_douban"></a>
+	<a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+    var jiathis_config={
+    data_track_clickback:true,
+    sm:"copy,renren,cqq",
+    pic:"",
+    summary:"",
+    
+  </script> 
+<script type="text/javascript" src="//v3.jiathis.com/code/jia.js?uid=
+2084050" charset="utf-8"></script>      
+
+
+	 </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2018/10/03/mysql-10-storage-procedure-and-engine-summary/" title="mysql专题10 存储过程及存储引擎">
+  <strong>上一篇：</strong><br/>
+  <span>
+  mysql专题10 存储过程及存储引擎</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2018/10/01/mysql-08-sql-mode/"  title="mysql专题08 探讨sql_mode=only_full_group_by解决方案及缘由">
+ <strong>下一篇：</strong><br/> 
+ <span>mysql专题08 探讨sql_mode=only_full_group_by解决方案及缘由
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+<!-- gitment评论框 start -->
+	<div id="gitment" class="ds-thread"></div>
+	<link rel="stylesheet" href="https://github.com/researchlab/gitment/blob/master/style/default.css">
+	<script src="https://github.com/researchlab/gitment/blob/master/dist/gitment.browser.js"></script>
+	<script>
+	  var gitment = new Gitment({
+	    id: 'lTue Oct 02 2018 17:29:37 GMT+0800', // 可选。建议为Tue Oct 02 2018 17:29:37 GMT+0800
+	    owner: 'researchlab', // 可以是你的GitHub用户名，也可以是github id
+	    repo: 'researchlab.github.io', //可以是你的任意一个repo，推荐使用githubpage所在的repo
+	    oauth: {
+	      client_id: 'e4971ec4c4fdbefb392f',
+	      client_secret: 'e5001b2dda2dcb9a9c66417991be57836c17a72b',
+	    },
+	  })
+	  gitment.render('gitment')
+</script>
+
+
+</div>  
+
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+<div id="asidepart">
+
+  <div class="widget tag">
+<!--<hr noshade color="#ccc">-->
+<!-- <p style="text-align:center">Mike.Lee</p> -->
+<p margin="0" style="text-align:center">
+<a class="ahref" href="http://researchlab.github.io/about/">
+<img id="aboutpic"  src="/img/qzly.png" alt="@一线攻城狮" height="200" width="200" style="box-shadow: 0px 0px 2px 2px #9edeff;border-radius: 8px;" >
+</a></p>
+<p style="text-align:center"><font size="2" color="grey">关注微信公众号 @一线攻城狮</font></p>
+<div style="display:block; margin-top:10px; padding: 0px 4px 4px 0; border-top: dashed 1px #ccc; text-align:left;"></div>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<div style="float:left;position:absolute;"><font size="2" >总访问:<span id="busuanzi_value_site_pv"></span>次</font></div>
+<div style="float:right;"><font size="2" >总访客:<span id="busuanzi_value_site_uv"></span>人</font></div>
+
+<div style="margin-top:30px; padding: 5px 4px 4px 0; border-top: dashed 1px #ccc; text-align:left;"></div>
+</div>
+
+
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/DevOps/" title="DevOps">DevOps<sup>12</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Hexo/" title="Hexo">Hexo<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/MQ/" title="MQ">MQ<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/algorithm/" title="algorithm">algorithm<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/docker-practice/" title="docker-practice">docker-practice<sup>8</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/go-bootcamp/" title="go-bootcamp">go-bootcamp<sup>6</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/go-pattern/" title="go-pattern">go-pattern<sup>3</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/golang/" title="golang">golang<sup>23</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/java/" title="java">java<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/javascript/" title="javascript">javascript<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/k8s/" title="k8s">k8s<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/mysql专题/" title="mysql专题">mysql专题<sup>16</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/php/" title="php">php<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/redis专题/" title="redis专题">redis专题<sup>17</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/golang/" title="golang">golang<sup>26</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mysql/" title="mysql">mysql<sup>18</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/redis/" title="redis">redis<sup>17</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/docker/" title="docker">docker<sup>9</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/setcookie/" title="setcookie">setcookie<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/tcp/" title="tcp">tcp<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/cache/" title="cache">cache<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/concurrency/" title="concurrency">concurrency<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Hexo/" title="Hexo">Hexo<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Blog/" title="Blog">Blog<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/minikube/" title="minikube">minikube<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/cache-invalid/" title="cache-invalid">cache-invalid<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/getcookie/" title="getcookie">getcookie<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/ticker/" title="ticker">ticker<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/rpc/" title="rpc">rpc<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/vendoring/" title="vendoring">vendoring<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/godep/" title="godep">godep<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/govendor/" title="govendor">govendor<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/glide/" title="glide">glide<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/hash/" title="hash">hash<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="http://blog.csdn.net/xiaolongwang2010" target="_blank" title="小龙王2010csdn技术博客">Linux/c/c++</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  
+
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+  <iframe width="100%" height="550" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=550&fansRow=1&ptype=1&speed=0&skin=1&isTitle=1&noborder=1&isWeibo=1&isFans=1&uid=5141203275&verifier=a533edf5&dpc=1"></iframe>
+
+
+</aside>
+</div>
+
+    </div>
+    <footer><div id="footer" >
+	
+	
+	<div class="social-font" class="clearfix">
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/researchlab/lightman" target="_blank" title="lightman">lightman</a> ©2016 - 2020 
+		
+		<a href="/about" target="_blank" title="Lee Hong">Lee Hong</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+
+
+<script type="text/javascript">
+  var duoshuoQuery = {short_name:"gamedp"};
+  (function() {
+    var ds = document.createElement('script');
+    ds.type = 'text/javascript';ds.async = true;
+    ds.src = '//static.duoshuo.com/embed.js';
+    ds.charset = 'UTF-8';
+    (document.getElementsByTagName('head')[0] 
+    || document.getElementsByTagName('body')[0]).appendChild(ds);
+  })();
+</script> 
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

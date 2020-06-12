@@ -1,0 +1,691 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>mysql专题15 性能优化之数据库结构优化 | 一线攻城狮</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="Lee Hong">
+    
+
+    
+    <meta name="description" content="除了常见的SQL语句优化及索引优化等数据库优化手段外, 对数据库结构进行优化也是可以考虑的一个重要方向;">
+<meta name="keywords" content="mysql">
+<meta property="og:type" content="article">
+<meta property="og:title" content="mysql专题15 性能优化之数据库结构优化">
+<meta property="og:url" content="http://researchlab.github.io/2018/10/08/mysql-15-database-structure-optimization/index.html">
+<meta property="og:site_name" content="一线攻城狮">
+<meta property="og:description" content="除了常见的SQL语句优化及索引优化等数据库优化手段外, 对数据库结构进行优化也是可以考虑的一个重要方向;">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2020-06-12T07:26:52.030Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="mysql专题15 性能优化之数据库结构优化">
+<meta name="twitter:description" content="除了常见的SQL语句优化及索引优化等数据库优化手段外, 对数据库结构进行优化也是可以考虑的一个重要方向;">
+
+    
+    <link rel="alternative" href="/atom.xml" title="一线攻城狮" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="一线攻城狮">一线攻城狮</a></h1>
+				<h2 class="blog-motto">十年磨一剑，一步一步脚踏实地的耕种</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">首页</a></li>
+					
+						<li><a href="/archives">归档</a></li>
+					
+						<li><a href="/about">关于</a></li>
+					
+						<li><a href="/reading">书单</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:researchlab.github.io">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2018/10/08/mysql-15-database-structure-optimization/" title="mysql专题15 性能优化之数据库结构优化" itemprop="url">mysql专题15 性能优化之数据库结构优化</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
+		
+ <p class="article-time">
+    <time datetime="2018-10-08T02:20:57.000Z" itemprop="datePublished"> 发表于 2018-10-08</time>
+   &nbsp&nbsp热度&nbsp<span id="busuanzi_value_page_pv"></span>° 
+  </p>
+</header>
+
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#列数据类型优化"><span class="toc-number">1.</span> <span class="toc-text">列数据类型优化</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#示例分析"><span class="toc-number">1.1.</span> <span class="toc-text">示例分析</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#表范式化优化"><span class="toc-number">2.</span> <span class="toc-text">表范式化优化</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#示例分析-1"><span class="toc-number">2.1.</span> <span class="toc-text">示例分析</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#表反范式化优化"><span class="toc-number">3.</span> <span class="toc-text">表反范式化优化</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#示例分析-2"><span class="toc-number">3.1.</span> <span class="toc-text">示例分析</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#表垂直拆分"><span class="toc-number">4.</span> <span class="toc-text">表垂直拆分</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#表水平拆分"><span class="toc-number">5.</span> <span class="toc-text">表水平拆分</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#总结"><span class="toc-number">6.</span> <span class="toc-text">总结</span></a></li></ol>
+		
+		</div>
+		
+		<p>除了常见的SQL语句优化及索引优化等数据库优化手段外, 对数据库结构进行优化也是可以考虑的一个重要方向;<br><a id="more"></a></p>
+<p>从以下几个方面来探讨数据库结构方面的优化实践,</p>
+<ul>
+<li>列<ul>
+<li>数据类型优化</li>
+</ul>
+</li>
+<li>数据表<ul>
+<li>范式化优化</li>
+<li>反范式化优化</li>
+<li>垂直拆分</li>
+<li>水平拆分</li>
+</ul>
+</li>
+</ul>
+<h2 id="列数据类型优化"><a href="#列数据类型优化" class="headerlink" title="列数据类型优化"></a>列数据类型优化</h2><p>如何选择合适的列数据类型?</p>
+<ol>
+<li>使用可以存下目标数据的最小的数据类型;</li>
+<li>使用简单的数据类型, Int要比varchar类型在mysql处理上简单;</li>
+<li>尽可能的使用NOT NULL定义字段;</li>
+<li>尽量少用text类型, 非用不可时最好考虑分表;</li>
+</ol>
+<h3 id="示例分析"><a href="#示例分析" class="headerlink" title="示例分析"></a>示例分析</h3><p>使用int类型存储日期时间, 利用FROM_UNIXTIME(), UNIX_TIMESTAMP()两个函数进行转换;</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">create</span> <span class="keyword">table</span> <span class="keyword">test</span>(</span><br><span class="line">	<span class="keyword">id</span> <span class="built_in">int</span> auto_increment <span class="keyword">not</span> <span class="literal">null</span>,</span><br><span class="line">	timestr <span class="built_in">int</span>,</span><br><span class="line">	primary <span class="keyword">key</span> (<span class="keyword">id</span>));</span><br><span class="line"></span><br><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> <span class="keyword">test</span> (timestr) <span class="keyword">values</span>(<span class="keyword">unix_timestamp</span>(<span class="string">'2016-06-11 12:11:00'</span>));</span><br><span class="line"></span><br><span class="line"><span class="keyword">select</span> FROM_UNIXTIME(timestr) <span class="keyword">from</span> <span class="keyword">test</span>;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>在具体使用时也应用结合业务使用场景来进行优化，如业务经常需要对时间进行各种格式化转换, 甚至需要在不同的语言中转换, 则应存储成标准的时间格式 time.Time, 以免引起精度损失问题;</li>
+</ul>
+<p>使用bigint来存储IP地址, 利用INET_ATON(), INET_NTOA()两个函数进行转换;</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">create</span> <span class="keyword">table</span> sessions(</span><br><span class="line"><span class="keyword">id</span> <span class="built_in">int</span> auto_increment <span class="keyword">not</span> <span class="literal">null</span>,</span><br><span class="line">ipaddr <span class="built_in">bigint</span>,</span><br><span class="line">primary <span class="keyword">key</span> (<span class="keyword">id</span>));</span><br><span class="line"></span><br><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> sessions(ipaddr) <span class="keyword">values</span>(<span class="keyword">inet_aton</span>(<span class="string">'192.168.0.1'</span>));</span><br><span class="line"></span><br><span class="line"><span class="keyword">select</span> <span class="keyword">inet_ntoa</span>(ipaddr) <span class="keyword">from</span> sessions;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>bigint 大概需要8个字节， 而varchar大概需要15个字节</li>
+</ul>
+<h2 id="表范式化优化"><a href="#表范式化优化" class="headerlink" title="表范式化优化"></a>表范式化优化</h2><p>表范式化一般指第三设计范式, 即要求数据表中不存在非关键字段对任意候选键字段的传递函数依赖则符合第三范式;</p>
+<h3 id="示例分析-1"><a href="#示例分析-1" class="headerlink" title="示例分析"></a>示例分析</h3><table>
+<thead>
+<tr>
+<th style="text-align:left">商品名</th>
+<th style="text-align:left">价格</th>
+<th style="text-align:left">重量</th>
+<th style="text-align:left">有效期</th>
+<th style="text-align:left">分类</th>
+<th style="text-align:left">分类描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">可乐</td>
+<td style="text-align:left">3.00</td>
+<td style="text-align:left">250ml</td>
+<td style="text-align:left">2015.6</td>
+<td style="text-align:left">饮料</td>
+<td style="text-align:left">碳酸饮料</td>
+</tr>
+<tr>
+<td style="text-align:left">雪碧</td>
+<td style="text-align:left">3.00</td>
+<td style="text-align:left">250ml</td>
+<td style="text-align:left">2015.6</td>
+<td style="text-align:left">饮料</td>
+<td style="text-align:left">碳酸饮料</td>
+</tr>
+</tbody>
+</table>
+<p>显然上述商品表中存在如下传递函数依赖关系<br>(商品名)–&gt;(分类)–&gt;(分类描述)</p>
+<p>也就是说存在非关键字”分类描述”对关键字”商品名”的传递函数依赖; 显然不符合第三设计范式, 不符合设计范式一般存在4大问题, </p>
+<ol>
+<li>数据冗余(分类, 分类描述) 对同一分类商品是一样的;</li>
+<li>数据插入异常; 插入了就能查到, 没有数据就查不到某些关键信息;</li>
+<li>更新异常;</li>
+<li>删除异常;</li>
+</ol>
+<p>一般这种问题可以通过将表设计拆分为两张实体表, 另外在增加一个关系表; 如, </p>
+<p>商品表(商品ming,价格,重量,有效期)</p>
+<p>分类表(分类,分类描述)</p>
+<p>商品分类(分类, 商品名)</p>
+<h2 id="表反范式化优化"><a href="#表反范式化优化" class="headerlink" title="表反范式化优化"></a>表反范式化优化</h2><p>反范式化是指为了查询效率的考虑把原本符合第三范式的表适当的增加冗余, 以达到优化查询效率的目的, 反范式化是一种以空间来换取时间的操作;</p>
+<h3 id="示例分析-2"><a href="#示例分析-2" class="headerlink" title="示例分析"></a>示例分析</h3><p>用户表(用户ID,姓名,电话,地址,邮编)<br>订单表(订单ID,用户ID,下单时间,支付类型,订单状态)<br>订单商品表(订单ID, 商品ID, 商品数量,商品价格)<br>商品表(商品ID,名称,描述,过期时间)</p>
+<p>问题: 查询订单详情</p>
+<p>常规sql</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> b.用户名, b.电话, b.地址, a.订单<span class="keyword">ID</span>, <span class="keyword">sum</span>(c.商品价格*c.商品数量) <span class="keyword">as</span> 订单价格 <span class="keyword">from</span> 订单表 a </span><br><span class="line"><span class="keyword">join</span> 用户表 b <span class="keyword">on</span> a.用户<span class="keyword">ID</span> = b.用户<span class="keyword">ID</span> </span><br><span class="line"><span class="keyword">join</span> 订单商品表 c <span class="keyword">on</span> c.订单<span class="keyword">ID</span> = b.订单<span class="keyword">ID</span></span><br><span class="line"><span class="keyword">group</span> <span class="keyword">by</span> b.用户名, b.电话, b.地址, a.订单<span class="keyword">ID</span>;</span><br></pre></td></tr></table></figure>
+<p>上述查询显然要关联多张表; 此外在group by 中如果存在非关键字索引字段， 则可能使用临时表来辅助查询, 那这样效率就比较低; </p>
+<p>可以通过将订单表中冗余一部分用户信息, 这样可以通过查询订单表一张表即可完成查询需求;</p>
+<p>订单表(订单ID,用户ID,下单时间,支付类型,订单状态,订单价格,用户名,电话,地址)</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> 用户名, 电话, 地址, 订单<span class="keyword">ID</span>,  订单价格 <span class="keyword">from</span> 订单表</span><br></pre></td></tr></table></figure>
+<h2 id="表垂直拆分"><a href="#表垂直拆分" class="headerlink" title="表垂直拆分"></a>表垂直拆分</h2><p>表的垂直拆分, 就是把原来有很多列的表拆分为多个表, 垂直拆分原则, </p>
+<ol>
+<li>把不常用的字段单独存放到一张表中;</li>
+<li>把大字段独立放到一个表中;</li>
+<li>把可能存在关联关系常用字段放到一张表中;</li>
+</ol>
+<h2 id="表水平拆分"><a href="#表水平拆分" class="headerlink" title="表水平拆分"></a>表水平拆分</h2><p>表的水平拆分是为了解决单表的数据量过大的问题, 水平拆分的表每一个表的结构都是完全一致的; 通过取某个primary key 或者uniquekey 的值进行hash计算然后决定把数据存入tb1,tb2,…,tbn中某个表中; </p>
+<p>但在以下场景中对sql操作会带来一些挑战,<br>1.跨分区表进行数据查询;<br>2.统计及后台报表操作;</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ul>
+<li>选择合适的列字段类型; </li>
+<li>启用空间换时间的办法, 做一些反范式化设计冗余字段提高查询等操作效率;</li>
+<li>针对数据表字段过多及数据量过多的情况的两种简单设计技巧的说明, 实际情况中会通过分库分表来做, 可以封装一套mysql来支持， 也可以采用现成的开源db, 如tidb等方案;</li>
+</ul>
+  
+	</div>
+		<div style="padding: 10px 44px 30px 44px;" >
+<div style="border: 1px dashed #e0e0e0; padding: 10px 10px 10px 10px; background-color: #fffeee; background-repeat: no-repeat; background-attachment: scroll; background-position: 1% 50%; -moz-background-size: auto auto; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">
+<div style="float:left;margin-top:0px;">
+<img src="/img/weixin.jpg" width="125px" height="125px" style="border:1px solid #ccc; margin: 6px 5px 0px 0px"/>
+</div>
+<div>
+ <p style="margin-top:0px;">作者署名：<b><a target="_blank" href="http://researchlab.github.io/">朴实的一线攻城狮</a></b>
+<br />本文标题：<b><a href="/2018/10/08/mysql-15-database-structure-optimization/" target="_blank" title="mysql专题15 性能优化之数据库结构优化">mysql专题15 性能优化之数据库结构优化</a></b> 
+<br />本文出处：<b><a href="/2018/10/08/mysql-15-database-structure-optimization/" target="_blank" title="mysql专题15 性能优化之数据库结构优化">http://researchlab.github.io/2018/10/08/mysql-15-database-structure-optimization/</a></b>
+<br />版权声明：本文由<b><a href="/about" target="_blank" title="Lee Hong">Lee Hong</a></b>创作和发表,采用<b>署名(BY)</b>-<b>非商业性使用(NC)</b>-<b>相同方式共享(SA)</b>国际许可协议进行许可,转载请注明作者及出处, 否则保留追究法律责任的权利。 </p>
+</div>
+</div>
+</div>
+
+   	       
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/mysql专题/">mysql专题</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/mysql/">mysql</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	<div class="share-jiathis">
+	  
+<div class="jiathis_style_24x24">
+	<a class="jiathis_button_weixin"></a>
+	<a class="jiathis_button_tsina"></a>
+	<a class="jiathis_button_tqq"></a>
+	<a class="jiathis_button_qzone"></a>
+    <a class="jiathis_button_googleplus"></a>
+	<a class="jiathis_button_douban"></a>
+	<a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+    var jiathis_config={
+    data_track_clickback:true,
+    sm:"copy,renren,cqq",
+    pic:"",
+    summary:"",
+    
+  </script> 
+<script type="text/javascript" src="//v3.jiathis.com/code/jia.js?uid=
+2084050" charset="utf-8"></script>      
+
+
+	 </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2018/10/08/redis-11-redisio/" title="redis专题11 线程IO模型">
+  <strong>上一篇：</strong><br/>
+  <span>
+  redis专题11 线程IO模型</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2018/10/07/redis-10-scan/"  title="redis专题10 海量数据扫描神器之scan">
+ <strong>下一篇：</strong><br/> 
+ <span>redis专题10 海量数据扫描神器之scan
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+<!-- gitment评论框 start -->
+	<div id="gitment" class="ds-thread"></div>
+	<link rel="stylesheet" href="https://github.com/researchlab/gitment/blob/master/style/default.css">
+	<script src="https://github.com/researchlab/gitment/blob/master/dist/gitment.browser.js"></script>
+	<script>
+	  var gitment = new Gitment({
+	    id: 'lMon Oct 08 2018 10:20:57 GMT+0800', // 可选。建议为Mon Oct 08 2018 10:20:57 GMT+0800
+	    owner: 'researchlab', // 可以是你的GitHub用户名，也可以是github id
+	    repo: 'researchlab.github.io', //可以是你的任意一个repo，推荐使用githubpage所在的repo
+	    oauth: {
+	      client_id: 'e4971ec4c4fdbefb392f',
+	      client_secret: 'e5001b2dda2dcb9a9c66417991be57836c17a72b',
+	    },
+	  })
+	  gitment.render('gitment')
+</script>
+
+
+</div>  
+
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+<div id="asidepart">
+
+  <div class="widget tag">
+<!--<hr noshade color="#ccc">-->
+<!-- <p style="text-align:center">Mike.Lee</p> -->
+<p margin="0" style="text-align:center">
+<a class="ahref" href="http://researchlab.github.io/about/">
+<img id="aboutpic"  src="/img/qzly.png" alt="@一线攻城狮" height="200" width="200" style="box-shadow: 0px 0px 2px 2px #9edeff;border-radius: 8px;" >
+</a></p>
+<p style="text-align:center"><font size="2" color="grey">关注微信公众号 @一线攻城狮</font></p>
+<div style="display:block; margin-top:10px; padding: 0px 4px 4px 0; border-top: dashed 1px #ccc; text-align:left;"></div>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<div style="float:left;position:absolute;"><font size="2" >总访问:<span id="busuanzi_value_site_pv"></span>次</font></div>
+<div style="float:right;"><font size="2" >总访客:<span id="busuanzi_value_site_uv"></span>人</font></div>
+
+<div style="margin-top:30px; padding: 5px 4px 4px 0; border-top: dashed 1px #ccc; text-align:left;"></div>
+</div>
+
+
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/DevOps/" title="DevOps">DevOps<sup>12</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Hexo/" title="Hexo">Hexo<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/MQ/" title="MQ">MQ<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/algorithm/" title="algorithm">algorithm<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/docker-practice/" title="docker-practice">docker-practice<sup>8</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/go-bootcamp/" title="go-bootcamp">go-bootcamp<sup>6</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/go-pattern/" title="go-pattern">go-pattern<sup>3</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/golang/" title="golang">golang<sup>23</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/java/" title="java">java<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/javascript/" title="javascript">javascript<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/k8s/" title="k8s">k8s<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/mysql专题/" title="mysql专题">mysql专题<sup>16</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/php/" title="php">php<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/redis专题/" title="redis专题">redis专题<sup>17</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/golang/" title="golang">golang<sup>26</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mysql/" title="mysql">mysql<sup>18</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/redis/" title="redis">redis<sup>17</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/docker/" title="docker">docker<sup>9</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/setcookie/" title="setcookie">setcookie<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/tcp/" title="tcp">tcp<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/cache/" title="cache">cache<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/concurrency/" title="concurrency">concurrency<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Hexo/" title="Hexo">Hexo<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Blog/" title="Blog">Blog<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/minikube/" title="minikube">minikube<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/cache-invalid/" title="cache-invalid">cache-invalid<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/getcookie/" title="getcookie">getcookie<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/ticker/" title="ticker">ticker<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/rpc/" title="rpc">rpc<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/vendoring/" title="vendoring">vendoring<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/godep/" title="godep">godep<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/govendor/" title="govendor">govendor<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/glide/" title="glide">glide<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/hash/" title="hash">hash<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="http://blog.csdn.net/xiaolongwang2010" target="_blank" title="小龙王2010csdn技术博客">Linux/c/c++</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  
+
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+  <iframe width="100%" height="550" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=550&fansRow=1&ptype=1&speed=0&skin=1&isTitle=1&noborder=1&isWeibo=1&isFans=1&uid=5141203275&verifier=a533edf5&dpc=1"></iframe>
+
+
+</aside>
+</div>
+
+    </div>
+    <footer><div id="footer" >
+	
+	
+	<div class="social-font" class="clearfix">
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/researchlab/lightman" target="_blank" title="lightman">lightman</a> ©2016 - 2020 
+		
+		<a href="/about" target="_blank" title="Lee Hong">Lee Hong</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+
+
+<script type="text/javascript">
+  var duoshuoQuery = {short_name:"gamedp"};
+  (function() {
+    var ds = document.createElement('script');
+    ds.type = 'text/javascript';ds.async = true;
+    ds.src = '//static.duoshuo.com/embed.js';
+    ds.charset = 'UTF-8';
+    (document.getElementsByTagName('head')[0] 
+    || document.getElementsByTagName('body')[0]).appendChild(ds);
+  })();
+</script> 
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

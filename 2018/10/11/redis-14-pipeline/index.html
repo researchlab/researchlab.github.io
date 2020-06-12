@@ -1,0 +1,682 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>redis专题14 性能提升之管道技术 | 一线攻城狮</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="Lee Hong">
+    
+
+    
+    <meta name="description" content="用redis管道技术对执行结果没有互相依赖，对结果响应也无需立即获得的命令集批量提交到redis服务器的方式，能在一定程度上提升redis性能，性能提升的原因主要是TCP连接中减少了交互往返的时间。">
+<meta name="keywords" content="redis">
+<meta property="og:type" content="article">
+<meta property="og:title" content="redis专题14 性能提升之管道技术">
+<meta property="og:url" content="http://researchlab.github.io/2018/10/11/redis-14-pipeline/index.html">
+<meta property="og:site_name" content="一线攻城狮">
+<meta property="og:description" content="用redis管道技术对执行结果没有互相依赖，对结果响应也无需立即获得的命令集批量提交到redis服务器的方式，能在一定程度上提升redis性能，性能提升的原因主要是TCP连接中减少了交互往返的时间。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2020-06-12T07:26:52.048Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="redis专题14 性能提升之管道技术">
+<meta name="twitter:description" content="用redis管道技术对执行结果没有互相依赖，对结果响应也无需立即获得的命令集批量提交到redis服务器的方式，能在一定程度上提升redis性能，性能提升的原因主要是TCP连接中减少了交互往返的时间。">
+
+    
+    <link rel="alternative" href="/atom.xml" title="一线攻城狮" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="一线攻城狮">一线攻城狮</a></h1>
+				<h2 class="blog-motto">十年磨一剑，一步一步脚踏实地的耕种</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">首页</a></li>
+					
+						<li><a href="/archives">归档</a></li>
+					
+						<li><a href="/about">关于</a></li>
+					
+						<li><a href="/reading">书单</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:researchlab.github.io">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2018/10/11/redis-14-pipeline/" title="redis专题14 性能提升之管道技术" itemprop="url">redis专题14 性能提升之管道技术</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
+		
+ <p class="article-time">
+    <time datetime="2018-10-11T07:37:51.000Z" itemprop="datePublished"> 发表于 2018-10-11</time>
+   &nbsp&nbsp热度&nbsp<span id="busuanzi_value_page_pv"></span>° 
+  </p>
+</header>
+
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-5"><a class="toc-link" href="#消息交互"><span class="toc-number">1.</span> <span class="toc-text">消息交互</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#管道"><span class="toc-number">2.</span> <span class="toc-text">管道</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#压力测试"><span class="toc-number">3.</span> <span class="toc-text">压力测试</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#管道VS事务"><span class="toc-number">4.</span> <span class="toc-text">管道VS事务</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#管道VS脚本"><span class="toc-number">5.</span> <span class="toc-text">管道VS脚本</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#总结"><span class="toc-number">6.</span> <span class="toc-text">总结</span></a></li></ol>
+		
+		</div>
+		
+		<p>用<code>redis管道技术</code>对执行结果没有互相依赖，对结果响应也无需立即获得的命令集批量提交到<code>redis</code>服务器的方式，能在一定程度上提升<code>redis</code>性能，性能提升的原因主要是TCP连接中减少了<code>交互往返</code>的时间。<br><a id="more"></a></p>
+<blockquote>
+<p><code>Redis管道(Pipeline)</code>本身并不是<code>Redis</code>服务器直接提供的技术，这个技术本质上是由客户端提供的，跟服务器没有什么直接的关系。</p>
+</blockquote>
+<h5 id="消息交互"><a href="#消息交互" class="headerlink" title="消息交互"></a>消息交互</h5><p><code>redis</code>是使用客户端-服务器模型的TCP服务器，称为请求/响应协议。<br>这意味着通常一个请求是通过以下步骤完成的:</p>
+<blockquote>
+<p>客户端向服务器发送查询，并通常以阻塞的方式从套接字读取服务器响应。<br>服务器处理命令并将响应发送回客户端。</p>
+</blockquote>
+<p>每一个<code>redis</code>命令request/response都需要经历一个<code>RTT</code>(Round-Trip Time 往返时间), 如果需要执行很多短小的命令，这些往返时间的开销是很大的，在此情形下，redis提出了<code>管道</code>来提高执行效率。</p>
+<h5 id="管道"><a href="#管道" class="headerlink" title="管道"></a>管道</h5><blockquote>
+<p>如果client执行一些相互之间无关的命令或者不需要获取命令的返回值，那么redis允许你连续发送多条命令，而不需要等待前面命令执行完毕;</p>
+</blockquote>
+<blockquote>
+<p>比如我们执行3条INCR命令，如果使用管道，理论上只需要一个RTT+3条命令的执行时间即可，如果不适用管道，那么可能需要额外的两个RTT时间;</p>
+</blockquote>
+<blockquote>
+<p>因此，管道相当于批处理脚本，相当于是命令集;</p>
+</blockquote>
+<blockquote>
+<p>执行管道命令中, <code>redis</code>必须在处理完所有命令前先缓存起所有命令的处理结果。打包的命令越多，缓存消耗内存也越多。所以并不是打包的命令越多越好。具体多少合适需要根据具体情况测试。</p>
+</blockquote>
+<p><strong>注意</strong></p>
+<blockquote>
+<p>执行<code>管道</code>命令期间将<code>独占</code>链接，此期间将不能进行非<code>管道</code>类型的其他操作，直到管道关闭；</p>
+</blockquote>
+<blockquote>
+<p>如果<code>管道</code>的指令集很庞大，为了不干扰链接中的其他操作，建议为<code>管道</code>操作新建Client链接，让<code>管道</code>和其他正常操作分离在2个client中; </p>
+</blockquote>
+<blockquote>
+<p>不过<code>管道</code>事实上所能容忍的操作个数，和socket-output缓冲区大小/返回结果的数据尺寸都有很大的关系；同时也意味着每个redis-server同时所能支撑的管道链接的个数，也是有限的，这将受限于server的物理内存或网络接口的缓冲能力。</p>
+</blockquote>
+<h5 id="压力测试"><a href="#压力测试" class="headerlink" title="压力测试"></a>压力测试</h5><p>Redis 自带了一个压力测试工具redis-benchmark，使用这个工具就可以进行管道测试。</p>
+<p>对一个普通的<code>set</code>指令进行压测，QPS 大约<code>6w/s</code>。<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">➜  02 docker exec -it redisbloom redis-benchmark -t set -q</span><br><span class="line">SET: 64350.06 requests per second</span><br></pre></td></tr></table></figure></p>
+<p><code>-P</code>参数，表示单个管道内并行的请求数量，看下面<code>P=2</code>，QPS 达到了<code>8w/s</code>。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker exec -it redisbloom redis-benchmark -t set -q -P 2</span><br><span class="line">SET: 89365.51 requests per second</span><br></pre></td></tr></table></figure>
+<p>再看看<code>P=5</code>，<code>QPS</code>达到了<code>10w/s</code>。<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">➜  02 docker exec -it redisbloom redis-benchmark -t set -q -P 5</span><br><span class="line">SET: 106723.59 requests per second</span><br></pre></td></tr></table></figure></p>
+<p>但如果再继续提升<code>P</code>参数，发现<code>QPS</code>已经上不去了。这是为什么呢？</p>
+<p>因为这里<code>CPU</code>处理能力已经达到了瓶颈，<code>Redis</code>的单线程<code>CPU</code>已经飙到了<code>100%</code>，所以无法再继续提升了。</p>
+<p>深入理解管道本质<br>接下来我们深入分析一个请求交互的流程，真实的情况是它很复杂，因为要经过网络协议栈，这个就得深入内核了。<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">client ---&gt; request  ---&gt; send buffer ---&gt; NIC ---&gt; Gateway Router ---&gt; NIC ---&gt; recv buffer ---&gt; request  ---&gt; server </span><br><span class="line">                                                                                                                 |</span><br><span class="line">client &lt;--- response &lt;--- recv buffer &lt;--- NIC &lt;--- Gateway Router &lt;--- NIC &lt;--- send buffer &lt;--- response &lt;---  V</span><br></pre></td></tr></table></figure></p>
+<p>上图就是一个完整的请求交互流程图,</p>
+<ol>
+<li>客户端进程调用<code>write</code>将消息写到操作系统内核为套接字分配的发送缓冲<code>send buffer</code>;</li>
+<li>客户端操作系统内核将发送缓冲的内容发送到<code>网卡</code>，<code>网卡</code>硬件将数据通过「路由」送到服务器的<code>网卡</code>;</li>
+<li>服务器操作系统内核将<code>网卡</code>的数据放到内核为套接字分配的接收缓冲<code>recv buffer</code>;</li>
+<li>服务器进程调用<code>read</code>从接收缓冲中取出消息进行处理;</li>
+<li>服务器进程调用<code>write</code>将响应消息写到内核为套接字分配的发送缓冲<code>send buffer</code>;</li>
+<li>服务器操作系统内核将发送缓冲的内容发送到<code>网卡</code>，<code>网卡</code>硬件将数据通过「路由」送到客户端的<code>网卡</code>。</li>
+<li>客户端操作系统内核将<code>网卡</code>的数据放到内核为套接字分配的接收缓冲<code>recv buffer</code>;</li>
+<li>客户端进程调用<code>read</code>从接收缓冲中取出消息返回给上层业务逻辑进行处理;</li>
+</ol>
+<blockquote>
+<p><code>write</code>操作不是等到对方收到消息才会返回。<code>write</code>操作只负责将数据写到本地操作系统内核的发送缓冲然后就返回了。剩下的事交给操作系统内核异步将数据送到目标机器。但是如果发送缓冲满了，那么就需要等待缓冲空出空闲空间来，这个就是写操作<code>IO</code>操作的真正耗时。</p>
+</blockquote>
+<blockquote>
+<p><code>read</code>操作不是从目标机器拉取数据。<code>read</code>操作只负责将数据从本地操作系统内核的接收缓冲中取出来就了事了。但是如果缓冲是空的，那么就需要等待数据到来，这个就是读操作<code>IO</code>操作的真正耗时。</p>
+</blockquote>
+<p>所以对于<code>value = redis.get(key)</code>这样一个简单的请求来说，<code>write</code>操作几乎没有耗时，直接写到发送缓冲就返回，而<code>read</code>就会比较耗时了，因为它要等待消息经过网络路由到目标机器处理后的响应消息,再回送到当前的内核读缓冲才可以返回。这才是一个网络来回的真正开销。</p>
+<p>而对于管道来说，连续的<code>write</code>操作根本就没有耗时，之后第一个<code>read</code>操作会等待一个网络的来回开销，然后所有的响应消息就都已经回送到内核的读缓冲了，后续的<code>read</code>操作直接就可以从缓冲拿到结果，瞬间就返回了。</p>
+<h5 id="管道VS事务"><a href="#管道VS事务" class="headerlink" title="管道VS事务"></a>管道VS事务</h5><blockquote>
+<p>管道和事务是不同的，pipeline只是表达”交互”中操作的传递的方向性，pipeline也可以在事务中运行，也可以不在。</p>
+</blockquote>
+<blockquote>
+<p>无论如何，pipeline中发送的每个command都会被server立即执行，如果执行失败，将会在此后的相应结果集中得到信息；也就是pipeline并不是表达”所有command都一起成功”的语义，管道中前面命令失败，后面命令不会有影响，继续执行。</p>
+</blockquote>
+<blockquote>
+<p>简单来说就是管道中的命令是没有关系的，它们只是像管道一样流水发给server，而不是串行执行，仅此而已; 但是如果pipeline的操作被封装在事务中，那么将有事务来确保操作的成功与失败。</p>
+</blockquote>
+<blockquote>
+<p>pipeline 只是把多个redis指令一起发出去，redis并没有保证这些指定的执行是原子的；multi相当于一个redis的transaction的，保证整个操作的原子性，避免由于中途出错而导致最后产生的数据不一致</p>
+</blockquote>
+<h5 id="管道VS脚本"><a href="#管道VS脚本" class="headerlink" title="管道VS脚本"></a>管道VS脚本</h5><blockquote>
+<p>使用管道可能在效率上比使用script要好，但是有的情况下只能使用script。因为在执行后面的命令时, 无法得到前面命令的结果，就像事务一样，所以如果需要在后面命令中使用前面命令的value等结果，则只能使用script或者事务+watch;</p>
+</blockquote>
+<blockquote>
+<p>使用Redis脚本(在Redis版本2.6+), 可以使用执行服务器端所需的大量工作的脚本更高效地处理一些pipelining用例;</p>
+</blockquote>
+<blockquote>
+<p>脚本的一大优势是它能够以最小的延迟读取和写入数据，使得读取，计算，写入等操作非常快速(在这种情况下, 流水线操作无法提供帮助, 因为客户端先需要读命令的回应, 它才可以调用写命令);</p>
+</blockquote>
+<blockquote>
+<p>有时，应用程序可能还想在管道中发送<code>EVAL</code>或<code>EVALSHA</code>命令。这是完全可能的，Redis通过SCRIPT LOAD命令明确地支持它(它保证可以调用EVALSHA而没有失败的风险);</p>
+</blockquote>
+<h5 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h5><ul>
+<li>从分析<code>redis</code>采用<code>tcp</code>消息协议入手, 为进一步提升<code>redis</code>性能的角度，探讨了<code>管道</code>技术在<code>redis</code>中的应用;  </li>
+<li>进一步分析了管道的原理, 因为<code>redis</code>需要在处理完管道命令集前把之前的结果先缓存下来，所以管道并不是打包的命令越多越好，因为打包的命令越多占用的缓存也会相应的增大, 同时在执行管道命令完成前, 同一个<code>redis</code>连接无法继续执行非管道命令;</li>
+<li>通过消息交互示例， 进一步深入分析了管道的本质，管道打包多条命令为客服端–服务端节省了往返(RTT)等待耗时, 因而进一步提升了<code>redis</code>性能;</li>
+<li>最后对比分析了<code>管道</code>与<code>redis事务</code>, <code>redis脚本</code>之间的区别， 进一步阐述了<code>管道</code>，<code>事务</code>, <code>脚本</code>各自适用的场景;</li>
+</ul>
+  
+	</div>
+		<div style="padding: 10px 44px 30px 44px;" >
+<div style="border: 1px dashed #e0e0e0; padding: 10px 10px 10px 10px; background-color: #fffeee; background-repeat: no-repeat; background-attachment: scroll; background-position: 1% 50%; -moz-background-size: auto auto; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">
+<div style="float:left;margin-top:0px;">
+<img src="/img/weixin.jpg" width="125px" height="125px" style="border:1px solid #ccc; margin: 6px 5px 0px 0px"/>
+</div>
+<div>
+ <p style="margin-top:0px;">作者署名：<b><a target="_blank" href="http://researchlab.github.io/">朴实的一线攻城狮</a></b>
+<br />本文标题：<b><a href="/2018/10/11/redis-14-pipeline/" target="_blank" title="redis专题14 性能提升之管道技术">redis专题14 性能提升之管道技术</a></b> 
+<br />本文出处：<b><a href="/2018/10/11/redis-14-pipeline/" target="_blank" title="redis专题14 性能提升之管道技术">http://researchlab.github.io/2018/10/11/redis-14-pipeline/</a></b>
+<br />版权声明：本文由<b><a href="/about" target="_blank" title="Lee Hong">Lee Hong</a></b>创作和发表,采用<b>署名(BY)</b>-<b>非商业性使用(NC)</b>-<b>相同方式共享(SA)</b>国际许可协议进行许可,转载请注明作者及出处, 否则保留追究法律责任的权利。 </p>
+</div>
+</div>
+</div>
+
+   	       
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/redis专题/">redis专题</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/redis/">redis</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	<div class="share-jiathis">
+	  
+<div class="jiathis_style_24x24">
+	<a class="jiathis_button_weixin"></a>
+	<a class="jiathis_button_tsina"></a>
+	<a class="jiathis_button_tqq"></a>
+	<a class="jiathis_button_qzone"></a>
+    <a class="jiathis_button_googleplus"></a>
+	<a class="jiathis_button_douban"></a>
+	<a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+    var jiathis_config={
+    data_track_clickback:true,
+    sm:"copy,renren,cqq",
+    pic:"",
+    summary:"",
+    
+  </script> 
+<script type="text/javascript" src="//v3.jiathis.com/code/jia.js?uid=
+2084050" charset="utf-8"></script>      
+
+
+	 </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2018/10/12/redis-15-transaction/" title="redis专题15 事务系列问题">
+  <strong>上一篇：</strong><br/>
+  <span>
+  redis专题15 事务系列问题</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2018/10/10/redis-13-data-storage-solution/"  title="redis专题13 数据存储与持久化">
+ <strong>下一篇：</strong><br/> 
+ <span>redis专题13 数据存储与持久化
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+<!-- gitment评论框 start -->
+	<div id="gitment" class="ds-thread"></div>
+	<link rel="stylesheet" href="https://github.com/researchlab/gitment/blob/master/style/default.css">
+	<script src="https://github.com/researchlab/gitment/blob/master/dist/gitment.browser.js"></script>
+	<script>
+	  var gitment = new Gitment({
+	    id: 'lThu Oct 11 2018 15:37:51 GMT+0800', // 可选。建议为Thu Oct 11 2018 15:37:51 GMT+0800
+	    owner: 'researchlab', // 可以是你的GitHub用户名，也可以是github id
+	    repo: 'researchlab.github.io', //可以是你的任意一个repo，推荐使用githubpage所在的repo
+	    oauth: {
+	      client_id: 'e4971ec4c4fdbefb392f',
+	      client_secret: 'e5001b2dda2dcb9a9c66417991be57836c17a72b',
+	    },
+	  })
+	  gitment.render('gitment')
+</script>
+
+
+</div>  
+
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+<div id="asidepart">
+
+  <div class="widget tag">
+<!--<hr noshade color="#ccc">-->
+<!-- <p style="text-align:center">Mike.Lee</p> -->
+<p margin="0" style="text-align:center">
+<a class="ahref" href="http://researchlab.github.io/about/">
+<img id="aboutpic"  src="/img/qzly.png" alt="@一线攻城狮" height="200" width="200" style="box-shadow: 0px 0px 2px 2px #9edeff;border-radius: 8px;" >
+</a></p>
+<p style="text-align:center"><font size="2" color="grey">关注微信公众号 @一线攻城狮</font></p>
+<div style="display:block; margin-top:10px; padding: 0px 4px 4px 0; border-top: dashed 1px #ccc; text-align:left;"></div>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<div style="float:left;position:absolute;"><font size="2" >总访问:<span id="busuanzi_value_site_pv"></span>次</font></div>
+<div style="float:right;"><font size="2" >总访客:<span id="busuanzi_value_site_uv"></span>人</font></div>
+
+<div style="margin-top:30px; padding: 5px 4px 4px 0; border-top: dashed 1px #ccc; text-align:left;"></div>
+</div>
+
+
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/DevOps/" title="DevOps">DevOps<sup>12</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Hexo/" title="Hexo">Hexo<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/MQ/" title="MQ">MQ<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/algorithm/" title="algorithm">algorithm<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/docker-practice/" title="docker-practice">docker-practice<sup>8</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/go-bootcamp/" title="go-bootcamp">go-bootcamp<sup>6</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/go-pattern/" title="go-pattern">go-pattern<sup>3</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/golang/" title="golang">golang<sup>23</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/java/" title="java">java<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/javascript/" title="javascript">javascript<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/k8s/" title="k8s">k8s<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/mysql专题/" title="mysql专题">mysql专题<sup>16</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/php/" title="php">php<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/redis专题/" title="redis专题">redis专题<sup>17</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/golang/" title="golang">golang<sup>26</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mysql/" title="mysql">mysql<sup>18</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/redis/" title="redis">redis<sup>17</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/docker/" title="docker">docker<sup>9</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/setcookie/" title="setcookie">setcookie<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/tcp/" title="tcp">tcp<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/cache/" title="cache">cache<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/concurrency/" title="concurrency">concurrency<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Hexo/" title="Hexo">Hexo<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Blog/" title="Blog">Blog<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/minikube/" title="minikube">minikube<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/cache-invalid/" title="cache-invalid">cache-invalid<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/getcookie/" title="getcookie">getcookie<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/ticker/" title="ticker">ticker<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/rpc/" title="rpc">rpc<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/vendoring/" title="vendoring">vendoring<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/godep/" title="godep">godep<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/govendor/" title="govendor">govendor<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/glide/" title="glide">glide<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/hash/" title="hash">hash<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="http://blog.csdn.net/xiaolongwang2010" target="_blank" title="小龙王2010csdn技术博客">Linux/c/c++</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  
+
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+  <iframe width="100%" height="550" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=550&fansRow=1&ptype=1&speed=0&skin=1&isTitle=1&noborder=1&isWeibo=1&isFans=1&uid=5141203275&verifier=a533edf5&dpc=1"></iframe>
+
+
+</aside>
+</div>
+
+    </div>
+    <footer><div id="footer" >
+	
+	
+	<div class="social-font" class="clearfix">
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/researchlab/lightman" target="_blank" title="lightman">lightman</a> ©2016 - 2020 
+		
+		<a href="/about" target="_blank" title="Lee Hong">Lee Hong</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+
+
+<script type="text/javascript">
+  var duoshuoQuery = {short_name:"gamedp"};
+  (function() {
+    var ds = document.createElement('script');
+    ds.type = 'text/javascript';ds.async = true;
+    ds.src = '//static.duoshuo.com/embed.js';
+    ds.charset = 'UTF-8';
+    (document.getElementsByTagName('head')[0] 
+    || document.getElementsByTagName('body')[0]).appendChild(ds);
+  })();
+</script> 
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

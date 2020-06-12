@@ -1,0 +1,959 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>mysql专题02 mysql数据类型及数据表操作 | 一线攻城狮</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="Lee Hong">
+    
+
+    
+    <meta name="description" content="区别于纯理论和纯实践步骤的文章, 本文将从实践结合理论的角度对常用的Mysql数据类型及使用进行归纳总结,从解决实际问题的角度出发在实践的基础上补充阐述理论知识，试图构建完整的Mysql知识体系, 深入学习了解Mysql常用数据类型对Mysql数据库表设计及优化非常重要;">
+<meta name="keywords" content="mysql">
+<meta property="og:type" content="article">
+<meta property="og:title" content="mysql专题02 mysql数据类型及数据表操作">
+<meta property="og:url" content="http://researchlab.github.io/2018/03/04/mysql-02-table-and-datatype-operation/index.html">
+<meta property="og:site_name" content="一线攻城狮">
+<meta property="og:description" content="区别于纯理论和纯实践步骤的文章, 本文将从实践结合理论的角度对常用的Mysql数据类型及使用进行归纳总结,从解决实际问题的角度出发在实践的基础上补充阐述理论知识，试图构建完整的Mysql知识体系, 深入学习了解Mysql常用数据类型对Mysql数据库表设计及优化非常重要;">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2020-06-12T07:26:52.019Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="mysql专题02 mysql数据类型及数据表操作">
+<meta name="twitter:description" content="区别于纯理论和纯实践步骤的文章, 本文将从实践结合理论的角度对常用的Mysql数据类型及使用进行归纳总结,从解决实际问题的角度出发在实践的基础上补充阐述理论知识，试图构建完整的Mysql知识体系, 深入学习了解Mysql常用数据类型对Mysql数据库表设计及优化非常重要;">
+
+    
+    <link rel="alternative" href="/atom.xml" title="一线攻城狮" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="一线攻城狮">一线攻城狮</a></h1>
+				<h2 class="blog-motto">十年磨一剑，一步一步脚踏实地的耕种</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">首页</a></li>
+					
+						<li><a href="/archives">归档</a></li>
+					
+						<li><a href="/about">关于</a></li>
+					
+						<li><a href="/reading">书单</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:researchlab.github.io">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2018/03/04/mysql-02-table-and-datatype-operation/" title="mysql专题02 mysql数据类型及数据表操作" itemprop="url">mysql专题02 mysql数据类型及数据表操作</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
+		
+ <p class="article-time">
+    <time datetime="2018-03-04T03:28:13.000Z" itemprop="datePublished"> 发表于 2018-03-04</time>
+   &nbsp&nbsp热度&nbsp<span id="busuanzi_value_page_pv"></span>° 
+  </p>
+</header>
+
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-5"><a class="toc-link" href="#搭建Mysql容器环境"><span class="toc-number">1.</span> <span class="toc-text">搭建Mysql容器环境</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#Mysql基础操作"><span class="toc-number">2.</span> <span class="toc-text">Mysql基础操作</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#SQL语句基本规范"><span class="toc-number">3.</span> <span class="toc-text">SQL语句基本规范</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#整型"><span class="toc-number">4.</span> <span class="toc-text">整型</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#浮点型"><span class="toc-number">5.</span> <span class="toc-text">浮点型</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#日期时间型"><span class="toc-number">6.</span> <span class="toc-text">日期时间型</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#字符串型"><span class="toc-number">7.</span> <span class="toc-text">字符串型</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#CHAR于VARCHAR类型"><span class="toc-number">8.</span> <span class="toc-text">CHAR于VARCHAR类型</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#CHAR-M-VARCHAR-M-的区别"><span class="toc-number">9.</span> <span class="toc-text">CHAR(M), VARCHAR(M)的区别</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#VARCHAR和TEXT、BlOB类型的区别"><span class="toc-number">10.</span> <span class="toc-text">VARCHAR和TEXT、BlOB类型的区别</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#CHAR-VARCHAR和TEXT的区别"><span class="toc-number">11.</span> <span class="toc-text">CHAR, VARCHAR和TEXT的区别</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#选择数据库"><span class="toc-number">12.</span> <span class="toc-text">选择数据库</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#建表"><span class="toc-number">13.</span> <span class="toc-text">建表</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#查表"><span class="toc-number">14.</span> <span class="toc-text">查表</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#查看表结构"><span class="toc-number">15.</span> <span class="toc-text">查看表结构</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#插入-查找数据"><span class="toc-number">16.</span> <span class="toc-text">插入/查找数据</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#空值与非空值"><span class="toc-number">17.</span> <span class="toc-text">空值与非空值</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#自动编号"><span class="toc-number">18.</span> <span class="toc-text">自动编号</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#总结"><span class="toc-number">19.</span> <span class="toc-text">总结</span></a></li></ol>
+		
+		</div>
+		
+		<p>区别于纯理论和纯实践步骤的文章, 本文将从实践结合理论的角度对常用的<code>Mysql</code>数据类型及使用进行归纳总结,从解决实际问题的角度出发在实践的基础上补充阐述理论知识，试图构建完整的<code>Mysql</code>知识体系, 深入学习了解<code>Mysql</code>常用数据类型对<code>Mysql</code>数据库表设计及优化非常重要;<br><a id="more"></a></p>
+<h5 id="搭建Mysql容器环境"><a href="#搭建Mysql容器环境" class="headerlink" title="搭建Mysql容器环境"></a>搭建Mysql容器环境</h5><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> pull mysql image</span></span><br><span class="line">➜  ~ docker pull mysql/mysql-server:5.7</span><br><span class="line"><span class="meta">#</span><span class="bash"> 启动 mysql 容器</span></span><br><span class="line">➜  ~ docker run --name=dev-mysql -d -p 3307:3306 -e MYSQL_USER=dev -e MYSQL_PASSWORD=dev123 -e MYSQL_ROOT_PASSWORD=dev123456 -e MYSQL_DATABASE=testdb  mysql/mysql-server</span><br><span class="line"><span class="meta">#</span><span class="bash"> 修改权限</span></span><br><span class="line">➜  ~ docker exec -it dev-mysql mysql -uroot -pdev123456</span><br><span class="line"><span class="meta">#</span><span class="bash">授权 root账号远程可登陆</span></span><br><span class="line"><span class="meta">mysql&gt;</span><span class="bash"> grant all privileges on *.* to <span class="string">'root'</span>@<span class="string">'%'</span> identified by <span class="string">'dev123456'</span>;</span></span><br><span class="line">Query OK, 0 rows affected, 1 warning (0.00 sec)</span><br><span class="line"><span class="meta">mysql&gt;</span><span class="bash"> flush privileges;</span></span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br><span class="line"><span class="meta">#</span><span class="bash">授权 dev账号所有权限;</span></span><br><span class="line"><span class="meta">mysql&gt;</span><span class="bash"> grant all privileges on *.* to <span class="string">'dev'</span>@<span class="string">'%'</span> identified by <span class="string">'dev123'</span>;</span></span><br><span class="line">Query OK, 0 rows affected, 1 warning (0.00 sec)</span><br><span class="line"><span class="meta">mysql&gt;</span><span class="bash"> flush privileges;</span></span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 登录mysql命令端</span></span><br><span class="line">➜  ~ docker exec -it dev-mysql mysql -udev -P3307 -pdev123 --prompt "\u@\d&gt;"</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p> mysql 8.0 以上版本创建用户和授权是分开的, 不能直接用上述 grant all privileges on xxx</p>
+</blockquote>
+<ul>
+<li>mysql 8.0+ 授权应如下操作<ul>
+<li>create user<br><code>mysql&gt; CREATE USER &#39;username&#39;@&#39;%&#39; IDENTIFIED WITH mysql_native_password BY &#39;password&#39;;</code></li>
+<li>grant<br><code>mysql&gt; GRANT ALL ON db1.* TO &#39;username&#39;@&#39;%&#39; WITH GRANT OPTION;</code></li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>更多参考<a href="https://github.com/khs1994-docker/lnmp/issues/452" target="_blank" rel="noopener">MySQL 用户管理 增加、授权、改密码 来源官方文档</a></p>
+</blockquote>
+<h5 id="Mysql基础操作"><a href="#Mysql基础操作" class="headerlink" title="Mysql基础操作"></a>Mysql基础操作</h5><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 创建testdb数据库</span></span><br><span class="line"><span class="meta">dev@(none)&gt;</span><span class="bash">create database <span class="keyword">if</span> not exists testdb;</span></span><br><span class="line">Query OK, 1 row affected (0.01 sec)</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 选择数据库</span></span><br><span class="line"><span class="meta">dev@(none)&gt;</span><span class="bash">use testdb;</span></span><br><span class="line">Database changed</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash">查看数据库创建属性</span></span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">show create database testdb;</span></span><br><span class="line">+----------+-------------------------------------------------------------------+</span><br><span class="line">| Database | Create Database                                                   |</span><br><span class="line">+----------+-------------------------------------------------------------------+</span><br><span class="line">| testdb   | CREATE DATABASE `testdb` /*!40100 DEFAULT CHARACTER SET latin1 */ |</span><br><span class="line">+----------+-------------------------------------------------------------------+</span><br><span class="line">1 row in set (0.00 sec)</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 修改数据库字符集为utf8;</span></span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">alter database testdb character <span class="built_in">set</span> utf8;</span></span><br><span class="line">Query OK, 1 row affected (0.00 sec)</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 查看是否修改成功;</span></span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">show create database testdb;</span></span><br><span class="line">+----------+-----------------------------------------------------------------+</span><br><span class="line">| Database | Create Database                                                 |</span><br><span class="line">+----------+-----------------------------------------------------------------+</span><br><span class="line">| testdb   | CREATE DATABASE `testdb` /*!40100 DEFAULT CHARACTER SET utf8 */ |</span><br><span class="line">+----------+-----------------------------------------------------------------+</span><br><span class="line">1 row in set (0.00 sec)</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 删除数据库</span></span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">drop database <span class="keyword">if</span> exists mydb;</span></span><br><span class="line">Query OK, 0 rows affected (0.04 sec)</span><br><span class="line"></span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash"></span></span><br></pre></td></tr></table></figure>
+<h5 id="SQL语句基本规范"><a href="#SQL语句基本规范" class="headerlink" title="SQL语句基本规范"></a>SQL语句基本规范</h5><ul>
+<li>关键字与函数名称全部大写;</li>
+<li>数据库名称/表名称/字段名称全部小写;</li>
+<li>SQL语句必须以分号结尾;</li>
+</ul>
+<p><code>Mysql</code>数据类型是指列, 存储过程参数, 表达式和局部变量的数据特征, 它决定了数据的存储格式, 代表了不同的信息类型; </p>
+<h5 id="整型"><a href="#整型" class="headerlink" title="整型"></a>整型</h5><hr>
+<p><code>Mysql</code>整型主要有如下5类 </p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">数据类型</th>
+<th style="text-align:left">存储范围</th>
+<th style="text-align:left">字节</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">TINYINT</td>
+<td style="text-align:left">有符号值: -128到127(-2<sup>7</sup>到2<sup>7</sup>-1)<br> 无符号值: 0 到255(0 到2<sup>8</sup>-1)</td>
+<td style="text-align:left">1</td>
+</tr>
+<tr>
+<td style="text-align:left">SMALLINT</td>
+<td style="text-align:left">有符号值: -32768到32767(-2<sup>15</sup>到2<sup>15</sup>-1)<br> 无符号值: 0 到65535(0 到2<sup>16</sup>-1)</td>
+<td style="text-align:left">2</td>
+</tr>
+<tr>
+<td style="text-align:left">MEDIUMINT</td>
+<td style="text-align:left">有符号值: -8388608到8388607(-2<sup>23</sup>到2<sup>23</sup>-1)<br> 无符号值: 0 到16777215(0 到2<sup>24</sup>-1)</td>
+<td style="text-align:left">3</td>
+</tr>
+<tr>
+<td style="text-align:left">INT</td>
+<td style="text-align:left">有符号值: -2147483648到2147483647(-2<sup>31</sup>到2<sup>31</sup>-1)<br> 无符号值: 0 到4294967295(0 到2<sup>32</sup>-1)</td>
+<td style="text-align:left">4</td>
+</tr>
+<tr>
+<td style="text-align:left">BIGINT</td>
+<td style="text-align:left">有符号值: -9223372036854775808到9223373036854775807(-2<sup>63</sup>到2<sup>63</sup>-1)<br> 无符号值: 0到18446744073709551615(0 到2<sup>64</sup>-1)</td>
+<td style="text-align:left">8</td>
+</tr>
+</tbody>
+</table>
+<p>如需要一个字段来存储年龄的话， 就没有必要采用<code>BIGINT</code>这样占用<code>8</code>个字节的类型， 因为年龄范围完全可用<code>TINYINT</code>来存储即可，这样每存储一个年龄就节省了7个字节，当数据量很大时是非常换算的; </p>
+<h5 id="浮点型"><a href="#浮点型" class="headerlink" title="浮点型"></a>浮点型</h5><hr>
+<p>Mysql 支持的三个浮点类型是 FLOAT、DOUBLE 和 DECIMAL 类型。FLOAT 数值类型用于表示单精度浮点数值，而 DOUBLE 数值类型用于表示双精度浮点数值。</p>
+<p>与整数一样，这些类型也带有附加参数：一个显示宽度指示器和一个小数点指示器。比如语句 FLOAT(7,3) 规定显示的值不会超过 7 位数字，小数点后面带有 3 位数字。</p>
+<p>对于小数点后面的位数超过允许范围的值，Mysql 会自动将它四舍五入为最接近它的值，再插入它。</p>
+<p>DECIMAL 数据类型用于精度要求非常高的计算中，这种类型允许指定数值的精度和计数方法作为选择参数。精度在这里指为这个值保存的有效数字的总个数，而计数方法表示小数点后数字的位数。比如语句 DECIMAL(7,3) 规定了存储的值不会超过 7 位数字，并且小数点后不超过 3 位。</p>
+<p>忽略 DECIMAL 数据类型的精度和计数方法修饰符将会使 Mysql 数据库把所有标识为这个数据类型的字段精度设置为 10，计算方法设置为 0。</p>
+<p>UNSIGNED 和 ZEROFILL 修饰符也可以被 FLOAT、DOUBLE 和 DECIMAL 数据类型使用。并且效果与 INT 数据类型相同。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">类型说明</th>
+<th style="text-align:left">取值范围</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">FLOAT[(M, D)]</td>
+<td style="text-align:left">最小非零值：±1.175494351E – 38</td>
+</tr>
+<tr>
+<td style="text-align:left">DOUBLE[(M,D)]</td>
+<td style="text-align:left">最小非零值：±2.2250738585072014E – 308</td>
+</tr>
+<tr>
+<td style="text-align:left">DECIMAL (M, D)</td>
+<td style="text-align:left">可变；其值的范围依赖于M 和D</td>
+</tr>
+</tbody>
+</table>
+<h5 id="日期时间型"><a href="#日期时间型" class="headerlink" title="日期时间型"></a>日期时间型</h5><hr>
+<p>Mysql所支持的日期时间类型有: DATETIME、 TIMESTAMP、DATE、TIME、YEAR;</p>
+<p>Mysql中关于日期的类型有Date/Datetime/Timestamp三种类型,</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">日期类型</th>
+<th style="text-align:left">占用空间</th>
+<th style="text-align:left">格式</th>
+<th style="text-align:left">最小值</th>
+<th style="text-align:left">最大值</th>
+<th style="text-align:left">零值表示</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">DATETIME</td>
+<td style="text-align:left">8 bytes</td>
+<td style="text-align:left">YYYY-MM-DD HH:MM:SS</td>
+<td style="text-align:left">1000-01-01 00:00:00</td>
+<td style="text-align:left">9999-12-31 23:59:59</td>
+<td style="text-align:left">0000-00-00 00:00:00</td>
+</tr>
+<tr>
+<td style="text-align:left">TIMESTAMP</td>
+<td style="text-align:left">4 bytes</td>
+<td style="text-align:left">YYYY-MM-DD HH:MM:SS</td>
+<td style="text-align:left">19700101080001</td>
+<td style="text-align:left">2038 年的某个时刻</td>
+<td style="text-align:left">00000000000000</td>
+</tr>
+<tr>
+<td style="text-align:left">DATE</td>
+<td style="text-align:left">4 bytes</td>
+<td style="text-align:left">YYYY-MM-DD</td>
+<td style="text-align:left">1000-01-01</td>
+<td style="text-align:left">9999-12-31</td>
+<td style="text-align:left">0000-00-00</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><p>日期赋值时，允许“不严格”语法：任何标点符都可以用做日期部分或时间部分之间的间割符。例如，’98-12-31 11:30:45’、’98.12.31 11+30+45’、’98/12/31 11<em>30</em>45’和‘98@12@31 11^30^45’是等价的，对于不合法的将会转换为：0000-00-00 00:00:00</p>
+</li>
+<li><p><code>Date</code>和<code>DateTime</code>格式允许使用字符串或数字为此列复制;<br>日期格式的字段updated，通过字符串或数字赋值均可,</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">update</span> person <span class="keyword">set</span> <span class="keyword">updated</span>= <span class="number">12331212</span> <span class="keyword">where</span> <span class="keyword">name</span>= <span class="string">'mike'</span>;</span><br><span class="line"><span class="keyword">update</span> person <span class="keyword">set</span> <span class="keyword">updated</span>= <span class="string">'1233-12-12'</span> <span class="keyword">where</span> <span class="keyword">name</span>= <span class="string">'name'</span>;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>TimeStamp</code>指时间戳，从1970-01-01 00:00:00到当前的时间差值（注意：当你在Java中输出[new Date(0)] 的时候，输出的是：Thu Jan 01 08:00:00 CST 1970，这是因为时区的概念，中国是东八区，所以对应的是早上八点），它精确到毫秒级别，范围为：1970-01-01 00:00:00 到 2037年（参考2038年问题），当值大于2037年就会抛出： [Error Code: 1292, SQL State: 22001]  Data truncation: Incorrect datetime value: ‘20381212121212’ for column ‘updated’ at row 1。设置值时只允许设置数字类型的值。</p>
+</li>
+<li><p>在为TimeStamp类型字段赋值的时候，值必须大于19700101000000，否则就会抛出： [Error Code: 1292, SQL State: 22001]  Data truncation: Incorrect datetime value: ‘10831212121212’ for column ‘updated’ at row 1。</p>
+</li>
+</ul>
+<p>Mysql中时间类型用Time表示,</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">时间类型</th>
+<th style="text-align:left">占用空间</th>
+<th style="text-align:left">格式</th>
+<th style="text-align:left">最小值</th>
+<th style="text-align:left">最大值</th>
+<th style="text-align:left">零值表示</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">TIME</td>
+<td style="text-align:left">3 bytes</td>
+<td style="text-align:left">HH:MM:SS</td>
+<td style="text-align:left">-838:59:59</td>
+<td style="text-align:left">838:59:59</td>
+<td style="text-align:left">00:00:00</td>
+</tr>
+</tbody>
+</table>
+<p>Mysql以’HH:MM:SS’格式检索和显示TIME值(或对于大的小时值采用’HHH:MM:SS’格式)。TIME值的范围可以从’-838:59:59’到’838:59:59’。小时部分会因此大的原因是TIME类型不仅可以用于表示一天的时间(必须小于24小时)，还可能为某个事件过去的时间或两个事件之间的时间间隔(可以大于24小时，或者甚至为负)。 格式说明, </p>
+<ul>
+<li><p>‘D HH:MM:SS.fraction’格式的字符串。还可以使用下面任何一种“非严格”语法：’HH:MM:SS.fraction’、’HH:MM:SS’、’HH:MM’、’D HH:MM:SS’、’D HH:MM’、’D HH’或’SS’。这里D表示日，可以取0到34之间的值。请注意Mysql还不保存分数。</p>
+</li>
+<li><p>‘HHMMSS’格式的没有间割符的字符串，假定是有意义的时间。例如，’101112’被理解为’10:11:12’，但’109712’是不合法的(它有一个没有意义的分钟部分)，将变为’00:00:00’。</p>
+</li>
+<li><p>HHMMSS格式的数值，假定是有意义的时间。例如，101112被理解为’10:11:12’。下面格式也可以理解：SS、MMSS、HHMMSS、HHMMSS.fraction。请注意Mysql还不保存分数。</p>
+</li>
+<li><p>函数返回的结果，其值适合TIME上下文，例如CURRENT_TIME。</p>
+</li>
+<li><p>超出TIME范围但合法的值被裁为范围最接近的端点。例如，’-850:00:00’和’850:00:00’被转换为’-838:59:59’和’838:59:59’。</p>
+</li>
+</ul>
+<p>Mysql中用year表示年类型,</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">年类型</th>
+<th style="text-align:left">占用空间</th>
+<th style="text-align:left">格式</th>
+<th style="text-align:left">最小值</th>
+<th style="text-align:left">最大值</th>
+<th style="text-align:left">零值表示</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">YEAR</td>
+<td style="text-align:left">1 bytes</td>
+<td style="text-align:left">YYYY</td>
+<td style="text-align:left">1901</td>
+<td style="text-align:left">2155</td>
+<td style="text-align:left">0000</td>
+</tr>
+</tbody>
+</table>
+<p>Mysql以YYYY格式检索和显示YEAR值。范围是1901到2155。可以指定各种格式的YEAR值,</p>
+<ul>
+<li><p>四位字符串，范围为’1901’到’2155’。</p>
+</li>
+<li><p>四位数字，范围为1901到2155。</p>
+</li>
+<li><p>两位字符串，范围为’00’到’99’。’00’到’69’和’70’到’99’范围的值被转换为2000到2069和1970到1999范围的YEAR值。</p>
+</li>
+<li><p>两位整数，范围为1到99。1到69和70到99范围的值被转换为2001到2069和1970到1999范围的YEAR值。请注意两位整数范围与两位字符串范围稍有不同，因为你不能直接将零指定为数字并将它解释为2000。你必须将它指定为一个字符串’0’或’00’或它被解释为0000。</p>
+</li>
+<li><p>函数返回的结果，其值适合YEAR上下文，例如NOW()。</p>
+</li>
+<li><p>非法YEAR值被转换为0000。</p>
+</li>
+</ul>
+<p>关于日期兼容性问题,</p>
+<blockquote>
+<p>Mysql服务器采用了Unix的时间功能，对于TIMESTAMP值，可处理的日期至2037年。对于DATE和DATETIME值，可接受的日期可至9999年。</p>
+</blockquote>
+<blockquote>
+<p>所有的Mysql日期函数均是在1个源文件sql/time.cc中实现的，并经过了恰当编码以确保2000年安全。</p>
+</blockquote>
+<blockquote>
+<p>在Mysql 3.22和以后的版本中，YEAR列类型能够在1个字节内保存0年以及1901～2155年，并能使用两位或四位数字显示它们。所有的两位数字年份均被视为介于1970～2069年之间，这意味着，如果你在YEAR列中保存了01，Mysql服务器会将其当作2001年。</p>
+</blockquote>
+<h5 id="字符串型"><a href="#字符串型" class="headerlink" title="字符串型"></a>字符串型</h5><p>Mysql中字符串类型大致分为可以变长和固定长度两类字符串,</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">字符串类型</th>
+<th style="text-align:left">描述及存储需求</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">CHAR(M)</td>
+<td style="text-align:left">M为0~255之间的整数</td>
+</tr>
+<tr>
+<td style="text-align:left">VARCHAR(M)</td>
+<td style="text-align:left">M为0~65536之间的整数</td>
+</tr>
+<tr>
+<td style="text-align:left">TINYBLOB</td>
+<td style="text-align:left">允许长度0~255字节</td>
+</tr>
+<tr>
+<td style="text-align:left">BLOB</td>
+<td style="text-align:left">允许长度0~65535字节</td>
+</tr>
+<tr>
+<td style="text-align:left">MEDUIMBLOB</td>
+<td style="text-align:left">允许长度0~167772150字节</td>
+</tr>
+<tr>
+<td style="text-align:left">LONGBLOB</td>
+<td style="text-align:left">允许长度0~4294967295</td>
+</tr>
+<tr>
+<td style="text-align:left">TINYTEXT</td>
+<td style="text-align:left">允许长度0~255字节</td>
+</tr>
+<tr>
+<td style="text-align:left">TEXT</td>
+<td style="text-align:left">允许长度0~65535字节</td>
+</tr>
+<tr>
+<td style="text-align:left">MEDIUMTEXT</td>
+<td style="text-align:left">允许长度0~167772150字节</td>
+</tr>
+<tr>
+<td style="text-align:left">LONGTEXT</td>
+<td style="text-align:left">允许长度0~4294967295字节</td>
+</tr>
+<tr>
+<td style="text-align:left">VARBINARY(M)</td>
+<td style="text-align:left">允许长度0~M个字节的边长字节字符集</td>
+</tr>
+<tr>
+<td style="text-align:left">BINARY(M)</td>
+<td style="text-align:left">允许长度0~M个字节的定长字节字符集</td>
+</tr>
+</tbody>
+</table>
+<h5 id="CHAR于VARCHAR类型"><a href="#CHAR于VARCHAR类型" class="headerlink" title="CHAR于VARCHAR类型"></a>CHAR于VARCHAR类型</h5><hr>
+<ul>
+<li>用来保存Mysql中较短的字符串, 主要区别在于:CHAR列的长度固定为创建表时声明的长度，长度可以为从0~255的任何值，而VARCHAR的值可以是变长字符串，长度可以指定0~65535之间的值，在检索的时候，CHAR列会删除尾部的空格而VARCHAR则保留了这些空格。</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">create table <span class="keyword">if</span> not exists name(first varchar(4), last char(4));</span></span><br><span class="line">Query OK, 0 rows affected (0.14 sec)</span><br><span class="line"></span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">desc name;</span></span><br><span class="line">+-------+------------+------+-----+---------+-------+</span><br><span class="line">| Field | Type       | Null | Key | Default | Extra |</span><br><span class="line">+-------+------------+------+-----+---------+-------+</span><br><span class="line">| first | varchar(4) | YES  |     | NULL    |       |</span><br><span class="line">| last  | char(4)    | YES  |     | NULL    |       |</span><br><span class="line">+-------+------------+------+-----+---------+-------+</span><br><span class="line">2 rows in set (0.03 sec)</span><br><span class="line"></span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">insert name(first, last) values(<span class="string">"ab "</span>, <span class="string">"ab "</span>);</span></span><br><span class="line">Query OK, 1 row affected (0.00 sec)</span><br><span class="line"></span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">select length(first), length(last) from name <span class="built_in">limit</span> 1;</span></span><br><span class="line">+---------------+--------------+</span><br><span class="line">| length(first) | length(last) |</span><br><span class="line">+---------------+--------------+</span><br><span class="line">|             3 |            2 |</span><br><span class="line">+---------------+--------------+</span><br><span class="line">1 row in set (0.00 sec)</span><br><span class="line"></span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">select concat(first, <span class="string">'+'</span>), concat(last, <span class="string">'+'</span>) from name <span class="built_in">limit</span> 1;</span></span><br><span class="line">+--------------------+-------------------+</span><br><span class="line">| concat(first, '+') | concat(last, '+') |</span><br><span class="line">+--------------------+-------------------+</span><br><span class="line">| ab +               | ab+               |</span><br><span class="line">+--------------------+-------------------+</span><br><span class="line">1 row in set (0.01 sec)</span><br><span class="line"></span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash"></span></span><br></pre></td></tr></table></figure>
+<p>从上面可以看到, CHAR列最后的空格在做操作的时候都被删除，而VARCHAR依然保留这些空格;</p>
+<ul>
+<li><p>4.0版本以下，varchar(20)，指的是20字节，如果存放UTF8汉字时，只能存6个（每个汉字3字节） ；5.0版本以上，varchar(20)，指的是20字符，无论存放的是数字、字母还是UTF8汉字（每个汉字3字节），都可以存放20个，最大大小是65532字节 ；varchar(20)在Mysql4中最大也不过是20个字节,但是Mysql5根据编码不同,存储大小也不同;</p>
+</li>
+<li><p><strong>varchar 字段是将实际内容单独存储在聚簇索引之外，内容开头用1到2个字节表示实际长度（长度超过255时需要2个字节），因此最大长度不能超过65535;</strong></p>
+</li>
+<li><p>字符类型若为gbk，每个字符最多占2个字节，最大长度不能超过32766;字符类型若为utf8，每个字符最多占3个字节，最大长度不能超过21845。若定义的时候超过上述限制，则varchar字段会被强行转为text类型，并产生warning。</p>
+</li>
+</ul>
+<h5 id="CHAR-M-VARCHAR-M-的区别"><a href="#CHAR-M-VARCHAR-M-的区别" class="headerlink" title="CHAR(M), VARCHAR(M)的区别"></a>CHAR(M), VARCHAR(M)的区别</h5><hr>
+<ul>
+<li><p>CHAR(M)定义的列的长度为固定的，M取值可以为0～255之间，当保存CHAR值时，在它们的右边填充空格以达到指定的长度。当检索到CHAR值时，尾部的空格被删除掉。在存储或检索过程中不进行大小写转换。CHAR存储定长数据很方便，CHAR字段上的索引效率级高，比如定义char(10)，那么不论你存储的数据是否达到了10个字节，都要占去10个字节的空间,不足的自动用空格填充;</p>
+</li>
+<li><p>VARCHAR(M)定义的列的长度为可变长字符串，M取值可以为0~65535之间，(VARCHAR的最大有效长度由最大行大小和使用的字符集确定。整体最大长度是65,532字节）。VARCHAR值保存时只保存需要的字符数，另加一个字节来记录长度(如果列声明的长度超过255，则使用两个字节)。VARCHAR值保存时不进行填充。当值保存和检索时尾部的空格仍保留，符合标准SQL。varchar存储变长数据，但存储效率没有CHAR高。如果一个字段可能的值是不固定长度的，我们只知道它不可能超过10个字符，把它定义为 VARCHAR(10)是最合算的。VARCHAR类型的实际长度是它的值的实际长度+1。为什么”+1”呢？这一个字节用于保存实际使用了多大的长度。从空间上考虑，用varchar合适；从效率上考虑，用char合适，关键是根据实际情况找到权衡点;</p>
+</li>
+<li><p>CHAR和VARCHAR最大的不同就是一个是固定长度，一个是可变长度。由于是可变长度，因此实际存储的时候是实际字符串再加上一个记录字符串长度的字节(如果超过255则需要两个字节)。如果分配给CHAR或VARCHAR列的值超过列的最大长度，则对值进行裁剪以使其适合。如果被裁掉的字符不是空格，则会产生一条警告。如果裁剪非空格字符，则会造成错误(而不是警告)并通过使用严格SQL模式禁用值的插入;</p>
+</li>
+</ul>
+<h5 id="VARCHAR和TEXT、BlOB类型的区别"><a href="#VARCHAR和TEXT、BlOB类型的区别" class="headerlink" title="VARCHAR和TEXT、BlOB类型的区别"></a>VARCHAR和TEXT、BlOB类型的区别</h5><hr>
+<ul>
+<li><p>VARCHAR，BLOB和TEXT类型是变长类型，对于其存储需求取决于列值的实际长度(在前面的表格中用L表示)，而不是取决于类型的最大可能尺寸。例如，一个VARCHAR(10)列能保存最大长度为10个字符的一个字符串，实际的存储需要是字符串的长度 ，加上1个字节以记录字符串的长度。对于字符串’abcd’，L是4而存储要求是5个字节。</p>
+</li>
+<li><p>BLOB和TEXT类型需要1，2，3或4个字节来记录列值的长度，这取决于类型的最大可能长度。VARCHAR需要定义大小，有65535字节的最大限制；TEXT则不需要。如果你把一个超过列类型最大长度的值赋给一个BLOB或TEXT列，值被截断以适合它。</p>
+</li>
+<li><p>一个BLOB是一个能保存可变数量的数据的二进制的大对象。4个BLOB类型TINYBLOB、BLOB、MEDIUMBLOB和LONGBLOB仅仅在他们能保存值的最大长度方面有所不同。</p>
+</li>
+<li><p>BLOB 可以储存图片,TEXT不行，TEXT只能储存纯文本文件。4个TEXT类型TINYTEXT、TEXT、MEDIUMTEXT和LONGTEXT对应于4个BLOB类型，并且有同样的最大长度和存储需求。在BLOB和TEXT类型之间的唯一差别是对BLOB值的排序和比较以大小写敏感方式执行，而对TEXT值是大小写不敏感的。换句话说，一个TEXT是一个大小写不敏感的BLOB。</p>
+</li>
+</ul>
+<h5 id="CHAR-VARCHAR和TEXT的区别"><a href="#CHAR-VARCHAR和TEXT的区别" class="headerlink" title="CHAR, VARCHAR和TEXT的区别"></a>CHAR, VARCHAR和TEXT的区别</h5><hr>
+<ul>
+<li><p>长度的区别，CHAR范围是0～255，VARCHAR最长是64k，但是注意这里的64k是整个row的长度，要考虑到其它的column，还有如果存在not null的时候也会占用一位，对不同的字符集，有效长度还不一样，比如utf8的，最多21845，还要除去别的column，但是VARCHAR在一般情况下存储都够用了。如果遇到了大文本，考虑使用TEXT，最大能到4G。</p>
+</li>
+<li><p>效率来说基本是CHAR&gt;VARCHAR&gt;TEXT，但是如果使用的是Innodb引擎的话，推荐使用VARCHAR代替CHAR;</p>
+</li>
+<li><p>CHAR和VARCHAR可以有默认值，TEXT不能指定默认值;</p>
+</li>
+</ul>
+<p>ENUM类型</p>
+<p>　　枚举类型，它的值范围需要在创建表时通过枚举方式显示指定，对1~255个成员的枚举需要1个字节存储，对于255~65535个成员，需要2个字节存储，最多允许65535个成员。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">insert into info values(<span class="string">'M'</span>), (<span class="string">'l'</span>), (<span class="string">'f'</span>), (null);</span></span><br><span class="line">ERROR 1265 (01000): Data truncated for column 'gander' at row 2</span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">insert into info values(<span class="string">'M'</span>), (<span class="string">'f'</span>), (null);</span></span><br><span class="line">Query OK, 3 rows affected (0.01 sec)</span><br><span class="line">Records: 3  Duplicates: 0  Warnings: 0</span><br><span class="line"></span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">select * from info;</span></span><br><span class="line">+--------+</span><br><span class="line">| gander |</span><br><span class="line">+--------+</span><br><span class="line">| M      |</span><br><span class="line">| F      |</span><br><span class="line">| NULL   |</span><br><span class="line">+--------+</span><br><span class="line">3 rows in set (0.00 sec)</span><br></pre></td></tr></table></figure>
+<ul>
+<li>ENUM类型忽略大小写;</li>
+<li>当插入值不在ENUM类型中则报错, 整个插入语句都执行失败;</li>
+</ul>
+<p>SET类型</p>
+<p>SET和enum非常相似，里面可以包含0~64个成员，根据成员的不用，存储上也有不同。<br>1~8成员的集合，占1个字节<br>9~16成员的集合，占2个字节<br>17~24成员的集合，占3个字节<br>25~32成员的集合，占4个字节<br>33~64成员的集合，占8个字节<br>set类型一次可以选取多个成员，而ENUM则只能选一个，就相当于ENUM是单选，而set是复选。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">create table ts(col <span class="built_in">set</span>(<span class="string">'a'</span>,<span class="string">'b'</span>,<span class="string">'c'</span>,<span class="string">'d'</span>,<span class="string">'e'</span>));</span></span><br><span class="line">Query OK, 0 rows affected (0.02 sec)</span><br><span class="line"></span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">desc ts;</span></span><br><span class="line">+-------+--------------------------+------+-----+---------+-------+</span><br><span class="line">| Field | Type                     | Null | Key | Default | Extra |</span><br><span class="line">+-------+--------------------------+------+-----+---------+-------+</span><br><span class="line">| col   | set('a','b','c','d','e') | YES  |     | NULL    |       |</span><br><span class="line">+-------+--------------------------+------+-----+---------+-------+</span><br><span class="line">1 row in set (0.01 sec)</span><br><span class="line"></span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">insert into ts values(<span class="string">'a,b'</span>), (<span class="string">'a,d,a'</span>), (<span class="string">'a,b'</span>),(<span class="string">'a'</span>);</span></span><br><span class="line">Query OK, 4 rows affected (0.00 sec)</span><br><span class="line">Records: 4  Duplicates: 0  Warnings: 0</span><br><span class="line"></span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">select * from ts;</span></span><br><span class="line">+------+</span><br><span class="line">| col  |</span><br><span class="line">+------+</span><br><span class="line">| a,b  |</span><br><span class="line">| a,d  |</span><br><span class="line">| a,b  |</span><br><span class="line">| a    |</span><br><span class="line">+------+</span><br><span class="line">4 rows in set (0.00 sec)</span><br><span class="line"></span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash"></span></span><br></pre></td></tr></table></figure>
+<p>可以看出set类型可以从允许值的集合中选择任意1个或多个元素进行组合，所以对于输入的值只要是在允许值的组合范围内，都可以正确的写入到set类型中，对于超过的允许值范围如（’a,d,f’）是不能写入到上面的例子中的，而对于（‘a,d,a’）这样包含的重复成员将只取一次，写入后的结果为’a,d’。</p>
+<h5 id="选择数据库"><a href="#选择数据库" class="headerlink" title="选择数据库"></a>选择数据库</h5><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">use testdb;</span></span><br><span class="line">Database changed</span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">select database();</span></span><br><span class="line">+------------+</span><br><span class="line">| database() |</span><br><span class="line">+------------+</span><br><span class="line">| testdb     |</span><br><span class="line">+------------+</span><br><span class="line">1 row in set (0.00 sec)</span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash"></span></span><br></pre></td></tr></table></figure>
+<h5 id="建表"><a href="#建表" class="headerlink" title="建表"></a>建表</h5><p>语法<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">create table if not exists table_name (</span><br><span class="line">column_name data_type,</span><br><span class="line">...</span><br><span class="line">)</span><br></pre></td></tr></table></figure></p>
+<p>建表t1,</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">create table <span class="keyword">if</span> not exists t1(</span></span><br><span class="line">    -&gt; username VARCHAR(20),</span><br><span class="line">    -&gt; age TINYINT UNSIGNED,</span><br><span class="line">    -&gt; salary FLOAT(8,2) UNSIGNED</span><br><span class="line">    -&gt; );</span><br><span class="line">Query OK, 0 rows affected (0.02 sec)</span><br><span class="line"></span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">desc t1;</span></span><br><span class="line">+----------+---------------------+------+-----+---------+-------+</span><br><span class="line">| Field    | Type                | Null | Key | Default | Extra |</span><br><span class="line">+----------+---------------------+------+-----+---------+-------+</span><br><span class="line">| username | varchar(20)         | YES  |     | NULL    |       |</span><br><span class="line">| age      | tinyint(3) unsigned | YES  |     | NULL    |       |</span><br><span class="line">| salary   | float(8,2) unsigned | YES  |     | NULL    |       |</span><br><span class="line">+----------+---------------------+------+-----+---------+-------+</span><br><span class="line">3 rows in set (0.00 sec)</span><br></pre></td></tr></table></figure>
+<h5 id="查表"><a href="#查表" class="headerlink" title="查表"></a>查表</h5><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 查询当前数据库中的所有表</span></span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">show tables;</span></span><br><span class="line">+------------------+</span><br><span class="line">| Tables_in_testdb |</span><br><span class="line">+------------------+</span><br><span class="line">| t1               |</span><br><span class="line">+------------------+</span><br><span class="line">1 row in set (0.00 sec)</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 查询指定数据库中所有表</span></span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">show tables from mysql;</span></span><br><span class="line">+---------------------------+</span><br><span class="line">| Tables_in_mysql           |</span><br><span class="line">+---------------------------+</span><br><span class="line">| columns_priv              |</span><br><span class="line">| .....                     |</span><br><span class="line">| user                      |</span><br><span class="line">+---------------------------+</span><br><span class="line">31 rows in set (0.01 sec)</span><br></pre></td></tr></table></figure>
+<h5 id="查看表结构"><a href="#查看表结构" class="headerlink" title="查看表结构"></a>查看表结构</h5><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">show columns from t1;</span></span><br><span class="line">+----------+---------------------+------+-----+---------+-------+</span><br><span class="line">| Field    | Type                | Null | Key | Default | Extra |</span><br><span class="line">+----------+---------------------+------+-----+---------+-------+</span><br><span class="line">| username | varchar(20)         | YES  |     | NULL    |       |</span><br><span class="line">| age      | tinyint(3) unsigned | YES  |     | NULL    |       |</span><br><span class="line">| salary   | float(8,2) unsigned | YES  |     | NULL    |       |</span><br><span class="line">+----------+---------------------+------+-----+---------+-------+</span><br><span class="line">3 rows in set (0.00 sec)</span><br><span class="line"></span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">desc t1;</span></span><br><span class="line">+----------+---------------------+------+-----+---------+-------+</span><br><span class="line">| Field    | Type                | Null | Key | Default | Extra |</span><br><span class="line">+----------+---------------------+------+-----+---------+-------+</span><br><span class="line">| username | varchar(20)         | YES  |     | NULL    |       |</span><br><span class="line">| age      | tinyint(3) unsigned | YES  |     | NULL    |       |</span><br><span class="line">| salary   | float(8,2) unsigned | YES  |     | NULL    |       |</span><br><span class="line">+----------+---------------------+------+-----+---------+-------+</span><br><span class="line">3 rows in set (0.00 sec)</span><br></pre></td></tr></table></figure>
+<h5 id="插入-查找数据"><a href="#插入-查找数据" class="headerlink" title="插入/查找数据"></a>插入/查找数据</h5><p>insert [into] tbl_name [(col_name,…)] values(val,…)<br>如果省略到[(col_name,…)] 则必须为所有字段赋值<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">insert t1 values(<span class="string">'Tom'</span>, 25, 7888.25);</span></span><br><span class="line">Query OK, 1 row affected (0.01 sec)</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash">当省略[(col_name, ...)]后,如果values中没有全部写入列值则会报错,</span></span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">insert t1 values(<span class="string">'Mike'</span>, <span class="string">'26'</span>);</span></span><br><span class="line">ERROR 1136 (21S01): Column count doesn't match value count at row 1</span><br><span class="line"></span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">insert t1 (username, salary) values(<span class="string">'John'</span>, 5600.01);</span></span><br><span class="line">Query OK, 1 row affected (0.01 sec)</span><br><span class="line"></span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">select * from t1;</span></span><br><span class="line">+----------+------+---------+</span><br><span class="line">| username | age  | salary  |</span><br><span class="line">+----------+------+---------+</span><br><span class="line">| Tom      |   25 | 7888.25 |</span><br><span class="line">| John     | NULL | 5600.01 |</span><br><span class="line">+----------+------+---------+</span><br><span class="line">2 rows in set (0.01 sec)</span><br></pre></td></tr></table></figure></p>
+<h5 id="空值与非空值"><a href="#空值与非空值" class="headerlink" title="空值与非空值"></a>空值与非空值</h5><ul>
+<li><code>NULL</code> 字段值可以为空, <code>NOT NULL</code> 字段值禁止为空; </li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">create table <span class="keyword">if</span> not exists t2(</span></span><br><span class="line">    -&gt; username VARCHAR(20) NOT NULL,</span><br><span class="line">    -&gt; age TINYINT UNSIGNED NULL</span><br><span class="line">    -&gt; );</span><br><span class="line">Query OK, 0 rows affected (0.01 sec)</span><br><span class="line"></span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">show columns from t2;</span></span><br><span class="line">+----------+---------------------+------+-----+---------+-------+</span><br><span class="line">| Field    | Type                | Null | Key | Default | Extra |</span><br><span class="line">+----------+---------------------+------+-----+---------+-------+</span><br><span class="line">| username | varchar(20)         | NO   |     | NULL    |       |</span><br><span class="line">| age      | tinyint(3) unsigned | YES  |     | NULL    |       |</span><br><span class="line">+----------+---------------------+------+-----+---------+-------+</span><br><span class="line">2 rows in set (0.01 sec)</span><br><span class="line"></span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">insert t2 values(<span class="string">'Tom'</span>, NULL);</span></span><br><span class="line">Query OK, 1 row affected (0.01 sec)</span><br><span class="line"></span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">insert t2 values(NULL, 26); </span></span><br><span class="line">ERROR 1048 (23000): Column 'username' cannot be null</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 注意NULL和空字符是两回事;</span></span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">insert t2 values(<span class="string">''</span>, 26);</span></span><br><span class="line">Query OK, 1 row affected (0.00 sec)</span><br><span class="line"></span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">select * from t2;</span></span><br><span class="line">+----------+------+</span><br><span class="line">| username | age  |</span><br><span class="line">+----------+------+</span><br><span class="line">| Tom      | NULL |</span><br><span class="line">|          |   26 |</span><br><span class="line">+----------+------+</span><br><span class="line">2 rows in set (0.00 sec)</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>NULL</code>和’’空字符是两回事，不是一个值;</li>
+</ul>
+<h5 id="自动编号"><a href="#自动编号" class="headerlink" title="自动编号"></a>自动编号</h5><p>可以通过自动编号来保证这个值在当前表中是唯一不重复;</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">create table <span class="keyword">if</span> not exists t3(</span></span><br><span class="line">    -&gt; id SMALLINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,</span><br><span class="line">    -&gt; username VARCHAR(20) NOT NULL</span><br><span class="line">    -&gt; );</span><br><span class="line">Query OK, 0 rows affected (0.02 sec)</span><br><span class="line"></span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">desc t3;</span></span><br><span class="line">+----------+----------------------+------+-----+---------+----------------+</span><br><span class="line">| Field    | Type                 | Null | Key | Default | Extra          |</span><br><span class="line">+----------+----------------------+------+-----+---------+----------------+</span><br><span class="line">| id       | smallint(5) unsigned | NO   | PRI | NULL    | auto_increment |</span><br><span class="line">| username | varchar(20)          | NO   |     | NULL    |                |</span><br><span class="line">+----------+----------------------+------+-----+---------+----------------+</span><br><span class="line">2 rows in set (0.00 sec)</span><br><span class="line"></span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">insert t3 values(<span class="string">'Mike'</span>), (<span class="string">'Tom'</span>);</span></span><br><span class="line">ERROR 1136 (21S01): Column count doesn't match value count at row 1</span><br><span class="line"></span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">insert t3(username) values(<span class="string">'Mike'</span>), (<span class="string">'Tom'</span>);</span></span><br><span class="line">Query OK, 2 rows affected (0.00 sec)</span><br><span class="line">Records: 2  Duplicates: 0  Warnings: 0</span><br><span class="line"></span><br><span class="line"><span class="meta">dev@testdb&gt;</span><span class="bash">select * from t3;</span></span><br><span class="line">+----+----------+</span><br><span class="line">| id | username |</span><br><span class="line">+----+----------+</span><br><span class="line">|  1 | Mike     |</span><br><span class="line">|  2 | Tom      |</span><br><span class="line">+----+----------+</span><br><span class="line">2 rows in set (0.00 sec)</span><br></pre></td></tr></table></figure>
+<ul>
+<li>主键允许用户赋值，但是不允许存在两个相同的值;</li>
+<li>AUTO_INCREMENT 必须与PRIMARY KEY一起使用; </li>
+<li>PRIMARY KEY 也可以简写为KEY;</li>
+</ul>
+<h5 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h5><ul>
+<li>本文首先搭建mysql容器环境;</li>
+<li>本文对mysql数据的基本数据类型整型/浮点型/日期类型及字符串等常用类型进行了归类总结并对字符类型中各个类型的差异与区别进行了简要分析;</li>
+<li>对数据表的基本操作进行了示例分析说明; </li>
+</ul>
+  
+	</div>
+		<div style="padding: 10px 44px 30px 44px;" >
+<div style="border: 1px dashed #e0e0e0; padding: 10px 10px 10px 10px; background-color: #fffeee; background-repeat: no-repeat; background-attachment: scroll; background-position: 1% 50%; -moz-background-size: auto auto; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">
+<div style="float:left;margin-top:0px;">
+<img src="/img/weixin.jpg" width="125px" height="125px" style="border:1px solid #ccc; margin: 6px 5px 0px 0px"/>
+</div>
+<div>
+ <p style="margin-top:0px;">作者署名：<b><a target="_blank" href="http://researchlab.github.io/">朴实的一线攻城狮</a></b>
+<br />本文标题：<b><a href="/2018/03/04/mysql-02-table-and-datatype-operation/" target="_blank" title="mysql专题02 mysql数据类型及数据表操作">mysql专题02 mysql数据类型及数据表操作</a></b> 
+<br />本文出处：<b><a href="/2018/03/04/mysql-02-table-and-datatype-operation/" target="_blank" title="mysql专题02 mysql数据类型及数据表操作">http://researchlab.github.io/2018/03/04/mysql-02-table-and-datatype-operation/</a></b>
+<br />版权声明：本文由<b><a href="/about" target="_blank" title="Lee Hong">Lee Hong</a></b>创作和发表,采用<b>署名(BY)</b>-<b>非商业性使用(NC)</b>-<b>相同方式共享(SA)</b>国际许可协议进行许可,转载请注明作者及出处, 否则保留追究法律责任的权利。 </p>
+</div>
+</div>
+</div>
+
+   	       
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/mysql专题/">mysql专题</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/mysql/">mysql</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	<div class="share-jiathis">
+	  
+<div class="jiathis_style_24x24">
+	<a class="jiathis_button_weixin"></a>
+	<a class="jiathis_button_tsina"></a>
+	<a class="jiathis_button_tqq"></a>
+	<a class="jiathis_button_qzone"></a>
+    <a class="jiathis_button_googleplus"></a>
+	<a class="jiathis_button_douban"></a>
+	<a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+    var jiathis_config={
+    data_track_clickback:true,
+    sm:"copy,renren,cqq",
+    pic:"",
+    summary:"",
+    
+  </script> 
+<script type="text/javascript" src="//v3.jiathis.com/code/jia.js?uid=
+2084050" charset="utf-8"></script>      
+
+
+	 </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2018/04/05/mysql-03-constraint-summary/" title="mysql专题03  数据库约束系列问题">
+  <strong>上一篇：</strong><br/>
+  <span>
+  mysql专题03  数据库约束系列问题</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2018/03/02/mysql-01-mysql-docker-env/"  title="mysql专题01 通过docker容器搭建mysql环境">
+ <strong>下一篇：</strong><br/> 
+ <span>mysql专题01 通过docker容器搭建mysql环境
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+<!-- gitment评论框 start -->
+	<div id="gitment" class="ds-thread"></div>
+	<link rel="stylesheet" href="https://github.com/researchlab/gitment/blob/master/style/default.css">
+	<script src="https://github.com/researchlab/gitment/blob/master/dist/gitment.browser.js"></script>
+	<script>
+	  var gitment = new Gitment({
+	    id: 'lSun Mar 04 2018 11:28:13 GMT+0800', // 可选。建议为Sun Mar 04 2018 11:28:13 GMT+0800
+	    owner: 'researchlab', // 可以是你的GitHub用户名，也可以是github id
+	    repo: 'researchlab.github.io', //可以是你的任意一个repo，推荐使用githubpage所在的repo
+	    oauth: {
+	      client_id: 'e4971ec4c4fdbefb392f',
+	      client_secret: 'e5001b2dda2dcb9a9c66417991be57836c17a72b',
+	    },
+	  })
+	  gitment.render('gitment')
+</script>
+
+
+</div>  
+
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+<div id="asidepart">
+
+  <div class="widget tag">
+<!--<hr noshade color="#ccc">-->
+<!-- <p style="text-align:center">Mike.Lee</p> -->
+<p margin="0" style="text-align:center">
+<a class="ahref" href="http://researchlab.github.io/about/">
+<img id="aboutpic"  src="/img/qzly.png" alt="@一线攻城狮" height="200" width="200" style="box-shadow: 0px 0px 2px 2px #9edeff;border-radius: 8px;" >
+</a></p>
+<p style="text-align:center"><font size="2" color="grey">关注微信公众号 @一线攻城狮</font></p>
+<div style="display:block; margin-top:10px; padding: 0px 4px 4px 0; border-top: dashed 1px #ccc; text-align:left;"></div>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<div style="float:left;position:absolute;"><font size="2" >总访问:<span id="busuanzi_value_site_pv"></span>次</font></div>
+<div style="float:right;"><font size="2" >总访客:<span id="busuanzi_value_site_uv"></span>人</font></div>
+
+<div style="margin-top:30px; padding: 5px 4px 4px 0; border-top: dashed 1px #ccc; text-align:left;"></div>
+</div>
+
+
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/DevOps/" title="DevOps">DevOps<sup>12</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Hexo/" title="Hexo">Hexo<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/MQ/" title="MQ">MQ<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/algorithm/" title="algorithm">algorithm<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/docker-practice/" title="docker-practice">docker-practice<sup>8</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/go-bootcamp/" title="go-bootcamp">go-bootcamp<sup>6</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/go-pattern/" title="go-pattern">go-pattern<sup>3</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/golang/" title="golang">golang<sup>23</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/java/" title="java">java<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/javascript/" title="javascript">javascript<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/k8s/" title="k8s">k8s<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/mysql专题/" title="mysql专题">mysql专题<sup>16</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/php/" title="php">php<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/redis专题/" title="redis专题">redis专题<sup>17</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/golang/" title="golang">golang<sup>26</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mysql/" title="mysql">mysql<sup>18</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/redis/" title="redis">redis<sup>17</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/docker/" title="docker">docker<sup>9</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/setcookie/" title="setcookie">setcookie<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/tcp/" title="tcp">tcp<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/cache/" title="cache">cache<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/concurrency/" title="concurrency">concurrency<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Hexo/" title="Hexo">Hexo<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Blog/" title="Blog">Blog<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/minikube/" title="minikube">minikube<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/cache-invalid/" title="cache-invalid">cache-invalid<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/getcookie/" title="getcookie">getcookie<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/ticker/" title="ticker">ticker<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/rpc/" title="rpc">rpc<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/vendoring/" title="vendoring">vendoring<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/godep/" title="godep">godep<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/govendor/" title="govendor">govendor<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/glide/" title="glide">glide<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/hash/" title="hash">hash<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="http://blog.csdn.net/xiaolongwang2010" target="_blank" title="小龙王2010csdn技术博客">Linux/c/c++</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  
+
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+  <iframe width="100%" height="550" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=550&fansRow=1&ptype=1&speed=0&skin=1&isTitle=1&noborder=1&isWeibo=1&isFans=1&uid=5141203275&verifier=a533edf5&dpc=1"></iframe>
+
+
+</aside>
+</div>
+
+    </div>
+    <footer><div id="footer" >
+	
+	
+	<div class="social-font" class="clearfix">
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/researchlab/lightman" target="_blank" title="lightman">lightman</a> ©2016 - 2020 
+		
+		<a href="/about" target="_blank" title="Lee Hong">Lee Hong</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+
+
+<script type="text/javascript">
+  var duoshuoQuery = {short_name:"gamedp"};
+  (function() {
+    var ds = document.createElement('script');
+    ds.type = 'text/javascript';ds.async = true;
+    ds.src = '//static.duoshuo.com/embed.js';
+    ds.charset = 'UTF-8';
+    (document.getElementsByTagName('head')[0] 
+    || document.getElementsByTagName('body')[0]).appendChild(ds);
+  })();
+</script> 
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>
