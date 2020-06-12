@@ -8,7 +8,7 @@ date: 2019-02-26 09:53:45
 1 [On Java 8](https://lingcoder.github.io/OnJava8/#/sidebar)
 2 [kubernetes指南](https://kubernetes.feisky.xyz/introduction/index)
 3 [docker--从入门到实践](https://yeasy.gitbooks.io/docker_practice/content/)
-4 [kubernetes指南](https://kubernetes.feisky.xyz/introduction/index)
+4 [kubernetes中文文档](https://hardocs.com/d/kubernetes/)
 5 [Think Python 2e](https://greenteapress.com/wp/think-python-2e/ )
 6 [Think Python 2e中译本](https://codingpy.com/books/thinkpython2/01-the-way-of-the-program.html)
 7 [HttpRunner](https://cn.httprunner.org/quickstart/)
