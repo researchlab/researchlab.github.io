@@ -1,9 +1,12 @@
 ---
 title: 阅读书单
-date: 2019-02-26 09:53:45
+date: 2021-02-17 23:38:00
 ---
 
-## # 2020
+## # 2021 
+1 [deep work](https://book.douban.com/subject/27056409/)
+
+## # 2020 已读书单归档
 - 在线阅读
 1 [On Java 8](https://lingcoder.github.io/OnJava8/#/sidebar)
 2 [kubernetes指南](https://kubernetes.feisky.xyz/introduction/index)
