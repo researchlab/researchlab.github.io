@@ -12,7 +12,7 @@
 
     
     <meta name="description" content="观察者(Observer)设计模式定义了对象间的一种一对多的依赖关系，以便一个对象的状态发生变化时，所有依赖于它的对象都得到通知并自动刷新。观察者模式将观察者和被观察的对象分离开,体现了面向对象设计中一个对象只做一件事情的原则，提高了应用程序的可维护性和重用性。">
-<meta name="keywords" content="golang,observer">
+<meta name="keywords" content="observer,dp">
 <meta property="og:type" content="article">
 <meta property="og:title" content="golang 设计模式之observer使用总结">
 <meta property="og:url" content="http://researchlab.github.io/2016/02/26/observer-pattern-in-go-md/index.html">
@@ -20,7 +20,7 @@
 <meta property="og:description" content="观察者(Observer)设计模式定义了对象间的一种一对多的依赖关系，以便一个对象的状态发生变化时，所有依赖于它的对象都得到通知并自动刷新。观察者模式将观察者和被观察的对象分离开,体现了面向对象设计中一个对象只做一件事情的原则，提高了应用程序的可维护性和重用性。">
 <meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="http://researchlab.github.io/2016/02/26/observer-pattern-in-go-md/observer_pattern.jpg">
-<meta property="og:updated_time" content="2020-11-08T02:57:49.960Z">
+<meta property="og:updated_time" content="2021-02-19T01:26:09.954Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="golang 设计模式之observer使用总结">
 <meta name="twitter:description" content="观察者(Observer)设计模式定义了对象间的一种一对多的依赖关系，以便一个对象的状态发生变化时，所有依赖于它的对象都得到通知并自动刷新。观察者模式将观察者和被观察的对象分离开,体现了面向对象设计中一个对象只做一件事情的原则，提高了应用程序的可维护性和重用性。">
@@ -138,13 +138,13 @@
 
 <div class="article-categories">
   <span></span>
-  <a class="article-category-link" href="/categories/go-pattern/">go-pattern</a>
+  <a class="article-category-link" href="/categories/better-coding/">better-coding</a>
 </div>
 
 
   <div class="article-tags">
   
-  <span></span> <a href="/tags/golang/">golang</a><a href="/tags/observer/">observer</a>
+  <span></span> <a href="/tags/observer/">observer</a><a href="/tags/dp/">dp</a>
   </div>
 
 </div>
@@ -272,6 +272,10 @@
 		  
 		
 		  
+			<li><a href="/categories/better-coding/" title="better-coding">better-coding<sup>4</sup></a></li>
+		  
+		
+		  
 			<li><a href="/categories/docker-practice/" title="docker-practice">docker-practice<sup>8</sup></a></li>
 		  
 		
@@ -279,8 +283,6 @@
 			<li><a href="/categories/go-bootcamp/" title="go-bootcamp">go-bootcamp<sup>6</sup></a></li>
 		  
 		
-		  
-			<li><a href="/categories/go-pattern/" title="go-pattern">go-pattern<sup>3</sup></a></li>
 		  
 		
 		  
@@ -311,6 +313,8 @@
 			<li><a href="/categories/redis专题/" title="redis专题">redis专题<sup>17</sup></a></li>
 		  
 		
+		  
+		
 		</ul>
 </div>
 
@@ -322,7 +326,7 @@
 		<ul class="clearfix">
 		
 			
-				<li><a href="/tags/golang/" title="golang">golang<sup>26</sup></a></li>
+				<li><a href="/tags/golang/" title="golang">golang<sup>24</sup></a></li>
 			
 		
 			
@@ -346,11 +350,15 @@
 			
 		
 			
-				<li><a href="/tags/cache/" title="cache">cache<sup>2</sup></a></li>
+				<li><a href="/tags/dp/" title="dp">dp<sup>3</sup></a></li>
 			
 		
 			
 				<li><a href="/tags/concurrency/" title="concurrency">concurrency<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/cache/" title="cache">cache<sup>2</sup></a></li>
 			
 		
 			
@@ -370,15 +378,15 @@
 			
 		
 			
-				<li><a href="/tags/rpc/" title="rpc">rpc<sup>1</sup></a></li>
-			
-		
-			
 				<li><a href="/tags/getcookie/" title="getcookie">getcookie<sup>1</sup></a></li>
 			
 		
 			
 				<li><a href="/tags/ticker/" title="ticker">ticker<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/rpc/" title="rpc">rpc<sup>1</sup></a></li>
 			
 		
 			
@@ -395,10 +403,6 @@
 		
 			
 				<li><a href="/tags/govendor/" title="govendor">govendor<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/glide/" title="glide">glide<sup>1</sup></a></li>
 			
 		
 		</ul>
