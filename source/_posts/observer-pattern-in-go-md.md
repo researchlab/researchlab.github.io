@@ -1,8 +1,8 @@
 ---
 title: "golang 设计模式之observer使用总结"
 date: 2016-02-26 00:40:11
-categories: [go-pattern]
-tags: [golang, observer]
+categories: [better-coding]
+tags: [dp, observer]
 description:
 ---
 

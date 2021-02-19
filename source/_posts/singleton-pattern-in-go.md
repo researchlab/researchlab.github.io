@@ -1,8 +1,8 @@
 ---
 title: "golang 设计模式之singleton使用总结"
 date: 2016-02-25 17:01:43
-categories: [go-pattern]
-tags: [golang,singleton]
+categories: [better-coding]
+tags: [dp,singleton]
 description:
 ---
 

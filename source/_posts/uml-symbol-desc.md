@@ -1,7 +1,7 @@
 ---
 title: "UML类图中符号定义,作用及区别总结" 
 date: 2016-11-23 11:47:43
-categories: [go-pattern]
+categories: [better-coding]
 tags: [uml]
 description:
 ---
