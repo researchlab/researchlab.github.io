@@ -4,27 +4,27 @@
 <head>
   <meta charset="UTF-8">
   
-    <title>如何编写高质量代码 | 一线攻城狮</title>
+    <title>聊一聊接口和抽象类 | 一线攻城狮</title>
     <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
     
     <meta name="author" content="Lee Hong">
     
 
     
-    <meta name="description" content="编写高质量代码，提高复杂代码的设计和开发能力；让读源码、学框架事半功倍；">
+    <meta name="description" content="接口和抽象类的区别是什么？什么时候用接口？什么时候用抽象类？抽象类和接口存在的意义是什么？能解决哪些编程问题？">
 <meta name="keywords" content="dp">
 <meta property="og:type" content="article">
-<meta property="og:title" content="如何编写高质量代码">
-<meta property="og:url" content="http://researchlab.github.io/2021/02/19/better-coding/index.html">
+<meta property="og:title" content="聊一聊接口和抽象类">
+<meta property="og:url" content="http://researchlab.github.io/2021/02/21/interface-vs-abstract/index.html">
 <meta property="og:site_name" content="一线攻城狮">
-<meta property="og:description" content="编写高质量代码，提高复杂代码的设计和开发能力；让读源码、学框架事半功倍；">
+<meta property="og:description" content="接口和抽象类的区别是什么？什么时候用接口？什么时候用抽象类？抽象类和接口存在的意义是什么？能解决哪些编程问题？">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:image" content="http://researchlab.github.io/2021/02/19/better-coding/code.png">
-<meta property="og:updated_time" content="2021-02-20T10:03:41.197Z">
+<meta property="og:image" content="http://researchlab.github.io/2021/02/21/interface-vs-abstract/interface-vs-abstract.png">
+<meta property="og:updated_time" content="2021-02-20T17:54:31.878Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="如何编写高质量代码">
-<meta name="twitter:description" content="编写高质量代码，提高复杂代码的设计和开发能力；让读源码、学框架事半功倍；">
-<meta name="twitter:image" content="http://researchlab.github.io/2021/02/19/better-coding/code.png">
+<meta name="twitter:title" content="聊一聊接口和抽象类">
+<meta name="twitter:description" content="接口和抽象类的区别是什么？什么时候用接口？什么时候用抽象类？抽象类和接口存在的意义是什么？能解决哪些编程问题？">
+<meta name="twitter:image" content="http://researchlab.github.io/2021/02/21/interface-vs-abstract/interface-vs-abstract.png">
 
     
     <link rel="alternative" href="/atom.xml" title="一线攻城狮" type="application/atom+xml">
@@ -81,14 +81,14 @@
 		<header class="article-info clearfix">
   <h1 itemprop="name">
     
-      <a href="/2021/02/19/better-coding/" title="如何编写高质量代码" itemprop="url">如何编写高质量代码</a>
+      <a href="/2021/02/21/interface-vs-abstract/" title="聊一聊接口和抽象类" itemprop="url">聊一聊接口和抽象类</a>
   </h1>
   <p class="article-author">By
        
 		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
 		
  <p class="article-time">
-    <time datetime="2021-02-19T01:04:31.000Z" itemprop="datePublished"> 发表于 2021-02-19</time>
+    <time datetime="2021-02-20T16:33:40.000Z" itemprop="datePublished"> 发表于 2021-02-21</time>
    &nbsp&nbsp热度&nbsp<span id="busuanzi_value_page_pv"></span>° 
   </p>
 </header>
@@ -98,41 +98,33 @@
 		<div id="toc" class="toc-article">
 			<strong class="toc-title">文章目录</strong>
 		
-			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#常用的评判代码质量的标准"><span class="toc-number">1.</span> <span class="toc-text">常用的评判代码质量的标准</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#如何才能写出高质量的代码"><span class="toc-number">2.</span> <span class="toc-text">如何才能写出高质量的代码</span></a></li></ol>
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#语法特性"><span class="toc-number">1.</span> <span class="toc-text">语法特性</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#解决哪些编程问题"><span class="toc-number">2.</span> <span class="toc-text">解决哪些编程问题</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#应用场景"><span class="toc-number">3.</span> <span class="toc-text">应用场景</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#联系"><span class="toc-number">4.</span> <span class="toc-text">联系</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考"><span class="toc-number">5.</span> <span class="toc-text">参考</span></a></li></ol>
 		
 		</div>
 		
-		<p>编写高质量代码，提高复杂代码的设计和开发能力；让读源码、学框架事半功倍；<br><a id="more"></a></p>
-<h2 id="常用的评判代码质量的标准"><a href="#常用的评判代码质量的标准" class="headerlink" title="常用的评判代码质量的标准"></a>常用的评判代码质量的标准</h2><ul>
-<li><p>可维护性（maintainability）<br>  代码分层清晰、模块化好、高内聚低耦合、遵从基于接口而非实现编程的设计原则</p>
-</li>
-<li><p>可读性（readability）<br>符合编码规范、命名是否达意、注释是否详尽、函数是否长短合适、模块划分是否清晰、是否符合高内聚低耦合</p>
-</li>
-<li><p>可扩展性（extensibility）<br>  在不修改或少量修改原有代码的情况下，通过扩展的方式添加新的功能代码。</p>
-</li>
-<li><p>灵活性（flexibility）<br>  代码易扩展、易复用或者易用</p>
-</li>
-<li><p>简洁性（simplicity）<br>Keep It Simple，Stupid, 思从深而行从简，真正的高手能云淡风轻地用最简单的方法解决最复杂的问题</p>
-</li>
-<li><p>可复用性（reusability）</p>
-</li>
-<li><p>可测试性（testability）</p>
-</li>
+		<p>接口和抽象类的区别是什么？什么时候用接口？什么时候用抽象类？抽象类和接口存在的意义是什么？能解决哪些编程问题？<br><a id="more"></a></p>
+<h2 id="语法特性"><a href="#语法特性" class="headerlink" title="语法特性"></a>语法特性</h2><p>抽象类: 不允许被实例化，只能被继承。它可以包含属性和方法。方法既可以包含代码实现，也可以不包含代码实现。不包含代码实现的方法叫作抽象方法。子类继承抽象类，必须实现抽象类中的所有抽象方法。</p>
+<p>接口: 不能包含属性，只能声明方法，方法不能包含代码实现。包含抽象方法、静态方法、default 方法；类实现接口时，必须实现抽象方法。</p>
+<h2 id="解决哪些编程问题"><a href="#解决哪些编程问题" class="headerlink" title="解决哪些编程问题"></a>解决哪些编程问题</h2><p>抽象类: 是对成员变量和方法的抽象，是一种 is-a 关系，是为了解决代码复用问题。</p>
+<p>接口: 仅仅是对方法的抽象，是一种 has-a 关系，表示具有某一组行为特性，是为了解决解耦问题，隔离接口和具体的实现，提高代码的扩展性。</p>
+<h2 id="应用场景"><a href="#应用场景" class="headerlink" title="应用场景"></a>应用场景</h2><p>什么时候该用抽象类？什么时候该用接口？</p>
+<p>如果要表示一种 is-a 的关系，并且是为了解决代码复用问题，就用抽象类；</p>
+<p>如果要表示一种 has-a 关系，并且是为了解决抽象而非代码复用问题，那就用接口。</p>
+<p>解决复用问题：java中的子类FileInputStream和PipeInputStream等继承抽象类InputStream。重写了read(source)方法，InputStream 中还包含其他方法，FileInputStream继承抽象类复用了父类的其他方法。</p>
+<p>解决抽象问题：抽象类InputStream实现了Closeable接口，该接口中包含close()抽象方法。Closeable这个接口还在很多其他类中实现了，例如Channel，Socket中都有close() 关闭这个功能，但具体实现每个类又各有不同的实现，这个就是抽象。</p>
+<h2 id="联系"><a href="#联系" class="headerlink" title="联系"></a>联系</h2><ul>
+<li>抽象类可以实现接口，而且可以只实现部分接口。</li>
 </ul>
-<h2 id="如何才能写出高质量的代码"><a href="#如何才能写出高质量的代码" class="headerlink" title="如何才能写出高质量的代码"></a>如何才能写出高质量的代码</h2><p>要写出高质量代码，需要掌握一些更加细化、更加能落地的编程方法论，这就包含面向对象设计思想、设计原则、设计模式、编码规范、重构技巧等。</p>
+<blockquote>
+<p>接口A有三个方法: aa(),bb(),cc()，抽象类B只实现了接口A的aa(),bb()两个方法，而剩下的cc()方法怎么办呢？<br>这时，当一个类C继承B时，就需要实现cc()方法了。这样的结果是:C类可以使用A接口的所有方法，而且可以自定义cc()方法的逻辑。<br>而如果C直接实现接口A，那么它必须实现A的所有方法。当C有aa(),bb()方法逻辑相同的兄弟类时，直接实现接口A的思路就会造成代码的重复率比较高了。</p>
+</blockquote>
 <ul>
-<li><p>面向对象编程因为其具有丰富的特性（封装、抽象、继承、多态），可以实现很多复杂的设计思路，写出可复用的代码，是很多设计原则、设计模式等编码实现的基础。</p>
-</li>
-<li><p>设计原则是指导代码设计的一些经验总结，比如，设计原则中的单一职责、DRY、基于接口而非实现、里式替换原则等，可以让我们写出可复用、灵活、可读性好、易扩展、易维护的代码</p>
-</li>
-<li><p>设计模式是针对软件开发中经常遇到的一些设计问题，总结出来的一套解决方案或者设计思路。应用设计模式的主要目的是提高代码的可扩展性，写出易扩展的代码。</p>
-</li>
-<li><p>编程规范主要解决的是代码的可读性问题。编码规范相对于设计原则、设计模式，更加具体、更加偏重代码细节、更加能落地。持续的小重构依赖的理论基础主要就是编程规范。</p>
-</li>
-<li><p>重构作为保持代码质量不下降的有效手段，利用的就是面向对象、设计原则、设计模式、编码规范这些理论。</p>
-</li>
+<li>接口可以继承接口，但是接口不能继承抽象类。</li>
 </ul>
-<p><img src="/2021/02/19/better-coding/code.png" alt="better-coding"></p>
+<p><img src="/2021/02/21/interface-vs-abstract/interface-vs-abstract.png" alt="interface-vs-abstract"></p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ul>
+<li><a href="https://www.it610.com/article/2291299.htm" target="_blank" rel="noopener">选择接口还是抽象类</a></li>
+</ul>
   
 	</div>
 		<div style="padding: 10px 44px 30px 44px;" >
@@ -142,8 +134,8 @@
 </div>
 <div>
  <p style="margin-top:0px;">作者署名：<b><a target="_blank" href="http://researchlab.github.io/">朴实的一线攻城狮</a></b>
-<br />本文标题：<b><a href="/2021/02/19/better-coding/" target="_blank" title="如何编写高质量代码">如何编写高质量代码</a></b> 
-<br />本文出处：<b><a href="/2021/02/19/better-coding/" target="_blank" title="如何编写高质量代码">http://researchlab.github.io/2021/02/19/better-coding/</a></b>
+<br />本文标题：<b><a href="/2021/02/21/interface-vs-abstract/" target="_blank" title="聊一聊接口和抽象类">聊一聊接口和抽象类</a></b> 
+<br />本文出处：<b><a href="/2021/02/21/interface-vs-abstract/" target="_blank" title="聊一聊接口和抽象类">http://researchlab.github.io/2021/02/21/interface-vs-abstract/</a></b>
 <br />版权声明：本文由<b><a href="/about" target="_blank" title="Lee Hong">Lee Hong</a></b>创作和发表,采用<b>署名(BY)</b>-<b>非商业性使用(NC)</b>-<b>相同方式共享(SA)</b>国际许可协议进行许可,转载请注明作者及出处, 否则保留追究法律责任的权利。 </p>
 </div>
 </div>
@@ -206,19 +198,11 @@
 	
 <nav class="article-nav clearfix">
  
- <div class="prev" >
- <a href="/2021/02/20/oop/" title="聊一聊面向对象编程">
-  <strong>上一篇：</strong><br/>
-  <span>
-  聊一聊面向对象编程</span>
-</a>
-</div>
-
 
 <div class="next">
-<a href="/2020/06/15/Cloud-vs-On-Premises-Pros-and-Cons/"  title="Cloud vs On-Premises Pros and Cons">
+<a href="/2021/02/20/oop/"  title="聊一聊面向对象编程">
  <strong>下一篇：</strong><br/> 
- <span>Cloud vs On-Premises Pros and Cons
+ <span>聊一聊面向对象编程
 </span>
 </a>
 </div>
@@ -232,7 +216,7 @@
 	<script src="https://github.com/researchlab/gitment/blob/master/dist/gitment.browser.js"></script>
 	<script>
 	  var gitment = new Gitment({
-	    id: 'lFri Feb 19 2021 09:04:31 GMT+0800', // 可选。建议为Fri Feb 19 2021 09:04:31 GMT+0800
+	    id: 'lSun Feb 21 2021 00:33:40 GMT+0800', // 可选。建议为Sun Feb 21 2021 00:33:40 GMT+0800
 	    owner: 'researchlab', // 可以是你的GitHub用户名，也可以是github id
 	    repo: 'researchlab.github.io', //可以是你的任意一个repo，推荐使用githubpage所在的repo
 	    oauth: {

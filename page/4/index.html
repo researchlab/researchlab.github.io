@@ -76,6 +76,71 @@
         <header class="article-info clearfix">
   <h1 itemprop="name">
     
+      <a href="/2018/10/03/redis-06-bloom-filter/" title="redis专题06 布隆过滤器" itemprop="url">redis专题06 布隆过滤器</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
+		
+ <p class="article-time">
+    <time datetime="2018-10-03T08:57:48.000Z" itemprop="datePublished"> 发表于 2018-10-03</time>
+  </p>
+</header>
+
+    <div class="article-content">
+        
+        <p>灰常方便用<code>redis</code>的<code>HyperLogLog</code>来<strong>进行数值估数</strong>, <u><strong>可以解决很多精确度不高的统计需求。</strong></u></p>
+<p>但是如果想知道某一个值是不是已经在<code>HyperLogLog</code>结构里面了，它就无能为力了，它只提供了<code>pfadd</code>, <code>pfcount</code>和<code>pfmerge</code>等方法，没有提供<code>pfcontains</code>这样类似的方法。<br></p>
+        
+        
+        <p class="article-more-link">
+          
+            <a href="/2018/10/03/redis-06-bloom-filter/#more">Read More</a>
+          
+       </p>
+    </div>
+    <footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/redis专题/">redis专题</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/redis/">redis</a>
+  </div>
+
+</div>
+
+
+
+
+<div class="comments-count">
+		
+	  	<span></span>
+		<a href="/2018/10/03/redis-06-bloom-filter/#comments" class="ds-thread-count comments-count-link" data-thread-key="2018/10/03/redis-06-bloom-filter/" data-count-type="comments">&nbsp;</a>
+	
+</div>
+
+</footer>
+
+
+    </article>
+
+
+
+
+
+
+   
+    
+    <article class="post-expand post" itemprop="articleBody"> 
+        <header class="article-info clearfix">
+  <h1 itemprop="name">
+    
       <a href="/2018/10/03/mysql-10-storage-procedure-and-engine-summary/" title="mysql专题10 存储过程及存储引擎" itemprop="url">mysql专题10 存储过程及存储引擎</a>
   </h1>
   <p class="article-author">By
@@ -646,70 +711,6 @@
 
 
 
-   
-    
-    <article class="post-expand post" itemprop="articleBody"> 
-        <header class="article-info clearfix">
-  <h1 itemprop="name">
-    
-      <a href="/2018/07/21/mysql-05-constraint-practice/" title="mysql专题05 数据库约束关系实践" itemprop="url">mysql专题05 数据库约束关系实践</a>
-  </h1>
-  <p class="article-author">By
-       
-		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
-		
- <p class="article-time">
-    <time datetime="2018-07-21T11:33:18.000Z" itemprop="datePublished"> 发表于 2018-07-21</time>
-  </p>
-</header>
-
-    <div class="article-content">
-        
-        <p>本文从实践的角度对<code>Mysql</code>五类约束关系深入学习实践;<br></p>
-        
-        
-        <p class="article-more-link">
-          
-            <a href="/2018/07/21/mysql-05-constraint-practice/#more">Read More</a>
-          
-       </p>
-    </div>
-    <footer class="article-footer clearfix">
-<div class="article-catetags">
-
-<div class="article-categories">
-  <span></span>
-  <a class="article-category-link" href="/categories/mysql专题/">mysql专题</a>
-</div>
-
-
-  <div class="article-tags">
-  
-  <span></span> <a href="/tags/mysql/">mysql</a>
-  </div>
-
-</div>
-
-
-
-
-<div class="comments-count">
-		
-	  	<span></span>
-		<a href="/2018/07/21/mysql-05-constraint-practice/#comments" class="ds-thread-count comments-count-link" data-thread-key="2018/07/21/mysql-05-constraint-practice/" data-count-type="comments">&nbsp;</a>
-	
-</div>
-
-</footer>
-
-
-    </article>
-
-
-
-
-
-
 
   <nav id="page-nav" class="clearfix">
     <a class="extend prev" rel="prev" href="/page/3/"><span></span>Prev</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="page-number current">4</span><a class="page-number" href="/page/5/">5</a><a class="page-number" href="/page/6/">6</a><span class="space">&hellip;</span><a class="page-number" href="/page/11/">11</a><a class="extend next" rel="next" href="/page/5/">Next<span></span></a>
@@ -759,7 +760,7 @@
 		  
 		
 		  
-			<li><a href="/categories/better-coding/" title="better-coding">better-coding<sup>5</sup></a></li>
+			<li><a href="/categories/better-coding/" title="better-coding">better-coding<sup>6</sup></a></li>
 		  
 		
 		  
@@ -825,7 +826,7 @@
 			
 		
 			
-				<li><a href="/tags/dp/" title="dp">dp<sup>3</sup></a></li>
+				<li><a href="/tags/dp/" title="dp">dp<sup>4</sup></a></li>
 			
 		
 			
@@ -869,6 +870,14 @@
 			
 		
 			
+				<li><a href="/tags/ticker/" title="ticker">ticker<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/cache-invalid/" title="cache-invalid">cache-invalid<sup>1</sup></a></li>
+			
+		
+			
 				<li><a href="/tags/vendoring/" title="vendoring">vendoring<sup>1</sup></a></li>
 			
 		
@@ -878,14 +887,6 @@
 		
 			
 				<li><a href="/tags/govendor/" title="govendor">govendor<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/glide/" title="glide">glide<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/ticker/" title="ticker">ticker<sup>1</sup></a></li>
 			
 		
 		</ul>

@@ -76,6 +76,70 @@
         <header class="article-info clearfix">
   <h1 itemprop="name">
     
+      <a href="/2016/02/25/singleton-pattern-in-go/" title="golang 设计模式之singleton使用总结" itemprop="url">golang 设计模式之singleton使用总结</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
+		
+ <p class="article-time">
+    <time datetime="2016-02-25T09:01:43.000Z" itemprop="datePublished"> 发表于 2016-02-25</time>
+  </p>
+</header>
+
+    <div class="article-content">
+        
+        <p><code>golang</code> 1.5版本之后默认设置<code>GOMAXPROCS</code>值为当前计算机真实核心数，使得<code>goroutines</code>从默认的<code>单线程内并发执行</code>变成了默认的（真实核心数支持的）的<code>多线程内并行</code>执行。多线程并行执行<code>goroutines</code>需要考虑并行执行过程中引入的<code>线程安全问题</code>。<br></p>
+        
+        
+        <p class="article-more-link">
+          
+            <a href="/2016/02/25/singleton-pattern-in-go/#more">Read More</a>
+          
+       </p>
+    </div>
+    <footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/better-coding/">better-coding</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/dp/">dp</a><a href="/tags/singleton/">singleton</a>
+  </div>
+
+</div>
+
+
+
+
+<div class="comments-count">
+		
+	  	<span></span>
+		<a href="/2016/02/25/singleton-pattern-in-go/#comments" class="ds-thread-count comments-count-link" data-thread-key="2016/02/25/singleton-pattern-in-go/" data-count-type="comments">&nbsp;</a>
+	
+</div>
+
+</footer>
+
+
+    </article>
+
+
+
+
+
+
+   
+    
+    <article class="post-expand post" itemprop="articleBody"> 
+        <header class="article-info clearfix">
+  <h1 itemprop="name">
+    
       <a href="/2016/02/24/go-concurrency-security/" title="golang 并发安全性案例分析" itemprop="url">golang 并发安全性案例分析</a>
   </h1>
   <p class="article-author">By
@@ -646,70 +710,6 @@
 
 
 
-   
-    
-    <article class="post-expand post" itemprop="articleBody"> 
-        <header class="article-info clearfix">
-  <h1 itemprop="name">
-    
-      <a href="/2016/01/16/go-basics/" title="[译]GO BOOTCAMP 第二章：基本概念实战" itemprop="url">[译]GO BOOTCAMP 第二章：基本概念实战</a>
-  </h1>
-  <p class="article-author">By
-       
-		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
-		
- <p class="article-time">
-    <time datetime="2016-01-16T08:54:06.000Z" itemprop="datePublished"> 发表于 2016-01-16</time>
-  </p>
-</header>
-
-    <div class="article-content">
-        
-        <p>如果已经有一定的编程基础，那你只需花几个小时就能学会<code>Go</code>编程，因此<code>Go</code>也常被认为是一门“简单易用”的编程语言。Go语言被设计得尽量简洁，它的整个语言规范也一样。在写第一个<code>Go</code>应用之前，我们先来学习<code>Go</code>的一些基础概念。<br></p>
-        
-        
-        <p class="article-more-link">
-          
-            <a href="/2016/01/16/go-basics/#more">Read More</a>
-          
-       </p>
-    </div>
-    <footer class="article-footer clearfix">
-<div class="article-catetags">
-
-<div class="article-categories">
-  <span></span>
-  <a class="article-category-link" href="/categories/go-bootcamp/">go-bootcamp</a>
-</div>
-
-
-  <div class="article-tags">
-  
-  <span></span> <a href="/tags/golang/">golang</a>
-  </div>
-
-</div>
-
-
-
-
-<div class="comments-count">
-		
-	  	<span></span>
-		<a href="/2016/01/16/go-basics/#comments" class="ds-thread-count comments-count-link" data-thread-key="2016/01/16/go-basics/" data-count-type="comments">&nbsp;</a>
-	
-</div>
-
-</footer>
-
-
-    </article>
-
-
-
-
-
-
 
   <nav id="page-nav" class="clearfix">
     <a class="extend prev" rel="prev" href="/page/9/"><span></span>Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/8/">8</a><a class="page-number" href="/page/9/">9</a><span class="page-number current">10</span><a class="page-number" href="/page/11/">11</a><a class="extend next" rel="next" href="/page/11/">Next<span></span></a>
@@ -759,7 +759,7 @@
 		  
 		
 		  
-			<li><a href="/categories/better-coding/" title="better-coding">better-coding<sup>5</sup></a></li>
+			<li><a href="/categories/better-coding/" title="better-coding">better-coding<sup>6</sup></a></li>
 		  
 		
 		  
@@ -825,7 +825,7 @@
 			
 		
 			
-				<li><a href="/tags/dp/" title="dp">dp<sup>3</sup></a></li>
+				<li><a href="/tags/dp/" title="dp">dp<sup>4</sup></a></li>
 			
 		
 			
@@ -869,6 +869,14 @@
 			
 		
 			
+				<li><a href="/tags/ticker/" title="ticker">ticker<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/cache-invalid/" title="cache-invalid">cache-invalid<sup>1</sup></a></li>
+			
+		
+			
 				<li><a href="/tags/vendoring/" title="vendoring">vendoring<sup>1</sup></a></li>
 			
 		
@@ -878,14 +886,6 @@
 		
 			
 				<li><a href="/tags/govendor/" title="govendor">govendor<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/glide/" title="glide">glide<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/ticker/" title="ticker">ticker<sup>1</sup></a></li>
 			
 		
 		</ul>
