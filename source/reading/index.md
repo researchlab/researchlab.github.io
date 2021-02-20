@@ -6,6 +6,13 @@ date: 2021-02-17 23:38:00
 ## # 2021 
 1 [deep work](https://book.douban.com/subject/27056409/)
 
+- 余华作品集
+1 [我没有自己的名字](https://book.douban.com/subject/1082236/)
+
+- 待读书单
+1 [社会心理学](https://book.douban.com/subject/25982198/)
+
+
 ## # 2020 已读书单归档
 - 在线阅读
 1 [On Java 8](https://lingcoder.github.io/OnJava8/#/sidebar)
@@ -23,9 +30,6 @@ date: 2021-02-17 23:38:00
 13 [awsome-go](https://awesome-go.com/)
 - 余华作品集
 1 [在细雨中呼喊](https://book.douban.com/subject/20421947/)
-- 待读书单
-1 [社会心理学](https://book.douban.com/subject/25982198/)
-
 
 ## # 2019  已读书单归档
 - 纸质书单
