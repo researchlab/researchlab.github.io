@@ -1,0 +1,652 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>Go Vendoring Tools 使用总结 | 一线攻城狮</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="Lee Hong">
+    
+
+    
+    <meta name="description" content="golang1.5版本开始支持第三方包到依赖管理,当多个项目在同一个GOPATH下，每个项目包含到第三方包通过go get命令都会get到GOPATH下到src目录中，而不是各个项目的文件夹中，这就导致第三方包的不同版本不能同时被GOPATH下到多个项目使用，从golang需要设置GOPATH来看,golang其实把每个项目当作一个个独立的第三包来看待。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Go Vendoring Tools 使用总结">
+<meta property="og:url" content="http://researchlab.github.io/2016/05/24/comparison-of-Go-Vendoring-Tools/index.html">
+<meta property="og:site_name" content="一线攻城狮">
+<meta property="og:description" content="golang1.5版本开始支持第三方包到依赖管理,当多个项目在同一个GOPATH下，每个项目包含到第三方包通过go get命令都会get到GOPATH下到src目录中，而不是各个项目的文件夹中，这就导致第三方包的不同版本不能同时被GOPATH下到多个项目使用，从golang需要设置GOPATH来看,golang其实把每个项目当作一个个独立的第三包来看待。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2016-05-24T06:03:36.000Z">
+<meta property="article:modified_time" content="2021-10-19T02:21:45.389Z">
+<meta property="article:author" content="Lee Hong">
+<meta property="article:tag" content="vendoring">
+<meta property="article:tag" content="godep">
+<meta property="article:tag" content="govendor">
+<meta property="article:tag" content="glide">
+<meta name="twitter:card" content="summary">
+
+    
+    <link rel="alternative" href="/atom.xml" title="一线攻城狮" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    
+<link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="/%02.css">
+<link rel="stylesheet" href="/.css">
+
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="一线攻城狮">一线攻城狮</a></h1>
+				<h2 class="blog-motto">十年磨一剑，一步一步脚踏实地的耕种</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">首页</a></li>
+					
+						<li><a href="/archives">归档</a></li>
+					
+						<li><a href="/reading">书单</a></li>
+					
+						<li><a href="/opensource">开源</a></li>
+					
+						<li><a href="/about">关于</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:researchlab.github.io">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2016/05/24/comparison-of-Go-Vendoring-Tools/" title="Go Vendoring Tools 使用总结" itemprop="url">Go Vendoring Tools 使用总结</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
+		
+ <p class="article-time">
+    <time datetime="2016-05-24T06:03:36.000Z" itemprop="datePublished"> 发表于 2016-05-24</time>
+   &nbsp&nbsp热度&nbsp<span id="busuanzi_value_page_pv"></span>° 
+  </p>
+</header>
+
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#godep"><span class="toc-number">1.</span> <span class="toc-text">godep</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#govendor"><span class="toc-number">2.</span> <span class="toc-text">govendor</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#glide"><span class="toc-number">3.</span> <span class="toc-text">glide</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">4.</span> <span class="toc-text">总结</span></a></li></ol>
+		
+		</div>
+		
+		<p>golang1.5版本开始支持第三方包到依赖管理,当多个项目在同一个<code>GOPATH</code>下，每个项目包含到第三方包通过<code>go get</code>命令都会<code>get</code>到<code>GOPATH</code>下到<code>src</code>目录中，而不是各个项目的文件夹中，这就导致第三方包的不同版本不能同时被<code>GOPATH</code>下到多个项目使用，从<code>golang</code>需要设置<code>GOPATH</code>来看,<code>golang</code>其实把每个项目当作一个个独立的第三包来看待。<br><span id="more"></span><br>关于<code>golang</code>包管理工具的topic, 在<code>golang</code>的官方wiki要有一篇总结对比的文章:<a target="_blank" rel="noopener" href="https://github.com/golang/go/wiki/PackageManagementTools">PackageManagementTools</a>。下面主要就项目中用过的<code>godep</code>,<code>govendor</code>,<code>glide</code>做一个简要的对比分析。</p>
+<h2 id="godep"><a href="#godep" class="headerlink" title="godep"></a>godep</h2><p><a target="_blank" rel="noopener" href="https://github.com/tools/godep">godep</a> helps build packages reproducibly by fixing their dependencies.</p>
+<p><strong>前置条件</strong></p>
+<ul>
+<li>项目处在<code>GOPATH</code>下</li>
+<li>项目能被<code>go install</code>通过</li>
+<li>项目能被<code>go test</code>通过</li>
+</ul>
+<p><strong>包初始化管理</strong><br>在项目根目录下执行<code>godep save</code>命令<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ godep save</span><br></pre></td></tr></table></figure><br>会在项目根目录下生成两个文件夹: </p>
+<p><code>Godeps</code>目录</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">➜  Godeps tree</span><br><span class="line">.</span><br><span class="line">├── Godeps.json</span><br><span class="line">└── Readme</span><br><span class="line"></span><br><span class="line">0 directories, 2 files</span><br><span class="line">➜  Godeps cat Godeps.json </span><br><span class="line">&#123;</span><br><span class="line">	<span class="string">&quot;ImportPath&quot;</span>: <span class="string">&quot;yaml&quot;</span>,</span><br><span class="line">	<span class="string">&quot;GoVersion&quot;</span>: <span class="string">&quot;go1.6&quot;</span>,</span><br><span class="line">	<span class="string">&quot;GodepVersion&quot;</span>: <span class="string">&quot;v70&quot;</span>,</span><br><span class="line">	<span class="string">&quot;Packages&quot;</span>: [</span><br><span class="line">		<span class="string">&quot;./...&quot;</span></span><br><span class="line">	],</span><br><span class="line">	<span class="string">&quot;Deps&quot;</span>: [</span><br><span class="line">		&#123;</span><br><span class="line">			<span class="string">&quot;ImportPath&quot;</span>: <span class="string">&quot;gopkg.in/yaml.v2&quot;</span>,</span><br><span class="line">			<span class="string">&quot;Rev&quot;</span>: <span class="string">&quot;a83829b6f1293c91addabc89d0571c246397bbf4&quot;</span></span><br><span class="line">		&#125;</span><br><span class="line">	]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>vendor</code>目录:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">➜  vendor tree</span><br><span class="line">.</span><br><span class="line">└── gopkg.in</span><br><span class="line">    └── yaml.v2</span><br><span class="line">        ├── apic.go</span><br><span class="line">        ├── decode.go</span><br><span class="line">        ├── emitterc.go</span><br><span class="line">        ├── encode.go</span><br><span class="line">        ├── LICENSE</span><br><span class="line">        ├── LICENSE.libyaml</span><br><span class="line">        ├── parserc.go</span><br><span class="line">        ├── readerc.go</span><br><span class="line">        ├── README.md</span><br><span class="line">        ├── resolve.go</span><br><span class="line">        ├── scannerc.go</span><br><span class="line">        ├── sorter.go</span><br><span class="line">        ├── writerc.go</span><br><span class="line">        ├── yaml.go</span><br><span class="line">        ├── yamlh.go</span><br><span class="line">        └── yamlprivateh.go</span><br><span class="line"></span><br><span class="line">2 directories, 16 files</span><br></pre></td></tr></table></figure>
+<p>可以看到，<code>godep</code>把第三包的版本依赖信息记录在<code>Godeps.json</code>下，并且把第三包完整拷贝一份到<code>vendor</code>下面。通过对<code>Godeps.json</code>文件进行版本管理即可以管理整个项目的第三方包依赖信息。</p>
+<p><strong>添加新包</strong><br>方法一：</p>
+<p>go get 把新增的第三方包get到<code>GOPATH</code>的<code>src</code>目录下，然后再执行<code>godep save</code></p>
+<p>方法二：</p>
+<p>godep get <url> 同样是把第三方包get到<code>GOPATH</code>的<code>src</code>下，然后再执行<code>godep save</code></url></p>
+<p>可以看到<code>godep</code>只是把第三方包进行单独到依赖管理，而新增到第三包还是会被get到<code>GOPATH</code>中, 如果多个项目用同一个第三包的不同版本时，显然不能满足。</p>
+<p><strong>更新包</strong><br><code>godep</code>通过<code>godep update</code> 更新制定的第三包以及<code>golang</code>的版本。</p>
+<h2 id="govendor"><a href="#govendor" class="headerlink" title="govendor"></a>govendor</h2><p><a target="_blank" rel="noopener" href="https://github.com/kardianos/govendor">govendor</a> Uses the go1.5+ vendor folder. Multiple workflows supported, single tool.</p>
+<p><strong>Quick Start</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Setup your project.</span></span><br><span class="line"><span class="built_in">cd</span> <span class="string">&quot;my project in GOPATH&quot;</span></span><br><span class="line">govendor init</span><br><span class="line"></span><br><span class="line"><span class="comment"># Add existing GOPATH files to vendor.</span></span><br><span class="line">govendor add +external</span><br><span class="line"></span><br><span class="line"><span class="comment"># View your work.</span></span><br><span class="line">govendor list</span><br><span class="line"></span><br><span class="line"><span class="comment"># Look at what is using a package</span></span><br><span class="line">govendor list -v fmt</span><br><span class="line"></span><br><span class="line"><span class="comment"># Specify a specific version or revision to fetch</span></span><br><span class="line">govendor fetch golang.org/x/net/context@a4bbce9fcae005b22ae5443f6af064d80a6f5a55</span><br><span class="line">govendor fetch golang.org/x/net/context@v1   <span class="comment"># Get latest v1.*.* tag or branch.</span></span><br><span class="line">govendor fetch golang.org/x/net/context@=v1  <span class="comment"># Get the tag or branch named &quot;v1&quot;.</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Update a package to latest, given any prior version constraint</span></span><br><span class="line">govendor fetch golang.org/x/net/context</span><br></pre></td></tr></table></figure>
+<p><strong>Sub-commands</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">init     Create the <span class="string">&quot;vendor&quot;</span> folder and the <span class="string">&quot;vendor.json&quot;</span> file.</span><br><span class="line">    list     List and filter existing dependencies and packages.</span><br><span class="line">    add      Add packages from <span class="variable">$GOPATH</span>.</span><br><span class="line">    update   Update packages from <span class="variable">$GOPATH</span>.</span><br><span class="line">    remove   Remove packages from the vendor folder.</span><br><span class="line">    status   Lists any packages missing, out-of-date, or modified locally.</span><br><span class="line">    fetch    Add new or update vendor folder packages from remote repository.</span><br><span class="line">    sync     Pull packages into vendor folder from remote repository with revisions</span><br><span class="line">                 from vendor.json file.</span><br><span class="line">    migrate  Move packages from a legacy tool to the vendor folder with metadata.</span><br><span class="line">    get      Like <span class="string">&quot;go get&quot;</span> but copies dependencies into a <span class="string">&quot;vendor&quot;</span> folder.</span><br><span class="line">    license  List discovered licenses <span class="keyword">for</span> the given status or import paths.</span><br><span class="line">    shell    Run a <span class="string">&quot;shell&quot;</span> to make multiple sub-commands more efficent <span class="keyword">for</span> large</span><br><span class="line">                 projects.</span><br><span class="line"></span><br><span class="line">    go tool commands that are wrapped:</span><br><span class="line">      `+&lt;status&gt;` package selection may be used with them</span><br><span class="line">    fmt, build, install, clean, <span class="built_in">test</span>, vet, generate</span><br></pre></td></tr></table></figure>
+<p><strong>Status</strong> </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">+<span class="built_in">local</span>    (l) packages <span class="keyword">in</span> your project</span><br><span class="line">    +external (e) referenced packages <span class="keyword">in</span> GOPATH but not <span class="keyword">in</span> current project</span><br><span class="line">    +vendor   (v) packages <span class="keyword">in</span> the vendor folder</span><br><span class="line">    +std      (s) packages <span class="keyword">in</span> the standard library</span><br><span class="line"></span><br><span class="line">    +unused   (u) packages <span class="keyword">in</span> the vendor folder, but unused</span><br><span class="line">    +missing  (m) referenced packages but not found</span><br><span class="line"></span><br><span class="line">    +program  (p) package is a main package</span><br><span class="line"></span><br><span class="line">    +outside  +external +missing</span><br><span class="line">    +all      +all packages</span><br></pre></td></tr></table></figure>
+<p>可以看到<code>govendor init</code>之后会在根目录下生成一个<code>vendor</code>文件夹 </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">➜  yaml tree -d</span><br><span class="line">.</span><br><span class="line">└── vendor</span><br><span class="line">    ├── github.com</span><br><span class="line">    │   └── cihub</span><br><span class="line">    │       └── seelog</span><br><span class="line">    └── gopkg.in</span><br><span class="line">        └── yaml.v2</span><br><span class="line"></span><br><span class="line">6 directories</span><br><span class="line">➜  yaml cat vendor/vendor.json </span><br><span class="line">&#123;</span><br><span class="line">	<span class="string">&quot;comment&quot;</span>: <span class="string">&quot;&quot;</span>,</span><br><span class="line">	<span class="string">&quot;ignore&quot;</span>: <span class="string">&quot;test&quot;</span>,</span><br><span class="line">	<span class="string">&quot;package&quot;</span>: [</span><br><span class="line">		&#123;</span><br><span class="line">			<span class="string">&quot;checksumSHA1&quot;</span>: <span class="string">&quot;Nc93Ubautl47L3RP6x4lTY+ud68=&quot;</span>,</span><br><span class="line">			<span class="string">&quot;path&quot;</span>: <span class="string">&quot;github.com/cihub/seelog&quot;</span>,</span><br><span class="line">			<span class="string">&quot;revision&quot;</span>: <span class="string">&quot;cedd97ac8c6c2ec413a97864185f9510fb1775cc&quot;</span>,</span><br><span class="line">			<span class="string">&quot;revisionTime&quot;</span>: <span class="string">&quot;2016-05-20T13:10:56Z&quot;</span></span><br><span class="line">		&#125;,</span><br><span class="line">		&#123;</span><br><span class="line">			<span class="string">&quot;checksumSHA1&quot;</span>: <span class="string">&quot;+OgOXBoiQ+X+C2dsAeiOHwBIEH0=&quot;</span>,</span><br><span class="line">			<span class="string">&quot;path&quot;</span>: <span class="string">&quot;gopkg.in/yaml.v2&quot;</span>,</span><br><span class="line">			<span class="string">&quot;revision&quot;</span>: <span class="string">&quot;a83829b6f1293c91addabc89d0571c246397bbf4&quot;</span>,</span><br><span class="line">			<span class="string">&quot;revisionTime&quot;</span>: <span class="string">&quot;2016-03-01T20:40:22Z&quot;</span></span><br><span class="line">		&#125;</span><br><span class="line">	],</span><br><span class="line">	<span class="string">&quot;rootPath&quot;</span>: <span class="string">&quot;yaml&quot;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>用<code>govendor fetch &lt;url1&gt; &lt;url2&gt;</code>新增的第三方包直接被get到根目录的<code>vendor</code>文件夹下,不会与其它的项目混用第三方包，完美避免多个项目同用同一个第三方包的不同版本问题。</p>
+<p>只需要对<code>vendor/vendor.json</code>进行版本控制，即可对第三包依赖关系进行控制。</p>
+<h2 id="glide"><a href="#glide" class="headerlink" title="glide"></a>glide</h2><p><a target="_blank" rel="noopener" href="https://github.com/Masterminds/glide">Glide</a> Vendor Package Management for Golang.</p>
+<p><strong>Usage</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">➜  yaml glide --<span class="built_in">help</span></span><br><span class="line">USAGE:</span><br><span class="line">   glide [global options] <span class="built_in">command</span> [<span class="built_in">command</span> options] [arguments...]</span><br><span class="line"></span><br><span class="line">	create, init	Initialize a new project, creating a glide.yaml file</span><br><span class="line">    get			Install one or more packages into `vendor/` and add dependency to glide.yaml.</span><br><span class="line">    remove, rm		Remove a package from the glide.yaml file, and regenerate the lock file.</span><br><span class="line">    import		Import files from other dependency management systems.</span><br><span class="line">    name		Print the name of this project.</span><br><span class="line">    novendor, nv	List all non-vendor paths <span class="keyword">in</span> a directory.</span><br><span class="line">    rebuild		Rebuild (<span class="string">&#x27;go build&#x27;</span>) the dependencies</span><br><span class="line">    install, i		Install a project<span class="string">&#x27;s dependencies</span></span><br><span class="line"><span class="string">    update, up		Update a project&#x27;</span>s dependencies</span><br><span class="line">    tree		Tree prints the dependencies of this project as a tree.</span><br><span class="line">    list		List prints all dependencies that the present code references.</span><br><span class="line">    info		Info prints information about this project</span><br><span class="line">    about		Learn about Glide</span><br><span class="line"></span><br><span class="line">GLOBAL OPTIONS:</span><br><span class="line">   --yaml, -y <span class="string">&quot;glide.yaml&quot;</span>	Set a YAML configuration file.</span><br><span class="line">   --quiet, -q			Quiet (no info or debug messages)</span><br><span class="line">   --debug			Print Debug messages (verbose)</span><br><span class="line">   --home <span class="string">&quot;/home/dev/.glide&quot;</span>	The location of Glide files [<span class="variable">$GLIDE_HOME</span>]</span><br><span class="line">   --no-color			Turn off colored output <span class="keyword">for</span> <span class="built_in">log</span> messages</span><br><span class="line">   --<span class="built_in">help</span>, -h			show <span class="built_in">help</span></span><br><span class="line">   --version, -v		<span class="built_in">print</span> the version</span><br></pre></td></tr></table></figure>
+<p><code>glide</code>    通过<code>glide create</code>或<code>glide init</code>命令初始化第三方包管理，会在项目根目录下生成一个<code>glide.yaml</code>，这个文件记录用到的第三方包的依赖关系，支持编辑修改。<br><code>glide</code>通过<code>glide install</code>, 会把所有缺少的第三方包都下载到<code>vendor</code>文件夹下，并且会在<code>glide.yaml</code>中添加所有依赖的第三方包名称，在<code>glide.lock</code>文件中记录具体的版本管理信息。</p>
+<p><strong>glide install</strong></p>
+<p>When you want to install the specific versions from the glide.lock file use glide install.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ glide install</span><br></pre></td></tr></table></figure>
+<p>This will read the <code>glide.lock</code> file and install the commit id specific versions there.</p>
+<p>When the glide.lock file doesn’t tie to the <code>glide.yaml</code> file, such as there being a change, it will provide a warning. Running glide up will recreate the <code>glide.lock</code> file when updating the dependency tree.</p>
+<p>If no glide.lock file is present glide install will perform an update and generate a lock file.</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ul>
+<li><code>godep</code>,<code>govendor</code>,<code>glide</code> 都可以很好的进行包管理。<code>govendor</code>,<code>glide</code>提供的可操作命令更丰富。</li>
+<li><code>godep</code> 会在根目录生成<code>Godeps</code>和<code>vendor</code>两个文件夹; <code>govendor</code>把所有信息都生成在<code>vendor</code>目录下; <code>glide</code> 会在根目录下生成<code>glide.yaml</code>, <code>glide.lock</code>文件及<code>vendor</code>目录; 从<code>简洁度</code>和<code>尽量不污染项目</code>来看，<code>govendor</code>最优，<code>glide</code>次之。</li>
+<li><p><code>godep</code>, <code>govendor</code>, <code>glide</code> 都提供get 第三方包的命令，但是 <code>glide</code>的<code>glide install</code> 最为方便， 并且直接把第三方包get到本项目的vendor目录下，并且<code>glide</code>提供的<code>便捷</code>命令也丰富。</p>
+</li>
+<li><p><strong> 在生产项目中推荐使用<code>govendor</code>, 更简洁; 在试验项目中推荐试用<code>glide</code>, 更方便。</strong></p>
+</li>
+</ul>
+  
+	</div>
+		<div style="padding: 10px 44px 30px 44px;" >
+<div style="border: 1px dashed #e0e0e0; padding: 10px 10px 10px 10px; background-color: #fffeee; background-repeat: no-repeat; background-attachment: scroll; background-position: 1% 50%; -moz-background-size: auto auto; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">
+<div style="float:left;margin-top:0px;">
+<img src="/img/weixin.jpg" width="125px" height="125px" style="border:1px solid #ccc; margin: 6px 5px 0px 0px"/>
+</div>
+<div>
+ <p style="margin-top:0px;">作者署名：<b><a target="_blank" href="http://researchlab.github.io/">朴实的一线攻城狮</a></b>
+<br />本文标题：<b><a href="/2016/05/24/comparison-of-Go-Vendoring-Tools/" target="_blank" title="Go Vendoring Tools 使用总结">Go Vendoring Tools 使用总结</a></b> 
+<br />本文出处：<b><a href="/2016/05/24/comparison-of-Go-Vendoring-Tools/" target="_blank" title="Go Vendoring Tools 使用总结">http://researchlab.github.io/2016/05/24/comparison-of-Go-Vendoring-Tools/</a></b>
+<br />版权声明：本文由<b><a href="/about" target="_blank" title="Lee Hong">Lee Hong</a></b>创作和发表,采用<b>署名(BY)</b>-<b>非商业性使用(NC)</b>-<b>相同方式共享(SA)</b>国际许可协议进行许可,转载请注明作者及出处, 否则保留追究法律责任的权利。 </p>
+</div>
+</div>
+</div>
+
+   	       
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/golang/">golang</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/vendoring/">vendoring</a><a href="/tags/godep/">godep</a><a href="/tags/govendor/">govendor</a><a href="/tags/glide/">glide</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	<div class="share-jiathis">
+	  
+<div class="jiathis_style_24x24">
+	<a class="jiathis_button_weixin"></a>
+	<a class="jiathis_button_tsina"></a>
+	<a class="jiathis_button_tqq"></a>
+	<a class="jiathis_button_qzone"></a>
+    <a class="jiathis_button_googleplus"></a>
+	<a class="jiathis_button_douban"></a>
+	<a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+    var jiathis_config={
+    data_track_clickback:true,
+    sm:"copy,renren,cqq",
+    pic:"",
+    summary:"",
+    
+  </script> 
+<script type="text/javascript" src="//v3.jiathis.com/code/jia.js?uid=
+2084050" charset="utf-8"></script>      
+
+
+	 </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2016/06/14/go-time-summary/" title="golang 格式化时间总结">
+  <strong>上一篇：</strong><br/>
+  <span>
+  golang 格式化时间总结</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2016/05/08/travis-ci-deploy-hexo-blog/"  title="使用Travis CI自动构建Hexo静态博客">
+ <strong>下一篇：</strong><br/> 
+ <span>使用Travis CI自动构建Hexo静态博客
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+<!-- gitment评论框 start -->
+	<div id="gitment" class="ds-thread"></div>
+	<link rel="stylesheet" href="https://github.com/researchlab/gitment/blob/master/style/default.css">
+	<script src="https://github.com/researchlab/gitment/blob/master/dist/gitment.browser.js"></script>
+	<script>
+	  var gitment = new Gitment({
+	    id: 'lTue May 24 2016 14:03:36 GMT+0800', // 可选。建议为Tue May 24 2016 14:03:36 GMT+0800
+	    owner: 'researchlab', // 可以是你的GitHub用户名，也可以是github id
+	    repo: 'researchlab.github.io', //可以是你的任意一个repo，推荐使用githubpage所在的repo
+	    oauth: {
+	      client_id: 'e4971ec4c4fdbefb392f',
+	      client_secret: 'e5001b2dda2dcb9a9c66417991be57836c17a72b',
+	    },
+	  })
+	  gitment.render('gitment')
+</script>
+
+
+</div>  
+
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+<div id="asidepart">
+
+  <div class="widget tag">
+<!--<hr noshade color="#ccc">-->
+<!-- <p style="text-align:center">Mike.Lee</p> -->
+<p margin="0" style="text-align:center">
+<a class="ahref" href="http://researchlab.github.io/about/">
+<img id="aboutpic"  src="/img/qzly.png" alt="@一线攻城狮" height="200" width="200" style="box-shadow: 0px 0px 2px 2px #9edeff;border-radius: 8px;" >
+</a></p>
+<p style="text-align:center"><font size="2" color="grey">关注微信公众号 @一线攻城狮</font></p>
+<div style="display:block; margin-top:10px; padding: 0px 4px 4px 0; border-top: dashed 1px #ccc; text-align:left;"></div>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<div style="float:left;position:absolute;"><font size="2" >总访问:<span id="busuanzi_value_site_pv"></span>次</font></div>
+<div style="float:right;"><font size="2" >总访客:<span id="busuanzi_value_site_uv"></span>人</font></div>
+
+<div style="margin-top:30px; padding: 5px 4px 4px 0; border-top: dashed 1px #ccc; text-align:left;"></div>
+</div>
+
+
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/DevOps/" title="DevOps">DevOps<sup>13</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Hexo/" title="Hexo">Hexo<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/MQ/" title="MQ">MQ<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/algorithm/" title="algorithm">algorithm<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/better-coding/" title="better-coding">better-coding<sup>6</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/docker-practice/" title="docker-practice">docker-practice<sup>8</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/go-bootcamp/" title="go-bootcamp">go-bootcamp<sup>6</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/golang/" title="golang">golang<sup>23</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/java/" title="java">java<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/javascript/" title="javascript">javascript<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/k8s/" title="k8s">k8s<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/mysql专题/" title="mysql专题">mysql专题<sup>16</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/php/" title="php">php<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/redis专题/" title="redis专题">redis专题<sup>17</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/golang/" title="golang">golang<sup>24</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mysql/" title="mysql">mysql<sup>18</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/redis/" title="redis">redis<sup>17</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/docker/" title="docker">docker<sup>9</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/dp/" title="dp">dp<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/setcookie/" title="setcookie">setcookie<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/tcp/" title="tcp">tcp<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/cache/" title="cache">cache<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/concurrency/" title="concurrency">concurrency<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Hexo/" title="Hexo">Hexo<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Blog/" title="Blog">Blog<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/minikube/" title="minikube">minikube<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/cloud-computing/" title="cloud computing">cloud computing<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/getcookie/" title="getcookie">getcookie<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/rpc/" title="rpc">rpc<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/cache-invalid/" title="cache-invalid">cache-invalid<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/ticker/" title="ticker">ticker<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/vendoring/" title="vendoring">vendoring<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/godep/" title="godep">godep<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/govendor/" title="govendor">govendor<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="http://blog.csdn.net/xiaolongwang2010" target="_blank" title="小龙王2010csdn技术博客">Linux/c/c++</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  
+
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+  <iframe width="100%" height="550" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=550&fansRow=1&ptype=1&speed=0&skin=1&isTitle=1&noborder=1&isWeibo=1&isFans=1&uid=5141203275&verifier=a533edf5&dpc=1"></iframe>
+
+
+</aside>
+</div>
+
+    </div>
+    <footer><div id="footer" >
+	
+	
+	<div class="social-font" class="clearfix">
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/researchlab/lightman" target="_blank" title="lightman">lightman</a> ©2016 - 2021 
+		
+		<a href="/about" target="_blank" title="Lee Hong">Lee Hong</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+
+
+<script type="text/javascript">
+  var duoshuoQuery = {short_name:"gamedp"};
+  (function() {
+    var ds = document.createElement('script');
+    ds.type = 'text/javascript';ds.async = true;
+    ds.src = '//static.duoshuo.com/embed.js';
+    ds.charset = 'UTF-8';
+    (document.getElementsByTagName('head')[0] 
+    || document.getElementsByTagName('body')[0]).appendChild(ds);
+  })();
+</script> 
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

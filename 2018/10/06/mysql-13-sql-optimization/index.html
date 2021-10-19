@@ -1,0 +1,1200 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>mysql专题13 性能优化之sql语句优化 | 一线攻城狮</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="Lee Hong">
+    
+
+    
+    <meta name="description" content="为应用服务提供稳定的数据CURD服务,同时为了进一步提升CURD性能及潜在的问题, 就需要根据实际业务情况及数据体量进行数据库优化修订工作, 关于数据库优化的操作可以从多个方面来总结归纳, 如对SQL语句的优化, 索引的优化, 表结构的优化, 配置的优化等等; 本文从总结实践经验及归纳回顾知识要点的角度来探讨关于SQL语句优化的相关问题;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="mysql专题13 性能优化之sql语句优化">
+<meta property="og:url" content="http://researchlab.github.io/2018/10/06/mysql-13-sql-optimization/index.html">
+<meta property="og:site_name" content="一线攻城狮">
+<meta property="og:description" content="为应用服务提供稳定的数据CURD服务,同时为了进一步提升CURD性能及潜在的问题, 就需要根据实际业务情况及数据体量进行数据库优化修订工作, 关于数据库优化的操作可以从多个方面来总结归纳, 如对SQL语句的优化, 索引的优化, 表结构的优化, 配置的优化等等; 本文从总结实践经验及归纳回顾知识要点的角度来探讨关于SQL语句优化的相关问题;">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2018-10-06T02:01:54.000Z">
+<meta property="article:modified_time" content="2021-10-19T02:21:45.453Z">
+<meta property="article:author" content="Lee Hong">
+<meta property="article:tag" content="mysql">
+<meta name="twitter:card" content="summary">
+
+    
+    <link rel="alternative" href="/atom.xml" title="一线攻城狮" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    
+<link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="/%02.css">
+<link rel="stylesheet" href="/.css">
+
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="一线攻城狮">一线攻城狮</a></h1>
+				<h2 class="blog-motto">十年磨一剑，一步一步脚踏实地的耕种</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">首页</a></li>
+					
+						<li><a href="/archives">归档</a></li>
+					
+						<li><a href="/reading">书单</a></li>
+					
+						<li><a href="/opensource">开源</a></li>
+					
+						<li><a href="/about">关于</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:researchlab.github.io">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2018/10/06/mysql-13-sql-optimization/" title="mysql专题13 性能优化之sql语句优化" itemprop="url">mysql专题13 性能优化之sql语句优化</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
+		
+ <p class="article-time">
+    <time datetime="2018-10-06T02:01:54.000Z" itemprop="datePublished"> 发表于 2018-10-06</time>
+   &nbsp&nbsp热度&nbsp<span id="busuanzi_value_page_pv"></span>° 
+  </p>
+</header>
+
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BC%98%E5%8C%96%E7%9B%AE%E7%9A%84"><span class="toc-number">1.</span> <span class="toc-text">优化目的</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BC%98%E5%8C%96%E6%96%B9%E5%90%91%E5%8F%8A%E6%88%90%E6%9C%AC"><span class="toc-number">2.</span> <span class="toc-text">优化方向及成本</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E5%87%86%E5%A4%87"><span class="toc-number">3.</span> <span class="toc-text">数据准备</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%85%A2%E6%9F%A5%E6%97%A5%E5%BF%97"><span class="toc-number">4.</span> <span class="toc-text">慢查日志</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9F%A5%E7%9C%8B%E6%85%A2%E6%9F%A5%E8%AF%A2%E5%BC%80%E5%90%AF%E7%8A%B6%E6%80%81"><span class="toc-number">4.1.</span> <span class="toc-text">查看慢查询开启状态</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%85%A2%E6%9F%A5%E6%97%A5%E5%BF%97%E4%BD%8D%E7%BD%AE"><span class="toc-number">4.2.</span> <span class="toc-text">慢查日志位置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%80%E5%90%AF%E6%85%A2%E6%9F%A5%E6%97%A5%E5%BF%97"><span class="toc-number">4.3.</span> <span class="toc-text">开启慢查日志</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9F%A5%E7%9C%8B%E6%85%A2%E6%9F%A5%E6%97%A5%E5%BF%97"><span class="toc-number">4.4.</span> <span class="toc-text">查看慢查日志</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%B0%83%E6%95%B4%E6%97%B6%E5%8C%BA"><span class="toc-number">4.5.</span> <span class="toc-text">调整时区</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%85%A2%E6%9F%A5%E6%97%A5%E5%BF%97%E5%AD%98%E5%82%A8%E6%A0%BC%E5%BC%8F"><span class="toc-number">4.6.</span> <span class="toc-text">慢查日志存储格式</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%85%A2%E6%9F%A5%E6%97%A5%E5%BF%97%E5%88%86%E6%9E%90"><span class="toc-number">5.</span> <span class="toc-text">慢查日志分析</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#mysqldumpslow"><span class="toc-number">5.1.</span> <span class="toc-text">mysqldumpslow</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#pt-query-digest"><span class="toc-number">5.2.</span> <span class="toc-text">pt-query-digest</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%94%A8%E6%B3%95%E4%B8%BE%E4%BE%8B"><span class="toc-number">5.3.</span> <span class="toc-text">用法举例</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%80%9A%E8%BF%87%E6%85%A2%E6%9F%A5%E6%97%A5%E5%BF%97%E5%8F%91%E7%8E%B0%E9%97%AE%E9%A2%98SQL"><span class="toc-number">6.</span> <span class="toc-text">通过慢查日志发现问题SQL</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%80%9A%E8%BF%87explain%E6%9F%A5%E8%AF%A2%E5%92%8C%E5%88%86%E6%9E%90SQL%E7%9A%84%E6%89%A7%E8%A1%8C%E8%AE%A1%E5%88%92"><span class="toc-number">7.</span> <span class="toc-text">通过explain查询和分析SQL的执行计划</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Max-%E5%87%BD%E6%95%B0%E4%BC%98%E5%8C%96"><span class="toc-number">8.</span> <span class="toc-text">Max()函数优化</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Count-%E5%87%BD%E6%95%B0%E4%BC%98%E5%8C%96"><span class="toc-number">9.</span> <span class="toc-text">Count()函数优化</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AD%90%E6%9F%A5%E8%AF%A2%E4%BC%98%E5%8C%96"><span class="toc-number">10.</span> <span class="toc-text">子查询优化</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1%E5%AF%B9%E5%A4%9A%E5%85%B3%E7%B3%BB%E5%B8%A6%E6%9D%A5%E7%9A%84%E9%87%8D%E5%A4%8D%E6%95%B0%E6%8D%AE%E9%97%AE%E9%A2%98"><span class="toc-number">10.1.</span> <span class="toc-text">1对多关系带来的重复数据问题</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9E%E4%BE%8B%E5%88%86%E6%9E%90"><span class="toc-number">10.2.</span> <span class="toc-text">实例分析</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#group-by%E4%BC%98%E5%8C%96"><span class="toc-number">11.</span> <span class="toc-text">group by优化</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#limit%E6%9F%A5%E8%AF%A2%E4%BC%98%E5%8C%96"><span class="toc-number">12.</span> <span class="toc-text">limit查询优化</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">13.</span> <span class="toc-text">总结</span></a></li></ol>
+		
+		</div>
+		
+		<p>为应用服务提供稳定的数据CURD服务,同时为了进一步提升CURD性能及潜在的问题, 就需要根据实际业务情况及数据体量进行数据库优化修订工作, 关于数据库优化的操作可以从多个方面来总结归纳, 如对SQL语句的优化, 索引的优化, 表结构的优化, 配置的优化等等; 本文从总结实践经验及归纳回顾知识要点的角度来探讨关于SQL语句优化的相关问题;<br><span id="more"></span></p>
+<h2 id="优化目的"><a href="#优化目的" class="headerlink" title="优化目的"></a>优化目的</h2><ul>
+<li>避免出现页面访问错误<ol>
+<li>由于数据库连接timeout产生页面5xx错误;</li>
+<li>由于慢查询造成页面无法加载;</li>
+<li>由于阻塞造成数据无法提交;</li>
+</ol>
+</li>
+<li>增加数据库的稳定性<ol>
+<li>很多数据库问题都是由于低效的查询引起的;</li>
+</ol>
+</li>
+<li>优化用户体验<ol>
+<li>流畅页面的访问速度;</li>
+<li>良好的业务功能体验;</li>
+</ol>
+</li>
+</ul>
+<h2 id="优化方向及成本"><a href="#优化方向及成本" class="headerlink" title="优化方向及成本"></a>优化方向及成本</h2><p>大致可以从如下几个方向进行优化, </p>
+<ul>
+<li>SQL语句优化;</li>
+<li>索引优化;</li>
+<li>数据库表结构优化;</li>
+<li>配置优化(连接数限制/文件数限制等);</li>
+<li>硬件优化(SSD显然能提高IO性能);</li>
+</ul>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">成本(低) <span class="comment">--- &gt; 高</span></span><br><span class="line"><span class="keyword">SQL</span>及索引 <span class="comment">---&gt; 数据库表结构 ---&gt; 系统配置 ---&gt; 硬件</span></span><br><span class="line">效果(高) <span class="operator">&lt;</span><span class="comment">---  低</span></span><br></pre></td></tr></table></figure>
+<h2 id="数据准备"><a href="#数据准备" class="headerlink" title="数据准备"></a>数据准备</h2><p>实验数据库采用mysql官方提供的示例数据库 sakila database,</p>
+<ul>
+<li>installation: <a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/sakila/en/sakila-installation.html">https://dev.mysql.com/doc/sakila/en/sakila-installation.html</a></li>
+<li>sakila database zip: <a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/index-other.html">https://dev.mysql.com/doc/index-other.html</a></li>
+</ul>
+<p>导入sakila数据库及数据<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">root@(<span class="keyword">none</span>)<span class="operator">&gt;</span>source <span class="operator">/</span>sqls<span class="operator">/</span>sakila<span class="operator">-</span>db<span class="operator">/</span>sakila<span class="operator">-</span>schema.sql;</span><br><span class="line">root<span class="variable">@sakila</span><span class="operator">&gt;</span>source <span class="operator">/</span>sqls<span class="operator">/</span>sakila<span class="operator">-</span>db<span class="operator">/</span>sakila<span class="operator">-</span>data.sql;</span><br><span class="line">root<span class="variable">@sakila</span><span class="operator">&gt;</span><span class="keyword">select</span> <span class="built_in">count</span>(<span class="operator">*</span>) <span class="keyword">from</span> film;</span><br><span class="line"><span class="operator">+</span><span class="comment">----------+</span></span><br><span class="line"><span class="operator">|</span> <span class="built_in">count</span>(<span class="operator">*</span>) <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">----------+</span></span><br><span class="line"><span class="operator">|</span>     <span class="number">1000</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">----------+</span></span><br><span class="line"><span class="number">1</span> <span class="type">row</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></figure></p>
+<ul>
+<li>普通账号没有设置创建schema的权限也不应设置其具有这样的权限, 所以先登录root账号导入sakila数据库及示例数据;</li>
+</ul>
+<p>授权普通账号dev操作sakila数据库的权限<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">grant</span> <span class="keyword">all</span> privileges <span class="keyword">on</span> sakila.<span class="operator">*</span> <span class="keyword">to</span> <span class="string">&#x27;dev&#x27;</span>@<span class="string">&#x27;%&#x27;</span> <span class="keyword">with</span> <span class="keyword">grant</span> option;</span><br><span class="line">Query OK, <span class="number">0</span> <span class="keyword">rows</span> affected (<span class="number">0.05</span> sec)</span><br><span class="line"></span><br><span class="line">mysql<span class="operator">&gt;</span> flush privileges;</span><br><span class="line">Query OK, <span class="number">0</span> <span class="keyword">rows</span> affected (<span class="number">0.02</span> sec)</span><br></pre></td></tr></table></figure></p>
+<ul>
+<li>导入成功后, 需要对普通账号dev授权,dev账号才可以使用sakila数据库, 在mysql8.0+中授权分为创建账号和授权两个过程; </li>
+<li>因为dev账号已创建; 所以这里只需要授权即可;</li>
+<li>建议养成对普通账号每次只针对某个数据库的某些操作进行授权的习惯; 只要需要时才进行进一步授权; </li>
+</ul>
+<p>登录dev普通账号;</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">dev@(<span class="keyword">none</span>)<span class="operator">&gt;</span>use sakila;</span><br><span class="line">Reading <span class="keyword">table</span> information <span class="keyword">for</span> completion <span class="keyword">of</span> <span class="keyword">table</span> <span class="keyword">and</span> <span class="keyword">column</span> names</span><br><span class="line">You can turn off this feature <span class="keyword">to</span> <span class="keyword">get</span> a quicker startup <span class="keyword">with</span> <span class="operator">-</span>A</span><br><span class="line"></span><br><span class="line">Database changed</span><br><span class="line">dev<span class="variable">@sakila</span><span class="operator">&gt;</span></span><br><span class="line"></span><br><span class="line">dev<span class="variable">@sakila</span><span class="operator">&gt;</span><span class="keyword">select</span> @<span class="variable">@version</span>;</span><br><span class="line"><span class="operator">+</span><span class="comment">-----------+</span></span><br><span class="line"><span class="operator">|</span> @<span class="variable">@version</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">-----------+</span></span><br><span class="line"><span class="operator">|</span> <span class="number">8.0</span><span class="number">.12</span>    <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">-----------+</span></span><br><span class="line"><span class="number">1</span> <span class="type">row</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></figure>
+<p>如何发现有问题的SQL?<br>在进行SQL语句及索引优化之前, 需要知道哪些查询是需要优化的,是有效率问题的, 在mysql中可以用其提供的慢查询日志把那些有效率的日志记录下来, 然后进行分析优化, </p>
+<h2 id="慢查日志"><a href="#慢查日志" class="headerlink" title="慢查日志"></a>慢查日志</h2><p>使用Mysql慢查日志对有效率的SQL进行监控,</p>
+<p>开启慢查日志</p>
+<ul>
+<li>show variables like ‘slow_query_log’</li>
+<li>set global slow_query_log_file = ‘/var/log/mysql/mysql-slow.log’</li>
+<li>set global log_queries_not_using_indexes = on;</li>
+<li>set global long_query_time =1 #即超过一秒的查询日志记录到慢查日志中;</li>
+</ul>
+<h3 id="查看慢查询开启状态"><a href="#查看慢查询开启状态" class="headerlink" title="查看慢查询开启状态"></a>查看慢查询开启状态</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">dev<span class="variable">@sakila</span><span class="operator">&gt;</span><span class="keyword">show</span> variables <span class="keyword">like</span> <span class="string">&#x27;slow_query_log&#x27;</span>;</span><br><span class="line"><span class="operator">+</span><span class="comment">----------------+-------+</span></span><br><span class="line"><span class="operator">|</span> Variable_name  <span class="operator">|</span> <span class="keyword">Value</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">----------------+-------+</span></span><br><span class="line"><span class="operator">|</span> slow_query_log <span class="operator">|</span> OFF   <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">----------------+-------+</span></span><br><span class="line"><span class="number">1</span> <span class="type">row</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.04</span> sec)</span><br><span class="line"></span><br><span class="line"># 查看到slow_query_log 和 log_queries_not_using_indexes 都是未开启状态;</span><br><span class="line">dev<span class="variable">@sakila</span><span class="operator">&gt;</span><span class="keyword">show</span> variables <span class="keyword">like</span> <span class="string">&#x27;%log%&#x27;</span>;</span><br><span class="line"><span class="operator">+</span><span class="comment">--------------------------------------------+---------------------------------------------+</span></span><br><span class="line"><span class="operator">|</span> Variable_name                              <span class="operator">|</span> <span class="keyword">Value</span>                                       <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">--------------------------------------------+---------------------------------------------+</span></span><br><span class="line"><span class="operator">|</span> activate_all_roles_on_login                <span class="operator">|</span> OFF                                         <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> back_log                                   <span class="operator">|</span> <span class="number">151</span>                                         <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> log_error                                  <span class="operator">|</span> stderr                                      <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> log_error_services                         <span class="operator">|</span> log_filter_internal; log_sink_internal      <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> log_error_verbosity                        <span class="operator">|</span> <span class="number">2</span>                                           <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> log_output                                 <span class="operator">|</span> FILE                                        <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> log_queries_not_using_indexes              <span class="operator">|</span> OFF                                         <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> slow_query_log_file                        <span class="operator">|</span> <span class="operator">/</span>var<span class="operator">/</span>lib<span class="operator">/</span>mysql<span class="operator">/</span><span class="number">2139</span>b750c3f3<span class="operator">-</span>slow.log        <span class="operator">|</span></span><br><span class="line">...</span><br><span class="line"><span class="operator">+</span><span class="comment">--------------------------------------------+---------------------------------------------+</span></span><br><span class="line"><span class="number">81</span> <span class="keyword">rows</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>slow_query_log OFF</code> 慢查日志  状态 - 未开启</li>
+<li><code>log_queries_not_using_indexes</code>  将没有创建索引的SQL查询日志记录到慢查日志中 状态 - 未开启 </li>
+</ul>
+<p>查看执行时间超过多少s的SQL查询日志会记录到慢查日志中</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">show</span> variables <span class="keyword">like</span> <span class="string">&#x27;long_query_time&#x27;</span>;</span><br><span class="line"><span class="operator">+</span><span class="comment">-----------------+-----------+</span></span><br><span class="line"><span class="operator">|</span> Variable_name   <span class="operator">|</span> <span class="keyword">Value</span>     <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">-----------------+-----------+</span></span><br><span class="line"><span class="operator">|</span> long_query_time <span class="operator">|</span> <span class="number">10.000000</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">-----------------+-----------+</span></span><br><span class="line"><span class="number">1</span> <span class="type">row</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>long_query_time</code>默认是执行时间超过10s的SQL查询将记录到慢查日志中;</li>
+</ul>
+<h3 id="慢查日志位置"><a href="#慢查日志位置" class="headerlink" title="慢查日志位置"></a>慢查日志位置</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">show</span> variables <span class="keyword">like</span> <span class="string">&#x27;slow_query_log_file&#x27;</span>;</span><br><span class="line"><span class="operator">+</span><span class="comment">---------------------+--------------------------------------+</span></span><br><span class="line"><span class="operator">|</span> Variable_name       <span class="operator">|</span> <span class="keyword">Value</span>                                <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">---------------------+--------------------------------------+</span></span><br><span class="line"><span class="operator">|</span> slow_query_log_file <span class="operator">|</span><span class="operator">/</span>var<span class="operator">/</span>lib<span class="operator">/</span>mysql<span class="operator">/</span><span class="number">2139</span>b750c3f3<span class="operator">-</span>slow.log  <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">---------------------+--------------------------------------+</span></span><br><span class="line"><span class="number">1</span> <span class="type">row</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>slow_query_log_file</code> 慢查日志默认位置在<code>/var/lib/mysql/2139b750c3f3-slow.log</code></li>
+</ul>
+<p>为便于学习实验 将设置long_query_time=0s; 即将所有查询日志都记录到慢查日志中, 实际使用中一般设置超过100ms的SQL查询记录到慢查日志中;<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; set global long_query_time=0;</span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br><span class="line">#退出重新登录在查询</span><br><span class="line">mysql&gt; show variables like &#x27;long_query_time&#x27;;</span><br><span class="line">+-----------------+----------+</span><br><span class="line">| Variable_name   | Value    |</span><br><span class="line">+-----------------+----------+</span><br><span class="line">| long_query_time | 0.000000 |</span><br><span class="line">+-----------------+----------+</span><br><span class="line">1 row in set (0.00 sec)</span><br></pre></td></tr></table></figure></p>
+<ul>
+<li>设置long_query_time参数时，需要重新连接才能生效，不需要重启服务; 否则通过<code>show variables like &#39;long_query_time&#39;</code> 查看不到变化;</li>
+</ul>
+<p>开启将没有创建索引的sql查询日志记录到慢查日志中<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">set</span> <span class="keyword">global</span> log_queries_not_using_indexes<span class="operator">=</span><span class="keyword">on</span>;</span><br><span class="line">Query OK, <span class="number">0</span> <span class="keyword">rows</span> affected (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></figure></p>
+<p>设置慢查日志文件位置 </p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">set</span> <span class="keyword">global</span> slow_query_log_file<span class="operator">=</span>&quot;/var/log/mysql/mysql-slow.log&quot;;</span><br><span class="line">Query OK, <span class="number">0</span> <span class="keyword">rows</span> affected (<span class="number">0.00</span> sec)</span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">show</span> variables <span class="keyword">like</span> <span class="string">&#x27;slow_query_log_file&#x27;</span>;</span><br><span class="line"><span class="operator">+</span><span class="comment">---------------------+-------------------------------+</span></span><br><span class="line"><span class="operator">|</span> Variable_name       <span class="operator">|</span> <span class="keyword">Value</span>                         <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">---------------------+-------------------------------+</span></span><br><span class="line"><span class="operator">|</span> slow_query_log_file <span class="operator">|</span> <span class="operator">/</span>var<span class="operator">/</span>log<span class="operator">/</span>mysql<span class="operator">/</span>mysql<span class="operator">-</span>slow.log <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">---------------------+-------------------------------+</span></span><br><span class="line"><span class="number">1</span> <span class="type">row</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></figure>
+<ul>
+<li>设置<code>slow_query_log_file</code>时, 目录必须存在, 并且mysql有权读写该目录,</li>
+</ul>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mkdir <span class="operator">/</span>var<span class="operator">/</span>log<span class="operator">/</span>mysql</span><br><span class="line">chown mysql:mysql <span class="operator">/</span>var<span class="operator">/</span>log<span class="operator">/</span>mysql</span><br></pre></td></tr></table></figure>
+<p>否则报错</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">set</span> <span class="keyword">global</span> slow_query_log_file<span class="operator">=</span>&quot;/var/log/mysql/mysql-slow.log&quot;;</span><br><span class="line">ERROR <span class="number">1231</span> (<span class="number">42000</span>): Variable <span class="string">&#x27;slow_query_log_file&#x27;</span> can<span class="string">&#x27;t be set to the value of &#x27;</span><span class="operator">/</span>var<span class="operator">/</span>log<span class="operator">/</span>mysql<span class="operator">/</span>mysql<span class="operator">-</span>slow.log<span class="string">&#x27;</span></span><br></pre></td></tr></table></figure>
+<h3 id="开启慢查日志"><a href="#开启慢查日志" class="headerlink" title="开启慢查日志"></a>开启慢查日志</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">set</span> <span class="keyword">global</span> slow_query_log<span class="operator">=</span><span class="keyword">on</span>;</span><br><span class="line">Query OK, <span class="number">0</span> <span class="keyword">rows</span> affected (<span class="number">0.02</span> sec)</span><br></pre></td></tr></table></figure>
+<h3 id="查看慢查日志"><a href="#查看慢查日志" class="headerlink" title="查看慢查日志"></a>查看慢查日志</h3><p>进行简单的查询操作查看慢日志文件是否有记录<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">dev<span class="variable">@sakila</span><span class="operator">&gt;</span><span class="keyword">show</span> tables;</span><br><span class="line">dev<span class="variable">@sakila</span><span class="operator">&gt;</span><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> film limit <span class="number">10</span>;</span><br></pre></td></tr></table></figure></p>
+<h3 id="调整时区"><a href="#调整时区" class="headerlink" title="调整时区"></a>调整时区</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">dev<span class="variable">@sakila</span><span class="operator">&gt;</span><span class="keyword">show</span> variables <span class="keyword">like</span> <span class="string">&#x27;%time_zone%&#x27;</span>;</span><br><span class="line"><span class="operator">+</span><span class="comment">------------------+--------+</span></span><br><span class="line"><span class="operator">|</span> Variable_name    <span class="operator">|</span> <span class="keyword">Value</span>  <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">------------------+--------+</span></span><br><span class="line"><span class="operator">|</span> system_time_zone <span class="operator">|</span> UTC    <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> time_zone        <span class="operator">|</span> <span class="keyword">SYSTEM</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">------------------+--------+</span></span><br><span class="line"><span class="number">2</span> <span class="keyword">rows</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br><span class="line"></span><br><span class="line">dev<span class="variable">@sakila</span><span class="operator">&gt;</span><span class="keyword">set</span> time_zone<span class="operator">=</span><span class="string">&#x27;+8:00&#x27;</span>;</span><br><span class="line">Query OK, <span class="number">0</span> <span class="keyword">rows</span> affected (<span class="number">0.00</span> sec)</span><br><span class="line"></span><br><span class="line">dev<span class="variable">@sakila</span><span class="operator">&gt;</span><span class="keyword">show</span> variables <span class="keyword">like</span> <span class="string">&#x27;%time_zone%&#x27;</span>;</span><br><span class="line"><span class="operator">+</span><span class="comment">------------------+--------+</span></span><br><span class="line"><span class="operator">|</span> Variable_name    <span class="operator">|</span> <span class="keyword">Value</span>  <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">------------------+--------+</span></span><br><span class="line"><span class="operator">|</span> system_time_zone <span class="operator">|</span> UTC    <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> time_zone        <span class="operator">|</span> <span class="operator">+</span><span class="number">08</span>:<span class="number">00</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">------------------+--------+</span></span><br><span class="line"><span class="number">2</span> <span class="keyword">rows</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></figure>
+<p>在命令一个终端可以查看到SQL查询日志记录到了慢查日志文件中, </p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">➜  <span class="operator">~</span> docker <span class="keyword">exec</span> <span class="operator">-</span>it mysql<span class="operator">-</span>db tail <span class="operator">-</span>f <span class="operator">/</span>var<span class="operator">/</span>log<span class="operator">/</span>mysql<span class="operator">/</span>mysql<span class="operator">-</span>slow.log</span><br><span class="line"># <span class="type">Time</span>: <span class="number">2018</span><span class="number">-11</span><span class="number">-03</span>T06:<span class="number">12</span>:<span class="number">56.235450</span>Z</span><br><span class="line"># <span class="keyword">User</span><span class="variable">@Host</span>: dev[dev] @ localhost []  Id:    <span class="number">28</span></span><br><span class="line"># Query_time: <span class="number">0.000182</span>  Lock_time: <span class="number">0.000000</span> Rows_sent: <span class="number">1</span>  Rows_examined: <span class="number">0</span></span><br><span class="line"><span class="keyword">SET</span> <span class="type">timestamp</span><span class="operator">=</span><span class="number">1541225576</span>;</span><br><span class="line"><span class="keyword">SELECT</span> DATABASE();</span><br><span class="line"># <span class="type">Time</span>: <span class="number">2018</span><span class="number">-11</span><span class="number">-03</span>T06:<span class="number">12</span>:<span class="number">56.235855</span>Z</span><br><span class="line"># <span class="keyword">User</span><span class="variable">@Host</span>: dev[dev] @ localhost []  Id:    <span class="number">28</span></span><br><span class="line"># Query_time: <span class="number">0.000160</span>  Lock_time: <span class="number">0.000000</span> Rows_sent: <span class="number">1</span>  Rows_examined: <span class="number">0</span></span><br><span class="line"><span class="keyword">SET</span> <span class="type">timestamp</span><span class="operator">=</span><span class="number">1541225576</span>;</span><br><span class="line"># administrator command: Init DB;</span><br><span class="line"># <span class="type">Time</span>: <span class="number">2018</span><span class="number">-11</span><span class="number">-03</span>T06:<span class="number">13</span>:<span class="number">34.376262</span>Z</span><br><span class="line"># <span class="keyword">User</span><span class="variable">@Host</span>: dev[dev] @ localhost []  Id:    <span class="number">28</span></span><br><span class="line"># Query_time: <span class="number">0.000779</span>  Lock_time: <span class="number">0.000337</span> Rows_sent: <span class="number">10</span>  Rows_examined: <span class="number">10</span></span><br><span class="line"><span class="keyword">SET</span> <span class="type">timestamp</span><span class="operator">=</span><span class="number">1541225614</span>;</span><br><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> film limit <span class="number">10</span>;</span><br><span class="line"># <span class="type">Time</span>: <span class="number">2018</span><span class="number">-11</span><span class="number">-03</span>T06:<span class="number">14</span>:<span class="number">21.627579</span>Z</span><br><span class="line"># <span class="keyword">User</span><span class="variable">@Host</span>: dev[dev] @ localhost []  Id:    <span class="number">28</span></span><br><span class="line"># Query_time: <span class="number">0.000388</span>  Lock_time: <span class="number">0.000121</span> Rows_sent: <span class="number">1</span>  Rows_examined: <span class="number">0</span></span><br><span class="line"><span class="keyword">SET</span> <span class="type">timestamp</span><span class="operator">=</span><span class="number">1541225661</span>;</span><br><span class="line"><span class="keyword">select</span> <span class="built_in">count</span>(<span class="operator">*</span>) <span class="keyword">from</span> film;</span><br></pre></td></tr></table></figure>
+<h3 id="慢查日志存储格式"><a href="#慢查日志存储格式" class="headerlink" title="慢查日志存储格式"></a>慢查日志存储格式</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"># <span class="type">Time</span>: <span class="number">2018</span><span class="number">-11</span><span class="number">-03</span>T06:<span class="number">14</span>:<span class="number">21.627579</span>Z</span><br><span class="line"># <span class="keyword">User</span><span class="variable">@Host</span>: dev[dev] @ localhost []  Id:    <span class="number">28</span></span><br><span class="line"># Query_time: <span class="number">0.000388</span>  Lock_time: <span class="number">0.000121</span> Rows_sent: <span class="number">1</span>  Rows_examined: <span class="number">0</span></span><br><span class="line"><span class="keyword">SET</span> <span class="type">timestamp</span><span class="operator">=</span><span class="number">1541225661</span>;</span><br><span class="line"><span class="keyword">select</span> <span class="built_in">count</span>(<span class="operator">*</span>) <span class="keyword">from</span> film;</span><br></pre></td></tr></table></figure>
+<p>一条慢查日志主要包括五个部分</p>
+<ol>
+<li>查询的执行时间</li>
+</ol>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"># <span class="type">Time</span>: <span class="number">2018</span><span class="number">-11</span><span class="number">-03</span>T06:<span class="number">14</span>:<span class="number">21.627579</span>Z</span><br></pre></td></tr></table></figure>
+<ol start="2">
+<li>执行SQL的主机信息</li>
+</ol>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"># <span class="keyword">User</span><span class="variable">@Host</span>: dev[dev] @ localhost []  Id:    <span class="number">28</span></span><br></pre></td></tr></table></figure>
+<ol start="3">
+<li>SQL的执行信息</li>
+</ol>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"># Query_time: <span class="number">0.000388</span>  Lock_time: <span class="number">0.000121</span> Rows_sent: <span class="number">1</span>  Rows_examined: <span class="number">0</span></span><br></pre></td></tr></table></figure>
+<ol start="4">
+<li>SQL的执行时间</li>
+</ol>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SET</span> <span class="type">timestamp</span><span class="operator">=</span><span class="number">1541225661</span>;</span><br></pre></td></tr></table></figure>
+<ol start="5">
+<li>SQL的内容</li>
+</ol>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="built_in">count</span>(<span class="operator">*</span>) <span class="keyword">from</span> film;</span><br></pre></td></tr></table></figure>
+<h2 id="慢查日志分析"><a href="#慢查日志分析" class="headerlink" title="慢查日志分析"></a>慢查日志分析</h2><p>慢查询日志分析工具有很多, 如mysqlsla, pt-query-digest以及官方默认提供的mysqldumpslow等, </p>
+<h3 id="mysqldumpslow"><a href="#mysqldumpslow" class="headerlink" title="mysqldumpslow"></a>mysqldumpslow</h3><p>mysqldumpslow 是一个MySQL官方提供的慢查日志分析工具</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">➜  <span class="operator">~</span> docker <span class="keyword">exec</span> <span class="operator">-</span>it mysql<span class="operator">-</span>db mysqldumpslow <span class="operator">-</span>h</span><br><span class="line">Option h requires an argument</span><br><span class="line">ERROR: bad option</span><br><span class="line"></span><br><span class="line">Usage: mysqldumpslow [ OPTS... ] [ LOGS... ]</span><br><span class="line"></span><br><span class="line">Parse <span class="keyword">and</span> summarize the MySQL slow query log. Options <span class="keyword">are</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">--verbose    verbose</span></span><br><span class="line">  <span class="comment">--debug      debug</span></span><br><span class="line">  <span class="comment">--help       write this text to standard output</span></span><br><span class="line"></span><br><span class="line">  <span class="operator">-</span>v           verbose</span><br><span class="line">  <span class="operator">-</span>d           debug</span><br><span class="line">  <span class="operator">-</span>s <span class="keyword">ORDER</span>     what <span class="keyword">to</span> sort <span class="keyword">by</span> (al, <span class="keyword">at</span>, ar, c, l, r, t), <span class="string">&#x27;at&#x27;</span> <span class="keyword">is</span> <span class="keyword">default</span></span><br><span class="line">                al: average lock <span class="type">time</span></span><br><span class="line">                ar: average <span class="keyword">rows</span> sent</span><br><span class="line">                <span class="keyword">at</span>: average query <span class="type">time</span></span><br><span class="line">                 c: count</span><br><span class="line">                 l: lock <span class="type">time</span></span><br><span class="line">                 r: <span class="keyword">rows</span> sent</span><br><span class="line">                 t: query <span class="type">time</span></span><br><span class="line">  <span class="operator">-</span>r           reverse the sort <span class="keyword">order</span> (largest <span class="keyword">last</span> instead <span class="keyword">of</span> <span class="keyword">first</span>)</span><br><span class="line">  <span class="operator">-</span>t NUM       just <span class="keyword">show</span> the top n queries</span><br><span class="line">  <span class="operator">-</span>a           don<span class="string">&#x27;t abstract all numbers to N and strings to &#x27;</span>S<span class="string">&#x27;</span></span><br><span class="line"><span class="string">  -n NUM       abstract numbers with at least n digits within names</span></span><br><span class="line"><span class="string">  -g PATTERN   grep: only consider stmts that include this string</span></span><br><span class="line"><span class="string">  -h HOSTNAME  hostname of db server for *-slow.log filename (can be wildcard),</span></span><br><span class="line"><span class="string">               default is &#x27;</span><span class="operator">*</span><span class="string">&#x27;, i.e. match all</span></span><br><span class="line"><span class="string">  -i NAME      name of server instance (if using mysql.server startup script)</span></span><br><span class="line"><span class="string">  -l           don&#x27;</span>t subtract lock <span class="type">time</span> <span class="keyword">from</span> total <span class="type">time</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>可以通过<code>s</code>指定排序规则;</li>
+<li>通过<code>t</code>指定最前面的n条查询记录;</li>
+</ul>
+<p>下面通过实例分析一条日志,</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">➜  <span class="operator">~</span> docker <span class="keyword">exec</span> <span class="operator">-</span>it mysql<span class="operator">-</span>db mysqldumpslow <span class="operator">-</span>t <span class="number">1</span> <span class="operator">/</span>var<span class="operator">/</span>log<span class="operator">/</span>mysql<span class="operator">/</span>mysql<span class="operator">-</span>slow.log;</span><br><span class="line"></span><br><span class="line">Reading mysql slow query log <span class="keyword">from</span> <span class="operator">/</span>var<span class="operator">/</span>log<span class="operator">/</span>mysql<span class="operator">/</span>mysql<span class="operator">-</span>slow.log</span><br><span class="line">Count: <span class="number">1</span>  <span class="type">Time</span><span class="operator">=</span><span class="number">0.02</span>s (<span class="number">0</span>s)  Lock<span class="operator">=</span><span class="number">0.00</span>s (<span class="number">0</span>s)  <span class="keyword">Rows</span><span class="operator">=</span><span class="number">0.0</span> (<span class="number">0</span>), dev[dev]<span class="variable">@localhost</span></span><br><span class="line">  <span class="keyword">CREATE</span> <span class="keyword">TRIGGER</span> `ins_film` AFTER <span class="keyword">INSERT</span> <span class="keyword">ON</span> `film` <span class="keyword">FOR</span> <span class="keyword">EACH</span> <span class="type">ROW</span> <span class="keyword">BEGIN</span></span><br><span class="line">  <span class="keyword">INSERT</span> <span class="keyword">INTO</span> film_text (film_id, title, description)</span><br><span class="line">  <span class="keyword">VALUES</span> (new.film_id, new.title, new.description);</span><br><span class="line">  <span class="keyword">END</span></span><br></pre></td></tr></table></figure>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">关键字</th>
+<th style="text-align:left">说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><code>Count</code></td>
+<td style="text-align:left">这条SQL执行的次数</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>Time</code></td>
+<td style="text-align:left">执行耗时</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>Lock</code></td>
+<td style="text-align:left">锁定时间</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>Rows</code></td>
+<td style="text-align:left">发送的行数</td>
+</tr>
+</tbody>
+</table>
+<h3 id="pt-query-digest"><a href="#pt-query-digest" class="headerlink" title="pt-query-digest"></a>pt-query-digest</h3><p>pt-query-digest是用于分析mySQL慢查询的一个工具，它可以分析binlog、General log、slowlog，也可以通过SHOWPROCESSLIST或者通过tcpdump抓取的MySQL协议数据来进行分析。可以把分析结果输出到文件中，分析过程是先对查询语句的条件进行参数化，然后对参数化以后的查询进行分组统计，统计出各查询的执行时间、次数、占比等，可以借助分析结果找出问题进行优化。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">输出到文件</span><br><span class="line">pt<span class="operator">-</span>query<span class="operator">-</span>digest slow.log <span class="operator">&gt;</span> slow_log.report</span><br><span class="line"></span><br><span class="line">输出到数据库表</span><br><span class="line">pt<span class="operator">-</span>query<span class="operator">-</span>digest slow.log <span class="operator">-</span>review \</span><br><span class="line">h <span class="operator">=</span> <span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span>,D<span class="operator">=</span>test,p<span class="operator">=</span>root,P<span class="operator">=</span><span class="number">3306</span>,u<span class="operator">=</span>root,t<span class="operator">=</span>query_review \</span><br><span class="line"><span class="comment">--create-reviewtable \</span></span><br><span class="line"><span class="comment">--review-history t=hostname_slow</span></span><br></pre></td></tr></table></figure>
+<p>常用选项<br>pt-query-digest常用选项, </p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">选项</th>
+<th style="text-align:left">说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><code>--create-review-table</code></td>
+<td style="text-align:left">当使用—review参数，把分析结果输出到表中</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>--create-history-table</code></td>
+<td style="text-align:left">但是用—history参数，把分析结果输出到表中</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>--filter</code></td>
+<td style="text-align:left">对输入的慢查询按指定的字符串进行匹配过滤后，在进行分析</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>--limit</code></td>
+<td style="text-align:left">限制输出结果百分比或数量，默认值是20，即将最慢的20条语句输出</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>--host</code></td>
+<td style="text-align:left">HostName</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>--user</code></td>
+<td style="text-align:left">用户名</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>--password</code></td>
+<td style="text-align:left">密码</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>--history</code></td>
+<td style="text-align:left">将分析结果保存到表中，分析结果比较详细</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>--review</code></td>
+<td style="text-align:left">将分析结果保存到表中</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>--output</code></td>
+<td style="text-align:left">分析结果输出类型</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>--since</code></td>
+<td style="text-align:left">从什么时间开始分析，值为字符串</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>--until</code></td>
+<td style="text-align:left">截止时间，配合since一起分析</td>
+</tr>
+</tbody>
+</table>
+<p>pt-query-digest分析结果主要有以下几部分,</p>
+<ul>
+<li>总体统计结果;</li>
+<li>查询分组统计结果;</li>
+<li>每一种查询的详细统计结果;</li>
+</ul>
+<p>总体统计结果,</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"># <span class="number">59.5</span>s <span class="keyword">user</span> <span class="type">time</span>, <span class="number">90</span>ms <span class="keyword">system</span> <span class="type">time</span>, <span class="number">51.81</span>M rss, <span class="number">228.12</span>M vsz</span><br><span class="line"># <span class="keyword">Current</span> <span class="type">date</span>: Sun Aug  <span class="number">3</span> <span class="number">16</span>:<span class="number">09</span>:<span class="number">31</span> <span class="number">2014</span></span><br><span class="line"># Hostname: db1.test.com</span><br><span class="line"># Files: <span class="operator">/</span>var<span class="operator">/</span>log<span class="operator">/</span>mysql<span class="operator">/</span>mysql<span class="operator">-</span>slow.log</span><br><span class="line"># Overall: <span class="number">224.01</span>k total, <span class="number">570</span> <span class="keyword">unique</span>, <span class="number">0.01</span> QPS, <span class="number">0.09</span>x concurrency ________</span><br><span class="line"># <span class="type">Time</span> <span class="keyword">range</span>: <span class="number">2013</span><span class="number">-10</span><span class="number">-09</span> <span class="number">17</span>:<span class="number">55</span>:<span class="number">04</span> <span class="keyword">to</span> <span class="number">2014</span><span class="number">-08</span><span class="number">-03</span> <span class="number">15</span>:<span class="number">16</span>:<span class="number">38</span></span><br><span class="line"># Attribute          total     min     max     avg     <span class="number">95</span><span class="operator">%</span>  stddev  median</span><br><span class="line"># <span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span>     <span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span> <span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span> <span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span> <span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span> <span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span> <span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span> <span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span></span><br><span class="line"># <span class="keyword">Exec</span> <span class="type">time</span>        <span class="number">2188385</span>s      <span class="number">2</span>s   <span class="number">7229</span>s     <span class="number">10</span>s     <span class="number">13</span>s     <span class="number">67</span>s      <span class="number">5</span>s</span><br><span class="line"># Lock <span class="type">time</span>        <span class="number">100721</span>s       <span class="number">0</span>    <span class="number">365</span>s   <span class="number">450</span>ms      <span class="number">2</span>s      <span class="number">5</span>s   <span class="number">119</span>us</span><br><span class="line"># <span class="keyword">Rows</span> sent         <span class="number">26.98</span>G       <span class="number">0</span>   <span class="number">3.30</span>M <span class="number">126.27</span>k <span class="number">328.61</span>k <span class="number">371.66</span>k    <span class="number">4.96</span></span><br><span class="line"># <span class="keyword">Rows</span> examine     <span class="number">394.85</span>G       <span class="number">0</span>   <span class="number">3.32</span>G   <span class="number">1.80</span>M   <span class="number">3.03</span>M  <span class="number">20.83</span>M <span class="number">562.03</span>k</span><br><span class="line"># Query size        <span class="number">78.65</span>M       <span class="number">6</span>   <span class="number">5.54</span>k  <span class="number">368.18</span>  <span class="number">685.39</span>  <span class="number">241.61</span>  <span class="number">271.23</span></span><br></pre></td></tr></table></figure>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">选项</th>
+<th style="text-align:left">说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><code>Overall</code></td>
+<td style="text-align:left">总共有多少条查询</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>unique</code></td>
+<td style="text-align:left">唯一查询数量</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>Time range</code></td>
+<td style="text-align:left">查询执行的时间范围</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>total</code></td>
+<td style="text-align:left">总计</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>min</code></td>
+<td style="text-align:left">最小</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>max</code></td>
+<td style="text-align:left">最大</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>avg</code></td>
+<td style="text-align:left">平均</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>95%</code></td>
+<td style="text-align:left">95%的查询时间，重点分析</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>median</code></td>
+<td style="text-align:left">中位数，把所有值从小到大排列，位置位于中间那个数</td>
+</tr>
+</tbody>
+</table>
+<p>分组统计结果,</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"># Profile</span><br><span class="line"># Rank Query ID           Response <span class="type">time</span>     Calls R<span class="operator">/</span><span class="keyword">Call</span>    V<span class="operator">/</span>M   Item</span><br><span class="line"># <span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span> <span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span> <span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span> <span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span> <span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span> <span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span> <span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span></span><br><span class="line">#    <span class="number">1</span> <span class="number">0xA6FE3D6982868655</span> <span class="number">351140.1266</span> <span class="number">16.0</span><span class="operator">%</span>   <span class="number">622</span>  <span class="number">564.5340</span> <span class="number">99.</span>.. <span class="keyword">CREATE</span> <span class="keyword">TABLE</span> dw_user_cache `dw_user_cache`</span><br><span class="line">#    <span class="number">2</span> <span class="number">0x281C83DE62A11A8B</span> <span class="number">310896.7675</span> <span class="number">14.2</span><span class="operator">%</span> <span class="number">40841</span>    <span class="number">7.6124</span>  <span class="number">6.51</span> <span class="keyword">SELECT</span> dw_borrow_tender dw_borrow dw_user dw_credit dw_credit_rank</span><br><span class="line">#    <span class="number">3</span> <span class="number">0x26BA6BEAE6C74350</span> <span class="number">279545.6534</span> <span class="number">12.8</span><span class="operator">%</span>  <span class="number">1305</span>  <span class="number">214.2112</span> <span class="number">25.</span>.. <span class="keyword">SELECT</span> dw_account_log    </span><br></pre></td></tr></table></figure>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">选项</th>
+<th style="text-align:left">说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><code>Response</code></td>
+<td style="text-align:left">总的响应时间</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>time</code></td>
+<td style="text-align:left">该查询在本次分析中占用的时间比</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>Calls</code></td>
+<td style="text-align:left">执行次数</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>R/Call</code></td>
+<td style="text-align:left">平均每次执行的响应时间</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>Item</code></td>
+<td style="text-align:left">查询对象</td>
+</tr>
+</tbody>
+</table>
+<p>每一种查询的详细统计结果,</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"># Query <span class="number">172</span>: <span class="number">0.00</span> QPS, <span class="number">0.00</span>x concurrency, ID <span class="number">0x61199112D48D8F69</span> <span class="keyword">at</span> byte <span class="number">56964086</span></span><br><span class="line"># This item <span class="keyword">is</span> included <span class="keyword">in</span> the report because it <span class="keyword">matches</span> <span class="comment">--outliers.</span></span><br><span class="line"># Scores: V<span class="operator">/</span>M <span class="operator">=</span> <span class="number">0.85</span></span><br><span class="line"># <span class="type">Time</span> <span class="keyword">range</span>: <span class="number">2013</span><span class="number">-11</span><span class="number">-20</span> <span class="number">17</span>:<span class="number">00</span>:<span class="number">38</span> <span class="keyword">to</span> <span class="number">2014</span><span class="number">-03</span><span class="number">-23</span> <span class="number">09</span>:<span class="number">00</span>:<span class="number">45</span></span><br><span class="line"># Attribute    pct   total     min     max     avg     <span class="number">95</span><span class="operator">%</span>  stddev  median</span><br><span class="line"># <span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span> <span class="operator">=</span><span class="operator">=</span><span class="operator">=</span> <span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span> <span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span> <span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span> <span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span> <span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span> <span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span> <span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span></span><br><span class="line"># Count          <span class="number">0</span>      <span class="number">26</span></span><br><span class="line"># <span class="keyword">Exec</span> <span class="type">time</span>      <span class="number">0</span>    <span class="number">172</span>s      <span class="number">5</span>s     <span class="number">17</span>s      <span class="number">7</span>s      <span class="number">8</span>s      <span class="number">2</span>s      <span class="number">6</span>s</span><br><span class="line"># Lock <span class="type">time</span>      <span class="number">0</span>     <span class="number">3</span>ms    <span class="number">63</span>us   <span class="number">180</span>us   <span class="number">100</span>us   <span class="number">119</span>us    <span class="number">22</span>us    <span class="number">93</span>us</span><br><span class="line"># <span class="keyword">Rows</span> sent      <span class="number">0</span>     <span class="number">208</span>       <span class="number">8</span>       <span class="number">8</span>       <span class="number">8</span>       <span class="number">8</span>       <span class="number">0</span>       <span class="number">8</span></span><br><span class="line"># <span class="keyword">Rows</span> examine   <span class="number">0</span> <span class="number">333.82</span>k   <span class="number">6.95</span>k  <span class="number">20.62</span>k  <span class="number">12.84</span>k  <span class="number">18.47</span>k   <span class="number">4.33</span>k  <span class="number">10.80</span>k</span><br><span class="line"># Query size     <span class="number">0</span>   <span class="number">5.59</span>k     <span class="number">220</span>     <span class="number">220</span>     <span class="number">220</span>     <span class="number">220</span>       <span class="number">0</span>     <span class="number">220</span></span><br><span class="line"># String:</span><br><span class="line"># Databases    test2</span><br><span class="line"># Hosts</span><br><span class="line"># Users        rx1919 (<span class="number">24</span><span class="operator">/</span><span class="number">92</span><span class="operator">%</span>), tn1819 (<span class="number">2</span><span class="operator">/</span><span class="number">7</span><span class="operator">%</span>)</span><br><span class="line"># Query_time distribution</span><br><span class="line">#   <span class="number">1</span>us</span><br><span class="line">#  <span class="number">10</span>us</span><br><span class="line"># <span class="number">100</span>us</span><br><span class="line">#   <span class="number">1</span>ms</span><br><span class="line">#  <span class="number">10</span>ms</span><br><span class="line"># <span class="number">100</span>ms</span><br><span class="line">#    <span class="number">1</span>s  ################################################################</span><br><span class="line">#  <span class="number">10</span>s<span class="operator">+</span>  #####</span><br><span class="line"># Tables</span><br><span class="line">#    <span class="keyword">SHOW</span> <span class="keyword">TABLE</span> STATUS <span class="keyword">FROM</span> `test2` <span class="keyword">LIKE</span> <span class="string">&#x27;dw_bbs_topics&#x27;</span>G</span><br><span class="line">#    <span class="keyword">SHOW</span> <span class="keyword">CREATE</span> <span class="keyword">TABLE</span> `test2`.`dw_bbs_topics`G</span><br><span class="line">#    <span class="keyword">SHOW</span> <span class="keyword">TABLE</span> STATUS <span class="keyword">FROM</span> `test2` <span class="keyword">LIKE</span> <span class="string">&#x27;dw_bbs_forums&#x27;</span>G</span><br><span class="line">#    <span class="keyword">SHOW</span> <span class="keyword">CREATE</span> <span class="keyword">TABLE</span> `test2`.`dw_bbs_forums`G</span><br><span class="line"># EXPLAIN <span class="comment">/*!50100 PARTITIONS*/</span></span><br><span class="line"><span class="keyword">select</span> p1.<span class="operator">*</span>,p2.name <span class="keyword">as</span> forum_name <span class="keyword">from</span> `dw_bbs_topics` <span class="keyword">as</span> p1 </span><br><span class="line">                                <span class="keyword">left</span> <span class="keyword">join</span> dw_bbs_forums <span class="keyword">as</span> p2 <span class="keyword">on</span> p2.id <span class="operator">=</span> p1.fid</span><br><span class="line">                                <span class="keyword">where</span> isrecycle<span class="operator">&lt;&gt;</span><span class="number">1</span> <span class="keyword">and</span> isrecycle<span class="operator">&lt;&gt;</span><span class="number">1</span> <span class="keyword">and</span> p1.status <span class="operator">=</span> <span class="number">1</span> <span class="keyword">and</span> p1.isgood <span class="operator">=</span> <span class="number">1</span>    <span class="keyword">order</span> <span class="keyword">by</span> rand()   limit <span class="number">8</span>G</span><br></pre></td></tr></table></figure>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">选项</th>
+<th style="text-align:left">说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><code>ID</code></td>
+<td style="text-align:left">查询的ID号，和上图的Query ID对应</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>Databases</code></td>
+<td style="text-align:left">数据库名</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>Users</code></td>
+<td style="text-align:left">各个用户执行的次数（占比）</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>Query_time distribution</code></td>
+<td style="text-align:left">查询时间分布, 长短体现区间占比，本例中1s-10s之间查询数量是10s以上的两倍</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>Tables</code></td>
+<td style="text-align:left">查询涉及到的表</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>EXPLAIN</code></td>
+<td style="text-align:left">示例</td>
+</tr>
+</tbody>
+</table>
+<h3 id="用法举例"><a href="#用法举例" class="headerlink" title="用法举例"></a>用法举例</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">(<span class="number">1</span>)直接分析慢查询文件:</span><br><span class="line">pt<span class="operator">-</span>query<span class="operator">-</span>digest  slow.log <span class="operator">&gt;</span> slow_report.<span class="built_in">log</span></span><br><span class="line"></span><br><span class="line">(<span class="number">2</span>)分析最近<span class="number">12</span>小时内的查询：</span><br><span class="line">pt<span class="operator">-</span>query<span class="operator">-</span>digest  <span class="comment">--since=12h  slow.log &gt; slow_report2.log</span></span><br><span class="line"></span><br><span class="line">(<span class="number">3</span>)分析指定时间范围内的查询：</span><br><span class="line">pt<span class="operator">-</span>query<span class="operator">-</span>digest slow.log <span class="comment">--since &#x27;2014-04-17 09:30:00&#x27; --until &#x27;2014-04-17 10:00:00&#x27;&gt; &gt; slow_report3.log</span></span><br><span class="line"></span><br><span class="line">(<span class="number">4</span>)分析指含有<span class="keyword">select</span>语句的慢查询</span><br><span class="line">pt<span class="operator">-</span>query<span class="operator">-</span>digest<span class="comment">--filter &#x27;$event-&gt;&#123;fingerprint&#125; =~ m/^select/i&#x27; slow.log&gt; slow_report4.log</span></span><br><span class="line"></span><br><span class="line">(<span class="number">5</span>) 针对某个用户的慢查询</span><br><span class="line">pt<span class="operator">-</span>query<span class="operator">-</span>digest<span class="comment">--filter &#x27;($event-&gt;&#123;user&#125; || &quot;&quot;) =~ m/^root/i&#x27; slow.log&gt; slow_report5.log</span></span><br><span class="line"></span><br><span class="line">(<span class="number">6</span>) 查询所有所有的全表扫描或<span class="keyword">full</span> <span class="keyword">join</span>的慢查询</span><br><span class="line">pt<span class="operator">-</span>query<span class="operator">-</span>digest<span class="comment">--filter &#x27;(($event-&gt;&#123;Full_scan&#125; || &quot;&quot;) eq &quot;yes&quot;) ||(($event-&gt;&#123;Full_join&#125; || &quot;&quot;) eq &quot;yes&quot;)&#x27; slow.log&gt; slow_report6.log</span></span><br><span class="line"></span><br><span class="line">(<span class="number">7</span>)把查询保存到query_review表</span><br><span class="line">pt<span class="operator">-</span>query<span class="operator">-</span>digest  <span class="comment">--user=root –password=abc123 --review  h=localhost,D=test,t=query_review--create-review-table  slow.log</span></span><br><span class="line"></span><br><span class="line">(<span class="number">8</span>)把查询保存到query_history表</span><br><span class="line">pt<span class="operator">-</span>query<span class="operator">-</span>digest  <span class="comment">--user=root –password=abc123 --review  h=localhost,D=test,t=query_ history--create-review-table  slow.log_20140401</span></span><br><span class="line">pt<span class="operator">-</span>query<span class="operator">-</span>digest  <span class="comment">--user=root –password=abc123--review  h=localhost,D=test,t=query_history--create-review-table  slow.log_20140402</span></span><br><span class="line"></span><br><span class="line">(<span class="number">9</span>)通过tcpdump抓取mysql的tcp协议数据，然后再分析</span><br><span class="line">tcpdump <span class="operator">-</span>s <span class="number">65535</span> <span class="operator">-</span>x <span class="operator">-</span>nn <span class="operator">-</span>q <span class="operator">-</span>tttt <span class="operator">-</span>i <span class="keyword">any</span> <span class="operator">-</span>c <span class="number">1000</span> port <span class="number">3306</span> <span class="operator">&gt;</span> mysql.tcp.txt</span><br><span class="line">pt<span class="operator">-</span>query<span class="operator">-</span>digest <span class="comment">--type tcpdump mysql.tcp.txt&gt; slow_report9.log</span></span><br><span class="line"></span><br><span class="line">(<span class="number">10</span>)分析binlog</span><br><span class="line">mysqlbinlog mysql<span class="operator">-</span>bin<span class="number">.000093</span> <span class="operator">&gt;</span> mysql<span class="operator">-</span>bin000093.sql</span><br><span class="line">pt<span class="operator">-</span>query<span class="operator">-</span>digest  <span class="comment">--type=binlog  mysql-bin000093.sql &gt; slow_report10.log</span></span><br><span class="line"></span><br><span class="line">(<span class="number">11</span>)分析general log</span><br><span class="line">pt<span class="operator">-</span>query<span class="operator">-</span>digest  <span class="comment">--type=genlog  localhost.log &gt; slow_report11.log</span></span><br></pre></td></tr></table></figure>
+<h2 id="通过慢查日志发现问题SQL"><a href="#通过慢查日志发现问题SQL" class="headerlink" title="通过慢查日志发现问题SQL"></a>通过慢查日志发现问题SQL</h2><p>如何通过慢查日志发现有问题的SQL？ 主要通过以下几个方面来判断, </p>
+<ol>
+<li><p>查询次数多且每次查询占用时间长的SQL<br>通常为pt-query-digest分析的前几个查询</p>
+</li>
+<li><p>IO大的SQL<br>注意pt-query-digest分析中的Rows examine项 (Rows examine 指一条查询SQL中扫描的行数), 扫描行数越多, 说明其IO消耗也会越大;</p>
+</li>
+<li><p>未命中索引的SQL<br>注意pt-query-digest分析中Rows examine 和Rows Send的对比,  Rows examine(扫描的行数) 要比Rows Send(发送的行数)数据大得多, 说明此次查询基本靠扫描查询出来的;</p>
+</li>
+</ol>
+<h2 id="通过explain查询和分析SQL的执行计划"><a href="#通过explain查询和分析SQL的执行计划" class="headerlink" title="通过explain查询和分析SQL的执行计划"></a>通过explain查询和分析SQL的执行计划</h2><p>如何分析SQL查询</p>
+<ol>
+<li>使用explain查询SQL的执行计划</li>
+</ol>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">dev<span class="variable">@sakila</span><span class="operator">&gt;</span>explain <span class="keyword">select</span> customer_id, first_name, last_name <span class="keyword">from</span> customer \G</span><br><span class="line"><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span> <span class="number">1.</span> <span class="type">row</span> <span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span></span><br><span class="line">           id: <span class="number">1</span></span><br><span class="line">  select_type: SIMPLE</span><br><span class="line">        <span class="keyword">table</span>: customer</span><br><span class="line">   partitions: <span class="keyword">NULL</span></span><br><span class="line">         type: <span class="keyword">ALL</span></span><br><span class="line">possible_keys: <span class="keyword">NULL</span></span><br><span class="line">          key: <span class="keyword">NULL</span></span><br><span class="line">      key_len: <span class="keyword">NULL</span></span><br><span class="line">          <span class="keyword">ref</span>: <span class="keyword">NULL</span></span><br><span class="line">         <span class="keyword">rows</span>: <span class="number">599</span></span><br><span class="line">     filtered: <span class="number">100.00</span></span><br><span class="line">        Extra: <span class="keyword">NULL</span></span><br><span class="line"><span class="number">1</span> <span class="type">row</span> <span class="keyword">in</span> <span class="keyword">set</span>, <span class="number">1</span> warning (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></figure>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">列名</th>
+<th style="text-align:left">说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><code>select_type</code></td>
+<td style="text-align:left">查询的类型</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>table</code></td>
+<td style="text-align:left">显示这一行的数据是关于哪张表的</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>type</code></td>
+<td style="text-align:left">这是重要的列, 显示连接使用了哪种类型, 从最好到最差的连接类型为const, eq_reg, ref,range, index 和 ALL</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>possible_keys</code></td>
+<td style="text-align:left">显示可能应用在这张表中的索引。 如果为空, 没有可能的索引</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>key</code></td>
+<td style="text-align:left">实际使用的索引。如果为NULL, 则没有使用索引</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>key_len</code></td>
+<td style="text-align:left">使用索引的长度。在不损失精确性的情况下, 长度越短越好</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>ref</code></td>
+<td style="text-align:left">显示索引的哪一列被使用了, 如果可能的话, 是一个常数</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>rows</code></td>
+<td style="text-align:left">MySQL认为必须检查的用来返回请求数据的行数</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>filtered</code></td>
+<td style="text-align:left">扫描函数占数据表的比例</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>extra</code></td>
+<td style="text-align:left">是否需要额外的条件及操作来完成当前查询, 返回为NULL表示不需要, 如值为Using filesort或者Using temporary时 说明需要进行优化了</td>
+</tr>
+</tbody>
+</table>
+<p>select_type 查询类型说明,</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">选择查询类型</th>
+<th style="text-align:left">说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><code>SIMPLE</code></td>
+<td style="text-align:left">简单查询(不适用union和子查询的)</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>PRIMARY</code></td>
+<td style="text-align:left">最外层的查询</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>UNION</code></td>
+<td style="text-align:left">UNION中的第二个或者后面的SELECT语句</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>DEPENDENT</code></td>
+<td style="text-align:left">UNION中的第二个或者后面的SELECT语句,依赖于外部查询</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>UNION</code></td>
+<td style="text-align:left">UNION结果</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>SUBQUERY</code></td>
+<td style="text-align:left">子查询中的第一个SELECT语句</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>DEPENDENT</code></td>
+<td style="text-align:left">子查询中的第一个SELECT语句，依赖于外部查询</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>DERIVED</code></td>
+<td style="text-align:left">派生表的SELECT(FROM子句的子查询)</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>MATERIALIZED</code></td>
+<td style="text-align:left">Materialized subquery</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>UNCACHEABLE</code></td>
+<td style="text-align:left">对于该结果不能被缓存，必须重新评估外部查询的每一行子查询</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>UNCACHEABLE</code></td>
+<td style="text-align:left">UNION中的第二个或者后面的SELECT语句属于不可缓存子查询 (see UNCACHEABLE SUBQUERY)</td>
+</tr>
+</tbody>
+</table>
+<p>type 连接类型说明, </p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">连接类型</th>
+<th style="text-align:left">说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><code>const</code></td>
+<td style="text-align:left">指常数查找, 一般指对主键或唯一索引进行查找;</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>eq_reg</code></td>
+<td style="text-align:left">指在一定范围内查找,一般是基于唯一索引/主键的范围查找;</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>ref</code></td>
+<td style="text-align:left">常见于连接查询中, 基于某一个索引查找;</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>range</code></td>
+<td style="text-align:left">基于索引的范围查找;</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>index</code></td>
+<td style="text-align:left">对索引进行扫描查找;</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>ALL</code></td>
+<td style="text-align:left">进行表扫描查找;</td>
+</tr>
+</tbody>
+</table>
+<p>extra返回值说明,</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">返回值</th>
+<th style="text-align:left">说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><code>Using filesort</code></td>
+<td style="text-align:left">Mysql需要进行额外的步骤来发现如何对返回的行排序。它根据连接类型以及存储排序键值和匹配条件的全部行的行指针来排序全部行</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>Using temporary</code></td>
+<td style="text-align:left">Mysql需要创建一个临时表来存储结果, 这通常发生在对不同的列集进行ORDER BY上, 而不是GROUP BY 上</td>
+</tr>
+</tbody>
+</table>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">dev<span class="variable">@sakila</span><span class="operator">&gt;</span>explain <span class="keyword">select</span> customer_id, first_name, last_name</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> <span class="keyword">from</span> customer</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> <span class="keyword">where</span> customer_id <span class="operator">&gt;</span> <span class="number">50</span></span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> <span class="keyword">group</span> <span class="keyword">by</span> customer_id, first_name, last_name</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> <span class="keyword">having</span> <span class="built_in">count</span>(customer_id) <span class="operator">&gt;</span> <span class="number">1</span></span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> <span class="keyword">order</span> <span class="keyword">by</span> customer_id, first_name \G</span><br><span class="line"><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span> <span class="number">1.</span> <span class="type">row</span> <span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span></span><br><span class="line">           id: <span class="number">1</span></span><br><span class="line">  select_type: SIMPLE</span><br><span class="line">        <span class="keyword">table</span>: customer</span><br><span class="line">   partitions: <span class="keyword">NULL</span></span><br><span class="line">         type: <span class="keyword">range</span></span><br><span class="line">possible_keys: <span class="keyword">PRIMARY</span></span><br><span class="line">          key: <span class="keyword">PRIMARY</span></span><br><span class="line">      key_len: <span class="number">2</span></span><br><span class="line">          <span class="keyword">ref</span>: <span class="keyword">NULL</span></span><br><span class="line">         <span class="keyword">rows</span>: <span class="number">549</span></span><br><span class="line">     filtered: <span class="number">100.00</span></span><br><span class="line">        Extra: <span class="keyword">Using</span> <span class="keyword">where</span>; <span class="keyword">Using</span> temporary; <span class="keyword">Using</span> filesort</span><br><span class="line"><span class="number">1</span> <span class="type">row</span> <span class="keyword">in</span> <span class="keyword">set</span>, <span class="number">1</span> warning (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>Mysql每次读取是以页为单位的, 而一页中存储的索引越多, 其查询效率就越高, 所以索引长度越小越好;</p>
+</blockquote>
+<h2 id="Max-函数优化"><a href="#Max-函数优化" class="headerlink" title="Max()函数优化"></a>Max()函数优化</h2><p>Max()函数经常会被用于查找出最大的或最后的某个时间或数值操作;</p>
+<p>Max()函数示例, 查询最后支付时间,</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">dev<span class="variable">@sakila</span><span class="operator">&gt;</span>explain <span class="keyword">select</span> <span class="built_in">max</span>(payment_date) <span class="keyword">from</span> payment \G</span><br><span class="line"><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span> <span class="number">1.</span> <span class="type">row</span> <span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span></span><br><span class="line">           id: <span class="number">1</span></span><br><span class="line">  select_type: SIMPLE</span><br><span class="line">        <span class="keyword">table</span>: payment</span><br><span class="line">   partitions: <span class="keyword">NULL</span></span><br><span class="line">         type: <span class="keyword">ALL</span></span><br><span class="line">possible_keys: <span class="keyword">NULL</span></span><br><span class="line">          key: <span class="keyword">NULL</span></span><br><span class="line">      key_len: <span class="keyword">NULL</span></span><br><span class="line">          <span class="keyword">ref</span>: <span class="keyword">NULL</span></span><br><span class="line">         <span class="keyword">rows</span>: <span class="number">16086</span></span><br><span class="line">     filtered: <span class="number">100.00</span></span><br><span class="line">        Extra: <span class="keyword">NULL</span></span><br><span class="line"><span class="number">1</span> <span class="type">row</span> <span class="keyword">in</span> <span class="keyword">set</span>, <span class="number">1</span> warning (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></figure>
+<ul>
+<li>type值为ALL 表示进行表扫描; </li>
+<li>rows值为16086 表示扫描了16086行数据;</li>
+<li>filtered值为100 表示进行了完整全表扫描;</li>
+</ul>
+<p>显然当payment数据量很大时就会消耗更多的IO, 从而会拖慢服务器的性能;</p>
+<p>通常情况下 是对这个字段建立索引, </p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">dev<span class="variable">@sakila</span><span class="operator">&gt;</span><span class="keyword">create</span> index idx_paydate <span class="keyword">on</span> payment(payment_date);</span><br><span class="line">Query OK, <span class="number">0</span> <span class="keyword">rows</span> affected (<span class="number">0.11</span> sec)</span><br><span class="line">Records: <span class="number">0</span>  Duplicates: <span class="number">0</span>  Warnings: <span class="number">0</span></span><br><span class="line"></span><br><span class="line">dev<span class="variable">@sakila</span><span class="operator">&gt;</span>explain <span class="keyword">select</span> <span class="built_in">max</span>(payment_date) <span class="keyword">from</span> payment \G</span><br><span class="line"><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span> <span class="number">1.</span> <span class="type">row</span> <span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span></span><br><span class="line">           id: <span class="number">1</span></span><br><span class="line">  select_type: SIMPLE</span><br><span class="line">        <span class="keyword">table</span>: <span class="keyword">NULL</span></span><br><span class="line">   partitions: <span class="keyword">NULL</span></span><br><span class="line">         type: <span class="keyword">NULL</span></span><br><span class="line">possible_keys: <span class="keyword">NULL</span></span><br><span class="line">          key: <span class="keyword">NULL</span></span><br><span class="line">      key_len: <span class="keyword">NULL</span></span><br><span class="line">          <span class="keyword">ref</span>: <span class="keyword">NULL</span></span><br><span class="line">         <span class="keyword">rows</span>: <span class="keyword">NULL</span></span><br><span class="line">     filtered: <span class="keyword">NULL</span></span><br><span class="line">        Extra: <span class="keyword">Select</span> tables optimized away</span><br><span class="line"><span class="number">1</span> <span class="type">row</span> <span class="keyword">in</span> <span class="keyword">set</span>, <span class="number">1</span> warning (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></figure>
+<p>通过建立索引后, 可以看到查询类型不在是All, 同时Extra 表示为 Select tables optimized away, 表示不需进行表的操作就可以完成查询, 因为索引是按顺序排序的, 通过索引就可以知道payment_date最后一个数据值, 因此并不需要进行表的操作, 大大优化了执行效率, 同时尽可能大的减少IO操作, 这种情况下不过payment_date的数据结构是什么样的, 不管它的数据量有多大, 它的执行效率基本是恒定的;</p>
+<p>所以像Max()函数这类的操作优化的思路之一就是为字段建立索引来进行优化;</p>
+<h2 id="Count-函数优化"><a href="#Count-函数优化" class="headerlink" title="Count()函数优化"></a>Count()函数优化</h2><p>问题: 在一条SQL中同时查出2006年和2007年电影的数量</p>
+<p>方式一</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="built_in">COUNT</span>(release_year<span class="operator">=</span><span class="string">&#x27;2006&#x27;</span> <span class="keyword">OR</span> release_year<span class="operator">=</span><span class="string">&#x27;2007&#x27;</span>) <span class="keyword">FROM</span> film;</span><br></pre></td></tr></table></figure>
+<p>方式二</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="built_in">COUNT</span>(<span class="operator">*</span>) <span class="keyword">FROM</span> film <span class="keyword">WHERE</span> release_year<span class="operator">=</span><span class="string">&#x27;2006&#x27;</span> <span class="keyword">AND</span> release_year<span class="operator">=</span><span class="string">&#x27;2007&#x27;</span>;</span><br></pre></td></tr></table></figure>
+<p>方式一无法区分2006和2007的电影数量;<br>方式二release_year值不存在同时为2006和2007的情况;</p>
+<p>显然方式一二都无法满足需求, 合理的方式是, </p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">dev<span class="variable">@sakila</span><span class="operator">&gt;</span><span class="keyword">select</span></span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> <span class="built_in">count</span>(release_year<span class="operator">=</span><span class="string">&#x27;2006&#x27;</span> <span class="keyword">OR</span> <span class="keyword">NULL</span>) <span class="keyword">AS</span> <span class="string">&#x27;2006年电影数量&#x27;</span>,</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> <span class="built_in">count</span>(release_year<span class="operator">=</span><span class="string">&#x27;2007&#x27;</span> <span class="keyword">OR</span> <span class="keyword">NULL</span>) <span class="keyword">AS</span> <span class="string">&#x27;2007年电影数量&#x27;</span></span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> <span class="keyword">from</span> film \G</span><br><span class="line"><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span> <span class="number">1.</span> <span class="type">row</span> <span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span></span><br><span class="line"><span class="number">2006</span>年电影数量: <span class="number">1000</span></span><br><span class="line"><span class="number">2007</span>年电影数量: <span class="number">0</span></span><br><span class="line"><span class="number">1</span> <span class="type">row</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.01</span> sec)</span><br></pre></td></tr></table></figure>
+<p>问题一: count()函数参数里面是用星号(*)号好还是用列名好? </p>
+<p>说明 count()函数参数用星号和列名分别查询的结果 有时候是不一样的, 需要注意,</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">dev<span class="variable">@sakila</span><span class="operator">&gt;</span><span class="keyword">create</span> <span class="keyword">table</span> tbtest(id <span class="type">int</span>, name <span class="type">char</span>(<span class="number">20</span>));</span><br><span class="line">Query OK, <span class="number">0</span> <span class="keyword">rows</span> affected (<span class="number">0.09</span> sec)</span><br><span class="line"></span><br><span class="line">dev<span class="variable">@sakila</span><span class="operator">&gt;</span><span class="keyword">insert</span> tbtest <span class="keyword">values</span>(<span class="number">1</span>, <span class="string">&#x27;Tom&#x27;</span>), (<span class="number">2</span>,<span class="keyword">NULL</span>);</span><br><span class="line">Query OK, <span class="number">2</span> <span class="keyword">rows</span> affected (<span class="number">0.08</span> sec)</span><br><span class="line">Records: <span class="number">2</span>  Duplicates: <span class="number">0</span>  Warnings: <span class="number">0</span></span><br><span class="line"></span><br><span class="line">dev<span class="variable">@sakila</span><span class="operator">&gt;</span><span class="keyword">select</span> <span class="built_in">count</span>(<span class="operator">*</span>), <span class="built_in">count</span>(id), <span class="built_in">count</span>(name) <span class="keyword">from</span> tbtest;</span><br><span class="line"><span class="operator">+</span><span class="comment">----------+-----------+-------------+</span></span><br><span class="line"><span class="operator">|</span> <span class="built_in">count</span>(<span class="operator">*</span>) <span class="operator">|</span> <span class="built_in">count</span>(id) <span class="operator">|</span> <span class="built_in">count</span>(name) <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">----------+-----------+-------------+</span></span><br><span class="line"><span class="operator">|</span>        <span class="number">2</span> <span class="operator">|</span>         <span class="number">2</span> <span class="operator">|</span>           <span class="number">1</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">----------+-----------+-------------+</span></span><br><span class="line"><span class="number">1</span> <span class="type">row</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></figure>
+<p>上述示例说明count(*)是指存在的具体数据行数, 而count(列名)是指这列值不为NULL的行数; </p>
+<p>同时要注意 count(release_year=’2007’ OR NULL) 后面的<code>OR NULL</code> 这个表示当前面的查询不存在时返回NULL,<br>如果直接写成count(relase_year=’2007’) 那当不存在’2007’的条件值时 返回的结果是count(*)的值;</p>
+<p>下面通过示例进一步分析, </p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">dev<span class="variable">@sakila</span><span class="operator">&gt;</span><span class="keyword">create</span> <span class="keyword">table</span> tb19(name <span class="type">char</span>(<span class="number">20</span>), age tinyint unsigned);</span><br><span class="line">Query OK, <span class="number">0</span> <span class="keyword">rows</span> affected (<span class="number">0.07</span> sec)</span><br><span class="line"></span><br><span class="line">dev<span class="variable">@sakila</span><span class="operator">&gt;</span><span class="keyword">insert</span> tb19 <span class="keyword">values</span>(<span class="string">&#x27;Tom&#x27;</span>,<span class="number">19</span>), (<span class="string">&#x27;Mike&#x27;</span>,<span class="number">20</span>),</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> (<span class="string">&#x27;jack&#x27;</span>,<span class="keyword">NULL</span>), (<span class="string">&#x27;jason&#x27;</span>,<span class="number">19</span>), (<span class="string">&#x27;oliva&#x27;</span>,<span class="number">19</span>), (<span class="string">&#x27;reminer&#x27;</span>,<span class="number">20</span>);</span><br><span class="line">Query OK, <span class="number">5</span> <span class="keyword">rows</span> affected (<span class="number">0.07</span> sec)</span><br><span class="line">Records: <span class="number">5</span>  Duplicates: <span class="number">0</span>  Warnings: <span class="number">0</span></span><br><span class="line"></span><br><span class="line">dev<span class="variable">@sakila</span><span class="operator">&gt;</span><span class="keyword">select</span></span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> <span class="built_in">count</span>(<span class="operator">*</span>),</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> <span class="built_in">count</span>(age<span class="operator">=</span><span class="number">19</span>),</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> <span class="built_in">count</span>(age<span class="operator">=</span><span class="number">19</span> <span class="keyword">OR</span> <span class="keyword">NULL</span>),</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> <span class="built_in">count</span>(age<span class="operator">=</span><span class="number">21</span>),</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> <span class="built_in">count</span>(age<span class="operator">=</span><span class="number">21</span> <span class="keyword">OR</span> <span class="keyword">NULL</span>),</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> <span class="built_in">count</span>(name),</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> <span class="built_in">count</span>(age)</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> <span class="keyword">from</span> tb19 \G</span><br><span class="line"><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span> <span class="number">1.</span> <span class="type">row</span> <span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span></span><br><span class="line">             <span class="built_in">count</span>(<span class="operator">*</span>): <span class="number">6</span></span><br><span class="line">        <span class="built_in">count</span>(age<span class="operator">=</span><span class="number">19</span>): <span class="number">5</span></span><br><span class="line"><span class="built_in">count</span>(age<span class="operator">=</span><span class="number">19</span> <span class="keyword">OR</span> <span class="keyword">NULL</span>): <span class="number">3</span></span><br><span class="line">        <span class="built_in">count</span>(age<span class="operator">=</span><span class="number">21</span>): <span class="number">5</span></span><br><span class="line"><span class="built_in">count</span>(age<span class="operator">=</span><span class="number">21</span> <span class="keyword">OR</span> <span class="keyword">NULL</span>): <span class="number">0</span></span><br><span class="line">          <span class="built_in">count</span>(name): <span class="number">6</span></span><br><span class="line">           <span class="built_in">count</span>(age): <span class="number">5</span></span><br><span class="line"><span class="number">1</span> <span class="type">row</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></figure>
+<ul>
+<li>count(*) 返回数据表中当前的数据行数;</li>
+<li>count(age =19) 相当于count(age), 即不管count(age= N) 都相当于count(age)的返回值,count(age)计算这列不为NULL的记录之和; </li>
+<li>count(age =19 OR NULL) 表示只有age=19条件时才参与结果统计, age=NULL或其它值均不参与结果统计;</li>
+<li>count(age=21)  与count(age) 值相同;</li>
+<li>count(列名) 即统计该列值不为NULL的记录总数;</li>
+</ul>
+<h2 id="子查询优化"><a href="#子查询优化" class="headerlink" title="子查询优化"></a>子查询优化</h2><p>通常情况下, 需要把子查询优化为join查询, 但是在优化时要注意关联键是否有一对多的关系, 需要注意重复数据;</p>
+<h3 id="1对多关系带来的重复数据问题"><a href="#1对多关系带来的重复数据问题" class="headerlink" title="1对多关系带来的重复数据问题"></a>1对多关系带来的重复数据问题</h3><p>关于数据重复问题示例, </p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">dev<span class="variable">@sakila</span><span class="operator">&gt;</span><span class="keyword">create</span> <span class="keyword">table</span> t(id <span class="type">int</span>);</span><br><span class="line">Query OK, <span class="number">0</span> <span class="keyword">rows</span> affected (<span class="number">0.07</span> sec)</span><br><span class="line"></span><br><span class="line">dev<span class="variable">@sakila</span><span class="operator">&gt;</span><span class="keyword">create</span> <span class="keyword">table</span> t1(tid <span class="type">int</span>);</span><br><span class="line">Query OK, <span class="number">0</span> <span class="keyword">rows</span> affected (<span class="number">0.07</span> sec)</span><br><span class="line"></span><br><span class="line">dev<span class="variable">@sakila</span><span class="operator">&gt;</span><span class="keyword">insert</span> t <span class="keyword">values</span>(<span class="number">1</span>);</span><br><span class="line">Query OK, <span class="number">1</span> <span class="type">row</span> affected (<span class="number">0.04</span> sec)</span><br><span class="line"></span><br><span class="line">dev<span class="variable">@sakila</span><span class="operator">&gt;</span><span class="keyword">insert</span> t1 <span class="keyword">values</span>(<span class="number">1</span>), (<span class="number">1</span>);</span><br><span class="line">Query OK, <span class="number">2</span> <span class="type">row</span> affected (<span class="number">0.07</span> sec)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>查询t表id, 要求t表id是t1表中的tid的值范围;</p>
+<p>子查询</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">dev<span class="variable">@sakila</span><span class="operator">&gt;</span><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> t <span class="keyword">where</span> t.id <span class="keyword">in</span> (<span class="keyword">select</span> t1.tid <span class="keyword">from</span> t1);</span><br><span class="line"><span class="operator">+</span><span class="comment">------+</span></span><br><span class="line"><span class="operator">|</span> id   <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">------+</span></span><br><span class="line"><span class="operator">|</span>    <span class="number">1</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">------+</span></span><br><span class="line"><span class="number">1</span> <span class="type">row</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></figure>
+<p>修改为连接查询, </p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">dev<span class="variable">@sakila</span><span class="operator">&gt;</span><span class="keyword">select</span> t.id id <span class="keyword">from</span> t <span class="keyword">inner</span> <span class="keyword">join</span> t1 <span class="keyword">on</span> t.id <span class="operator">=</span> t1.tid;</span><br><span class="line"><span class="operator">+</span><span class="comment">------+</span></span><br><span class="line"><span class="operator">|</span> id   <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">------+</span></span><br><span class="line"><span class="operator">|</span>    <span class="number">1</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>    <span class="number">1</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">------+</span></span><br><span class="line"><span class="number">2</span> <span class="keyword">rows</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></figure>
+<p>因为t.id 与t1.tid存在1对多的关系, 所以用连接查询出现了重复数据问题, 那此时就需要通过distinct来处理重复问题;</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">dev<span class="variable">@sakila</span><span class="operator">&gt;</span><span class="keyword">select</span> <span class="keyword">distinct</span> t.id id <span class="keyword">from</span> t <span class="keyword">inner</span> <span class="keyword">join</span> t1 <span class="keyword">on</span> t.id <span class="operator">=</span> t1.tid;</span><br><span class="line"><span class="operator">+</span><span class="comment">------+</span></span><br><span class="line"><span class="operator">|</span> id   <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">------+</span></span><br><span class="line"><span class="operator">|</span>    <span class="number">1</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">------+</span></span><br><span class="line"><span class="number">1</span> <span class="type">row</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></figure>
+<h3 id="实例分析"><a href="#实例分析" class="headerlink" title="实例分析"></a>实例分析</h3><p>问题: 查询sandra出演的所有影片</p>
+<p>子查询,</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">dev<span class="variable">@sakila</span><span class="operator">&gt;</span><span class="keyword">select</span> title, release_year, length</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> <span class="keyword">from</span> film</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> <span class="keyword">where</span> film_id <span class="keyword">in</span> (</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> <span class="keyword">select</span> film_id <span class="keyword">from</span> film_actor <span class="keyword">where</span> actor_id <span class="keyword">in</span> (</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> <span class="keyword">select</span> actor_id <span class="keyword">from</span> actor <span class="keyword">where</span> first_name <span class="operator">=</span> <span class="string">&#x27;sandra&#x27;</span>));</span><br></pre></td></tr></table></figure>
+<p>修改为连接查询,</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">dev<span class="variable">@sakila</span><span class="operator">&gt;</span>explain <span class="keyword">select</span> title, release_year, length</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> <span class="keyword">from</span> film</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> <span class="keyword">join</span> film_actor fa <span class="keyword">on</span> film.film_id <span class="operator">=</span> fa.film_id</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> <span class="keyword">join</span> actor a <span class="keyword">on</span> fa.actor_id <span class="operator">=</span> a.actor_id <span class="keyword">where</span> a.first_name <span class="operator">=</span> <span class="string">&#x27;sandra&#x27;</span>;</span><br></pre></td></tr></table></figure>
+<p>子查询与连接查询执行计划对比,</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">dev<span class="variable">@sakila</span><span class="operator">&gt;</span>explain <span class="keyword">select</span> title, release_year, length</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> <span class="keyword">from</span> film</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> <span class="keyword">where</span> film_id <span class="keyword">in</span> (</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> <span class="keyword">select</span> film_id <span class="keyword">from</span> film_actor <span class="keyword">where</span> actor_id <span class="keyword">in</span> (</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> <span class="keyword">select</span> actor_id <span class="keyword">from</span> actor <span class="keyword">where</span> first_name <span class="operator">=</span> <span class="string">&#x27;sandra&#x27;</span>));</span><br><span class="line"><span class="operator">+</span><span class="comment">----+--------------+-------------+------------+--------+------------------------+---------+---------+-----------------------+------+----------+-------------+</span></span><br><span class="line"><span class="operator">|</span> id <span class="operator">|</span> select_type  <span class="operator">|</span> <span class="keyword">table</span>       <span class="operator">|</span> partitions <span class="operator">|</span> type   <span class="operator">|</span> possible_keys          <span class="operator">|</span> key     <span class="operator">|</span> key_len <span class="operator">|</span> <span class="keyword">ref</span>                   <span class="operator">|</span> <span class="keyword">rows</span> <span class="operator">|</span> filtered <span class="operator">|</span> Extra       <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">----+--------------+-------------+------------+--------+------------------------+---------+---------+-----------------------+------+----------+-------------+</span></span><br><span class="line"><span class="operator">|</span>  <span class="number">1</span> <span class="operator">|</span> SIMPLE       <span class="operator">|</span> <span class="operator">&lt;</span>subquery2<span class="operator">&gt;</span> <span class="operator">|</span> <span class="keyword">NULL</span>       <span class="operator">|</span> <span class="keyword">ALL</span>    <span class="operator">|</span> <span class="keyword">NULL</span>                   <span class="operator">|</span> <span class="keyword">NULL</span>    <span class="operator">|</span> <span class="keyword">NULL</span>    <span class="operator">|</span> <span class="keyword">NULL</span>                  <span class="operator">|</span> <span class="keyword">NULL</span> <span class="operator">|</span>   <span class="number">100.00</span> <span class="operator">|</span> <span class="keyword">NULL</span>        <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>  <span class="number">1</span> <span class="operator">|</span> SIMPLE       <span class="operator">|</span> film        <span class="operator">|</span> <span class="keyword">NULL</span>       <span class="operator">|</span> eq_ref <span class="operator">|</span> <span class="keyword">PRIMARY</span>                <span class="operator">|</span> <span class="keyword">PRIMARY</span> <span class="operator">|</span> <span class="number">2</span>       <span class="operator">|</span> <span class="operator">&lt;</span>subquery2<span class="operator">&gt;</span>.film_id   <span class="operator">|</span>    <span class="number">1</span> <span class="operator">|</span>   <span class="number">100.00</span> <span class="operator">|</span> <span class="keyword">NULL</span>        <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>  <span class="number">2</span> <span class="operator">|</span> MATERIALIZED <span class="operator">|</span> actor       <span class="operator">|</span> <span class="keyword">NULL</span>       <span class="operator">|</span> <span class="keyword">ALL</span>    <span class="operator">|</span> <span class="keyword">PRIMARY</span>                <span class="operator">|</span> <span class="keyword">NULL</span>    <span class="operator">|</span> <span class="keyword">NULL</span>    <span class="operator">|</span> <span class="keyword">NULL</span>                  <span class="operator">|</span>  <span class="number">200</span> <span class="operator">|</span>    <span class="number">10.00</span> <span class="operator">|</span> <span class="keyword">Using</span> <span class="keyword">where</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>  <span class="number">2</span> <span class="operator">|</span> MATERIALIZED <span class="operator">|</span> film_actor  <span class="operator">|</span> <span class="keyword">NULL</span>       <span class="operator">|</span> <span class="keyword">ref</span>    <span class="operator">|</span> <span class="keyword">PRIMARY</span>,idx_fk_film_id <span class="operator">|</span> <span class="keyword">PRIMARY</span> <span class="operator">|</span> <span class="number">2</span>       <span class="operator">|</span> sakila.actor.actor_id <span class="operator">|</span>   <span class="number">27</span> <span class="operator">|</span>   <span class="number">100.00</span> <span class="operator">|</span> <span class="keyword">Using</span> index <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">----+--------------+-------------+------------+--------+------------------------+---------+---------+-----------------------+------+----------+-------------+</span></span><br><span class="line"><span class="number">4</span> <span class="keyword">rows</span> <span class="keyword">in</span> <span class="keyword">set</span>, <span class="number">1</span> warning (<span class="number">0.00</span> sec)</span><br><span class="line"></span><br><span class="line">dev<span class="variable">@sakila</span><span class="operator">&gt;</span>explain <span class="keyword">select</span> title, release_year, length</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> <span class="keyword">from</span> film</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> <span class="keyword">join</span> film_actor fa <span class="keyword">on</span> film.film_id <span class="operator">=</span> fa.film_id</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> <span class="keyword">join</span> actor a <span class="keyword">on</span> fa.actor_id <span class="operator">=</span> a.actor_id <span class="keyword">where</span> a.first_name <span class="operator">=</span> <span class="string">&#x27;sandra&#x27;</span>;</span><br><span class="line"><span class="operator">+</span><span class="comment">----+-------------+-------+------------+--------+------------------------+---------+---------+-------------------+------+----------+-------------+</span></span><br><span class="line"><span class="operator">|</span> id <span class="operator">|</span> select_type <span class="operator">|</span> <span class="keyword">table</span> <span class="operator">|</span> partitions <span class="operator">|</span> type   <span class="operator">|</span> possible_keys          <span class="operator">|</span> key     <span class="operator">|</span> key_len <span class="operator">|</span> <span class="keyword">ref</span>               <span class="operator">|</span> <span class="keyword">rows</span> <span class="operator">|</span> filtered <span class="operator">|</span> Extra       <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">----+-------------+-------+------------+--------+------------------------+---------+---------+-------------------+------+----------+-------------+</span></span><br><span class="line"><span class="operator">|</span>  <span class="number">1</span> <span class="operator">|</span> SIMPLE      <span class="operator">|</span> a     <span class="operator">|</span> <span class="keyword">NULL</span>       <span class="operator">|</span> <span class="keyword">ALL</span>    <span class="operator">|</span> <span class="keyword">PRIMARY</span>                <span class="operator">|</span> <span class="keyword">NULL</span>    <span class="operator">|</span> <span class="keyword">NULL</span>    <span class="operator">|</span> <span class="keyword">NULL</span>              <span class="operator">|</span>  <span class="number">200</span> <span class="operator">|</span>    <span class="number">10.00</span> <span class="operator">|</span> <span class="keyword">Using</span> <span class="keyword">where</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>  <span class="number">1</span> <span class="operator">|</span> SIMPLE      <span class="operator">|</span> fa    <span class="operator">|</span> <span class="keyword">NULL</span>       <span class="operator">|</span> <span class="keyword">ref</span>    <span class="operator">|</span> <span class="keyword">PRIMARY</span>,idx_fk_film_id <span class="operator">|</span> <span class="keyword">PRIMARY</span> <span class="operator">|</span> <span class="number">2</span>       <span class="operator">|</span> sakila.a.actor_id <span class="operator">|</span>   <span class="number">27</span> <span class="operator">|</span>   <span class="number">100.00</span> <span class="operator">|</span> <span class="keyword">Using</span> index <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>  <span class="number">1</span> <span class="operator">|</span> SIMPLE      <span class="operator">|</span> film  <span class="operator">|</span> <span class="keyword">NULL</span>       <span class="operator">|</span> eq_ref <span class="operator">|</span> <span class="keyword">PRIMARY</span>                <span class="operator">|</span> <span class="keyword">PRIMARY</span> <span class="operator">|</span> <span class="number">2</span>       <span class="operator">|</span> sakila.fa.film_id <span class="operator">|</span>    <span class="number">1</span> <span class="operator">|</span>   <span class="number">100.00</span> <span class="operator">|</span> <span class="keyword">NULL</span>        <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">----+-------------+-------+------------+--------+------------------------+---------+---------+-------------------+------+----------+-------------+</span></span><br><span class="line"><span class="number">3</span> <span class="keyword">rows</span> <span class="keyword">in</span> <span class="keyword">set</span>, <span class="number">1</span> warning (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></figure>
+<ul>
+<li>同对比中可以优化后的连接查询比子查询要少进行一次子查询引发的全表扫描查询操作, 如果数据量很大的时候, 优化效果将灰常明显;</li>
+</ul>
+<h2 id="group-by优化"><a href="#group-by优化" class="headerlink" title="group by优化"></a>group by优化</h2><p>对关联中的某一列进行group by 时, 尽量选用来自同一张表的列进行group by 操作;</p>
+<p>问题: 查询每个演员所参演的影片的数量</p>
+<p>查询语句, </p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> actor.first_name, actor.last_name, <span class="built_in">count</span>(<span class="operator">*</span>) <span class="keyword">from</span> sakila.film_actor </span><br><span class="line"><span class="keyword">inner</span> <span class="keyword">join</span> sakila.actor <span class="keyword">using</span>(actor_id) <span class="keyword">group</span> <span class="keyword">by</span> film_actor.actor_id;</span><br></pre></td></tr></table></figure>
+<p>执行计划,</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">dev<span class="variable">@sakila</span><span class="operator">&gt;</span>explain <span class="keyword">select</span> actor.first_name, actor.last_name, <span class="built_in">count</span>(<span class="operator">*</span>)</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> <span class="keyword">from</span> film_actor</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> <span class="keyword">join</span> actor <span class="keyword">using</span>(actor_id)</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> <span class="keyword">group</span> <span class="keyword">by</span> film_actor.actor_id;</span><br><span class="line"><span class="operator">+</span><span class="comment">----+-------------+------------+------------+------+------------------------+---------+---------+-----------------------+------+----------+-----------------+</span></span><br><span class="line"><span class="operator">|</span> id <span class="operator">|</span> select_type <span class="operator">|</span> <span class="keyword">table</span>      <span class="operator">|</span> partitions <span class="operator">|</span> type <span class="operator">|</span> possible_keys          <span class="operator">|</span> key     <span class="operator">|</span> key_len <span class="operator">|</span> <span class="keyword">ref</span>                   <span class="operator">|</span> <span class="keyword">rows</span> <span class="operator">|</span> filtered <span class="operator">|</span> Extra           <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">----+-------------+------------+------------+------+------------------------+---------+---------+-----------------------+------+----------+-----------------+</span></span><br><span class="line"><span class="operator">|</span>  <span class="number">1</span> <span class="operator">|</span> SIMPLE      <span class="operator">|</span> actor      <span class="operator">|</span> <span class="keyword">NULL</span>       <span class="operator">|</span> <span class="keyword">ALL</span>  <span class="operator">|</span> <span class="keyword">PRIMARY</span>                <span class="operator">|</span> <span class="keyword">NULL</span>    <span class="operator">|</span> <span class="keyword">NULL</span>    <span class="operator">|</span> <span class="keyword">NULL</span>                  <span class="operator">|</span>  <span class="number">200</span> <span class="operator">|</span>   <span class="number">100.00</span> <span class="operator">|</span> <span class="keyword">Using</span> temporary <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>  <span class="number">1</span> <span class="operator">|</span> SIMPLE      <span class="operator">|</span> film_actor <span class="operator">|</span> <span class="keyword">NULL</span>       <span class="operator">|</span> <span class="keyword">ref</span>  <span class="operator">|</span> <span class="keyword">PRIMARY</span>,idx_fk_film_id <span class="operator">|</span> <span class="keyword">PRIMARY</span> <span class="operator">|</span> <span class="number">2</span>       <span class="operator">|</span> sakila.actor.actor_id <span class="operator">|</span>   <span class="number">27</span> <span class="operator">|</span>   <span class="number">100.00</span> <span class="operator">|</span> <span class="keyword">Using</span> index     <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">----+-------------+------------+------------+------+------------------------+---------+---------+-----------------------+------+----------+-----------------+</span></span><br><span class="line"><span class="number">2</span> <span class="keyword">rows</span> <span class="keyword">in</span> <span class="keyword">set</span>, <span class="number">1</span> warning (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></figure>
+<p>可以看到执行计划中将用到临时表来支持查询操作, 那么最好对这个查询语句进行改写, 尽量避免使用临时表来进行操作, </p>
+<p>改写后的查询语句,</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> actor.first_name, actor.last_name, c.cnt</span><br><span class="line"><span class="keyword">from</span> actor </span><br><span class="line"><span class="keyword">join</span> (<span class="keyword">select</span> actor_id, <span class="built_in">count</span>(<span class="operator">*</span>) <span class="keyword">as</span> cnt <span class="keyword">from</span> film_actor <span class="keyword">group</span> <span class="keyword">by</span> actor_id) <span class="keyword">as</span> c <span class="keyword">using</span>(actor_id);</span><br></pre></td></tr></table></figure>
+<ul>
+<li>using(id) 等价于 on actor.actor_id = c.actor_id的意思;</li>
+</ul>
+<p>对比执行计划</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">dev<span class="variable">@sakila</span><span class="operator">&gt;</span>explain <span class="keyword">select</span> actor.first_name, actor.last_name, c.cnt</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> <span class="keyword">from</span> actor</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> <span class="keyword">inner</span> <span class="keyword">join</span> (</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> <span class="keyword">select</span> actor_id, <span class="built_in">count</span>(<span class="operator">*</span>) <span class="keyword">as</span> cnt <span class="keyword">from</span> film_actor <span class="keyword">group</span> <span class="keyword">by</span> actor_id</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> ) <span class="keyword">as</span> c <span class="keyword">using</span>(actor_id);</span><br><span class="line"><span class="operator">+</span><span class="comment">----+-------------+------------+------------+-------+------------------------+-------------+---------+-----------------------+------+----------+-------------+</span></span><br><span class="line"><span class="operator">|</span> id <span class="operator">|</span> select_type <span class="operator">|</span> <span class="keyword">table</span>      <span class="operator">|</span> partitions <span class="operator">|</span> type  <span class="operator">|</span> possible_keys          <span class="operator">|</span> key         <span class="operator">|</span> key_len <span class="operator">|</span> <span class="keyword">ref</span>                   <span class="operator">|</span> <span class="keyword">rows</span> <span class="operator">|</span> filtered <span class="operator">|</span> Extra       <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">----+-------------+------------+------------+-------+------------------------+-------------+---------+-----------------------+------+----------+-------------+</span></span><br><span class="line"><span class="operator">|</span>  <span class="number">1</span> <span class="operator">|</span> <span class="keyword">PRIMARY</span>     <span class="operator">|</span> actor      <span class="operator">|</span> <span class="keyword">NULL</span>       <span class="operator">|</span> <span class="keyword">ALL</span>   <span class="operator">|</span> <span class="keyword">PRIMARY</span>                <span class="operator">|</span> <span class="keyword">NULL</span>        <span class="operator">|</span> <span class="keyword">NULL</span>    <span class="operator">|</span> <span class="keyword">NULL</span>                  <span class="operator">|</span>  <span class="number">200</span> <span class="operator">|</span>   <span class="number">100.00</span> <span class="operator">|</span> <span class="keyword">NULL</span>        <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>  <span class="number">1</span> <span class="operator">|</span> <span class="keyword">PRIMARY</span>     <span class="operator">|</span> <span class="operator">&lt;</span>derived2<span class="operator">&gt;</span> <span class="operator">|</span> <span class="keyword">NULL</span>       <span class="operator">|</span> <span class="keyword">ref</span>   <span class="operator">|</span> <span class="operator">&lt;</span>auto_key0<span class="operator">&gt;</span>            <span class="operator">|</span> <span class="operator">&lt;</span>auto_key0<span class="operator">&gt;</span> <span class="operator">|</span> <span class="number">2</span>       <span class="operator">|</span> sakila.actor.actor_id <span class="operator">|</span>   <span class="number">27</span> <span class="operator">|</span>   <span class="number">100.00</span> <span class="operator">|</span> <span class="keyword">NULL</span>        <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>  <span class="number">2</span> <span class="operator">|</span> DERIVED     <span class="operator">|</span> film_actor <span class="operator">|</span> <span class="keyword">NULL</span>       <span class="operator">|</span> index <span class="operator">|</span> <span class="keyword">PRIMARY</span>,idx_fk_film_id <span class="operator">|</span> <span class="keyword">PRIMARY</span>     <span class="operator">|</span> <span class="number">4</span>       <span class="operator">|</span> <span class="keyword">NULL</span>                  <span class="operator">|</span> <span class="number">5462</span> <span class="operator">|</span>   <span class="number">100.00</span> <span class="operator">|</span> <span class="keyword">Using</span> index <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">----+-------------+------------+------------+-------+------------------------+-------------+---------+-----------------------+------+----------+-------------+</span></span><br><span class="line"><span class="number">3</span> <span class="keyword">rows</span> <span class="keyword">in</span> <span class="keyword">set</span>, <span class="number">1</span> warning (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></figure>
+<ul>
+<li>可见优化后 就不需要使用临时表来辅助查询操作了; </li>
+<li>在上述语句中是先通过子查询查询到演员及其参演电影数量然后通过连接查询连接演员的基本信息, 这就是说 子查询可以通过修改为连接查询来进一步优化, 那有时候有可能在连接查询中应用子查询来提高查询效率, 具体优化时应根据实际情况进行灵活应用;</li>
+</ul>
+<h2 id="limit查询优化"><a href="#limit查询优化" class="headerlink" title="limit查询优化"></a>limit查询优化</h2><p>limit常用于分页处理, 时常会伴随order by 从句使用, 因此大多时候会使用filesorts, 这样会造成大量IO问题;</p>
+<p>问题: 获取影片信息,</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> film_id, description <span class="keyword">from</span> film <span class="keyword">order</span> <span class="keyword">by</span> title limit <span class="number">50</span>, <span class="number">5</span>;</span><br></pre></td></tr></table></figure>
+<p>优化1,</p>
+<p>使用有索引的列或主键进行Order by 操作;</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">dev<span class="variable">@sakila</span><span class="operator">&gt;</span>explain <span class="keyword">select</span> film_id, description <span class="keyword">from</span> film <span class="keyword">order</span> <span class="keyword">by</span> title limit <span class="number">50</span>, <span class="number">5</span> \G</span><br><span class="line"><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span> <span class="number">1.</span> <span class="type">row</span> <span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span></span><br><span class="line">           id: <span class="number">1</span></span><br><span class="line">  select_type: SIMPLE</span><br><span class="line">        <span class="keyword">table</span>: film</span><br><span class="line">   partitions: <span class="keyword">NULL</span></span><br><span class="line">         type: <span class="keyword">ALL</span></span><br><span class="line">possible_keys: <span class="keyword">NULL</span></span><br><span class="line">          key: <span class="keyword">NULL</span></span><br><span class="line">      key_len: <span class="keyword">NULL</span></span><br><span class="line">          <span class="keyword">ref</span>: <span class="keyword">NULL</span></span><br><span class="line">         <span class="keyword">rows</span>: <span class="number">1000</span></span><br><span class="line">     filtered: <span class="number">100.00</span></span><br><span class="line">        Extra: <span class="keyword">Using</span> filesort</span><br><span class="line"><span class="number">1</span> <span class="type">row</span> <span class="keyword">in</span> <span class="keyword">set</span>, <span class="number">1</span> warning (<span class="number">0.00</span> sec)</span><br><span class="line"></span><br><span class="line">dev<span class="variable">@sakila</span><span class="operator">&gt;</span>explain <span class="keyword">select</span> film_id, description <span class="keyword">from</span> film <span class="keyword">order</span> <span class="keyword">by</span> film_id limit <span class="number">50</span>, <span class="number">5</span> \G</span><br><span class="line"><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span> <span class="number">1.</span> <span class="type">row</span> <span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span></span><br><span class="line">           id: <span class="number">1</span></span><br><span class="line">  select_type: SIMPLE</span><br><span class="line">        <span class="keyword">table</span>: film</span><br><span class="line">   partitions: <span class="keyword">NULL</span></span><br><span class="line">         type: index</span><br><span class="line">possible_keys: <span class="keyword">NULL</span></span><br><span class="line">          key: <span class="keyword">PRIMARY</span></span><br><span class="line">      key_len: <span class="number">2</span></span><br><span class="line">          <span class="keyword">ref</span>: <span class="keyword">NULL</span></span><br><span class="line">         <span class="keyword">rows</span>: <span class="number">55</span></span><br><span class="line">     filtered: <span class="number">100.00</span></span><br><span class="line">        Extra: <span class="keyword">NULL</span></span><br><span class="line"><span class="number">1</span> <span class="type">row</span> <span class="keyword">in</span> <span class="keyword">set</span>, <span class="number">1</span> warning (<span class="number">0.00</span> sec)</span><br><span class="line"><span class="keyword">select</span> film_id, description <span class="keyword">from</span> film <span class="keyword">order</span> <span class="keyword">by</span> film_id limit <span class="number">50</span>, <span class="number">5</span>;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>优化前需要用到filesort排序, 将order by 字段修改为索引的列或主键后, 就不需要额外的filesort排序, 从而可以减少很多IO操作;</li>
+</ul>
+<p>上述优化存在一个问题， 当表中数据量很大时, 要扫描的行数也随之增大, 那就需要进一步优化,</p>
+<p>优化2,</p>
+<p>记录上次返回的主键, 在下次查询时使用主键过滤, 从而可以避免数据量大时扫描过多的记录;</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">dev<span class="variable">@sakila</span><span class="operator">&gt;</span>explain <span class="keyword">select</span> film_id, description <span class="keyword">from</span> film <span class="keyword">where</span> film_id <span class="operator">&gt;</span> <span class="number">55</span> <span class="keyword">and</span> film_id <span class="operator">&lt;=</span> <span class="number">60</span> <span class="keyword">order</span> <span class="keyword">by</span> film_id limit <span class="number">1</span>, <span class="number">5</span> \G</span><br><span class="line"><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span> <span class="number">1.</span> <span class="type">row</span> <span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span></span><br><span class="line">           id: <span class="number">1</span></span><br><span class="line">  select_type: SIMPLE</span><br><span class="line">        <span class="keyword">table</span>: film</span><br><span class="line">   partitions: <span class="keyword">NULL</span></span><br><span class="line">         type: <span class="keyword">range</span></span><br><span class="line">possible_keys: <span class="keyword">PRIMARY</span></span><br><span class="line">          key: <span class="keyword">PRIMARY</span></span><br><span class="line">      key_len: <span class="number">2</span></span><br><span class="line">          <span class="keyword">ref</span>: <span class="keyword">NULL</span></span><br><span class="line">         <span class="keyword">rows</span>: <span class="number">5</span></span><br><span class="line">     filtered: <span class="number">100.00</span></span><br><span class="line">        Extra: <span class="keyword">Using</span> <span class="keyword">where</span></span><br><span class="line"><span class="number">1</span> <span class="type">row</span> <span class="keyword">in</span> <span class="keyword">set</span>, <span class="number">1</span> warning (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></figure>
+<p>上述优化后, 可以看到要扫描的行数就是要查询的行数量, 从而可以避免数据量很大时要查询靠后的数据引发扫描多行的问题;</p>
+<p>当然上述优化有一个限制, 就是要求主键是连续的， 如果主键在中间是不连续的那按照上述优化, 有可能where子查询返回的条数不够要查询的条数;</p>
+<p>上述两个优化的思想就是优化过多的扫描带来的IO消耗;</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ul>
+<li>简要概述了优化的目的及方向;</li>
+<li>对慢查日志知识进行回顾并通过实例实践深入了解学习慢查日志分析来发现存在效率的SQL;</li>
+<li>对max()函数场景进行优化, 实例分析max()函数场景优化前后的执行计划;</li>
+<li>对count()函数场景进行优化, 并实例分析count()函数优化的执行计划;</li>
+<li>回顾子查询相关知识并实例分析子查询优化过程;</li>
+<li>对group by及limit查询进行实例分析优化过程, 总结出其适用的场景及使用时应注意的限制级问题;</li>
+</ul>
+  
+	</div>
+		<div style="padding: 10px 44px 30px 44px;" >
+<div style="border: 1px dashed #e0e0e0; padding: 10px 10px 10px 10px; background-color: #fffeee; background-repeat: no-repeat; background-attachment: scroll; background-position: 1% 50%; -moz-background-size: auto auto; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">
+<div style="float:left;margin-top:0px;">
+<img src="/img/weixin.jpg" width="125px" height="125px" style="border:1px solid #ccc; margin: 6px 5px 0px 0px"/>
+</div>
+<div>
+ <p style="margin-top:0px;">作者署名：<b><a target="_blank" href="http://researchlab.github.io/">朴实的一线攻城狮</a></b>
+<br />本文标题：<b><a href="/2018/10/06/mysql-13-sql-optimization/" target="_blank" title="mysql专题13 性能优化之sql语句优化">mysql专题13 性能优化之sql语句优化</a></b> 
+<br />本文出处：<b><a href="/2018/10/06/mysql-13-sql-optimization/" target="_blank" title="mysql专题13 性能优化之sql语句优化">http://researchlab.github.io/2018/10/06/mysql-13-sql-optimization/</a></b>
+<br />版权声明：本文由<b><a href="/about" target="_blank" title="Lee Hong">Lee Hong</a></b>创作和发表,采用<b>署名(BY)</b>-<b>非商业性使用(NC)</b>-<b>相同方式共享(SA)</b>国际许可协议进行许可,转载请注明作者及出处, 否则保留追究法律责任的权利。 </p>
+</div>
+</div>
+</div>
+
+   	       
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/mysql%E4%B8%93%E9%A2%98/">mysql专题</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/mysql/">mysql</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	<div class="share-jiathis">
+	  
+<div class="jiathis_style_24x24">
+	<a class="jiathis_button_weixin"></a>
+	<a class="jiathis_button_tsina"></a>
+	<a class="jiathis_button_tqq"></a>
+	<a class="jiathis_button_qzone"></a>
+    <a class="jiathis_button_googleplus"></a>
+	<a class="jiathis_button_douban"></a>
+	<a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+    var jiathis_config={
+    data_track_clickback:true,
+    sm:"copy,renren,cqq",
+    pic:"",
+    summary:"",
+    
+  </script> 
+<script type="text/javascript" src="//v3.jiathis.com/code/jia.js?uid=
+2084050" charset="utf-8"></script>      
+
+
+	 </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2018/10/06/redis-09-geohash/" title="redis专题09 geo地理位置模块">
+  <strong>上一篇：</strong><br/>
+  <span>
+  redis专题09 geo地理位置模块</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2018/10/05/mysql-12-database-physical-design/"  title="mysql专题12 数据库表物理设计系列问题">
+ <strong>下一篇：</strong><br/> 
+ <span>mysql专题12 数据库表物理设计系列问题
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+<!-- gitment评论框 start -->
+	<div id="gitment" class="ds-thread"></div>
+	<link rel="stylesheet" href="https://github.com/researchlab/gitment/blob/master/style/default.css">
+	<script src="https://github.com/researchlab/gitment/blob/master/dist/gitment.browser.js"></script>
+	<script>
+	  var gitment = new Gitment({
+	    id: 'lSat Oct 06 2018 10:01:54 GMT+0800', // 可选。建议为Sat Oct 06 2018 10:01:54 GMT+0800
+	    owner: 'researchlab', // 可以是你的GitHub用户名，也可以是github id
+	    repo: 'researchlab.github.io', //可以是你的任意一个repo，推荐使用githubpage所在的repo
+	    oauth: {
+	      client_id: 'e4971ec4c4fdbefb392f',
+	      client_secret: 'e5001b2dda2dcb9a9c66417991be57836c17a72b',
+	    },
+	  })
+	  gitment.render('gitment')
+</script>
+
+
+</div>  
+
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+<div id="asidepart">
+
+  <div class="widget tag">
+<!--<hr noshade color="#ccc">-->
+<!-- <p style="text-align:center">Mike.Lee</p> -->
+<p margin="0" style="text-align:center">
+<a class="ahref" href="http://researchlab.github.io/about/">
+<img id="aboutpic"  src="/img/qzly.png" alt="@一线攻城狮" height="200" width="200" style="box-shadow: 0px 0px 2px 2px #9edeff;border-radius: 8px;" >
+</a></p>
+<p style="text-align:center"><font size="2" color="grey">关注微信公众号 @一线攻城狮</font></p>
+<div style="display:block; margin-top:10px; padding: 0px 4px 4px 0; border-top: dashed 1px #ccc; text-align:left;"></div>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<div style="float:left;position:absolute;"><font size="2" >总访问:<span id="busuanzi_value_site_pv"></span>次</font></div>
+<div style="float:right;"><font size="2" >总访客:<span id="busuanzi_value_site_uv"></span>人</font></div>
+
+<div style="margin-top:30px; padding: 5px 4px 4px 0; border-top: dashed 1px #ccc; text-align:left;"></div>
+</div>
+
+
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/DevOps/" title="DevOps">DevOps<sup>13</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Hexo/" title="Hexo">Hexo<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/MQ/" title="MQ">MQ<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/algorithm/" title="algorithm">algorithm<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/better-coding/" title="better-coding">better-coding<sup>6</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/docker-practice/" title="docker-practice">docker-practice<sup>8</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/go-bootcamp/" title="go-bootcamp">go-bootcamp<sup>6</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/golang/" title="golang">golang<sup>23</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/java/" title="java">java<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/javascript/" title="javascript">javascript<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/k8s/" title="k8s">k8s<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/mysql专题/" title="mysql专题">mysql专题<sup>16</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/php/" title="php">php<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/redis专题/" title="redis专题">redis专题<sup>17</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/golang/" title="golang">golang<sup>24</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mysql/" title="mysql">mysql<sup>18</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/redis/" title="redis">redis<sup>17</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/docker/" title="docker">docker<sup>9</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/dp/" title="dp">dp<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/setcookie/" title="setcookie">setcookie<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/tcp/" title="tcp">tcp<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/cache/" title="cache">cache<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/concurrency/" title="concurrency">concurrency<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Hexo/" title="Hexo">Hexo<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Blog/" title="Blog">Blog<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/minikube/" title="minikube">minikube<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/cloud-computing/" title="cloud computing">cloud computing<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/getcookie/" title="getcookie">getcookie<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/rpc/" title="rpc">rpc<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/cache-invalid/" title="cache-invalid">cache-invalid<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/ticker/" title="ticker">ticker<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/vendoring/" title="vendoring">vendoring<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/godep/" title="godep">godep<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/govendor/" title="govendor">govendor<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="http://blog.csdn.net/xiaolongwang2010" target="_blank" title="小龙王2010csdn技术博客">Linux/c/c++</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  
+
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+  <iframe width="100%" height="550" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=550&fansRow=1&ptype=1&speed=0&skin=1&isTitle=1&noborder=1&isWeibo=1&isFans=1&uid=5141203275&verifier=a533edf5&dpc=1"></iframe>
+
+
+</aside>
+</div>
+
+    </div>
+    <footer><div id="footer" >
+	
+	
+	<div class="social-font" class="clearfix">
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/researchlab/lightman" target="_blank" title="lightman">lightman</a> ©2016 - 2021 
+		
+		<a href="/about" target="_blank" title="Lee Hong">Lee Hong</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+
+
+<script type="text/javascript">
+  var duoshuoQuery = {short_name:"gamedp"};
+  (function() {
+    var ds = document.createElement('script');
+    ds.type = 'text/javascript';ds.async = true;
+    ds.src = '//static.duoshuo.com/embed.js';
+    ds.charset = 'UTF-8';
+    (document.getElementsByTagName('head')[0] 
+    || document.getElementsByTagName('body')[0]).appendChild(ds);
+  })();
+</script> 
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

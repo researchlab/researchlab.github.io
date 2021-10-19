@@ -1,0 +1,722 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>一致性哈希算法总结 | 一线攻城狮</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="Lee Hong">
+    
+
+    
+    <meta name="description" content="存在一种场景, 当一个缓存服务由多个服务器组共同提供时, key应该路由到哪一个服务。这里假如采用最通用的方式取模求余: key%N(N为服务器数目), 这样做均衡性没有什么问题, 但是当服务器数目发送增加或减少时, 分配方式则变为key%(N+1)或key%(N-1)。这里将会有大量的key失效迁移, 如果后端key对应的是有状态的存储数据,那么毫无疑问,这种做法将导致服务器间大量的数据迁移,从">
+<meta property="og:type" content="article">
+<meta property="og:title" content="一致性哈希算法总结">
+<meta property="og:url" content="http://researchlab.github.io/2017/01/16/consistent-hashing-summary/index.html">
+<meta property="og:site_name" content="一线攻城狮">
+<meta property="og:description" content="存在一种场景, 当一个缓存服务由多个服务器组共同提供时, key应该路由到哪一个服务。这里假如采用最通用的方式取模求余: key%N(N为服务器数目), 这样做均衡性没有什么问题, 但是当服务器数目发送增加或减少时, 分配方式则变为key%(N+1)或key%(N-1)。这里将会有大量的key失效迁移, 如果后端key对应的是有状态的存储数据,那么毫无疑问,这种做法将导致服务器间大量的数据迁移,从">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://researchlab.github.io/2017/01/16/consistent-hashing-summary/hashring.jpg">
+<meta property="og:image" content="http://researchlab.github.io/2017/01/16/consistent-hashing-summary/object.jpg">
+<meta property="og:image" content="http://researchlab.github.io/2017/01/16/consistent-hashing-summary/cache.jpg">
+<meta property="og:image" content="http://researchlab.github.io/2017/01/16/consistent-hashing-summary/cache_object.jpg">
+<meta property="og:image" content="http://researchlab.github.io/2017/01/16/consistent-hashing-summary/remove.jpg">
+<meta property="og:image" content="http://researchlab.github.io/2017/01/16/consistent-hashing-summary/add.jpg">
+<meta property="og:image" content="http://researchlab.github.io/2017/01/16/consistent-hashing-summary/why-hash-ring.jpg">
+<meta property="og:image" content="http://researchlab.github.io/2017/01/16/consistent-hashing-summary/remove-c3.jpg">
+<meta property="og:image" content="http://researchlab.github.io/2017/01/16/consistent-hashing-summary/virtual1.jpg">
+<meta property="og:image" content="http://researchlab.github.io/2017/01/16/consistent-hashing-summary/virtual2.png">
+<meta property="article:published_time" content="2017-01-16T03:02:50.000Z">
+<meta property="article:modified_time" content="2021-10-19T02:21:45.389Z">
+<meta property="article:author" content="Lee Hong">
+<meta property="article:tag" content="golang">
+<meta property="article:tag" content="hash">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://researchlab.github.io/2017/01/16/consistent-hashing-summary/hashring.jpg">
+
+    
+    <link rel="alternative" href="/atom.xml" title="一线攻城狮" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    
+<link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="/%02.css">
+<link rel="stylesheet" href="/.css">
+
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="一线攻城狮">一线攻城狮</a></h1>
+				<h2 class="blog-motto">十年磨一剑，一步一步脚踏实地的耕种</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">首页</a></li>
+					
+						<li><a href="/archives">归档</a></li>
+					
+						<li><a href="/reading">书单</a></li>
+					
+						<li><a href="/opensource">开源</a></li>
+					
+						<li><a href="/about">关于</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:researchlab.github.io">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2017/01/16/consistent-hashing-summary/" title="一致性哈希算法总结" itemprop="url">一致性哈希算法总结</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
+		
+ <p class="article-time">
+    <time datetime="2017-01-16T03:02:50.000Z" itemprop="datePublished"> 发表于 2017-01-16</time>
+   &nbsp&nbsp热度&nbsp<span id="busuanzi_value_page_pv"></span>° 
+  </p>
+</header>
+
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="toc-number">1.</span> <span class="toc-text">应用场景</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AE%97%E6%B3%95%E5%8E%9F%E7%90%86"><span class="toc-number">2.</span> <span class="toc-text">算法原理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AE%97%E6%B3%95%E5%AE%9E%E7%8E%B0"><span class="toc-number">3.</span> <span class="toc-text">算法实现</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">4.</span> <span class="toc-text">总结</span></a></li></ol>
+		
+		</div>
+		
+		<p>存在一种场景, 当一个缓存服务由多个服务器组共同提供时, key应该路由到哪一个服务。这里假如采用最通用的方式取模求余: <code>key%N</code>(N为服务器数目), 这样做均衡性没有什么问题, 但是当服务器数目发送增加或减少时, 分配方式则变为<code>key%(N+1)</code>或<code>key%(N-1)</code>。这里将会有大量的key失效迁移, 如果后端key对应的是有状态的存储数据,那么毫无疑问,这种做法将导致服务器间大量的数据迁移,从而造成服务的不稳定。解决思路，采用一致性哈希方法可以解决此问题。 </p>
+<span id="more"></span>
+<h2 id="应用场景"><a href="#应用场景" class="headerlink" title="应用场景"></a>应用场景</h2><p>1.分布式负载均衡;<br>2.过渡平滑(如给分布式集群分发数据, 当分布式集群动态增删时,可尽量减少数据迁移,减少受影响的数据);<br>3.分布式缓存均衡(对缓存节点进行扩缩容, 原理如上述2);</p>
+<h2 id="算法原理"><a href="#算法原理" class="headerlink" title="算法原理"></a>算法原理</h2><p>一致性哈希算法在1997年由麻省理工学院提出的一种分布式哈希(DHT)实现算法，设计目标是为了解决因特网中的热点(Hot spot)问题，初衷和CARP十分类似。一致性哈希修正了CARP使用的简 单哈希算法带来的问题，使得分布式哈希(DHT)可以在P2P环境中真正得到应用。 </p>
+<p>一致性hash算法提出了在动态变化的Cache环境中，判定哈希算法好坏的四个定义:</p>
+<p>1.<code>平衡性(Balance)</code>: 平衡性是指哈希的结果能够尽可能分布到所有的缓冲中去，这样可以使得所有的缓冲空间都得到利用。很多哈希算法都能够满足这一条件。</p>
+<p>2.<code>单调性(Monotonicity)</code>: 单调性是指如果已经有一些内容通过哈希分派到了相应的缓冲中，又有新的缓冲加入到系统中。哈希的结果应能够保证原有已分配的内容可以被映射到原有的或者新的缓冲中去，而不会被映射到旧的缓冲集合中的其他缓冲区。 </p>
+<p>3.<code>分散性(Spread)</code>: 在分布式环境中，终端有可能看不到所有的缓冲，而是只能看到其中的一部分。当终端希望通过哈希过程将内容映射到缓冲上时，由于不同终端所见的缓冲范围有可能不同，从而导致哈希的结果不一致，最终的结果是相同的内容被不同的终端映射到不同的缓冲区中。这种情况显然是应该避免的，因为它导致相同内容被存储到不同缓冲中去，降低了系统存储的效率。分散性的定义就是上述情况发生的严重程度。好的哈希算法应能够尽量避免不一致的情况发生，也就是尽量降低分散性。 </p>
+<p>4.<code>负载(Load)</code>: 负载问题实际上是从另一个角度看待分散性问题。既然不同的终端可能将相同的内容映射到不同的缓冲区中，那么对于一个特定的缓冲区而言，也可能被不同的用户映射为不同 的内容。与分散性一样，这种情况也是应当避免的，因此好的哈希算法应能够尽量降低缓冲的负荷。</p>
+<p>在分布式集群中，对机器的添加删除，或者机器故障后自动脱离集群这些操作是分布式集群管理最基本的功能。如果采用常用的hash(object)%N算法，那么在有机器添加或者删除后，很多原有的数据就无法找到了，这样严重的违反了单调性原则。在移除/添加一个cache时，利用一致性哈希算法能够尽可能小的改变已存在key映射关系，尽可能的满足单调性的要求。</p>
+<p>下面就来按照5个步骤简单讲讲 consistent hashing 算法的基本原理:</p>
+<p><strong> 1 环形hash空间 </strong></p>
+<p>考虑通常的hash算法都是将value映射到一个32位的key值, 也即是0~2^32-1次方的数值空间上; 可以将这个空间想象成一个首(0)尾(2^32-1)相接的圆环, 如图1所示,</p>
+<center><img src="/2017/01/16/consistent-hashing-summary/hashring.jpg" alt=""><br>图1 环形hash空间</center>
+
+<p><strong> 2 把对象映射到hash空间 </strong></p>
+<p>接下来考虑4个对象key1~key4，通过hash函数计算出的hash值key在环上的分布如图2所示,</p>
+<p>hash(key1) = k1;<br>… …<br>hash(key4) = k4;</p>
+<center><img src="/2017/01/16/consistent-hashing-summary/object.jpg" alt="object_hash ring">图2 4个对象的key哈希值分布</center>
+
+<p><strong> 3 把cache server映射到hash空间 </strong></p>
+<p>一致性哈希算法的基本思想就是将对象和cache server都映射到同一个hash数值空间中，并且使用相同的hash算法。</p>
+<p>同样, 假设当前有3台cache server，把缓存服务器通过hash算法，加入到上述的环中。</p>
+<p>hash(cache1) = c1;<br>… …<br>hash(cache3) = c3;</p>
+<center><img src="/2017/01/16/consistent-hashing-summary/cache.jpg" alt="cache_hash ring">图3 cache server 和对象的key哈希值分布</center>
+
+<font color="red">通常cache server的hash计算, 是用cache机器的IP地址或机器名作为hash输入, 后继的实现案例中利用了cache server的IP地址作为参数因子。</font>
+
+<p><strong> 4 把对象映射到cache server上 </strong></p>
+<p>接下来就是数据如何存储到cache服务器上了，key值哈希之后的结果顺时针找上述环形hash空间中，距离自己最近的机器节点，然后将数据存储到上面， 如上图所示，k1 存储到 c3 服务器上， k4,k3存储到c1服务器上， k2存储在c2服务器上。用图表示如下：</p>
+<center><img src="/2017/01/16/consistent-hashing-summary/cache_object.jpg" alt="cache_object_hash_ring">图4 cache server 和对象的key哈希值映射</center>
+
+<p><strong> 5 考察cache server的变动 </strong><br>前面讲过，通过hash求余的方法带来的最大问题就在于不能满足单调性，当cache server有所变动时，存储在原位置上的cache数据失效了，就需要做相应的迁移, 进而对后台服务器造成巨大的冲击，现在就来分析一致性哈希算法,</p>
+<p>5.1 移除cache server </p>
+<p>假设cache3服务器宕机，这时候需要从集群中将其摘除。那么，之前存储在c3上的k1，将会顺时针寻找距离它最近的一个节点，也就是c1节点，这样，k1就会存储到c1上了，看一看下下面的图，比较清晰。</p>
+<center><img src="/2017/01/16/consistent-hashing-summary/remove.jpg" alt="移除cache3">图4 Cache server 3被移除后的cache server映射</center>
+
+<font color="red">摘除c3节点之后，只影响到了原先存储再c3上的k1，而k3、k4、k2都没有受到影响，也就意味着解决了最开始的解决方案（hash(key)%N）中可能带来的雪崩问题。</font>
+
+<p>5.2 添加cache server</p>
+<p>新增C4节点之后，原先存储到C1的k4，迁移到了C4，分担了C1上的存储压力和流量压力。</p>
+<center><img src="/2017/01/16/consistent-hashing-summary/add.jpg" alt="新增C4节点">图5 添加cache server 4后的映射关系</center>
+
+<p>为什么需要想象成环形？</p>
+<p>为了保证节点宕机摘除之后，原先存储在当前节点的key能找到可存储的位置。举个极端的例子，在不是环状hash空间下，刚好缓存的服务器处于0这个位置，那么0之后是没有任何节点信息的，那么当缓存服务器摘除的时候，以前存储在这台机器上的key便找不到顺时针距离它最近的一个节点了。但如果是环形空间，0之后的最近的一个节点信息有可能是2^32-1这个位置，他可以找到0之后的节点。如下图描述可能清晰一点。</p>
+<center><img src="/2017/01/16/consistent-hashing-summary/why-hash-ring.jpg" alt="why hash ring">图6 why hash环</center>
+
+<p>为什么是2^32个桶空间？<br>桶空间的大小根据选用的hash算法来定, 一般情况下, hash的返回结果为32位的整型数据, 无符号的整型的最大值是2^32-1, 最小值是0, 一共2^32个数字, 所有, 桶空间也就是2^32个了; </p>
+<p>上面的简单的一致性hash的方案在某些情况下但依旧存在问题：一个节点宕机之后，数据需要落到距离他最近的节点上，会导致下个节点的压力突然增大，可能导致雪崩，整个服务挂掉。如下图所示，</p>
+<center><img src="/2017/01/16/consistent-hashing-summary/remove-c3.jpg" alt="摘除c3缓存服务器">图7 摘除c3服务器</center>
+
+<p>当节点C3摘除之后，之前再C3上的k1就要迁移到C1上，这时候带来了两部分的压力:</p>
+<pre><code>1)、之前请求到C3上的流量转嫁到了C1上,会导致C1的流量增加，如果之前C3上存在热点数据，则可能导致C1扛不住压力挂掉。
+
+2)、之前存储到C3上的key值转义到了C1，会导致C1的内容占用量增加，可能存在瓶颈。
+</code></pre><p>当上面两个压力发生的时候，可能导致C1节点也宕机了。那么压力便会传递到C2上，又出现了类似滚雪球的情况，服务压力出现了雪崩，导致整个服务不可用。</p>
+<p>那怎么解决这个问题呢？ 引入虚拟节点, </p>
+<p><strong> 6 虚拟节点 </strong></p>
+<p>考量Hash算法的另一个指标是<code>平衡性(Balance)</code>，定义如下:<br><strong> 平衡性 </strong> 是指哈希的结果能够尽可能分布到所有的缓冲中去，这样可以使得所有的缓冲空间都得到利用, hash算法并不是保证绝对的平衡，如果cache server较少的话，对象并不能被均匀的映射到cache server上，比如在上面的例子中，仅部署cache server 1 和 cache server 3的情况下，在4个对象中，cache server 1仅存储了key1，而cache server 3则存储了key2, key3和key4; 分布是很不均衡的。</p>
+<p>如上描述，一个节点宕机之后可能会引起下个节点的存储及流量压力变大，这一点违背了最开始提到的四个原则中的 平衡性， 节点宕机之后，流量及内存的分配方式打破了原有的平衡。</p>
+<p>虚拟节点，从名字可以看出来，这个节点是个虚拟的，每个实际节点对应多个虚拟节点。比较专业的说法如下：</p>
+<p>“虚拟节点”（ virtual node ）是实际节点（机器）在 hash 空间的复制品（ replica ），一实际个节点（机器）对应了若干个“虚拟节点”，这个对应个数也成为“复制个数”，“虚拟节点”在 hash 空间中以hash值排列。</p>
+<p>依旧用图片来解释，假设存在以下的真实节点和虚拟节点的对应关系。</p>
+<p>Visual100—&gt; Real1</p>
+<p>Visual101—&gt; Real1</p>
+<p>Visual200—&gt; Real2</p>
+<p>Visual201—&gt; Real2</p>
+<p>Visual300—&gt; Real3</p>
+<p>Visual301—&gt; Real3</p>
+<p>同样的，hash之后的结果如下：</p>
+<p>hash(Visual100)—&gt; V100  —&gt; Real1</p>
+<p>hash(Visual101)—&gt; V101  —&gt; Real1</p>
+<p>hash(Visual200)—&gt; V200  —&gt; Real2</p>
+<p>hash(Visual201)—&gt; V201  —&gt; Real2</p>
+<p>hash(Visual300)—&gt; V300  —&gt; Real3</p>
+<p>hash(Visual301)—&gt; V301  —&gt; Real3</p>
+<p>key值的hash结果如上，这里暂时不写了。</p>
+<p>如图解释：</p>
+<center><img src="/2017/01/16/consistent-hashing-summary/virtual1.jpg" alt="虚拟节点">图8 虚拟节点</center>
+
+<p>和之前介绍的不添加虚拟节点的类似，主要聊下如果宕机之后的情况。 </p>
+<p>假设Real1机器宕机，则会发生一下情况。</p>
+<p>1、原先存储在虚拟节点V100上的k1数据将迁移到V301上，也就意味着迁移到了Real3机器上。 </p>
+<p>2、原先存储再虚拟节点V101上的k4数据将迁移到V200上，也就意味着迁移到了Real2机器上。</p>
+<p>结果如下图：</p>
+<center><img src="/2017/01/16/consistent-hashing-summary/virtual2.png" alt="虚拟节点">图8 虚拟节点</center>
+
+<p>这个就解决之前的问题了，某个节点宕机之后，存储及流量压力并没有全部转移到某台机器上，而是分散到了多台节点上。解决了节点宕机可能存在的雪崩问题。</p>
+<p>当物理节点多的时候，虚拟节点多，这个的雪崩可能就越小。</p>
+<h2 id="算法实现"><a href="#算法实现" class="headerlink" title="算法实现"></a>算法实现</h2><p>上面详细讲述了一致性哈希算法的原理，下面通过golang语言来实现一致性哈希算法，具体实现思想:<br>1.通过一致性哈希函数将这些cache server映射到一个哈希环上，并将这个哈希环按升序排序;<br>2.将待写入到cache server中的key-value值对象，可以用这个对象的key作为因子用上述同一个一致性哈希函数计算出一个hash值，然后按顺时针在哈希环上找到第一个大于这个hash值的cache server hash值;<br>3.通过找到的这个cache server hash值可以找到对应的cache server;<br>4.然后将上述的key-value对象存入到这个cache server中。 </p>
+<p>具体实现过程大致可以分为一下几个步骤:</p>
+<p>1.定义cache server节点实体, 用于计算cache server节点hash值的字符串;<br>2.定义一致性哈希结构，用于构建cache server的哈希环;<br>3.定义添加哈希节点的函数;<br>4.定义获取哈希节点的函数;<br>5.定义删除哈希节点的函数。</p>
+<p>1.定义cache server节点实体,<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> Node <span class="keyword">struct</span> &#123;</span><br><span class="line">  Id       <span class="keyword">int</span></span><br><span class="line">  Ip       <span class="keyword">string</span></span><br><span class="line">  Port     <span class="keyword">int</span></span><br><span class="line">  HostName <span class="keyword">string</span></span><br><span class="line">  Weight   <span class="keyword">int</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>上面定义了一个cache server node的实体, 作用是用于计算代表cache server node的唯一hash值, 在本程序中将采用缓存服务器的Id, IP, Weight以及虚拟节点Id作为计算字符串，说明如下:</p>
+<p><code>Id</code>: 缓存服务器节点id<br><code>Ip</code>: 缓存服务器ip<br><code>Port</code>: 缓存服务器port<br><code>HostName</code>: 缓存服务器主机名(unique)<br><code>Weight</code>: 缓存服务器权重</p>
+<p>2.定义一致性哈希结构，</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> Consistent <span class="keyword">struct</span> &#123;</span><br><span class="line">  Nodes     <span class="keyword">map</span>[<span class="keyword">uint32</span>]Node</span><br><span class="line">  numReps   <span class="keyword">int</span></span><br><span class="line">  Resources <span class="keyword">map</span>[<span class="keyword">int</span>]<span class="keyword">bool</span></span><br><span class="line">  ring      HashRing</span><br><span class="line">  sync.RWMutex</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>上面定义了一致性哈希结构，说明如下,</p>
+<p><code>Nodes</code>: 用于保存所有的hash-cache server node 映射关系<br><code>numReps</code>: 复制个数, 用于设置每个物理节点所虚拟的个数，即每个物理节点最后虚拟出多少个节点个数<br><code>Resources</code>: 用于标识当前物理节点是否已经被映射过了<br><code>ring</code>: 是一个切片数组， 用于保存所有的虚拟节点，即上面<code>Nodes</code>中的所有<code>key</code>值，可以通过这个<code>key</code>值到<code>Nodes</code>中去取对应的cache server信息，这个切片数组是排序过的，可以想象成一个环，及所谓的hash 环。<br><code>sync.RWMutex</code>: 读写锁，全部数据操作一致性。</p>
+<p>3.定义添加哈希节点函数, 用于构建哈希环<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *Consistent)</span> <span class="title">Add</span><span class="params">(node *Node)</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">	c.Lock()</span><br><span class="line">	<span class="keyword">defer</span> c.Unlock()</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> _, ok := c.Resources[node.Id]; ok &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	count := c.numReps * node.Weight</span><br><span class="line">	<span class="keyword">for</span> i := <span class="number">0</span>; i &lt; count; i++ &#123;</span><br><span class="line">		str := c.joinStr(i, node)</span><br><span class="line">		c.Nodes[c.hashStr(str)] = *(node)</span><br><span class="line">	&#125;</span><br><span class="line">	c.Resources[node.Id] = <span class="literal">true</span></span><br><span class="line">	c.sortHashRing()</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>上述添加哈希节点过程其实就是在计算一个一个cache server node的hash值，并构建排序过的哈希环， 大致分为以下几步:<br>1.检查当前物理节点是否已经被映射到哈希环上了，没有则进入下一步，<br>2.根据权重值计算出本物理节点的最终虚拟节点个数，然后分别计算对应虚拟节点的hash值,保存到<code>Nodes</code>结构中，<br>3.构建哈希环并排序，</p>
+<p>4.定义获取哈希节点的函数, 用于将待存储的热点值存入到对应的cache server上,<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *Consistent)</span> <span class="title">Get</span><span class="params">(key <span class="keyword">string</span>)</span> <span class="title">Node</span></span> &#123;</span><br><span class="line">	c.RLock()</span><br><span class="line">	<span class="keyword">defer</span> c.RUnlock()</span><br><span class="line"></span><br><span class="line">	hash := c.hashStr(key)</span><br><span class="line">	hit_index := c.search(hash)</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> c.Nodes[c.ring[hit_index]]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>大致过程，<br>1.计算对象key的hash值，<br>2.根据上面计算的hash值，用二分搜索法到哈希环搜索自上述hash值起离它最近的一个cache server node hash值节点key，<br>3.根据查找到的cache server节点key, 返回<code>Nodes</code>结构中存储的cache sever信息，</p>
+<p>5.定义删除哈希节点的函数, 当某个cache server 挂掉之后，用于删除这个节点(一般情况下不建议删除节点，而是将当前坏节点上的数据迁移到好的节点上)<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *Consistent)</span> <span class="title">Remove</span><span class="params">(node *Node)</span></span> &#123;</span><br><span class="line">	c.Lock()</span><br><span class="line">	<span class="keyword">defer</span> c.Unlock()</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> _, ok := c.Resources[node.Id]; !ok &#123;</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="built_in">delete</span>(c.Resources, node.Id)</span><br><span class="line"></span><br><span class="line">	count := c.numReps * node.Weight</span><br><span class="line">	<span class="keyword">for</span> i := <span class="number">0</span>; i &lt; count; i++ &#123;</span><br><span class="line">		str := c.joinStr(i, node)</span><br><span class="line">		<span class="built_in">delete</span>(c.Nodes, c.hashStr(str))</span><br><span class="line">	&#125;</span><br><span class="line">	c.sortHashRing()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>大致过程，<br>1.判断待删除物理节点是否存在哈希环中，存在则删除，并进入下一步，<br>2.删除改物理节点映射在哈希环中的所有虚拟节点,<br>3.重新排序哈希环,</p>
+<p>至此一致性哈希算法基本实现， 详细代码请参见 <a target="_blank" rel="noopener" href="https://github.com/researchlab/experiments/tree/master/consistent_hash">https://github.com/researchlab/experiments/tree/master/consistent_hash</a></p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ul>
+<li>详细阐述了一致性哈希算法实现原理及适合场景</li>
+<li>采用slice + sort 方式构建哈希环，并用golang实现了一致性哈希算法</li>
+<li>可以尝试采用红黑树的方式来构建哈希环，在性能上可能更好，有待进一步尝试 </li>
+</ul>
+  
+	</div>
+		<div style="padding: 10px 44px 30px 44px;" >
+<div style="border: 1px dashed #e0e0e0; padding: 10px 10px 10px 10px; background-color: #fffeee; background-repeat: no-repeat; background-attachment: scroll; background-position: 1% 50%; -moz-background-size: auto auto; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">
+<div style="float:left;margin-top:0px;">
+<img src="/img/weixin.jpg" width="125px" height="125px" style="border:1px solid #ccc; margin: 6px 5px 0px 0px"/>
+</div>
+<div>
+ <p style="margin-top:0px;">作者署名：<b><a target="_blank" href="http://researchlab.github.io/">朴实的一线攻城狮</a></b>
+<br />本文标题：<b><a href="/2017/01/16/consistent-hashing-summary/" target="_blank" title="一致性哈希算法总结">一致性哈希算法总结</a></b> 
+<br />本文出处：<b><a href="/2017/01/16/consistent-hashing-summary/" target="_blank" title="一致性哈希算法总结">http://researchlab.github.io/2017/01/16/consistent-hashing-summary/</a></b>
+<br />版权声明：本文由<b><a href="/about" target="_blank" title="Lee Hong">Lee Hong</a></b>创作和发表,采用<b>署名(BY)</b>-<b>非商业性使用(NC)</b>-<b>相同方式共享(SA)</b>国际许可协议进行许可,转载请注明作者及出处, 否则保留追究法律责任的权利。 </p>
+</div>
+</div>
+</div>
+
+   	       
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/algorithm/">algorithm</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/golang/">golang</a><a href="/tags/hash/">hash</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	<div class="share-jiathis">
+	  
+<div class="jiathis_style_24x24">
+	<a class="jiathis_button_weixin"></a>
+	<a class="jiathis_button_tsina"></a>
+	<a class="jiathis_button_tqq"></a>
+	<a class="jiathis_button_qzone"></a>
+    <a class="jiathis_button_googleplus"></a>
+	<a class="jiathis_button_douban"></a>
+	<a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+    var jiathis_config={
+    data_track_clickback:true,
+    sm:"copy,renren,cqq",
+    pic:"",
+    summary:"",
+    
+  </script> 
+<script type="text/javascript" src="//v3.jiathis.com/code/jia.js?uid=
+2084050" charset="utf-8"></script>      
+
+
+	 </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2017/01/17/http-cache/" title="http 缓存知识总结">
+  <strong>上一篇：</strong><br/>
+  <span>
+  http 缓存知识总结</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2017/01/14/too-many-open-files-solution/"  title="linux too many open files 问题解决总结">
+ <strong>下一篇：</strong><br/> 
+ <span>linux too many open files 问题解决总结
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+<!-- gitment评论框 start -->
+	<div id="gitment" class="ds-thread"></div>
+	<link rel="stylesheet" href="https://github.com/researchlab/gitment/blob/master/style/default.css">
+	<script src="https://github.com/researchlab/gitment/blob/master/dist/gitment.browser.js"></script>
+	<script>
+	  var gitment = new Gitment({
+	    id: 'lMon Jan 16 2017 11:02:50 GMT+0800', // 可选。建议为Mon Jan 16 2017 11:02:50 GMT+0800
+	    owner: 'researchlab', // 可以是你的GitHub用户名，也可以是github id
+	    repo: 'researchlab.github.io', //可以是你的任意一个repo，推荐使用githubpage所在的repo
+	    oauth: {
+	      client_id: 'e4971ec4c4fdbefb392f',
+	      client_secret: 'e5001b2dda2dcb9a9c66417991be57836c17a72b',
+	    },
+	  })
+	  gitment.render('gitment')
+</script>
+
+
+</div>  
+
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+<div id="asidepart">
+
+  <div class="widget tag">
+<!--<hr noshade color="#ccc">-->
+<!-- <p style="text-align:center">Mike.Lee</p> -->
+<p margin="0" style="text-align:center">
+<a class="ahref" href="http://researchlab.github.io/about/">
+<img id="aboutpic"  src="/img/qzly.png" alt="@一线攻城狮" height="200" width="200" style="box-shadow: 0px 0px 2px 2px #9edeff;border-radius: 8px;" >
+</a></p>
+<p style="text-align:center"><font size="2" color="grey">关注微信公众号 @一线攻城狮</font></p>
+<div style="display:block; margin-top:10px; padding: 0px 4px 4px 0; border-top: dashed 1px #ccc; text-align:left;"></div>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<div style="float:left;position:absolute;"><font size="2" >总访问:<span id="busuanzi_value_site_pv"></span>次</font></div>
+<div style="float:right;"><font size="2" >总访客:<span id="busuanzi_value_site_uv"></span>人</font></div>
+
+<div style="margin-top:30px; padding: 5px 4px 4px 0; border-top: dashed 1px #ccc; text-align:left;"></div>
+</div>
+
+
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/DevOps/" title="DevOps">DevOps<sup>13</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Hexo/" title="Hexo">Hexo<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/MQ/" title="MQ">MQ<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/algorithm/" title="algorithm">algorithm<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/better-coding/" title="better-coding">better-coding<sup>6</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/docker-practice/" title="docker-practice">docker-practice<sup>8</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/go-bootcamp/" title="go-bootcamp">go-bootcamp<sup>6</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/golang/" title="golang">golang<sup>23</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/java/" title="java">java<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/javascript/" title="javascript">javascript<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/k8s/" title="k8s">k8s<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/mysql专题/" title="mysql专题">mysql专题<sup>16</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/php/" title="php">php<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/redis专题/" title="redis专题">redis专题<sup>17</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/golang/" title="golang">golang<sup>24</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mysql/" title="mysql">mysql<sup>18</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/redis/" title="redis">redis<sup>17</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/docker/" title="docker">docker<sup>9</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/dp/" title="dp">dp<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/setcookie/" title="setcookie">setcookie<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/tcp/" title="tcp">tcp<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/cache/" title="cache">cache<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/concurrency/" title="concurrency">concurrency<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Hexo/" title="Hexo">Hexo<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Blog/" title="Blog">Blog<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/minikube/" title="minikube">minikube<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/cloud-computing/" title="cloud computing">cloud computing<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/getcookie/" title="getcookie">getcookie<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/rpc/" title="rpc">rpc<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/cache-invalid/" title="cache-invalid">cache-invalid<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/ticker/" title="ticker">ticker<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/vendoring/" title="vendoring">vendoring<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/godep/" title="godep">godep<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/govendor/" title="govendor">govendor<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="http://blog.csdn.net/xiaolongwang2010" target="_blank" title="小龙王2010csdn技术博客">Linux/c/c++</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  
+
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+  <iframe width="100%" height="550" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=550&fansRow=1&ptype=1&speed=0&skin=1&isTitle=1&noborder=1&isWeibo=1&isFans=1&uid=5141203275&verifier=a533edf5&dpc=1"></iframe>
+
+
+</aside>
+</div>
+
+    </div>
+    <footer><div id="footer" >
+	
+	
+	<div class="social-font" class="clearfix">
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/researchlab/lightman" target="_blank" title="lightman">lightman</a> ©2016 - 2021 
+		
+		<a href="/about" target="_blank" title="Lee Hong">Lee Hong</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+
+
+<script type="text/javascript">
+  var duoshuoQuery = {short_name:"gamedp"};
+  (function() {
+    var ds = document.createElement('script');
+    ds.type = 'text/javascript';ds.async = true;
+    ds.src = '//static.duoshuo.com/embed.js';
+    ds.charset = 'UTF-8';
+    (document.getElementsByTagName('head')[0] 
+    || document.getElementsByTagName('body')[0]).appendChild(ds);
+  })();
+</script> 
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

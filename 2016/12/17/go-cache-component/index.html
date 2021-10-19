@@ -1,0 +1,674 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>go实现缓存组件 | 一线攻城狮</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="Lee Hong">
+    
+
+    
+    <meta name="description" content="总结用golang从分析，设计到实现一个可用的缓存组件。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="go实现缓存组件">
+<meta property="og:url" content="http://researchlab.github.io/2016/12/17/go-cache-component/index.html">
+<meta property="og:site_name" content="一线攻城狮">
+<meta property="og:description" content="总结用golang从分析，设计到实现一个可用的缓存组件。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2016-12-17T03:32:51.000Z">
+<meta property="article:modified_time" content="2021-10-19T02:21:45.419Z">
+<meta property="article:author" content="Lee Hong">
+<meta property="article:tag" content="cache">
+<meta name="twitter:card" content="summary">
+
+    
+    <link rel="alternative" href="/atom.xml" title="一线攻城狮" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    
+<link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="/%02.css">
+<link rel="stylesheet" href="/.css">
+
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="一线攻城狮">一线攻城狮</a></h1>
+				<h2 class="blog-motto">十年磨一剑，一步一步脚踏实地的耕种</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">首页</a></li>
+					
+						<li><a href="/archives">归档</a></li>
+					
+						<li><a href="/reading">书单</a></li>
+					
+						<li><a href="/opensource">开源</a></li>
+					
+						<li><a href="/about">关于</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:researchlab.github.io">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2016/12/17/go-cache-component/" title="go实现缓存组件" itemprop="url">go实现缓存组件</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
+		
+ <p class="article-time">
+    <time datetime="2016-12-17T03:32:51.000Z" itemprop="datePublished"> 发表于 2016-12-17</time>
+   &nbsp&nbsp热度&nbsp<span id="busuanzi_value_page_pv"></span>° 
+  </p>
+</header>
+
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BC%93%E5%AD%98"><span class="toc-number">1.</span> <span class="toc-text">缓存</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BC%93%E5%AD%98%E7%BB%84%E4%BB%B6%E8%AE%BE%E8%AE%A1"><span class="toc-number">2.</span> <span class="toc-text">缓存组件设计</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BC%93%E5%AD%98%E7%BB%84%E4%BB%B6%E5%AE%9E%E7%8E%B0"><span class="toc-number">3.</span> <span class="toc-text">缓存组件实现</span></a></li></ol>
+		
+		</div>
+		
+		<p>总结用golang从分析，设计到实现一个可用的缓存组件。<br><span id="more"></span></p>
+<h2 id="缓存"><a href="#缓存" class="headerlink" title="缓存"></a>缓存</h2><ul>
+<li><p>为什么要设计缓存<br>  电脑的内存是以系统总线的时钟频率工作的，这个频率通常也就是CPU的外频(对于雷鸟、毒龙系列的处理器，由于在设计采用了DDR技术，CPU工作的外频为系统总线频率的两倍)。但是，CPU的工作频率(主频)是外频与倍频因子的乘积。这样一来，内存的工作频率就远低于CPU的工作频率了,造成的直接结果是：CPU在执行完一条指令后，常常需要”等待”一些时间才能再次访问内存，极大降了CPU工作效率。在这样一种情况下，Cache就应运而生,Cache是一种特殊的存储器，它由Cache 存储部件和Cache控制部件组成。Cache 存储部件一般采用与CPU同类型的半导体存储器件，存取速度比内存快几倍甚至十几倍。<br>  缓存(Cache)在计算机硬件中普遍存在。比如在CPU中就有一级缓存，二级缓存，甚至三级缓存。缓存的工作原理一般是CPU需要读取数据时，会首先从缓存中查找需要的数据，如果找到了就直接进行处理，如果没有找到则从内存中读取数据。缓存不仅仅存在于硬件中，在各种软件系统中也处处可见。比如在Web系统中，缓存存在于服务器端，客户端或者代理服务器中。广泛使用的CDN网络，也可以看作一个巨大的缓存系统。缓存在Web系统中的使用有很多好处，不仅可以减少网络流量，降低客户访问延迟，还可以减轻服务器负载。</p>
+</li>
+<li><p>缓存如何工作<br> 单颗CPU运行程序是一条指令一条指令地执行的，而且指令地址往往是连续的，意思就是说CPU在访问内存时，在较短的一段时间内往往集中于某个局部，这时候可能会碰到一些需要反复调用的子程序。电脑在工作时，把这些活跃的子程序存入比内存快得多的Cache中。CPU在访问内存时，首先判断所要访问的内容是否在Cache中，如果在，就称为<code>命中</code>，此时CPU直接从Cache中调用该内容；否则，就称为<code>不命中</code>，CPU只好去内存中调用所需的子程序或指令了。CPU不但可以直接从Cache中读出内容，也可以直接往其中写入内容。由于Cache的存取速率相当快，使得CPU的利用率大大提高，进而使整个系统的性能得以提升。<br> CPU通过地址映射Cache和主存关联起来，从而确定将要访问的主存的内容是否在缓存中，所谓映象问题是指如何确定Cache中的内容是主存中的哪一部分的拷贝，即必须应用某种函数把主存地址映象到Cache中定位，也称地址映象。当信息按这种方式装入Cache中后，执行程序时，应将主存地址变换为Cache地址，这个变换过程叫作地址变换。</p>
+<ul>
+<li>地址映象方式通常采用<code>直接映象</code>、<code>全相联映象</code>、<code>组相联映象</code>三种<ol>
+<li><code>直接映像</code><br>是指每个主存页只能复制到某一固定的Cache页中。直接映像的规律是：将主存的2048页分为128组，每组有16页，分别与Cache的16页直接对应，即主存的第0页、第16页、第32页……只能映像到Cache的第0页。</li>
+<li><code>全相联映像</code><br>全相联映像是指主存的每一页可以映像可以映像到Cache的任意一页。</li>
+<li><code>组相联映像</code><br>组相联映像是直接映像与全相联映像的折中方案，它将Cache分为若干组，如8组；每组若干页，如2页；同时将主存分为若干组，如255组；每组内的页数与Cache的组数相同，如8页。组相联映像的规律是主存中的各页与Cache的组号有固定的映像关系，但可自由映像到对应的Cache组中的任意一页。即组间采用直接映像，而组内的页为全相联映像。</li>
+</ol>
+</li>
+</ul>
+</li>
+<li><p>缓存更新机制<br>  当CPU访问Cache未命中时，应从主存中读取信息，同时写入Cache。若Cache未满，则直接写入；若Cache已满，则需要进行替换。替换机构由硬件组成，并按替换算法进行设计，其作用是指出替换的页号。常用的替换算法有<code>先进先出算法(FIFO)</code>和<code>近期最少使用算法(LRU)</code>。</p>
+</li>
+<li><p>缓存读/写操作</p>
+</li>
+</ul>
+<ol>
+<li><code>读操作</code><br>访存时，将主存地址同时送主存和Cache，一则启动对主存的读操作，二则在Cache中按映像方式从中获取Cache地址，并将主存标记与Cache标记比较：若相同，则访问命中，从Cache中读取数据。因为Cache速度比主存速度快，所以不等主存读操作结束，即可继续下一次访存操作；若不相同，则访问未命中，则从主存中读取数据，并考虑是否按某种替换算法更新Cache某页的内容。</li>
+<li><code>写操作</code><br> 将数据写入主存有两种方法，<code>写回法</code>和<code>写直达法</code>。<br> <code>写回法</code>: 信息暂时只写入Cache，并用标志加以注明，直到该页内容需从Cache中替换出来时，才一次写入主存。优点是操作速度快，缺点是写回主存前，主存中没有这些内容，与Cache不一致，易造成错误。<br> <code>写直达法</code>: 信息在写入Cahce时也同时写入主存。优点是主存与Cache始终保持一致，但速度慢。</li>
+</ol>
+<p>目前已经存在很多高性能的缓存系统，比如Memcache，Redis等，尤其是Redis，现已经广泛用于各种Web服务中。既然有了这些功能完善的缓存系统，那为什么我们还需要自己实现一个缓存系统呢？这么做主要有两个原因，第一，通过动手实现我们可以了解缓存系统的工作原理，这也是老掉牙的理由了。第二，Redis 之类的缓存系统都是独立存在的，如果只是开发一个简单的应用还需要单独使用Redis服务器，难免会过于复杂。这时候如果有一个功能完善的软件包实现了这些功能，只需要引入这个软件包就能实现缓存功能，而不需要单独使用 Redis 服务器，就最好不过了。</p>
+<h2 id="缓存组件设计"><a href="#缓存组件设计" class="headerlink" title="缓存组件设计"></a>缓存组件设计</h2><ul>
+<li><p>缓存系统中，缓存的数据一般都存储在内存中，所以我们设计的缓存系统要以某一种方式管理内存中的数据。既然缓存数据是存储在内存中的，那如果系统停机，那数据岂不就丢失了吗？其实一般情况下，缓存系统还支持将内存中的数据写入到文件中，在系统再次启动时，再将文件中的数据加载到内存中，这样一来就算系统停机，缓存数据也不会丢失。</p>
+</li>
+<li><p>同时缓存系统还提供过期数据清理机制，也就是说缓存的数据项是有生存时间的，如果数据项过期，则数据项会从内存中被删除，这样一来热数据会一直存在，而冷数据则会被删除，也没有必要进行缓存。</p>
+</li>
+<li><p>缓存系统还需要对外提供操作的接口，这样系统的其他组件才能使用缓存。一般情况下，缓存系统需要支持<code>CRUD操作</code>，即创建(添加)，读取，更新和删除操作。</p>
+<p>通过以上分析，可以总结出缓存系统需要有以下功能：</p>
+<ol>
+<li>缓存数据的存储;</li>
+<li>过期数据项管理;</li>
+<li>内存数据导出/导入;</li>
+<li>提供CRUD接口. </li>
+</ol>
+</li>
+</ul>
+<h2 id="缓存组件实现"><a href="#缓存组件实现" class="headerlink" title="缓存组件实现"></a>缓存组件实现</h2><p>缓存数据需要存储在内存中，这样才可以被快速访问。那使用什么数据结构来存储数据项呢？一般情况下，我们使用哈希表来存储数据项，这样访问数据项将获得更好的性能。在golang语言中内建类型map已经实现了哈希表，所以可以直接将缓存数据项存储在map中。同时由于缓存系统需要支持过期数据清理，所以缓存数据项应该带有生存时间，这说明需要将缓存数据进行封装后，保存到缓存系统中。这样我们就需要先实现缓存数据项，其实现的代码如下：</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> Item <span class="keyword">struct</span> &#123;</span><br><span class="line">    Object     <span class="keyword">interface</span>&#123;&#125; <span class="comment">// 真正的数据项</span></span><br><span class="line">    Expiration <span class="keyword">int64</span>       <span class="comment">// 生存时间</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 判断数据项是否已经过期</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(item Item)</span> <span class="title">Expired</span><span class="params">()</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">    <span class="keyword">if</span> item.Expiration == <span class="number">0</span> &#123;</span><br><span class="line">	   <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> time.Now().UnixNano() &gt; item.Expiration</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>在<code>Item</code>结构中， <ul>
+<li><code>Object</code>: 用于存储任意类型的数据对象;</li>
+<li><code>Expiration</code>: 字段则存储了该数据项的过期时间;</li>
+<li><code>Expired()</code>方法: 用于检测当前缓存数据项是否过期，返回<code>false</code>表示过期, 其中数据项的过期时间，是<code>Unix时间戳</code>，单位是纳秒; 用<code>time</code>包实现一个<code>ticker</code>定期检查每一项数据项，如果发现数据项的过期时间小于当前时间，则调用删除方法将数据项从缓存系统中删除.</li>
+</ul>
+</li>
+</ul>
+<p>现在来设计实现缓存组件的结构， 代码如下:<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> (</span><br><span class="line">    <span class="comment">// 没有过期时间标志</span></span><br><span class="line">    NoExpiration time.Duration = <span class="number">-1</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 默认的过期时间</span></span><br><span class="line">    DefaultExpiration time.Duration = <span class="number">0</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> Cache <span class="keyword">struct</span> &#123;</span><br><span class="line">    defaultExpiration time.Duration</span><br><span class="line">    items             <span class="keyword">map</span>[<span class="keyword">string</span>]Item <span class="comment">// 缓存数据项存储在 map 中</span></span><br><span class="line">    mu                sync.RWMutex    <span class="comment">// 读写锁</span></span><br><span class="line">    gcInterval        time.Duration   <span class="comment">// 过期数据项清理周期</span></span><br><span class="line">    stopGc            <span class="keyword">chan</span> <span class="keyword">bool</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 过期缓存数据项清理</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *Cache)</span> <span class="title">gcLoop</span><span class="params">()</span></span> &#123;</span><br><span class="line">    ticker := time.NewTicker(c.gcInterval)</span><br><span class="line">    <span class="keyword">for</span> &#123;</span><br><span class="line">        <span class="keyword">select</span> &#123;</span><br><span class="line">        <span class="keyword">case</span> &lt;-ticker.C:</span><br><span class="line">            c.DeleteExpired()</span><br><span class="line">        <span class="keyword">case</span> &lt;-c.stopGc:</span><br><span class="line">            ticker.Stop()</span><br><span class="line">            <span class="keyword">return</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">/ 删除缓存数据项</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *Cache)</span> <span class="title">del</span><span class="params">(k <span class="keyword">string</span>)</span></span> &#123;</span><br><span class="line">    <span class="built_in">delete</span>(c.items, k)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 删除过期数据项</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *Cache)</span> <span class="title">DeleteExpired</span><span class="params">()</span></span> &#123;</span><br><span class="line">    now := time.Now().UnixNano()</span><br><span class="line">    c.mu.Lock()</span><br><span class="line">    <span class="keyword">defer</span> c.mu.Unlock()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> k, v := <span class="keyword">range</span> c.items &#123;</span><br><span class="line">        <span class="keyword">if</span> v.Expiration &gt; <span class="number">0</span> &amp;&amp; now &gt; v.Expiration &#123;</span><br><span class="line">            c.del(k)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<ul>
+<li>缓存组件结构<code>Cache</code>，<ul>
+<li><code>NoExpiration</code>: 表示数据项永远不过期;</li>
+<li><code>DefaultExpiration</code>: 后者表示数据项默认过期时间;</li>
+<li><code>items</code>: 是一个<code>map</code>，用于存储缓存数据项;</li>
+<li><code>mu</code>: 读写锁， 为保证缓存读写数据一致性，在相应操作前应加锁;</li>
+<li><code>gcInterval</code>: 表示隔多久清理一次过期缓存数据;</li>
+<li><code>gcLoop()方法</code>: 该方通过time.Ticker 定期执行<code>DeleteExpired()</code>方法，从而清理过期的数据项;通过监听c.stopGc通道，在必要的时候安全结束<code>gcLoop()</code>; </li>
+</ul>
+</li>
+</ul>
+<p>通过实现<code>Set</code>和<code>Add</code>方法向缓存系统中添加数据， 通过实现<code>Get</code>方法获取缓存数据,实现如下:<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 设置缓存数据项，如果数据项存在则覆盖</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *Cache)</span> <span class="title">Set</span><span class="params">(k <span class="keyword">string</span>, v <span class="keyword">interface</span>&#123;&#125;, d time.Duration)</span></span> &#123;</span><br><span class="line">	<span class="comment">//已省略添加过期时间逻辑</span></span><br><span class="line">    c.mu.Lock()</span><br><span class="line">    <span class="keyword">defer</span> c.mu.Unlock()</span><br><span class="line">    c.items[k] = Item&#123;</span><br><span class="line">        Object:     v,</span><br><span class="line">        Expiration: e,</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 设置数据项, 没有锁操作</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *Cache)</span> <span class="title">set</span><span class="params">(k <span class="keyword">string</span>, v <span class="keyword">interface</span>&#123;&#125;, d time.Duration)</span></span> &#123;</span><br><span class="line">	<span class="comment">// to-do    </span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 获取数据项，如果找到数据项，还需要判断数据项是否已经过期</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *Cache)</span> <span class="title">get</span><span class="params">(k <span class="keyword">string</span>)</span> <span class="params">(<span class="keyword">interface</span>&#123;&#125;, <span class="keyword">bool</span>)</span></span> &#123;</span><br><span class="line">	<span class="comment">// to-do</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 添加数据项，如果数据项已经存在，则返回错误</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *Cache)</span> <span class="title">Add</span><span class="params">(k <span class="keyword">string</span>, v <span class="keyword">interface</span>&#123;&#125;, d time.Duration)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">	<span class="comment">// to-do</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 获取数据项</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *Cache)</span> <span class="title">Get</span><span class="params">(k <span class="keyword">string</span>)</span> <span class="params">(<span class="keyword">interface</span>&#123;&#125;, <span class="keyword">bool</span>)</span></span> &#123;</span><br><span class="line">	<span class="comment">// to-do</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<ul>
+<li>Set()与Add()的主要区别在于Set()方法将数据添加到缓存系统中时，如果数据项已经存在则会覆盖，而后者如果发现数据项已经存在则会发生报错，这样能避免缓存被错误的覆盖;</li>
+<li>通过Set(), Add()和Get()来写入/读取缓存数据时，应注意加锁保证数据操作的一致性。</li>
+</ul>
+<p>除了向缓存系统中写入/读取缓存数据以外，还需要实现更新和删除缓存数据， 实现如下:<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 替换一个存在的数据项</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *Cache)</span> <span class="title">Replace</span><span class="params">(k <span class="keyword">string</span>, v <span class="keyword">interface</span>&#123;&#125;, d time.Duration)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">    c.mu.Lock()</span><br><span class="line">    _, found := c.get(k)</span><br><span class="line">    <span class="keyword">if</span> !found &#123;</span><br><span class="line">        c.mu.Unlock()</span><br><span class="line">        <span class="keyword">return</span> fmt.Errorf(<span class="string">&quot;Item %s doesn&#x27;t exist&quot;</span>, k)</span><br><span class="line">    &#125;</span><br><span class="line">    c.set(k, v, d)</span><br><span class="line">    c.mu.Unlock()</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 删除一个数据项</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *Cache)</span> <span class="title">Delete</span><span class="params">(k <span class="keyword">string</span>)</span></span> &#123;</span><br><span class="line">    c.mu.Lock()</span><br><span class="line">    c.del(k)</span><br><span class="line">    c.mu.Unlock()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>为了是缓存数据在重启程序或系统后依然存在，则应将缓存数据持久化处理，本文方案提供将缓存数据写入本地文件的持久化操作，具体实现如下:<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 将缓存数据项写入到 io.Writer 中</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *Cache)</span> <span class="title">Save</span><span class="params">(w io.Writer)</span> <span class="params">(err error)</span></span> &#123;</span><br><span class="line">    enc := gob.NewEncoder(w)</span><br><span class="line">    <span class="keyword">defer</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="keyword">if</span> x := <span class="built_in">recover</span>(); x != <span class="literal">nil</span> &#123;</span><br><span class="line">            err = fmt.Errorf(<span class="string">&quot;Error registering item types with Gob library&quot;</span>)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;()</span><br><span class="line">    c.mu.RLock()</span><br><span class="line">    <span class="keyword">defer</span> c.mu.RUnlock()</span><br><span class="line">    <span class="keyword">for</span> _, v := <span class="keyword">range</span> c.items &#123;</span><br><span class="line">        gob.Register(v.Object)</span><br><span class="line">    &#125;</span><br><span class="line">    err = enc.Encode(&amp;c.items)</span><br><span class="line">    <span class="keyword">return</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 保存数据项到文件中</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *Cache)</span> <span class="title">SaveToFile</span><span class="params">(file <span class="keyword">string</span>)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">    f, err := os.Create(file)</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> err</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> err = c.Save(f); err != <span class="literal">nil</span> &#123;</span><br><span class="line">        f.Close()</span><br><span class="line">        <span class="keyword">return</span> err</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> f.Close()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 从 io.Reader 中读取数据项</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *Cache)</span> <span class="title">Load</span><span class="params">(r io.Reader)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">    dec := gob.NewDecoder(r)</span><br><span class="line">    items := <span class="keyword">map</span>[<span class="keyword">string</span>]Item&#123;&#125;</span><br><span class="line">    err := dec.Decode(&amp;items)</span><br><span class="line">    <span class="keyword">if</span> err == <span class="literal">nil</span> &#123;</span><br><span class="line">        c.mu.Lock()</span><br><span class="line">        <span class="keyword">defer</span> c.mu.Unlock()</span><br><span class="line">        <span class="keyword">for</span> k, v := <span class="keyword">range</span> items &#123;</span><br><span class="line">            ov, found := c.items[k]</span><br><span class="line">            <span class="keyword">if</span> !found || ov.Expired() &#123;</span><br><span class="line">                c.items[k] = v</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> err</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 从文件中加载缓存数据项</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *Cache)</span> <span class="title">LoadFile</span><span class="params">(file <span class="keyword">string</span>)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">    f, err := os.Open(file)</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> err</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> err = c.Load(f); err != <span class="literal">nil</span> &#123;</span><br><span class="line">        f.Close()</span><br><span class="line">        <span class="keyword">return</span> err</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> f.Close()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<ul>
+<li><code>Save()</code>通过<code>gob</code>模块将二进制缓存数据转码写入到实现了io.Writer 接口的对象中;</li>
+<li><code>Load()</code>则从<code>io.Reader</code>中读取二进制数据，然后通过<code>gob</code>模块将数据进行反序列化;</li>
+<li><code>SaveToFile</code>和<code>LoadFile</code>则向指定的文件中写入和读取缓存数据.</li>
+</ul>
+<p>至此整个缓存系统基本实现，支持数据对象添加，删除，替换，和查询操作，同时还支持过期数据的删除。<br><a target="_blank" rel="noopener" href="https://github.com/comlibs/cache">github-完整代码示例</a></p>
+  
+	</div>
+		<div style="padding: 10px 44px 30px 44px;" >
+<div style="border: 1px dashed #e0e0e0; padding: 10px 10px 10px 10px; background-color: #fffeee; background-repeat: no-repeat; background-attachment: scroll; background-position: 1% 50%; -moz-background-size: auto auto; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">
+<div style="float:left;margin-top:0px;">
+<img src="/img/weixin.jpg" width="125px" height="125px" style="border:1px solid #ccc; margin: 6px 5px 0px 0px"/>
+</div>
+<div>
+ <p style="margin-top:0px;">作者署名：<b><a target="_blank" href="http://researchlab.github.io/">朴实的一线攻城狮</a></b>
+<br />本文标题：<b><a href="/2016/12/17/go-cache-component/" target="_blank" title="go实现缓存组件">go实现缓存组件</a></b> 
+<br />本文出处：<b><a href="/2016/12/17/go-cache-component/" target="_blank" title="go实现缓存组件">http://researchlab.github.io/2016/12/17/go-cache-component/</a></b>
+<br />版权声明：本文由<b><a href="/about" target="_blank" title="Lee Hong">Lee Hong</a></b>创作和发表,采用<b>署名(BY)</b>-<b>非商业性使用(NC)</b>-<b>相同方式共享(SA)</b>国际许可协议进行许可,转载请注明作者及出处, 否则保留追究法律责任的权利。 </p>
+</div>
+</div>
+</div>
+
+   	       
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/golang/">golang</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/cache/">cache</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	<div class="share-jiathis">
+	  
+<div class="jiathis_style_24x24">
+	<a class="jiathis_button_weixin"></a>
+	<a class="jiathis_button_tsina"></a>
+	<a class="jiathis_button_tqq"></a>
+	<a class="jiathis_button_qzone"></a>
+    <a class="jiathis_button_googleplus"></a>
+	<a class="jiathis_button_douban"></a>
+	<a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+    var jiathis_config={
+    data_track_clickback:true,
+    sm:"copy,renren,cqq",
+    pic:"",
+    summary:"",
+    
+  </script> 
+<script type="text/javascript" src="//v3.jiathis.com/code/jia.js?uid=
+2084050" charset="utf-8"></script>      
+
+
+	 </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2017/01/06/go-printf-format/" title="总结printf 格式化标识">
+  <strong>上一篇：</strong><br/>
+  <span>
+  总结printf 格式化标识</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2016/11/23/uml-symbol-desc/"  title="UML类图中符号定义,作用及区别总结">
+ <strong>下一篇：</strong><br/> 
+ <span>UML类图中符号定义,作用及区别总结
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+<!-- gitment评论框 start -->
+	<div id="gitment" class="ds-thread"></div>
+	<link rel="stylesheet" href="https://github.com/researchlab/gitment/blob/master/style/default.css">
+	<script src="https://github.com/researchlab/gitment/blob/master/dist/gitment.browser.js"></script>
+	<script>
+	  var gitment = new Gitment({
+	    id: 'lSat Dec 17 2016 11:32:51 GMT+0800', // 可选。建议为Sat Dec 17 2016 11:32:51 GMT+0800
+	    owner: 'researchlab', // 可以是你的GitHub用户名，也可以是github id
+	    repo: 'researchlab.github.io', //可以是你的任意一个repo，推荐使用githubpage所在的repo
+	    oauth: {
+	      client_id: 'e4971ec4c4fdbefb392f',
+	      client_secret: 'e5001b2dda2dcb9a9c66417991be57836c17a72b',
+	    },
+	  })
+	  gitment.render('gitment')
+</script>
+
+
+</div>  
+
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+<div id="asidepart">
+
+  <div class="widget tag">
+<!--<hr noshade color="#ccc">-->
+<!-- <p style="text-align:center">Mike.Lee</p> -->
+<p margin="0" style="text-align:center">
+<a class="ahref" href="http://researchlab.github.io/about/">
+<img id="aboutpic"  src="/img/qzly.png" alt="@一线攻城狮" height="200" width="200" style="box-shadow: 0px 0px 2px 2px #9edeff;border-radius: 8px;" >
+</a></p>
+<p style="text-align:center"><font size="2" color="grey">关注微信公众号 @一线攻城狮</font></p>
+<div style="display:block; margin-top:10px; padding: 0px 4px 4px 0; border-top: dashed 1px #ccc; text-align:left;"></div>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<div style="float:left;position:absolute;"><font size="2" >总访问:<span id="busuanzi_value_site_pv"></span>次</font></div>
+<div style="float:right;"><font size="2" >总访客:<span id="busuanzi_value_site_uv"></span>人</font></div>
+
+<div style="margin-top:30px; padding: 5px 4px 4px 0; border-top: dashed 1px #ccc; text-align:left;"></div>
+</div>
+
+
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/DevOps/" title="DevOps">DevOps<sup>13</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Hexo/" title="Hexo">Hexo<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/MQ/" title="MQ">MQ<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/algorithm/" title="algorithm">algorithm<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/better-coding/" title="better-coding">better-coding<sup>6</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/docker-practice/" title="docker-practice">docker-practice<sup>8</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/go-bootcamp/" title="go-bootcamp">go-bootcamp<sup>6</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/golang/" title="golang">golang<sup>23</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/java/" title="java">java<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/javascript/" title="javascript">javascript<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/k8s/" title="k8s">k8s<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/mysql专题/" title="mysql专题">mysql专题<sup>16</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/php/" title="php">php<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/redis专题/" title="redis专题">redis专题<sup>17</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/golang/" title="golang">golang<sup>24</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mysql/" title="mysql">mysql<sup>18</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/redis/" title="redis">redis<sup>17</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/docker/" title="docker">docker<sup>9</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/dp/" title="dp">dp<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/setcookie/" title="setcookie">setcookie<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/tcp/" title="tcp">tcp<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/cache/" title="cache">cache<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/concurrency/" title="concurrency">concurrency<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Hexo/" title="Hexo">Hexo<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Blog/" title="Blog">Blog<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/minikube/" title="minikube">minikube<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/cloud-computing/" title="cloud computing">cloud computing<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/getcookie/" title="getcookie">getcookie<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/rpc/" title="rpc">rpc<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/cache-invalid/" title="cache-invalid">cache-invalid<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/ticker/" title="ticker">ticker<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/vendoring/" title="vendoring">vendoring<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/godep/" title="godep">godep<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/govendor/" title="govendor">govendor<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="http://blog.csdn.net/xiaolongwang2010" target="_blank" title="小龙王2010csdn技术博客">Linux/c/c++</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  
+
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+  <iframe width="100%" height="550" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=550&fansRow=1&ptype=1&speed=0&skin=1&isTitle=1&noborder=1&isWeibo=1&isFans=1&uid=5141203275&verifier=a533edf5&dpc=1"></iframe>
+
+
+</aside>
+</div>
+
+    </div>
+    <footer><div id="footer" >
+	
+	
+	<div class="social-font" class="clearfix">
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/researchlab/lightman" target="_blank" title="lightman">lightman</a> ©2016 - 2021 
+		
+		<a href="/about" target="_blank" title="Lee Hong">Lee Hong</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+
+
+<script type="text/javascript">
+  var duoshuoQuery = {short_name:"gamedp"};
+  (function() {
+    var ds = document.createElement('script');
+    ds.type = 'text/javascript';ds.async = true;
+    ds.src = '//static.duoshuo.com/embed.js';
+    ds.charset = 'UTF-8';
+    (document.getElementsByTagName('head')[0] 
+    || document.getElementsByTagName('body')[0]).appendChild(ds);
+  })();
+</script> 
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

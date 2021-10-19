@@ -1,0 +1,670 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>redis专题06 布隆过滤器 | 一线攻城狮</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="Lee Hong">
+    
+
+    
+    <meta name="description" content="灰常方便用redis的HyperLogLog来进行数值估数, 可以解决很多精确度不高的统计需求。 但是如果想知道某一个值是不是已经在HyperLogLog结构里面了，它就无能为力了，它只提供了pfadd, pfcount和pfmerge等方法，没有提供pfcontains这样类似的方法。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="redis专题06 布隆过滤器">
+<meta property="og:url" content="http://researchlab.github.io/2018/10/03/redis-06-bloom-filter/index.html">
+<meta property="og:site_name" content="一线攻城狮">
+<meta property="og:description" content="灰常方便用redis的HyperLogLog来进行数值估数, 可以解决很多精确度不高的统计需求。 但是如果想知道某一个值是不是已经在HyperLogLog结构里面了，它就无能为力了，它只提供了pfadd, pfcount和pfmerge等方法，没有提供pfcontains这样类似的方法。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2018-10-03T08:57:48.000Z">
+<meta property="article:modified_time" content="2021-10-19T02:21:45.463Z">
+<meta property="article:author" content="Lee Hong">
+<meta property="article:tag" content="redis">
+<meta name="twitter:card" content="summary">
+
+    
+    <link rel="alternative" href="/atom.xml" title="一线攻城狮" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    
+<link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="/%02.css">
+<link rel="stylesheet" href="/.css">
+
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="一线攻城狮">一线攻城狮</a></h1>
+				<h2 class="blog-motto">十年磨一剑，一步一步脚踏实地的耕种</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">首页</a></li>
+					
+						<li><a href="/archives">归档</a></li>
+					
+						<li><a href="/reading">书单</a></li>
+					
+						<li><a href="/opensource">开源</a></li>
+					
+						<li><a href="/about">关于</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:researchlab.github.io">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2018/10/03/redis-06-bloom-filter/" title="redis专题06 布隆过滤器" itemprop="url">redis专题06 布隆过滤器</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Lee Hong" target="_blank" itemprop="author">Lee Hong</a>
+		
+ <p class="article-time">
+    <time datetime="2018-10-03T08:57:48.000Z" itemprop="datePublished"> 发表于 2018-10-03</time>
+   &nbsp&nbsp热度&nbsp<span id="busuanzi_value_page_pv"></span>° 
+  </p>
+</header>
+
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%B8%83%E9%9A%86%E8%BF%87%E6%BB%A4%E5%99%A8%E6%98%AF%E4%BB%80%E4%B9%88"><span class="toc-number">1.</span> <span class="toc-text">布隆过滤器是什么?</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#redis%E4%B8%AD%E5%B8%83%E9%9A%86%E8%BF%87%E6%BB%A4%E5%99%A8%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8"><span class="toc-number">2.</span> <span class="toc-text">redis中布隆过滤器基本使用</span></a><ol class="toc-child"><li class="toc-item toc-level-6"><a class="toc-link" href="#%E7%8E%AF%E5%A2%83%E5%87%86%E5%A4%87"><span class="toc-number">2.1.</span> <span class="toc-text">环境准备</span></a></li></ol></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%B8%83%E9%9A%86%E8%BF%87%E6%BB%A4%E5%99%A8%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86"><span class="toc-number">3.</span> <span class="toc-text">布隆过滤器实现原理</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%8D%A0%E7%94%A8%E7%A9%BA%E9%97%B4%E4%BC%B0%E8%AE%A1"><span class="toc-number">4.</span> <span class="toc-text">占用空间估计</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="toc-number">5.</span> <span class="toc-text">应用场景</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">6.</span> <span class="toc-text">总结</span></a></li></ol>
+		
+		</div>
+		
+		<p>灰常方便用<code>redis</code>的<code>HyperLogLog</code>来<strong>进行数值估数</strong>, <u><strong>可以解决很多精确度不高的统计需求。</strong></u></p>
+<p>但是如果想知道某一个值是不是已经在<code>HyperLogLog</code>结构里面了，它就无能为力了，它只提供了<code>pfadd</code>, <code>pfcount</code>和<code>pfmerge</code>等方法，没有提供<code>pfcontains</code>这样类似的方法。<br><span id="more"></span></p>
+<p>讲个使用场景，比如我们在使用新闻客户端看新闻时，它会给我们不停地推荐新的内容，它每次推荐时要去重，去掉那些已经看过的内容。问题来了，新闻客户端推荐系统如何实现推送去重的？</p>
+<p>你会想到服务器记录了用户看过的所有历史记录，当推荐系统推荐新闻时会从每个用户的历史记录里进行筛选，过滤掉那些已经存在的记录。问题是当用户量很大，每个用户看过的新闻又很多的情况下，这种方式，推荐系统的去重工作在性能上跟的上么？</p>
+<p>实际上，如果历史记录存储在关系数据库里，去重就需要频繁地对数据库进行<code>exists</code>查询，当系统并发量很高时，数据库是很难扛住压力的。</p>
+<p>你可能又想到了缓存，但是如此多的历史记录全部缓存起来，那得浪费多大存储空间啊？而且这个存储空间是随着时间线性增长，你撑得住一个月，你能撑得住几年么？但是不缓存的话，性能又跟不上，这该怎么办？</p>
+<p>这时，<font color="red"><strong><code>布隆过滤器(Bloom Filter)</code>闪亮登场了，它就是专门用来解决这种去重问题的。它在起到去重的同时，在空间上还能节省 90%`以上，只是稍微有那么点不精确，也就是有一定的误判概率。</strong></font></p>
+<blockquote>
+<p>数据量小时， 可以用<code>redis</code>提供的集合<code>set</code>去重;</p>
+</blockquote>
+<blockquote>
+<p>当数据量很大，且没有很严格的精度要求时， 就可以用<code>redis</code>提供的布隆过滤器来去重，而且还能极大的节省空间, 所以在存储空间上相比<code>set</code>集合优势十分明显;</p>
+</blockquote>
+<h5 id="布隆过滤器是什么"><a href="#布隆过滤器是什么" class="headerlink" title="布隆过滤器是什么?"></a>布隆过滤器是什么?</h5><p>布隆过滤器可以理解为一个不怎么精确的<code>set</code>结构，当你使用它的<code>contains</code>方法判断某个对象是否存在时，它可能会误判。但是布隆过滤器也不是特别不精确，只要参数设置的合理，它的精确度可以控制的相对足够精确，只会有小小的误判概率。</p>
+<blockquote>
+<p>当布隆过滤器说某个值存在时，这个值可能不存在；<br>当它说不存在时，那就肯定不存在。打个比方，当它说不认识你时，肯定就不认识；当它说见过你时，可能根本就没见过面，不过因为你的脸跟它认识的人中某脸比较相似 (某些熟脸的系数组合)，所以误判以前见过你。</p>
+</blockquote>
+<p>套在上面的使用场景中，布隆过滤器能准确过滤掉那些已经看过的内容，那些没有看过的新内容，它也会过滤掉极小一部分 (误判)，但是绝大多数新内容它都能准确识别。这样就可以完全保证推荐给用户的内容都是无重复的。</p>
+<h5 id="redis中布隆过滤器基本使用"><a href="#redis中布隆过滤器基本使用" class="headerlink" title="redis中布隆过滤器基本使用"></a>redis中布隆过滤器基本使用</h5><h6 id="环境准备"><a href="#环境准备" class="headerlink" title="环境准备"></a>环境准备</h6><p><code>redis</code>官方提供的布隆过滤器到了<code>redis4.0</code>提供了插件功能之后才正式登场。布隆过滤器作为一个插件加载到<code>Redis Server</code>中，给<code>Redis</code>提供了强大的布隆去重功能。<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">➜  02 docker exec -it myredis redis-cli --version</span><br><span class="line">redis-cli 4.0.11</span><br><span class="line">➜  02 docker pull redislabs/rebloom</span><br><span class="line">➜  02 docker run -itd --name redisbloom -p6378:6379 redislabs/rebloom</span><br><span class="line">➜  02 docker exec -it redisbloom redis-cli</span><br><span class="line">127.0.0.1:6379&gt;</span><br></pre></td></tr></table></figure><br>布隆过滤器有二个基本指令，<code>bf.add</code>添加元素，<code>bf.exists</code>查询元素是否存在，它的用法和<code>set</code>集合的<code>sadd</code>和 <code>sismember</code>差不多。注意<code>bf.add</code>只能一次添加一个元素，如果想要一次添加多个，就需要用到<code>bf.madd</code>指令。同样如果需要一次查询多个元素是否存在，就需要用到<code>bf.mexists</code>指令。<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; bf.add visitor user1</span><br><span class="line">(integer) 1</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 添加的元素如果原来不存在 则返回1， 否则返回0</span></span><br><span class="line">127.0.0.1:6379&gt; bf.add visitor user1</span><br><span class="line">(integer) 0</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">#</span><span class="bash"> bf.madd 返回值为数组</span></span><br><span class="line">127.0.0.1:6379&gt; bf.madd visitor user2 user3</span><br><span class="line">1) (integer) 1</span><br><span class="line">2) (integer) 1</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">#</span><span class="bash"> bf.exists 如果存在返回1， 否则返回0;</span></span><br><span class="line">127.0.0.1:6379&gt; bf.exists visitor user1</span><br><span class="line">(integer) 1</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">#</span><span class="bash">bf.mexists 返回一个数组， 1表示存在， 0表示不存在;</span></span><br><span class="line">127.0.0.1:6379&gt; bf.mexists visitor user1 user2 user3</span><br><span class="line">1) (integer) 1</span><br><span class="line">2) (integer) 1</span><br><span class="line">3) (integer) 1</span><br><span class="line">127.0.0.1:6379&gt;</span><br></pre></td></tr></table></figure></p>
+<p><code>布隆过滤器</code>判断元素是否存在时，存在一定的误差， 可以通过调节<code>布隆过滤器</code>参数来降低误差值， 在没有设置误差参数值时，<code>redis</code>会启用布隆过滤器的默认参数，它在第一次<code>add</code>的时候自动创建。用户可以在<code>add</code>之前使用<code>bf.reserve</code>指令显式自定义布隆过滤器参数值。如果对应的<code>key</code>已经存在，<code>bf.reserve</code>会报错。<code>bf.reserve</code>有三个参数，分别是<code>key</code>, <code>error_rate</code>和<code>initial_size</code>。错误率越低，需要的空间越大。<code>initial_size</code>参数表示预计放入的元素数量，当实际数量超出这个数值时，误判率会上升。所以需要提前设置一个较大的数值避免超出导致误判率升高。</p>
+<blockquote>
+<p>默认的<code>error_rate</code>是<code>0.01</code>，默认的<code>initial_size</code>是<code>100</code>。</p>
+</blockquote>
+<blockquote>
+<p>布隆过滤器的<code>initial_size</code>估计的过大，会浪费存储空间，估计的过小，就会影响准确率，用户在使用之前一定要尽可能地精确估计好元素数量，还需要加上一定的冗余空间以避免实际元素可能会意外高出估计值很多。</p>
+</blockquote>
+<blockquote>
+<p>布隆过滤器的<code>error_rate</code>越小，需要的存储空间就越大，对于不需要过于精确的场合，<code>error_rate</code>设置稍大一点也无伤大雅。比如在新闻去重上而言，误判率高一点只会让小部分文章不能让合适的人看到，文章的整体阅读量不会因为这点误判率就带来巨大的改变。</p>
+</blockquote>
+<h5 id="布隆过滤器实现原理"><a href="#布隆过滤器实现原理" class="headerlink" title="布隆过滤器实现原理"></a>布隆过滤器实现原理</h5><p>每个<code>布隆过滤器</code>对应到<code>redis</code>的数据结构里面就是一个大型的<code>位数组</code>和几个不一样的<code>无偏hash函数</code>。</p>
+<blockquote>
+<p><code>无偏</code>就是能够把元素的<code>hash</code>值算得比较均匀。</p>
+</blockquote>
+<p>向<code>布隆过滤器</code>中添加<code>key</code>时，会使用多个<code>hash</code>函数对<code>key</code>进行<code>hash</code>算得一个<code>整数索引值</code>然后对位数组长度进行取模运算得到一个位置，每个<code>hash</code>函数都会算得一个不同的位置。再把位数组的这几个位置都置为<code>1</code>就完成了<code>add</code>操作。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">       key1     key2</span><br><span class="line">       /  |    /  \</span><br><span class="line">      /   |   /    \</span><br><span class="line">     /    |  /      \</span><br><span class="line">0 0 1 0 0 1  1 0 0 0 1 0 0 0</span><br></pre></td></tr></table></figure>
+<p>向<code>布隆过滤器</code>询问<code>key</code>是否存在时，跟<code>add</code>一样，也会把<code>hash</code>的几个位置都算出来，看看位数组中这几个位置是否都为<code>1</code>，只要有一个位为<code>0</code>，那么说明布隆过滤器中这个<code>key</code>不存在。如果都是<code>1</code>，这并不能说明这个<code>key</code>就一定存在，只是极有可能存在，因为这些位被置为<code>1</code>可能是因为其它的<code>key</code>存在所致。如果这个位数组比较稀疏，判断正确的概率就会很大，如果这个位数组比较拥挤，判断正确的概率就会降低。</p>
+<p>使用时不要让实际元素远大于初始化大小，当实际元素开始超出初始化大小时，应该对<code>布隆过滤器</code>进行重建，重新分配一个<code>size</code>更大的过滤器，再将所有的历史元素批量<code>add</code>进去 (这就要求我们在其它的存储器中记录所有的历史元素)。因为<code>error_rate</code>不会因为数量超出就急剧增加，这就给我们重建过滤器提供了较为宽松的时间。</p>
+<h5 id="占用空间估计"><a href="#占用空间估计" class="headerlink" title="占用空间估计"></a>占用空间估计</h5><p><code>布隆过滤器</code>有两个参数，第一个是预计元素的数量<code>n</code>，第二个是错误率<code>f</code>。公式根据这两个输入得到两个输出，第一个输出是<code>位数组</code>的长度<code>l</code>，也就是需要的存储空间大小<code>(bit)</code>，第二个输出是<code>hash</code>函数的最佳数量<code>k</code>。<code>hash</code>函数的数量也会直接影响到错误率，最佳的数量会有最低的错误率。<code>布隆过滤器</code>的空间占用有一个简单的计算公式，<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">k=0.7*(l/n)  # 约等于</span><br><span class="line">f=0.6185^(l/n)  # ^ 表示次方计算，也就是 math.pow</span><br></pre></td></tr></table></figure></p>
+<p>从公式中可以看出</p>
+<p>位数组相对越长<code>(l/n)</code>，错误率<code>f</code>越低，这个和直观上理解是一致的<br>位数组相对越长<code>(l/n)</code>，hash<code>函数需要的最佳数量也越多，影响计算效率
+当一个元素平均需要</code>1<code>个字节</code>(8bit)<code>的指纹空间时</code>(l/n=8)<code>，错误率大约为</code>2%`</p>
+<blockquote>
+<p>错误率为<code>10%</code>，一个元素需要的平均指纹空间为<code>4.792</code>个<code>bit</code>，大约为<code>5bit</code><br>错误率为<code>1%</code>，一个元素需要的平均指纹空间为<code>9.585</code>个<code>bit</code>，大约为<code>10bit</code><br>错误率为<code>0.1%</code>，一个元素需要的平均指纹空间为<code>14.377</code>个 bit，大约为<code>15bit</code></p>
+</blockquote>
+<p>你也许会想，如果一个元素需要占据<code>15</code>个<code>bit</code>，那相对<code>set</code>集合的空间优势是不是就没有那么明显了？</p>
+<blockquote>
+<p><u><strong>这里需要明确的是，<code>set</code>中会存储每个元素的内容，而<code>布隆过滤器</code>仅仅存储元素的指纹。元素的内容大小就是字符串的长度，它一般会有多个字节，甚至是几十个上百个字节，每个元素本身还需要一个指针被<code>set</code>集合来引用，这个指针又会占去<code>4</code>个字节或<code>8</code>个字节，取决于系统是 32bit 还是 64bit。而指纹空间只有接近<code>2</code>个字节，所以布隆过滤器的空间优势还是非常明显的。</strong></u></p>
+</blockquote>
+<p>当实际元素超出预计元素时，错误率会有多大变化，它会急剧上升么，还是平缓地上升，这就需要另外一个公式，引入参数<code>t</code>表示实际元素和预计元素的倍数<code>t</code><br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">f=(1-0.5^t)^k  # 极限近似，k 是 hash 函数的最佳数量</span><br></pre></td></tr></table></figure></p>
+<p>当<code>t</code>增大时，错误率，<code>f</code>也会跟着增大，分别选择错误率为<code>10%,1%,0.1%</code>的<code>k</code>值，实验得知</p>
+<blockquote>
+<p>错误率为<code>10%</code>时，倍数比为<code>2</code>时，错误率就会升至接近<code>40%</code>，这个就比较危险了<br>错误率为<code>1%</code>时，倍数比为<code>2</code>时，错误率升至<code>15%</code>，也挺可怕的<br>错误率为<code>0.1%</code>，倍数比为<code>2</code>时，错误率升至<code>5%</code>，也比较悬了</p>
+</blockquote>
+<h5 id="应用场景"><a href="#应用场景" class="headerlink" title="应用场景"></a>应用场景</h5><blockquote>
+<p>在爬虫系统中，我们需要对<code>URL</code>进行去重，已经爬过的网页就可以不用爬了。但是<code>URL</code>太多了，几千万几个亿，如果用一个集合装下这些<code>URL</code>地址那是非常浪费空间的。这时候就可以考虑使用布隆过滤器。它可以大幅降低去重存储消耗，只不过也会使得爬虫系统错过少量的页面。</p>
+</blockquote>
+<blockquote>
+<p>布隆过滤器在<code>NoSQL</code>数据库领域使用非常广泛，我们平时用到的<code>HBase</code>、<code>Cassandra</code>还有<code>LevelDB</code>、<code>RocksDB</code>内部都有布隆过滤器结构，布隆过滤器可以显著降低数据库的<code>IO</code>请求数量。当用户来查询某个<code>row</code>时，可以先通过内存中的布隆过滤器过滤掉大量不存在的<code>row</code>请求，然后再去磁盘进行查询。</p>
+</blockquote>
+<blockquote>
+<p>邮箱系统的垃圾邮件过滤功能也普遍用到了布隆过滤器，因为用了这个过滤器，所以平时也会遇到某些正常的邮件被放进了垃圾邮件目录中，这个就是误判所致，概率很低。</p>
+</blockquote>
+<h5 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h5><ul>
+<li><code>布隆过滤</code>（Bloom Filter）是由布隆（Burton Howard Bloom）在1970年提出的。<u>它实际上是由一个很长的二进制向量和一系列随机映射函数组成，布隆过滤器可以用于检索一个元素是否在一个集合中</u>。本文引入了其基本原理，并给出实例分析;</li>
+<li>它的优点是<code>空间效率和查询时间</code>都远远超过一般的算法，布隆过滤器存储空间和插入/查询时间都是常数。另外, Hash 函数相互之间没有关系，方便由硬件并行实现。布隆过滤器不需要存储元素本身，在某些对保密要求非常严格的场合有优势。</li>
+<li><p>缺点是有一定的误识别率（假正例False positives，即Bloom Filter报告某一元素存在于某集合中，但是实际上该元素并不在集合中）和删除困难，但是没有识别错误的情形（即假反例False negatives，如果某个元素确实没有在该集合中，那么Bloom Filter 是不会报告该元素存在于集合中的，所以不会漏报）。</p>
+</li>
+<li><p>目前我们知道布隆过滤器可以支持<code>add</code>和<code>isExist</code>操作，那么<code>delete</code>操作可以么，很难实现， 如位数组中的<code>bit</code>位 被两个值共同覆盖的话，一旦你删除其中一个值而将其置位<code>0</code>，那么下次判断另一个值是否存在的话，会直接返回<code>false</code>，而实际上你并没有删除它。如何解决这个问题，答案是<code>计数删除</code>。但是计数删除需要存储一个数值，而不是原先的<code>bit</code>位，会增大占用的内存大小。这样的话，增加一个值就是将对应索引槽上存储的值加一，删除则是减一，判断是否存在则是看值是否大于0。</p>
+</li>
+</ul>
+  
+	</div>
+		<div style="padding: 10px 44px 30px 44px;" >
+<div style="border: 1px dashed #e0e0e0; padding: 10px 10px 10px 10px; background-color: #fffeee; background-repeat: no-repeat; background-attachment: scroll; background-position: 1% 50%; -moz-background-size: auto auto; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">
+<div style="float:left;margin-top:0px;">
+<img src="/img/weixin.jpg" width="125px" height="125px" style="border:1px solid #ccc; margin: 6px 5px 0px 0px"/>
+</div>
+<div>
+ <p style="margin-top:0px;">作者署名：<b><a target="_blank" href="http://researchlab.github.io/">朴实的一线攻城狮</a></b>
+<br />本文标题：<b><a href="/2018/10/03/redis-06-bloom-filter/" target="_blank" title="redis专题06 布隆过滤器">redis专题06 布隆过滤器</a></b> 
+<br />本文出处：<b><a href="/2018/10/03/redis-06-bloom-filter/" target="_blank" title="redis专题06 布隆过滤器">http://researchlab.github.io/2018/10/03/redis-06-bloom-filter/</a></b>
+<br />版权声明：本文由<b><a href="/about" target="_blank" title="Lee Hong">Lee Hong</a></b>创作和发表,采用<b>署名(BY)</b>-<b>非商业性使用(NC)</b>-<b>相同方式共享(SA)</b>国际许可协议进行许可,转载请注明作者及出处, 否则保留追究法律责任的权利。 </p>
+</div>
+</div>
+</div>
+
+   	       
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/redis%E4%B8%93%E9%A2%98/">redis专题</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/redis/">redis</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	<div class="share-jiathis">
+	  
+<div class="jiathis_style_24x24">
+	<a class="jiathis_button_weixin"></a>
+	<a class="jiathis_button_tsina"></a>
+	<a class="jiathis_button_tqq"></a>
+	<a class="jiathis_button_qzone"></a>
+    <a class="jiathis_button_googleplus"></a>
+	<a class="jiathis_button_douban"></a>
+	<a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+    var jiathis_config={
+    data_track_clickback:true,
+    sm:"copy,renren,cqq",
+    pic:"",
+    summary:"",
+    
+  </script> 
+<script type="text/javascript" src="//v3.jiathis.com/code/jia.js?uid=
+2084050" charset="utf-8"></script>      
+
+
+	 </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2018/10/04/mysql-11-database-logic-design/" title="mysql专题11 数据库逻辑设计">
+  <strong>上一篇：</strong><br/>
+  <span>
+  mysql专题11 数据库逻辑设计</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2018/10/03/mysql-10-storage-procedure-and-engine-summary/"  title="mysql专题10 存储过程及存储引擎">
+ <strong>下一篇：</strong><br/> 
+ <span>mysql专题10 存储过程及存储引擎
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+<!-- gitment评论框 start -->
+	<div id="gitment" class="ds-thread"></div>
+	<link rel="stylesheet" href="https://github.com/researchlab/gitment/blob/master/style/default.css">
+	<script src="https://github.com/researchlab/gitment/blob/master/dist/gitment.browser.js"></script>
+	<script>
+	  var gitment = new Gitment({
+	    id: 'lWed Oct 03 2018 16:57:48 GMT+0800', // 可选。建议为Wed Oct 03 2018 16:57:48 GMT+0800
+	    owner: 'researchlab', // 可以是你的GitHub用户名，也可以是github id
+	    repo: 'researchlab.github.io', //可以是你的任意一个repo，推荐使用githubpage所在的repo
+	    oauth: {
+	      client_id: 'e4971ec4c4fdbefb392f',
+	      client_secret: 'e5001b2dda2dcb9a9c66417991be57836c17a72b',
+	    },
+	  })
+	  gitment.render('gitment')
+</script>
+
+
+</div>  
+
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+<div id="asidepart">
+
+  <div class="widget tag">
+<!--<hr noshade color="#ccc">-->
+<!-- <p style="text-align:center">Mike.Lee</p> -->
+<p margin="0" style="text-align:center">
+<a class="ahref" href="http://researchlab.github.io/about/">
+<img id="aboutpic"  src="/img/qzly.png" alt="@一线攻城狮" height="200" width="200" style="box-shadow: 0px 0px 2px 2px #9edeff;border-radius: 8px;" >
+</a></p>
+<p style="text-align:center"><font size="2" color="grey">关注微信公众号 @一线攻城狮</font></p>
+<div style="display:block; margin-top:10px; padding: 0px 4px 4px 0; border-top: dashed 1px #ccc; text-align:left;"></div>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<div style="float:left;position:absolute;"><font size="2" >总访问:<span id="busuanzi_value_site_pv"></span>次</font></div>
+<div style="float:right;"><font size="2" >总访客:<span id="busuanzi_value_site_uv"></span>人</font></div>
+
+<div style="margin-top:30px; padding: 5px 4px 4px 0; border-top: dashed 1px #ccc; text-align:left;"></div>
+</div>
+
+
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/DevOps/" title="DevOps">DevOps<sup>13</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Hexo/" title="Hexo">Hexo<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/MQ/" title="MQ">MQ<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/algorithm/" title="algorithm">algorithm<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/better-coding/" title="better-coding">better-coding<sup>6</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/docker-practice/" title="docker-practice">docker-practice<sup>8</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/go-bootcamp/" title="go-bootcamp">go-bootcamp<sup>6</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/golang/" title="golang">golang<sup>23</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/java/" title="java">java<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/javascript/" title="javascript">javascript<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/k8s/" title="k8s">k8s<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/mysql专题/" title="mysql专题">mysql专题<sup>16</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/php/" title="php">php<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/redis专题/" title="redis专题">redis专题<sup>17</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/golang/" title="golang">golang<sup>24</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mysql/" title="mysql">mysql<sup>18</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/redis/" title="redis">redis<sup>17</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/docker/" title="docker">docker<sup>9</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/dp/" title="dp">dp<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/setcookie/" title="setcookie">setcookie<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/tcp/" title="tcp">tcp<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/cache/" title="cache">cache<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/concurrency/" title="concurrency">concurrency<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Hexo/" title="Hexo">Hexo<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Blog/" title="Blog">Blog<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/minikube/" title="minikube">minikube<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/cloud-computing/" title="cloud computing">cloud computing<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/getcookie/" title="getcookie">getcookie<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/rpc/" title="rpc">rpc<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/cache-invalid/" title="cache-invalid">cache-invalid<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/ticker/" title="ticker">ticker<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/vendoring/" title="vendoring">vendoring<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/godep/" title="godep">godep<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/govendor/" title="govendor">govendor<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="http://blog.csdn.net/xiaolongwang2010" target="_blank" title="小龙王2010csdn技术博客">Linux/c/c++</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  
+
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+  <iframe width="100%" height="550" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=550&fansRow=1&ptype=1&speed=0&skin=1&isTitle=1&noborder=1&isWeibo=1&isFans=1&uid=5141203275&verifier=a533edf5&dpc=1"></iframe>
+
+
+</aside>
+</div>
+
+    </div>
+    <footer><div id="footer" >
+	
+	
+	<div class="social-font" class="clearfix">
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/researchlab/lightman" target="_blank" title="lightman">lightman</a> ©2016 - 2021 
+		
+		<a href="/about" target="_blank" title="Lee Hong">Lee Hong</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+
+
+<script type="text/javascript">
+  var duoshuoQuery = {short_name:"gamedp"};
+  (function() {
+    var ds = document.createElement('script');
+    ds.type = 'text/javascript';ds.async = true;
+    ds.src = '//static.duoshuo.com/embed.js';
+    ds.charset = 'UTF-8';
+    (document.getElementsByTagName('head')[0] 
+    || document.getElementsByTagName('body')[0]).appendChild(ds);
+  })();
+</script> 
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>
