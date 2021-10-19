@@ -2,6 +2,21 @@
 title: 我的开源项目 
 date: 2020-10-24 00:00:00
 ---
+<div style="font-size:18px; color:gray; border-bottom:1px dotted gray;height:35px; line-height:35px;"><span style="font-size:20px;color:black;float:left;"> <i style="color:gray;">03</i> <a href="https://proj-previews.github.io/opsany/#/">高仿OpsAny网站</a></span><span style="float:right;">[ [预览](https://proj-previews.github.io/opsany/#/) ]
+</span><span style="float:right;padding-right:30px;">[ [源码](https://github.com/researchlab/febp/tree/master/react-practice/21-opsany) ]</span><span style="font-size:16px;float:right;padding-right:78px;">version:1.0.0
+</span></div>
+
+```
+简介 
+FakeOpsAny 是一个基于Fvx构建开发的React项目,高仿OpsAny网站 提供:
+- 高仿OpsAny首页; 
+- 高仿OpsAny下载页面; 
+- 高仿OpsAny演示登录页面; 
+- 高仿OpsAny联系页面; 
+
+技术栈
+react(17.0.2) +  webpack(5.49.0) + js + Antd + react-reavel(动效)
+```
 
 <div style="font-size:18px; color:gray; border-bottom:1px dotted gray;height:35px; line-height:35px;"><span style="font-size:20px;color:black;float:left;"> <i style="color:gray;">02</i> <a href="https://proj-previews.github.io/fvx/">Fvx</a></span><span style="float:right;">[ [预览](https://proj-previews.github.io/fvx/) ]
 </span><span style="float:right;padding-right:30px;">[ [源码](https://github.com/researchlab/fvx) ]</span><span style="font-size:16px;float:right;padding-right:78px;">version:1.0.12
@@ -35,22 +50,3 @@ react(17.0.2) +  webpack(5.49.0) + js
 技术栈
 css + ( js + html )
 ```
-
-<div style="font-size:18px; color:gray; border-bottom:1px dotted gray;height:35px; line-height:35px;"><span style="font-size:20px;color:black;float:left;"> <i style="color:gray;">03</i> <a href="#">on coming</a></span><span style="float:right;">
-[ [预览](#) ]
-</span><span style="float:right;padding-right:30px;">
-[ [源码](#) ]
-</span><span style="font-size:16px;float:right;padding-right:78px;">
-&nbsp;version:1.0
-</span></div>
-
-```
-简介 
-- xxxx
-- xxxxxxxxxxxxxxxxxx
-- xxxxxxxxxxxxxxxxxxxxxxxxxx
-
-技术栈
-css + react(16.8) + js
-```
-
